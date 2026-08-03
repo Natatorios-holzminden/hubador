@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Regla nueva de precio — escalas</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="datos-regla-nueva.js"></script>
+  <style>
+    :root {
+      --bg: #f4f6f8; --card: #fff; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0;
+      --quilmes: #2563eb; --markup: #7c3aed; --descuento: #d97706; --final: #0d9488; --coto: #ea580c;
+      --ok: #16a34a; --bad: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "DM Sans", system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.45; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1.1rem 3rem; }
+    h1 { font-size: 1.35rem; margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem; max-width: 46rem; }
+    .links { font-size: 0.82rem; margin-bottom: 1rem; }
+    .links a { color: var(--final); font-weight: 700; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+
+    .explain {
+      background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+      padding: 1rem 1.15rem; margin-bottom: 1rem;
+    }
+    .explain h2 { font-size: 1rem; margin: 0 0 0.6rem; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; }
+    .explain-item { border-radius: 10px; padding: 0.7rem 0.8rem; font-size: 0.85rem; border: 1px solid var(--line); }
+    .explain-item b { display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; margin-bottom: 0.25rem; }
+    .explain-item .formula { font-size: 0.76rem; color: var(--muted); font-family: monospace; }
+    .dot-lbl { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+    .regla-final {
+      background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 12px;
+      padding: 0.8rem 1rem; font-size: 0.88rem; margin-bottom: 1rem;
+    }
+    .regla-final b { color: #0f766e; }
+    .aclaracion {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+      padding: 0.8rem 1rem; font-size: 0.86rem; margin-bottom: 1rem;
+    }
+    .aclaracion b { color: #92400e; }
+
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.55rem; margin-bottom: 1rem; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem 0.75rem; }
+    .stat strong { display: block; font-size: 1.15rem; } .stat span { font-size: 0.72rem; color: var(--muted); }
+
+    .leyenda { display: flex; flex-wrap: wrap; gap: 0.75rem 1.1rem; font-size: 0.78rem; color: var(--muted); margin: 0.3rem 0 0.85rem; }
+    .leyenda span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.q { background: var(--quilmes); } .dot.m { background: var(--markup); }
+    .dot.d { background: var(--descuento); } .dot.f { background: var(--final); } .dot.c { background: var(--coto); }
+
+    .table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 1100px; }
+    th, td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #f8fafc; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    th.col-barra, td.col-barra { min-width: 400px; max-width: 480px; }
+    tr:last-child td { border-bottom: none; }
+    .prod { font-weight: 800; }
+    .prod-sub { display: block; font-size: 0.72rem; color: var(--muted); font-weight: 500; margin-top: 0.15rem; }
+    .pq { color: var(--quilmes); font-weight: 800; }
+    .pf { color: var(--final); font-weight: 800; }
+    .po { color: var(--coto); font-weight: 800; }
+    .ref { display: block; font-size: 0.68rem; color: var(--muted); font-weight: 500; }
+    .pill { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 6px; margin-top: 0.25rem; margin-right: 0.2rem; }
+    .pill-markup { background: #ede9fe; color: #5b21b6; }
+    .pill-descuento { background: #fef3c7; color: #92400e; }
+    .pill-ok { background: #dcfce7; color: #166534; }
+
+    .barra-wrap { padding: 0.15rem 0; }
+    .barra-zonas { position: relative; height: 22px; border-radius: 0 0 8px 8px; overflow: hidden; border: 1px solid #d6d3d1; border-top: none; background: #f5f5f4; }
+    .barra-zonas .zona { position: absolute; top: 0; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; color: rgba(255,255,255,0.95); text-shadow: 0 1px 1px rgba(0,0,0,0.2); letter-spacing: 0.02em; }
+    .zona-compra { background: linear-gradient(90deg, #93c5fd, #2563eb); }
+    .zona-margen { background: linear-gradient(90deg, #5eead4, #0d9488); }
+    .zona-hueco { background: linear-gradient(90deg, #fdba74, #ea580c); }
+    .zona-flete { background: repeating-linear-gradient(45deg, #b45309, #b45309 6px, #92400e 6px, #92400e 12px); }
+    .zona-comision { background: linear-gradient(90deg, #c4b5fd, #7c3aed); }
+    .zona-cobro { background: linear-gradient(90deg, #cbd5e1, #64748b); }
+    .zona-ganancia { background: linear-gradient(90deg, #5eead4, #0d9488); font-weight: 800; }
+    .barra-zonas-stack .zona { font-size: 0.52rem; padding: 0 0.2rem; overflow: hidden; white-space: nowrap; text-overflow: clip; }
+    .barra-pista { position: relative; height: 8px; background: #e7e5e4; border-left: 1px solid #d6d3d1; border-right: 1px solid #d6d3d1; }
+    .barra-pista .tick { position: absolute; top: 0; width: 2px; height: 100%; transform: translateX(-50%); background: rgba(0,0,0,0.14); }
+    .barra-marcas { position: relative; min-height: 72px; padding: 0 2px; margin-bottom: -1px; }
+    .marca { position: absolute; bottom: 0; transform: translateX(-50%); z-index: 2; display: flex; flex-direction: column-reverse; align-items: center; width: max-content; max-width: 92px; }
+    .marca .tallo { width: 2px; height: 6px; background: currentColor; opacity: 0.5; }
+    .marca-chip { display: flex; flex-direction: column; align-items: center; padding: 0.18rem 0.38rem; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.12); line-height: 1.15; min-width: 3rem; margin-bottom: 2px; }
+    .marca-chip .nom { font-size: 0.55rem; font-weight: 700; white-space: nowrap; opacity: 0.95; }
+    .marca-chip .pre { font-size: 0.66rem; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .marca.small .marca-chip { opacity: 0.75; padding: 0.12rem 0.3rem; }
+    .marca.small .pre { font-size: 0.6rem; }
+    .marca.grande { z-index: 3; }
+    .marca.grande .marca-chip { padding: 0.32rem 0.6rem; border-width: 3px; box-shadow: 0 3px 10px rgba(0,0,0,0.22); }
+    .marca.grande .nom { font-size: 0.62rem; }
+    .marca.grande .pre { font-size: 0.85rem; }
+    .marca[data-carril="0"] { bottom: 0; } .marca[data-carril="1"] { bottom: 32px; } .marca[data-carril="2"] { bottom: 64px; } .marca[data-carril="3"] { bottom: 96px; } .marca[data-carril="4"] { bottom: 128px; }
+    .marca.fq { color: var(--quilmes); } .marca.fq .marca-chip { background: #eff6ff; border-color: var(--quilmes); } .marca.fq .pre { color: var(--quilmes); }
+    .marca.fm { color: var(--markup); } .marca.fm .marca-chip { background: #f5f3ff; border-color: var(--markup); } .marca.fm .pre { color: var(--markup); }
+    .marca.ffl { color: #b45309; } .marca.ffl .marca-chip { background: #fef3c7; border-color: #b45309; } .marca.ffl .pre { color: #92400e; }
+    .marca.fcb { color: #475569; } .marca.fcb .marca-chip { background: #f1f5f9; border-color: #64748b; } .marca.fcb .pre { color: #334155; }
+    .marca.fd { color: var(--descuento); } .marca.fd .marca-chip { background: #fffbeb; border-color: var(--descuento); } .marca.fd .pre { color: var(--descuento); }
+    .marca.ff { color: var(--final); } .marca.ff .marca-chip { background: #ccfbf1; border-color: var(--final); } .marca.ff .pre { color: #0f766e; }
+    .marca.fc { color: var(--coto); } .marca.fc .marca-chip { background: #ffedd5; border-color: var(--coto); } .marca.fc .pre { color: #c2410c; }
+    .barra-escala { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 0.15rem; padding: 0 2px; }
+    .tu-precio {
+      display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.5rem;
+      background: #f0fdfa; border: 2px solid var(--final); border-radius: 10px;
+      padding: 0.5rem 0.75rem;
+    }
+    .tu-precio-label { font-size: 0.68rem; font-weight: 800; color: #0f766e; letter-spacing: 0.03em; }
+    .tu-precio-monto { font-size: 1.15rem; font-weight: 800; color: #0f766e; font-variant-numeric: tabular-nums; }
+    .tu-precio-desc { font-size: 0.76rem; font-weight: 700; color: var(--coto); margin-left: auto; }
+    .pct-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; margin-top: 0.45rem; padding-top: 0.4rem; border-top: 1px dashed var(--line); }
+    .pct-chips-label { font-size: 0.62rem; color: var(--muted); margin-right: 0.15rem; }
+    .pct-chips-sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 0.15rem; }
+    .pct-chips .tag { font-size: 0.64rem; font-weight: 700; padding: 0.16rem 0.45rem; border-radius: 6px; border: 1px solid transparent; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .tag-compra { background: #eff6ff; color: var(--quilmes); border-color: #bfdbfe; }
+    .tag-flete { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .tag-comision { background: #f5f3ff; color: var(--markup); border-color: #ddd6fe; }
+    .tag-cobro { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+    .tag-ganancia { background: #ccfbf1; color: #0f766e; border-color: #5eead4; }
+    .tag-coto { background: #ffedd5; color: #c2410c; border-color: #fdba74; font-weight: 800; }
+    footer { margin-top: 1.25rem; font-size: 0.78rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Cómo se arma tu precio — niveles cerrados de descuento</h1>
+    <p class="sub" id="desc">Cargando…</p>
+    <div class="links"><a href="comparador-unificado.html">→ Ver comparador actual (regla vieja: compra × 1,30)</a></div>
+
+    <div class="explain">
+      <h2>Cómo se arma el precio ahora</h2>
+      <div class="explain-grid">
+        <div class="explain-item">
+          <b><span class="dot-lbl" style="background:var(--coto)"></span>Descuento vs Coto</b>
+          Nivel cerrado por producto: 35%, 40% o 50%. Nada de números raros como "52%" o "36,8%".
+        </div>
+        <div class="explain-item">
+          <b><span class="dot-lbl" style="background:#b45309"></span>Costo real + comisión + cobro</b>
+          Compra + flete + merma, más 10% para el líder de nodo y 5% de cobro online.
+        </div>
+        <div class="explain-item">
+          <b><span class="dot-lbl" style="background:var(--final)"></span>Ganancia neta</b>
+          Ya no es un número fijo: es lo que queda después de todo lo anterior. Varía por producto según el nivel de descuento que le tocó.
+        </div>
+      </div>
+    </div>
+
+    <div class="regla-final">
+      <b>Regla de precio:</b> Precio final = Coto × (1 − nivel), con nivel ∈ {35%, 40%, 50%} fijo por producto (el más cercano al que daría 10% parejo). La ganancia neta sale del cálculo, no se fuerza.
+    </div>
+
+    <div class="aclaracion">
+      <b>Qué cambió:</b> antes se fijaba la ganancia en 10% y el descuento salía con decimales raros (36,8%, 42,0%, 53,0%, 56,8%).
+      Ahora es al revés: el descuento es un número cerrado y prolijo (35/40/50%) elegido según cuánto margen de sobra tiene cada producto, y la ganancia neta es el resultado — la ves abajo, distinta en cada fila.
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="leyenda">
+      <span><i class="dot" style="background:var(--quilmes)"></i> Compra Quilmes</span>
+      <span><i class="dot" style="background:#b45309"></i> Flete + merma (costo real)</span>
+      <span><i class="dot" style="background:var(--markup)"></i> Comisión líder</span>
+      <span><i class="dot" style="background:#64748b"></i> Cobro online</span>
+      <span><i class="dot" style="background:var(--final)"></i> Ganancia neta (lo que te queda)</span>
+      <span><i class="dot" style="background:var(--coto)"></i> Hueco hasta Coto</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="num">Compra</th>
+            <th class="num">Precio final</th>
+            <th class="num">Costo real</th>
+            <th class="num">Comisión + cobro</th>
+            <th class="num">Ganancia neta</th>
+            <th class="col-barra">De cada peso que cobrás, adónde va ($/kg)</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <footer id="footer"></footer>
+  </div>
+
+  <script>
+    const money = (n) => n == null || Number.isNaN(n) ? "—" : "$" + Math.round(n).toLocaleString("es-AR").replace(/ /g, ".");
+    const moneyDec = (n) => n == null || Number.isNaN(n) ? "—" : "$" + Number(n).toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/ /g, ".");
+
+    function pctEnRango(precio, rMin, rSpan) { return Math.max(2, Math.min(98, ((precio - rMin) / rSpan) * 100)); }
+
+    function asignarCarriles(items, minGapPct = 13) {
+      const sorted = [...items].sort((a, b) => a.left - b.left);
+      const lanes = [];
+      for (const it of sorted) {
+        let carril = 0;
+        while (lanes[carril] != null && it.left - lanes[carril] < minGapPct) carril++;
+        lanes[carril] = it.left;
+        it.carril = carril;
+      }
+      return items;
+    }
+
+    function segmentoHtml(cls, leftPct, widthPct, titulo, etiqueta, monto) {
+      if (widthPct <= 0) return "";
+      const mostrarTexto = widthPct >= 7; // no escribir adentro de segmentos angostos
+      return `<div class="zona ${cls}" style="left:${leftPct.toFixed(2)}%;width:${widthPct.toFixed(2)}%" title="${titulo}: ${moneyDec(monto)}/kg">
+        ${mostrarTexto ? `${etiqueta}` : ""}
+      </div>`;
+    }
+
+    function barraHtml(f) {
+      const c = f.calculo;
+      const compra = f.quilmes.compra_kg;
+      const costoAterrizado = c.costo_aterrizado;
+      const finComision = costoAterrizado + c.comision_lider_pesos;
+      const finCobro = finComision + c.cobro_pesos;
+      const fin = c.final; // = finCobro + ganancia_neta
+      const coto = f.coto.precio_kg;
+
+      const rMax = coto * 1.06;
+      const pct = (v) => Math.max(0, Math.min(100, (v / rMax) * 100));
+
+      const b0 = 0, b1 = pct(compra), b2 = pct(costoAterrizado), b3 = pct(finComision), b4 = pct(finCobro), b5 = pct(fin), b6 = pct(coto);
+
+      const zonas = [
+        segmentoHtml("zona-compra", b0, b1 - b0, "Compra Quilmes", "compra", compra),
+        segmentoHtml("zona-flete", b1, b2 - b1, "Flete + merma", "flete/merma", costoAterrizado - compra),
+        segmentoHtml("zona-comision", b2, b3 - b2, "Comisión líder", "líder", c.comision_lider_pesos),
+        segmentoHtml("zona-cobro", b3, b4 - b3, "Cobro online", "cobro", c.cobro_pesos),
+        segmentoHtml("zona-ganancia", b4, b5 - b4, "Ganancia neta", "GANANCIA", c.ganancia_neta),
+        segmentoHtml("zona-hueco", b5, b6 - b5, "Hueco hasta Coto", "vs Coto", coto - fin),
+      ].join("");
+
+      const pctDe = (monto) => ((monto / fin) * 100).toFixed(1).replace(".", ",") + "%";
+      const mid = (a, b) => (a + b) / 2;
+
+      const marcas = [
+        { left: mid(b0, b1), cls: "fq", nom: "Compra", pre: moneyDec(compra) },
+        { left: mid(b1, b2), cls: "ffl", nom: "Flete/merma", pre: pctDe(costoAterrizado - compra) },
+        { left: mid(b2, b3), cls: "fm", nom: "Comisión", pre: pctDe(c.comision_lider_pesos) },
+        { left: mid(b3, b4), cls: "fcb", nom: "Cobro", pre: pctDe(c.cobro_pesos) },
+        { left: mid(b4, b5), cls: "ff", nom: "Ganancia", pre: c.ganancia_neta_pct + "%" },
+        { left: mid(b5, b6), cls: "fc", nom: "Coto " + moneyDec(coto), pre: "−" + c.descuento_pct + "%" },
+      ];
+      const colocados = asignarCarriles(marcas.map((v) => ({ ...v })), 15);
+      const maxCarril = colocados.reduce((m, x) => Math.max(m, x.carril), 0);
+      const alturaMarcas = 30 + (maxCarril + 1) * 32;
+
+      const chips = colocados.map((v) => `
+        <div class="marca ${v.cls}" data-carril="${v.carril}" style="left:${v.left.toFixed(1)}%">
+          <div class="tallo"></div>
+          <div class="marca-chip"><span class="nom">${v.nom}</span><span class="pre">${v.pre}</span></div>
+        </div>`).join("");
+
+      const ticks = colocados.map((v) => `<div class="tick" style="left:${v.left.toFixed(1)}%"></div>`).join("");
+
+      return `<div class="barra-wrap">
+        <div class="barra-marcas" style="min-height:${alturaMarcas}px">${chips}</div>
+        <div class="barra-pista">${ticks}</div>
+        <div class="barra-zonas barra-zonas-stack">${zonas}</div>
+        <div class="barra-escala"><span>$0/kg</span><span>${moneyDec(rMax)}/kg</span></div>
+        <div class="tu-precio">
+          <span class="tu-precio-label">TU PRECIO</span>
+          <span class="tu-precio-monto">${moneyDec(fin)}/kg</span>
+          <span class="tu-precio-desc">−${c.descuento_pct}% vs Coto (${moneyDec(coto)})</span>
+        </div>
+      </div>`;
+    }
+
+    const data = window.REGLA_NUEVA;
+    if (!data) {
+      document.getElementById("tbody").innerHTML = "<tr><td colspan='6' style='color:#dc2626;padding:1rem'>No se pudo cargar datos-regla-nueva.js</td></tr>";
+      throw new Error("sin datos");
+    }
+    document.getElementById("desc").textContent = data.descripcion;
+
+    const filas = data.filas;
+    const promDescuento = filas.reduce((s, f) => s + f.calculo.descuento_pct, 0) / filas.length;
+    const promGanancia = filas.reduce((s, f) => s + f.calculo.ganancia_neta_pct, 0) / filas.length;
+    const bajoBanda = filas.filter((f) => !f.calculo.ok_banda_40_50).length;
+
+    document.getElementById("stats").innerHTML = [
+      ["Productos", filas.length],
+      ["Niveles usados", "35% · 40% · 50%"],
+      ["Ganancia neta prom.", promGanancia.toFixed(1).replace(".", ",") + "%"],
+      ["Descuento prom. vs Coto", promDescuento.toFixed(1).replace(".", ",") + "%"],
+    ].map(([label, val]) => `<div class="stat"><strong>${val}</strong><span>${label}</span></div>`).join("");
+
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = filas.map((f) => {
+      const c = f.calculo;
+      const nivelPill = `<span class="pill pill-ok">Nivel −${c.descuento_tier}%</span>`;
+      const gananciaColor = c.ganancia_neta_pct < 8 ? "var(--bad)" : c.ganancia_neta_pct < 15 ? "var(--descuento)" : "var(--ok)";
+
+      return `<tr>
+        <td>
+          <span class="prod">${f.producto}</span>
+          <span class="prod-sub">${f.coto.producto}</span>
+          ${nivelPill}
+        </td>
+        <td class="num"><span class="pq">${moneyDec(f.quilmes.compra_kg)}</span><span class="ref">/kg · ${f.quilmes.presentacion}</span></td>
+        <td class="num"><span class="pf" style="font-size:1.05rem">${moneyDec(c.final)}</span><span class="ref">TU PRECIO · −${c.descuento_pct}% vs Coto</span></td>
+        <td class="num"><span style="color:#b45309;font-weight:700">${moneyDec(c.costo_aterrizado)}</span><span class="ref">compra + flete + merma</span></td>
+        <td class="num"><span style="font-weight:700">${moneyDec(c.comision_lider_pesos + c.cobro_pesos)}</span><span class="ref">líder ${moneyDec(c.comision_lider_pesos)} + cobro ${moneyDec(c.cobro_pesos)}</span></td>
+        <td class="num">
+          <strong style="color:${gananciaColor};font-size:0.95rem">${moneyDec(c.ganancia_neta)}</strong>
+          <span class="ref">${c.ganancia_neta_pct}% del precio final</span>
+        </td>
+        <td class="col-barra">${barraHtml(f)}</td>
+      </tr>`;
+    }).join("");
+
+    document.getElementById("footer").textContent = `${data.fuente_quilmes} · ${data.fuente_coto} · Generado ${data.generado}`;
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+﻿HUBADOR — pack para revisar / subir
+
+Carpeta: conlat-SUBIR-WEB
+Abrir: index.html (doble clic) o http://localhost:8765/ (sirve conlat-ACTUAL)
+
+Escritorio (>=900px): sitio WEB
+Celular: app MOBILE
+Forzar web:    ?web=1
+Forzar mobile: ?mobile=1
+Preview menú:  ?dev=1
+
+Copia de trabajo (edición): conlat-ACTUAL

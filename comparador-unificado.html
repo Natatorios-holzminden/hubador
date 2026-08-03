@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Actualización 29/07 — Quilmes → Conlat → Coto</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="datos-comparacion-29-07.js"></script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #fff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --quilmes: #2563eb;
+      --conlat: #0d9488;
+      --coto: #ea580c;
+      --ok: #16a34a;
+      --warn: #d97706;
+      --bad: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1.1rem 3rem; }
+    .top {
+      display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem;
+      align-items: flex-start; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    h1 { font-size: 1.35rem; margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); font-size: 0.9rem; margin: 0; max-width: 42rem; }
+    .links { font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .links a { color: var(--conlat); font-weight: 700; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+    .badge-update {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd;
+      font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.55rem;
+      border-radius: 999px; letter-spacing: 0.02em;
+    }
+    .note {
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
+      padding: 0.9rem 1rem; font-size: 0.86rem; margin-bottom: 1rem;
+    }
+    .note strong { color: #1e40af; }
+    .reglas {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.6rem; margin-bottom: 1rem;
+    }
+    .regla {
+      background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem;
+    }
+    .regla b { display: block; font-size: 0.95rem; }
+    .regla span { font-size: 0.75rem; color: var(--muted); }
+    .stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.55rem; margin-bottom: 1rem;
+    }
+    .stat {
+      background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem 0.75rem;
+    }
+    .stat strong { display: block; font-size: 1.15rem; }
+    .stat span { font-size: 0.72rem; color: var(--muted); }
+    .table-wrap {
+      overflow-x: auto; background: var(--card);
+      border: 1px solid var(--line); border-radius: 14px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 1080px; }
+    th, td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th {
+      background: #f8fafc; font-size: 0.68rem; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--muted); position: sticky; top: 0;
+    }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    th.col-barra, td.col-barra { min-width: 380px; max-width: 460px; }
+    tr:last-child td { border-bottom: none; }
+    tr.nuevo { background: #f0f7ff; }
+    .prod { font-weight: 800; }
+    .prod-sub { display: block; font-size: 0.72rem; color: var(--muted); font-weight: 500; margin-top: 0.15rem; }
+    .marca-azul {
+      display: inline-block; margin-left: 0.35rem; vertical-align: middle;
+      font-size: 0.58rem; font-weight: 800; letter-spacing: 0.03em;
+      padding: 0.12rem 0.4rem; border-radius: 999px;
+      background: #2563eb; color: #fff; line-height: 1.2;
+    }
+    .pq { color: var(--quilmes); font-weight: 800; }
+    .pc { color: var(--conlat); font-weight: 800; }
+    .po { color: var(--coto); font-weight: 800; }
+    .ref { display: block; font-size: 0.68rem; color: var(--muted); font-weight: 500; }
+    .pill {
+      display: inline-block; font-size: 0.65rem; font-weight: 700;
+      padding: 0.15rem 0.4rem; border-radius: 6px; margin-top: 0.2rem;
+    }
+    .pill-ok { background: #dcfce7; color: #166534; }
+    .pill-warn { background: #ffedd5; color: #9a3412; }
+    .pill-bad { background: #fee2e2; color: #991b1b; }
+    .pill-info { background: #dbeafe; color: #1e40af; }
+    .barra-wrap { padding: 0.15rem 0; }
+    .barra-zonas {
+      position: relative; height: 22px; border-radius: 8px 8px 0 0;
+      overflow: hidden; border: 1px solid #d6d3d1; border-bottom: none; background: #f5f5f4;
+    }
+    .barra-zonas .zona {
+      position: absolute; top: 0; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; font-weight: 700; color: rgba(255,255,255,0.95);
+      text-shadow: 0 1px 1px rgba(0,0,0,0.2); letter-spacing: 0.02em;
+    }
+    .zona-compra { background: linear-gradient(90deg, #93c5fd, #2563eb); }
+    .zona-margen { background: linear-gradient(90deg, #2dd4bf, #0d9488); }
+    .zona-hueco { background: linear-gradient(90deg, #fdba74, #ea580c); }
+    .barra-pista {
+      position: relative; height: 8px; background: #e7e5e4;
+      border-left: 1px solid #d6d3d1; border-right: 1px solid #d6d3d1;
+    }
+    .barra-pista .tick {
+      position: absolute; top: 0; width: 2px; height: 100%;
+      transform: translateX(-50%); background: rgba(0,0,0,0.14);
+    }
+    .barra-marcas {
+      position: relative; min-height: 72px; margin-top: 2px; padding: 0 2px;
+    }
+    .marca {
+      position: absolute; transform: translateX(-50%); z-index: 2;
+      display: flex; flex-direction: column; align-items: center;
+      width: max-content; max-width: 92px;
+    }
+    .marca .tallo { width: 2px; height: 6px; background: currentColor; opacity: 0.5; }
+    .marca-chip {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0.2rem 0.4rem; border-radius: 8px; border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12); line-height: 1.15; min-width: 3.2rem;
+    }
+    .marca-chip .nom { font-size: 0.58rem; font-weight: 700; white-space: nowrap; opacity: 0.95; }
+    .marca-chip .pre {
+      font-size: 0.68rem; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
+    .marca[data-carril="0"] { top: 0; }
+    .marca[data-carril="1"] { top: 34px; }
+    .marca[data-carril="2"] { top: 68px; }
+    .marca.fq { color: var(--quilmes); }
+    .marca.fq .marca-chip { background: #eff6ff; border-color: var(--quilmes); }
+    .marca.fq .pre { color: var(--quilmes); }
+    .marca.fc { color: var(--conlat); }
+    .marca.fc .marca-chip { background: #ccfbf1; border-color: var(--conlat); }
+    .marca.fc .pre { color: #0f766e; }
+    .marca.fo { color: var(--coto); }
+    .marca.fo .marca-chip { background: #ffedd5; border-color: var(--coto); }
+    .marca.fo .pre { color: #c2410c; }
+    .barra-escala {
+      display: flex; justify-content: space-between;
+      font-size: 0.62rem; color: var(--muted); font-variant-numeric: tabular-nums;
+      margin-top: 0.15rem; padding: 0 2px;
+    }
+    .barra-chips {
+      display: flex; flex-wrap: wrap; gap: 0.25rem;
+      margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px dashed var(--line);
+    }
+    .barra-chips .tag {
+      font-size: 0.62rem; font-weight: 700; padding: 0.15rem 0.45rem;
+      border-radius: 6px; border: 1px solid transparent; font-variant-numeric: tabular-nums;
+    }
+    .tag.fq { background: #eff6ff; color: var(--quilmes); border-color: #bfdbfe; }
+    .tag.fc { background: #ccfbf1; color: #0f766e; border-color: #5eead4; }
+    .tag.fo { background: #ffedd5; color: #c2410c; border-color: #fdba74; }
+    .leyenda {
+      display: flex; flex-wrap: wrap; gap: 0.75rem 1.1rem;
+      font-size: 0.78rem; color: var(--muted); margin: 0.85rem 0 0.35rem;
+    }
+    .leyenda span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.q { background: var(--quilmes); }
+    .dot.c { background: var(--conlat); }
+    .dot.o { background: var(--coto); }
+    footer { margin-top: 1.25rem; font-size: 0.78rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="badge-update">Actualización 29/07</div>
+        <h1 id="titulo">Quilmes → Conlat → Coto</h1>
+        <p class="sub" id="desc">Cargando…</p>
+      </div>
+      <div class="links">
+        <a href="comparador-unificado-archivo.html">← Archivo (versión anterior)</a>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Solo comparador — no góndola.</strong>
+      Estos son precios de <em>compra</em> (cajones Quilmes). El home de HUBADOR todavía no cambia.
+      Conlat = compra × 1,30, con tope a −35% vs Coto. Referencia de piso ×1,20 para cubrir envío/gastos.
+    </div>
+
+    <div class="reglas">
+      <div class="regla"><b>Compra × 1,30</b><span>Precio Conlat candidato</span></div>
+      <div class="regla"><b>≤ Coto − 35%</b><span>Tope vs góndola Coto</span></div>
+      <div class="regla"><b>≥ Compra × 1,20</b><span>Piso envío / gastos</span></div>
+      <div class="regla"><b>Marca azul</b><span>Ítems nuevos de esta lista</span></div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="leyenda">
+      <span><i class="dot q"></i> Compra Quilmes $/kg</span>
+      <span><i class="dot c"></i> Venta Conlat $/kg</span>
+      <span><i class="dot o"></i> Coto $/kg</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="num">Compra Quilmes</th>
+            <th class="num">Conlat</th>
+            <th class="num">Coto</th>
+            <th class="num">vs Coto</th>
+            <th class="num">Margen / compra</th>
+            <th class="col-barra">Barra de posición ($/kg)</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <footer id="footer"></footer>
+  </div>
+
+  <script>
+    const money = (n) =>
+      n == null || Number.isNaN(n)
+        ? "—"
+        : "$" + Math.round(n).toLocaleString("es-AR").replace(/\u00A0/g, ".");
+
+    const moneyDec = (n) =>
+      n == null || Number.isNaN(n)
+        ? "—"
+        : "$" +
+          Number(n).toLocaleString("es-AR", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          }).replace(/\u00A0/g, ".");
+
+    function pctEnRango(precio, rMin, rSpan) {
+      return Math.max(2, Math.min(98, ((precio - rMin) / rSpan) * 100));
+    }
+
+    function asignarCarriles(items, minGapPct = 14) {
+      const sorted = [...items].sort((a, b) => a.left - b.left);
+      const lanes = [];
+      for (const it of sorted) {
+        let carril = 0;
+        while (lanes[carril] != null && it.left - lanes[carril] < minGapPct) carril++;
+        lanes[carril] = it.left;
+        it.carril = carril;
+      }
+      return items;
+    }
+
+    function barraHtml(f) {
+      const q = f.quilmes.compra_kg;
+      const c = f.conlat.precio_kg;
+      const o = f.coto.precio_kg;
+      const valores = [
+        { precio: q, cls: "fq", nom: "Quilmes", corto: "Q" },
+        { precio: c, cls: "fc", nom: "Conlat", corto: "CL" },
+        { precio: o, cls: "fo", nom: "Coto", corto: "CO" },
+      ];
+      const precios = valores.map((v) => v.precio);
+      const min = Math.min(...precios);
+      const max = Math.max(...precios);
+      const span = max - min || max * 0.1 || 1;
+      const pad = Math.max(span * 0.08, 40);
+      const rMin = Math.max(0, min - pad);
+      const rMax = max + pad;
+      const rSpan = rMax - rMin || 1;
+
+      const conItems = valores.map((v) => ({
+        ...v,
+        left: pctEnRango(v.precio, rMin, rSpan),
+      }));
+      const colocados = asignarCarriles(conItems, 15);
+      const maxCarril = colocados.reduce((m, x) => Math.max(m, x.carril), 0);
+      const alturaMarcas = 34 + maxCarril * 34;
+
+      // Zonas: hasta compra | compra→conlat (margen) | conlat→coto (hueco góndola)
+      const leftQ = pctEnRango(q, rMin, rSpan);
+      const leftC = pctEnRango(c, rMin, rSpan);
+      const leftO = pctEnRango(o, rMin, rSpan);
+      const z1 = Math.min(leftQ, leftC);
+      const z2 = Math.max(leftQ, leftC);
+      const z3 = Math.max(leftC, leftO);
+
+      const zonas = `
+        <div class="zona zona-compra" style="left:0;width:${z1.toFixed(1)}%" title="Hasta compra">compra</div>
+        <div class="zona zona-margen" style="left:${z1.toFixed(1)}%;width:${(z2 - z1).toFixed(1)}%" title="Margen Conlat">+margen</div>
+        <div class="zona zona-hueco" style="left:${z2.toFixed(1)}%;width:${Math.max(0, z3 - z2).toFixed(1)}%" title="Hueco hasta Coto">vs Coto</div>
+      `;
+
+      const marcas = colocados
+        .map(
+          (v) => `<div class="marca ${v.cls}" data-carril="${v.carril}" style="left:${v.left.toFixed(1)}%" title="${v.nom}: ${moneyDec(v.precio)}/kg">
+          <div class="tallo"></div>
+          <div class="marca-chip">
+            <span class="nom">${v.nom}</span>
+            <span class="pre">${moneyDec(v.precio)}</span>
+          </div>
+        </div>`
+        )
+        .join("");
+
+      const ticks = colocados
+        .map((v) => `<div class="tick" style="left:${v.left.toFixed(1)}%"></div>`)
+        .join("");
+
+      const tags = [...valores]
+        .sort((a, b) => a.precio - b.precio)
+        .map((v) => `<span class="tag ${v.cls}">${v.nom} ${moneyDec(v.precio)}</span>`)
+        .join("");
+
+      return `<div class="barra-wrap">
+        <div class="barra-zonas">${zonas}</div>
+        <div class="barra-pista">${ticks}</div>
+        <div class="barra-marcas" style="min-height:${alturaMarcas}px">${marcas}</div>
+        <div class="barra-escala"><span>${moneyDec(rMin)}/kg</span><span>${moneyDec(rMax)}/kg</span></div>
+        <div class="barra-chips">${tags}</div>
+      </div>`;
+    }
+
+    const data = window.COMPARACION_29_07;
+    if (!data) {
+      document.getElementById("tbody").innerHTML =
+        "<tr><td colspan='7' style='color:#dc2626;padding:1rem'>No se pudo cargar datos-comparacion-29-07.js</td></tr>";
+      throw new Error("sin datos");
+    }
+    document.getElementById("titulo").textContent = data.titulo.replace(/^Actualización 29\/07 — /, "");
+    document.getElementById("desc").textContent = data.descripcion;
+
+    const filas = [...data.filas].sort((a, b) => {
+      if (a.nuevo && !b.nuevo) return -1;
+      if (!a.nuevo && b.nuevo) return 1;
+      return a.producto.localeCompare(b.producto, "es");
+    });
+
+    const ok35 = filas.filter((f) => f.analisis.ok_menos_35_coto).length;
+    const ok20 = filas.filter((f) => f.analisis.ok_margen_envio_20).length;
+    const promAhorro =
+      filas.reduce((s, f) => s + (f.analisis.ahorro_vs_coto_pct || 0), 0) / filas.length;
+    const promMargen =
+      filas.reduce((s, f) => s + (f.analisis.margen_sobre_compra_pct || 0), 0) / filas.length;
+
+    document.getElementById("stats").innerHTML = [
+      ["Productos", filas.length],
+      ["OK −35% Coto", ok35 + "/" + filas.length],
+      ["OK piso ×1,20", ok20 + "/" + filas.length],
+      ["Ahorro prom. vs Coto", promAhorro.toFixed(1).replace(".", ",") + "%"],
+      ["Margen prom. / compra", promMargen.toFixed(1).replace(".", ",") + "%"],
+    ]
+      .map(
+        ([label, val]) =>
+          `<div class="stat"><strong>${val}</strong><span>${label}</span></div>`
+      )
+      .join("");
+
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = filas
+      .map((f) => {
+        const pills = [];
+        if (f.nuevo) pills.push(`<span class="pill pill-info">Nuevo Quilmes</span>`);
+        if (f.conlat.topeado_por_coto)
+          pills.push(`<span class="pill pill-warn">Topeado por −35% Coto</span>`);
+        if (f.conlat.alerta_piso_envio)
+          pills.push(`<span class="pill pill-bad">Bajo piso ×1,20 envío</span>`);
+        else pills.push(`<span class="pill pill-ok">Margen ≥ 20%</span>`);
+        if (f.analisis.ok_menos_35_coto)
+          pills.push(`<span class="pill pill-ok">−${f.analisis.ahorro_vs_coto_pct}% vs Coto</span>`);
+
+        return `<tr class="${f.nuevo ? "nuevo" : ""}">
+          <td>
+            <span class="prod">${f.producto}${f.nuevo ? '<span class="marca-azul">NUEVO</span>' : ""}</span>
+            <span class="prod-sub">${f.coto.producto}</span>
+            ${pills.join(" ")}
+          </td>
+          <td class="num">
+            <span class="pq">${moneyDec(f.quilmes.compra_kg)}</span><span class="ref">/kg</span>
+            <span class="ref">${f.quilmes.presentacion}</span>
+          </td>
+          <td class="num">
+            <span class="pc">${moneyDec(f.conlat.precio_kg)}</span><span class="ref">/kg venta</span>
+            <span class="ref">×1,30 = ${moneyDec(f.conlat.candidato_kg)} · tope ${moneyDec(f.conlat.tope_kg)}</span>
+          </td>
+          <td class="num">
+            <span class="po">${money(f.coto.precio_kg)}</span><span class="ref">/kg oferta</span>
+            ${f.coto.regular ? `<span class="ref">reg. ${money(f.coto.regular)}</span>` : ""}
+          </td>
+          <td class="num">
+            <strong style="color:var(--ok)">${moneyDec(f.analisis.ahorro_vs_coto_pesos)}</strong>
+            <span class="ref">−${f.analisis.ahorro_vs_coto_pct}% vs Coto</span>
+          </td>
+          <td class="num">
+            <strong>+${f.analisis.margen_sobre_compra_pct}%</strong>
+            <span class="ref">piso ${moneyDec(f.conlat.piso_kg)}</span>
+          </td>
+          <td class="col-barra">${barraHtml(f)}</td>
+        </tr>`;
+      })
+      .join("");
+
+    document.getElementById("footer").textContent =
+      `${data.fuente_quilmes} · ${data.fuente_coto} · Generado ${data.generado}`;
+  </script>
+</body>
+</html>

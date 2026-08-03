@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Archivo — Comparador unificado (pre 29/07)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="datos-comparacion-archivo.js"></script>
+  <style>
+    :root {
+      --bg: #fafaf9;
+      --card: #fff;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #e7e5e4;
+      --quilmes: #4f46e5;
+      --lnl: #7c3aed;
+      --central: #2563eb;
+      --conlat: #0d9488;
+      --coto: #ea580c;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.45; }
+    .wrap { max-width: min(100%, 1560px); margin: 0 auto; padding: 1.25rem 1.25rem 3rem; }
+    h1 { font-size: 1.35rem; margin: 0 0 0.35rem; }
+    .sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem; }
+    .links { margin-bottom: 1rem; font-size: 0.85rem; }
+    .links a { color: #0d9488; font-weight: 600; text-decoration: none; margin-right: 1rem; }
+    .links a:hover { text-decoration: underline; }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.65rem; margin-bottom: 1rem; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem; }
+    .stat strong { display: block; font-size: 1.2rem; }
+    .stat span { font-size: 0.75rem; color: var(--muted); }
+    .leyenda-barra {
+      display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem;
+      margin-bottom: 0.85rem; font-size: 0.8rem;
+    }
+    .leyenda-barra span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.15); }
+    .dot-q { background: var(--quilmes); }
+    .dot-l { background: var(--lnl); }
+    .dot-m { background: var(--central); }
+    .dot-c { background: var(--conlat); }
+    .dot-o { background: var(--coto); }
+    .filtros { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .filtros label { font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+    .table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+    table { width: 100%; min-width: 1400px; border-collapse: collapse; font-size: 0.82rem; }
+    th, td { padding: 0.5rem 0.6rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { background: #f5f5f4; font-size: 0.7rem; text-transform: uppercase; color: var(--muted); }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    th.col-barra, td.col-barra { min-width: 420px; max-width: 520px; }
+    .precio-q { color: var(--quilmes); font-weight: 700; }
+    .precio-l { color: var(--lnl); font-weight: 700; }
+    .precio-m { color: var(--central); font-weight: 700; }
+    .precio-c { color: var(--conlat); font-weight: 700; }
+    .precio-o { color: var(--coto); font-weight: 700; }
+    .ref { font-size: 0.68rem; color: var(--muted); display: block; }
+    .pills { display: flex; flex-wrap: wrap; gap: 0.25rem; max-width: 200px; }
+    .pill {
+      font-size: 0.65rem; padding: 0.15rem 0.35rem; border-radius: 6px;
+      background: #f5f5f4; border: 1px solid var(--line);
+    }
+    .pill strong { color: var(--coto); }
+    .barra-wrap { padding: 0.25rem 0 0.15rem; }
+    .barra-detalle { position: relative; }
+    .barra-zonas {
+      position: relative;
+      height: 22px;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      border: 1px solid #d6d3d1;
+      border-bottom: none;
+      background: #f5f5f4;
+    }
+    .barra-zonas .zona {
+      position: absolute; top: 0; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; font-weight: 700; color: rgba(255,255,255,0.95);
+      text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+      letter-spacing: 0.02em;
+    }
+    .zona-may { background: linear-gradient(90deg, #818cf8, #6366f1); }
+    .zona-subida { background: linear-gradient(90deg, #2dd4bf, #14b8a6); }
+    .zona-gondola { background: linear-gradient(90deg, #fb923c, #ea580c); }
+    .barra-pista {
+      position: relative;
+      height: 8px;
+      background: #e7e5e4;
+      border-left: 1px solid #d6d3d1;
+      border-right: 1px solid #d6d3d1;
+    }
+    .barra-pista .tick {
+      position: absolute; top: 0; width: 2px; height: 100%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.12);
+    }
+    .barra-marcas {
+      position: relative;
+      min-height: 72px;
+      margin-top: 2px;
+      padding: 0 2px;
+    }
+    .marca {
+      position: absolute;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: max-content;
+      max-width: 88px;
+    }
+    .marca .tallo {
+      width: 2px;
+      height: 6px;
+      background: currentColor;
+      opacity: 0.5;
+    }
+    .marca-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.2rem 0.4rem;
+      border-radius: 8px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      line-height: 1.15;
+      min-width: 3.2rem;
+    }
+    .marca-chip .nom {
+      font-size: 0.58rem;
+      font-weight: 700;
+      white-space: nowrap;
+      opacity: 0.95;
+    }
+    .marca-chip .pre {
+      font-size: 0.68rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .marca[data-carril="0"] { top: 0; }
+    .marca[data-carril="1"] { top: 34px; }
+    .marca[data-carril="2"] { top: 68px; }
+    .marca.fq { color: var(--quilmes); }
+    .marca.fq .marca-chip { background: #eef2ff; border-color: var(--quilmes); }
+    .marca.fq .pre { color: var(--quilmes); }
+    .marca.fl { color: var(--lnl); }
+    .marca.fl .marca-chip { background: #f5f3ff; border-color: var(--lnl); }
+    .marca.fl .pre { color: var(--lnl); }
+    .marca.fm { color: var(--central); }
+    .marca.fm .marca-chip { background: #eff6ff; border-color: var(--central); }
+    .marca.fm .pre { color: var(--central); }
+    .marca.fc { color: var(--conlat); }
+    .marca.fc .marca-chip { background: #ccfbf1; border-color: var(--conlat); }
+    .marca.fc .pre { color: #0f766e; }
+    .marca.fo { color: var(--coto); }
+    .marca.fo .marca-chip { background: #ffedd5; border-color: var(--coto); }
+    .marca.fo .pre { color: #c2410c; }
+    .marca.fg { color: #57534e; }
+    .marca.fg .marca-chip { background: #f5f5f4; border-color: #a8a29e; }
+    .marca.fg .pre { color: #44403c; }
+    .barra-escala {
+      display: flex; justify-content: space-between;
+      font-size: 0.62rem; color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      margin-top: 0.15rem; padding: 0 2px;
+    }
+    .barra-chips {
+      display: flex; flex-wrap: wrap; gap: 0.25rem;
+      margin-top: 0.35rem; padding-top: 0.35rem;
+      border-top: 1px dashed var(--line);
+    }
+    .barra-chips .tag {
+      font-size: 0.62rem; font-weight: 700;
+      padding: 0.15rem 0.45rem; border-radius: 6px;
+      border: 1px solid transparent;
+      font-variant-numeric: tabular-nums;
+    }
+    .tag.fq { background: #eef2ff; color: var(--quilmes); border-color: #c7d2fe; }
+    .tag.fl { background: #f5f3ff; color: var(--lnl); border-color: #ddd6fe; }
+    .tag.fm { background: #eff6ff; color: var(--central); border-color: #bfdbfe; }
+    .tag.fc { background: #ccfbf1; color: #0f766e; border-color: #5eead4; }
+    .tag.fo { background: #ffedd5; color: #c2410c; border-color: #fdba74; }
+    .tag.fg { background: #f5f5f4; color: #44403c; border-color: #d6d3d1; }
+    th.th-sort { cursor: pointer; user-select: none; background: #eff6ff; }
+    th.th-sort:hover { background: #dbeafe; }
+    th.th-sort.activo { background: #bfdbfe; }
+    .sort-hint { display: block; font-size: 0.6rem; font-weight: 600; color: #2563eb; text-transform: none; margin-top: 0.15rem; }
+    tr.top-margen { background: #f0fdf4; }
+    tr.bajo-margen { background: #fef2f2; }
+    .badge-3 { font-size: 0.6rem; background: #dbeafe; color: #1d4ed8; padding: 0.1rem 0.35rem; border-radius: 4px; font-weight: 700; margin-left: 0.25rem; }
+    .badge-gana {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-weight: 700;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      margin-top: 0.15rem;
+      background: #dcfce7;
+      color: #166534;
+    }
+    .celda-gana {
+      display: inline-block;
+      padding: 0.25rem 0.4rem;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+    }
+    td.num .celda-gana-q { border-color: #a5b4fc; background: #eef2ff; }
+    td.num .celda-gana-q .badge-gana { background: #e0e7ff; color: #4338ca; }
+    td.num .celda-gana-l { border-color: #c4b5fd; background: #f5f3ff; }
+    td.num .celda-gana-l .badge-gana { background: #ede9fe; color: #6d28d9; }
+    td.num .celda-gana-m { border-color: #93c5fd; background: #eff6ff; }
+    td.num .celda-gana-m .badge-gana { background: #dbeafe; color: #1d4ed8; }
+    .badge-gana-producto {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.12rem 0.4rem;
+      border-radius: 5px;
+      margin-left: 0.35rem;
+      vertical-align: middle;
+    }
+    .badge-gana-producto.bg-q { background: #eef2ff; color: var(--quilmes); }
+    .badge-gana-producto.bg-l { background: #f5f3ff; color: var(--lnl); }
+    .badge-gana-producto.bg-m { background: #eff6ff; color: var(--central); }
+    .filtros-gana { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 0.5rem; }
+    .filtros-gana span { font-size: 0.75rem; color: var(--muted); margin-right: 0.25rem; }
+    .btn-gana {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-gana:hover { filter: brightness(0.97); }
+    .btn-gana.activo { box-shadow: inset 0 0 0 2px currentColor; }
+    .btn-gana.btn-q { color: var(--quilmes); border-color: #c7d2fe; }
+    .btn-gana.btn-q.activo { background: #eef2ff; }
+    .btn-gana.btn-l { color: var(--lnl); border-color: #ddd6fe; }
+    .btn-gana.btn-l.activo { background: #f5f3ff; }
+    .btn-gana.btn-m { color: var(--central); border-color: #bfdbfe; }
+    .btn-gana.btn-m.activo { background: #eff6ff; }
+    .btn-gana.btn-todos.activo { background: #f5f5f4; color: var(--ink); }
+    th.th-gana { cursor: pointer; user-select: none; }
+    th.th-gana:hover { filter: brightness(0.97); }
+    th.th-gana.activo { outline: 2px solid currentColor; outline-offset: -2px; }
+    th.th-q.activo { background: #eef2ff; color: var(--quilmes); }
+    th.th-l.activo { background: #f5f3ff; color: var(--lnl); }
+    th.th-m.activo { background: #eff6ff; color: var(--central); }
+    tr.fila-destacada-gana { background: #fafaf9; }
+    .buscador-producto {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .buscador-producto label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .buscador-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  #buscar-producto {
+      flex: 1;
+      min-width: 220px;
+      padding: 0.55rem 0.75rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 2px solid #d6d3d1;
+      border-radius: 10px;
+      outline: none;
+    }
+    #buscar-producto:focus {
+      border-color: #0d9488;
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    }
+    .btn-limpiar {
+      padding: 0.5rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f5f5f4;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .btn-limpiar:hover { background: #e7e5e4; color: var(--ink); }
+    .buscador-hint { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+    tr.fila-producto-activo {
+      outline: 2px solid #0d9488;
+      outline-offset: -2px;
+      background: #f0fdfa !important;
+    }
+    .prioridad-venta {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 50%, #eff6ff 100%);
+      border: 1px solid #6ee7b7;
+      border-radius: 14px;
+      padding: 1rem 1.1rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .prioridad-venta h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.05rem;
+      color: #065f46;
+    }
+    .prioridad-venta .prio-intro {
+      font-size: 0.82rem;
+      color: #047857;
+      margin: 0 0 0.85rem;
+      line-height: 1.45;
+    }
+    .prio-grupos { display: flex; flex-direction: column; gap: 0.85rem; }
+    .prio-grupo-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    .prio-grupo-title span { font-weight: 600; text-transform: none; color: #059669; }
+    .prio-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .prio-barra-fila {
+      background: #fff;
+      border: 1px solid #a7f3d0;
+      border-radius: 10px;
+      padding: 0.55rem 0.75rem 0.65rem;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+    .prio-barra-fila:hover { box-shadow: 0 4px 14px rgba(5, 150, 105, 0.12); }
+    .prio-barra-fila.sin-datos { opacity: 0.5; cursor: default; border-style: dashed; }
+    .prio-barra-fila.sin-datos:hover { box-shadow: none; }
+    .prio-barra-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.35rem 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+    .prio-barra-head .titulo { display: flex; align-items: baseline; gap: 0.4rem; flex-wrap: wrap; }
+    .prio-barra-head strong { font-size: 0.92rem; }
+    .prio-barra-head .detalle { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+    .prio-barra-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+    .prio-barra-fila .barra-wrap { max-width: 100%; }
+    .prio-barra-fila .barra-detalle { max-width: 100%; }
+    .prio-barra-fila .barra-marcas { min-height: 44px !important; }
+    .prio-barra-fila .marca-chip {
+      padding: 0.12rem 0.32rem;
+      border-width: 1px;
+      min-width: 2.7rem;
+    }
+    .prio-barra-fila .marca-chip .nom { font-size: 0.52rem; }
+    .prio-barra-fila .marca-chip .pre { font-size: 0.62rem; }
+    .prio-barra-fila .barra-escala { display: none; }
+    .prio-barra-fila .barra-chips { display: none; }
+    .prio-num-inline {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: #10b981;
+      background: #ecfdf5;
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .prio-margen {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      background: #dcfce7;
+      color: #166534;
+    }
+    .prio-margen.bajo { background: #fef3c7; color: #92400e; }
+    tr.fila-prioridad-venta { background: #f0fdf4; }
+    tr.fila-prioridad-venta td:first-child { border-left: 3px solid #10b981; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="note" style="background:#fef3c7;border-color:#fcd34d"><strong>Archivo histórico</strong> — versión anterior al 29/07/2026. <a href="comparador-unificado.html">Ir a actualización 29/07 →</a></div>
+    <h1>Comparador unificado</h1>
+    <p class="sub" id="meta">Quilmes · La Nueva Luna · Mercado Central vs Coto y góndolas</p>
+    <div class="links">
+      <a href="/comparador-quilmes-coto">Quilmes</a>
+      <a href="/comparador-nueva-luna-coto">La Nueva Luna</a>
+      <a href="/comparador-mercado-central">Mercado Central</a>
+    </div>
+    <div class="note">
+      La celda con <strong>✓ más barato</strong> es el mayorista ganador entre los que tienen precio.
+      Clic en <strong>Nueva Luna</strong> (columna o botón) → solo productos donde gana La Nueva Luna. Mismo para Quilmes y M. Central. <strong>Todos</strong> vuelve a mostrar todo.
+    </div>
+    <div class="leyenda-barra">
+      <span><i class="dot dot-q"></i> Quilmes (Hot Sale)</span>
+      <span><i class="dot dot-l"></i> La Nueva Luna</span>
+      <span><i class="dot dot-m"></i> Mercado Central mayorista</span>
+      <span><i class="dot dot-c"></i> Conlat</span>
+      <span><i class="dot dot-o"></i> Coto / referencia góndola</span>
+    </div>
+    <div class="buscador-producto">
+      <label for="buscar-producto">Buscar producto</label>
+      <div class="buscador-row">
+        <input
+          type="search"
+          id="buscar-producto"
+          list="lista-productos"
+          placeholder="Escribí o elegí: mandarina, cebolla, tomate…"
+          autocomplete="off"
+        />
+        <button type="button" class="btn-limpiar" id="btn-limpiar-busqueda" title="Mostrar todos">✕ Limpiar</button>
+      </div>
+      <span class="buscador-hint" id="buscador-hint">Escribí para filtrar · elegí de la lista para ir directo al producto</span>
+    </div>
+    <datalist id="lista-productos"></datalist>
+    <section class="prioridad-venta" id="prioridad-venta" aria-label="Primera tanda de venta MCBA">
+      <h2>Primera tanda de venta — MCBA</h2>
+      <p class="prio-intro">
+        Productos de mayor volumen en el Mercado Central: verduras y tubérculos (~75% del segmento)
+        y frutas clave (~55%). Priorizá estos para la primera oferta Conlat cuando el costo mayorista
+        (Quilmes / Nueva Luna) mejora al MCBA.
+      </p>
+      <div class="prio-grupos" id="prio-grupos">Cargando prioridades…</div>
+    </section>
+    <div class="stats" id="stats"></div>
+    <div class="filtros-gana">
+      <span>Más barato entre mayoristas:</span>
+      <button type="button" class="btn-gana btn-todos activo" id="btn-gana-todos">Todos</button>
+      <button type="button" class="btn-gana btn-q" id="btn-gana-q">Quilmes gana</button>
+      <button type="button" class="btn-gana btn-l" id="btn-gana-l">Nueva Luna gana</button>
+      <button type="button" class="btn-gana btn-m" id="btn-gana-m">M. Central gana</button>
+    </div>
+    <div class="filtros">
+      <label><input type="checkbox" id="filtro-prioridad" /> Solo primera tanda MCBA (15 productos)</label>
+      <label><input type="checkbox" id="filtro-3may" /> Solo con 3 mayoristas</label>
+      <label><input type="checkbox" id="filtro-coto" checked /> Con precio góndola (Coto)</label>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="num th-gana th-q" id="th-gana-q" title="Clic: solo productos donde Quilmes es más barato">Quilmes</th>
+            <th class="num th-gana th-l" id="th-gana-l" title="Clic: solo productos donde Nueva Luna es más barata">Nueva Luna</th>
+            <th class="num th-gana th-m" id="th-gana-m" title="Clic: solo productos donde M. Central es más barato">M. Central</th>
+            <th class="num">Conlat</th>
+            <th class="num">Coto / góndola</th>
+            <th>Minoristas</th>
+            <th class="col-barra th-sort" id="th-sort" title="Clic para ordenar por margen Conlat">
+              Barra de posición ($/kg)
+              <span class="sort-hint">↕ Clic: mayor margen arriba</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="tbody"><tr><td colspan="8">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    const fmt = (n) => (n == null || isNaN(n)) ? "—" : "$ " + Number(n).toLocaleString("es-AR", { maximumFractionDigits: 0 });
+    const pct = (n) => (n == null || isNaN(n)) ? "" : (n > 0 ? "+" : "") + Number(n).toFixed(0) + "%";
+
+    const FUENTES = {
+      quilmes: { cls: "fq", nom: "Quilmes", corto: "Q" },
+      nueva_luna: { cls: "fl", nom: "Nueva Luna", corto: "L" },
+      mercado_central: { cls: "fm", nom: "M. Central", corto: "M" },
+      conlat: { cls: "fc", nom: "Conlat", corto: "C" },
+      coto: { cls: "fo", nom: "Coto", corto: "O" },
+    };
+
+    function precioMay(may, k) {
+      const x = may && may[k];
+      return x && x.precio_kg != null ? x.precio_kg : null;
+    }
+
+    function pctEnRango(precio, rMin, rSpan) {
+      return Math.max(0, Math.min(100, ((precio - rMin) / rSpan) * 100));
+    }
+
+    /** Evita solapamiento: asigna carril 0, 1 o 2 si dos precios están muy cerca en la barra. */
+    function asignarCarriles(items, minGapPct = 13) {
+      const sorted = [...items].sort((a, b) => a.left - b.left);
+      const carriles = [];
+      for (const item of sorted) {
+        let carril = 0;
+        for (;;) {
+          const conflicto = carriles[carril]?.some(
+            (p) => Math.abs(p.left - item.left) < minGapPct
+          );
+          if (!conflicto) break;
+          carril += 1;
+        }
+        if (!carriles[carril]) carriles[carril] = [];
+        carriles[carril].push({ ...item, carril });
+      }
+      return carriles.flat();
+    }
+
+    function zonasHtml(mayPrices, conlat, coto, rMin, rSpan) {
+      if (!mayPrices.length && !coto) return "";
+      const minMay = mayPrices.length ? Math.min(...mayPrices) : rMin;
+      const maxMay = mayPrices.length ? Math.max(...mayPrices) : minMay;
+      const pMay0 = pctEnRango(minMay, rMin, rSpan);
+      const pMay1 = pctEnRango(maxMay, rMin, rSpan);
+      const pCon = conlat != null ? pctEnRango(conlat, rMin, rSpan) : pMay1;
+      const pCoto = coto != null ? pctEnRango(coto, rMin, rSpan) : 100;
+      let html = "";
+      if (pMay1 > pMay0) {
+        html += `<div class="zona zona-may" style="left:${pMay0}%;width:${pMay1 - pMay0}%">Mayoristas</div>`;
+      }
+      if (conlat != null && pCon > pMay1 + 1) {
+        html += `<div class="zona zona-subida" style="left:${pMay1}%;width:${pCon - pMay1}%">→ Conlat</div>`;
+      }
+      if (coto != null && pCoto > pCon + 1) {
+        html += `<div class="zona zona-gondola" style="left:${pCon}%;width:${pCoto - pCon}%">Góndola</div>`;
+      }
+      return html;
+    }
+
+    function barraHtml(f, opts = {}) {
+      const {
+        incluirCadenas = true,
+        mostrarEscala = true,
+        mostrarChips = true,
+        minGapPct = 13,
+      } = opts;
+      const may = f.mayoristas || {};
+      const mino = f.minoristas || {};
+      const valores = [];
+      const push = (precio, id, nomExtra) => {
+        if (precio == null || isNaN(precio)) return;
+        const meta = FUENTES[id] || { cls: "fg", nom: nomExtra || id, corto: "?" };
+        valores.push({
+          precio,
+          cls: meta.cls,
+          nom: meta.nom,
+          corto: meta.corto,
+          id,
+        });
+      };
+      push(precioMay(may, "quilmes"), "quilmes");
+      push(precioMay(may, "nueva_luna"), "nueva_luna");
+      push(precioMay(may, "mercado_central"), "mercado_central");
+      push(mino.conlat_kg, "conlat");
+      push(mino.coto_kg, "coto");
+      if (incluirCadenas) {
+        (mino.cadenas || []).forEach((c) => {
+          if (c.cadena && c.cadena !== "Coto" && c.precio_kg != null) {
+            push(c.precio_kg, null, c.cadena);
+          }
+        });
+      }
+      if (valores.length < 2) return "<span class='ref'>Datos insuficientes</span>";
+
+      const precios = valores.map((v) => v.precio);
+      const min = Math.min(...precios);
+      const max = Math.max(...precios);
+      const span = max - min || max * 0.1 || 1;
+      const pad = Math.max(span * 0.06, 50);
+      const rMin = Math.max(0, min - pad);
+      const rMax = max + pad;
+      const rSpan = rMax - rMin;
+
+      const mayPrices = [
+        precioMay(may, "quilmes"),
+        precioMay(may, "nueva_luna"),
+        precioMay(may, "mercado_central"),
+      ].filter((p) => p != null);
+
+      const conItems = valores.map((v) => ({
+        ...v,
+        left: pctEnRango(v.precio, rMin, rSpan),
+      }));
+      const colocados = asignarCarriles(conItems, minGapPct);
+      const maxCarril = colocados.reduce((m, x) => Math.max(m, x.carril), 0);
+      const alturaMarcas = 34 + maxCarril * 34;
+
+      const marcas = colocados.map((v) =>
+        `<div class="marca ${v.cls}" data-carril="${v.carril}" style="left:${v.left.toFixed(1)}%" title="${v.nom}: ${fmt(v.precio)}/kg">
+          <div class="tallo"></div>
+          <div class="marca-chip">
+            <span class="nom">${v.nom}</span>
+            <span class="pre">${fmt(v.precio)}</span>
+          </div>
+        </div>`
+      ).join("");
+
+      const ticks = colocados.map((v) =>
+        `<div class="tick" style="left:${v.left.toFixed(1)}%"></div>`
+      ).join("");
+
+      const tags = [...valores]
+        .sort((a, b) => a.precio - b.precio)
+        .map((v) =>
+          `<span class="tag ${v.cls}">${v.nom} ${fmt(v.precio)}</span>`
+        ).join("");
+
+      return `<div class="barra-wrap">
+        <div class="barra-detalle">
+          <div class="barra-zonas">${zonasHtml(mayPrices, mino.conlat_kg, mino.coto_kg, rMin, rSpan)}</div>
+          <div class="barra-pista">${ticks}</div>
+          <div class="barra-marcas" style="min-height:${alturaMarcas}px">${marcas}</div>
+          ${mostrarEscala ? `<div class="barra-escala"><span>${fmt(rMin)}/kg</span><span>${fmt(rMax)}/kg</span></div>` : ""}
+          ${mostrarChips ? `<div class="barra-chips">${tags}</div>` : ""}
+        </div>
+      </div>`;
+    }
+
+    const MAY_KEYS = ["quilmes", "nueva_luna", "mercado_central"];
+    const GANA_LABEL = {
+      quilmes: { corto: "Quilmes", badge: "bg-q" },
+      nueva_luna: { corto: "Nueva Luna", badge: "bg-l" },
+      mercado_central: { corto: "M. Central", badge: "bg-m" },
+    };
+
+    /** Primera tanda venta — volumen MCBA (verduras 75,3% + frutas 55%). */
+    const PRIORIDAD_VENTA = [
+      { slug: "papa", label: "Papa", grupo: "verdura", pct: "75,3%", ids: ["papa"], keys: ["papa"] },
+      { slug: "tomate", label: "Tomate", grupo: "verdura", pct: "75,3%", ids: ["tomate"], keys: ["tomate"] },
+      { slug: "zapallo", label: "Zapallo", grupo: "verdura", pct: "75,3%", ids: ["anco", "zapallo-plomo", "cabutia"], keys: ["zapallo", "anco", "cabutia"] },
+      { slug: "cebolla", label: "Cebolla", grupo: "verdura", pct: "75,3%", ids: ["cebolla"], keys: ["cebolla"] },
+      { slug: "lechuga", label: "Lechuga", grupo: "verdura", pct: "75,3%", ids: ["lechuga"], keys: ["lechuga"] },
+      { slug: "batata", label: "Batata", grupo: "verdura", pct: "75,3%", ids: ["bataton", "boniato", "batata"], keys: ["batata", "boniato"] },
+      { slug: "zanahoria", label: "Zanahoria", grupo: "verdura", pct: "75,3%", ids: ["zanahoria"], keys: ["zanahoria"] },
+      { slug: "morron", label: "Morrón", grupo: "verdura", pct: "75,3%", ids: ["morron"], keys: ["morron", "pimiento"] },
+      { slug: "banana", label: "Banana", grupo: "fruta", pct: "55%", ids: ["banana"], keys: ["banana", "banano"] },
+      { slug: "limon", label: "Limón", grupo: "fruta", pct: "55%", ids: ["limon"], keys: ["limon"] },
+      { slug: "manzana", label: "Manzana", grupo: "fruta", pct: "55%", ids: ["manzana"], keys: ["manzana"] },
+      { slug: "naranja", label: "Naranja", grupo: "fruta", pct: "55%", ids: ["naranja"], keys: ["naranja"] },
+      { slug: "mandarina", label: "Mandarina", grupo: "fruta", pct: "55%", ids: ["mandarina"], keys: ["mandarina"] },
+      { slug: "pera", label: "Pera", grupo: "fruta", pct: "55%", ids: ["pera"], keys: ["pera"] },
+      { slug: "pomelo", label: "Pomelo", grupo: "fruta", pct: "55%", ids: ["pomelo"], keys: ["pomelo"] },
+    ];
+
+    function matchPrioridad(f, item) {
+      const id = normBusq(f.id || "");
+      const prod = normBusq(f.producto || "");
+      if (item.ids.some((i) => id === i || id.startsWith(i + "-"))) return true;
+      return item.keys.some((k) => prod.includes(normBusq(k)));
+    }
+
+    function prioridadSlug(f) {
+      const hit = PRIORIDAD_VENTA.find((p) => matchPrioridad(f, p));
+      return hit ? hit.slug : null;
+    }
+
+    function filasDePrioridad(filas, slug) {
+      const item = PRIORIDAD_VENTA.find((p) => p.slug === slug);
+      if (!item) return [];
+      return filas.filter((f) => matchPrioridad(f, item));
+    }
+
+    function representantePrioridad(filas, slug) {
+      const candidatos = filasDePrioridad(filas, slug);
+      if (!candidatos.length) return null;
+      const conMargen = candidatos.filter((f) => (f.comparacion || {}).mejor_margen_conlat_pct != null);
+      const pool = conMargen.length ? conMargen : candidatos;
+      return pool.sort((a, b) => {
+        const ma = (a.comparacion || {}).mejor_margen_conlat_pct || -1;
+        const mb = (b.comparacion || {}).mejor_margen_conlat_pct || -1;
+        return mb - ma;
+      })[0];
+    }
+
+    function mejorCostoMay(f) {
+      const may = f.mayoristas || {};
+      const vals = MAY_KEYS.map((k) => precioMay(may, k)).filter((p) => p != null);
+      if (!vals.length) return null;
+      return Math.min(...vals);
+    }
+
+    function renderPrioridadVentas(filas) {
+      const el = document.getElementById("prio-grupos");
+      if (!el) return;
+      const grupos = [
+        { key: "verdura", titulo: "Verduras, tubérculos y legumbres", sub: "~75,3% del volumen MCBA" },
+        { key: "fruta", titulo: "Frutas", sub: "~55% del volumen MCBA (banana, limón, manzana, naranja)" },
+      ];
+      el.innerHTML = grupos.map((g) => {
+        const items = PRIORIDAD_VENTA.filter((p) => p.grupo === g.key);
+        const rows = items.map((item) => {
+          const f = representantePrioridad(filas, item.slug);
+          const num = PRIORIDAD_VENTA.indexOf(item) + 1;
+          if (!f) {
+            return `<div class="prio-barra-fila sin-datos" data-prio="${item.slug}">
+              <div class="prio-barra-head">
+                <span class="titulo"><span class="prio-num-inline">${num}</span><strong>${item.label}</strong></span>
+                <span class="ref">Sin datos en comparador</span>
+              </div>
+            </div>`;
+          }
+          const cmp = f.comparacion || {};
+          const gana = ganadorMayorista(f);
+          const mPct = cmp.mejor_margen_conlat_pct;
+          const margenCls = mPct != null && mPct >= 80 ? "prio-margen" : "prio-margen bajo";
+          const ganaBadge = gana.ganador && GANA_LABEL[gana.ganador]
+            ? `<span class="badge-gana-producto ${GANA_LABEL[gana.ganador].badge}">${GANA_LABEL[gana.ganador].corto} ✓</span>`
+            : "";
+          return `<div class="prio-barra-fila" data-prio="${item.slug}" data-fila-id="${f.id || ""}" title="Clic: ver ${f.producto} en la tabla">
+            <div class="prio-barra-head">
+              <span class="titulo">
+                <span class="prio-num-inline">${num}</span>
+                <strong>${item.label}</strong>
+                <span class="detalle">${f.producto}</span>
+              </span>
+              <span class="prio-barra-meta">
+                ${mPct != null ? `<span class="${margenCls}">margen ${pct(mPct)}</span>` : ""}
+                ${ganaBadge}
+              </span>
+            </div>
+            ${barraHtml(f, { incluirCadenas: false, mostrarEscala: false, mostrarChips: false, minGapPct: 10 })}
+          </div>`;
+        }).join("");
+        return `<div><div class="prio-grupo-title">${g.titulo} <span>· ${g.sub}</span></div><div class="prio-grid">${rows}</div></div>`;
+      }).join("");
+    }
+
+    function ordenarConPrioridad(filas) {
+      const orden = Object.fromEntries(PRIORIDAD_VENTA.map((p, i) => [p.slug, i]));
+      return [...filas].sort((a, b) => {
+        const pa = prioridadSlug(a);
+        const pb = prioridadSlug(b);
+        if (pa && pb) return orden[pa] - orden[pb];
+        if (pa) return -1;
+        if (pb) return 1;
+        return (a.producto || "").localeCompare(b.producto || "", "es");
+      });
+    }
+
+    function ganadorMayorista(f) {
+      const may = f.mayoristas || {};
+      const precios = {};
+      for (const k of MAY_KEYS) {
+        const p = precioMay(may, k);
+        if (p != null) precios[k] = p;
+      }
+      const keys = Object.keys(precios);
+      if (keys.length < 2) return { ganador: null, precios, empate: false };
+      const min = Math.min(...Object.values(precios));
+      const ganadores = keys.filter((k) => precios[k] === min);
+      return {
+        ganador: ganadores.length === 1 ? ganadores[0] : null,
+        ganadores,
+        empate: ganadores.length > 1,
+        precios,
+        min,
+      };
+    }
+
+    function celdaMay(may, k, cls, ganaInfo) {
+      const x = may && may[k];
+      if (!x || x.precio_kg == null) return "—";
+      const esGana = ganaInfo && ganaInfo.ganador === k;
+      const suf = k.replace("mercado_central", "m").replace("nueva_luna", "l").replace("quilmes", "q");
+      const wrap = esGana
+        ? `<div class="celda-gana celda-gana-${suf}"><span class="${cls}">${fmt(x.precio_kg)}</span><span class="badge-gana">✓ más barato</span>`
+        : `<span class="${cls}">${fmt(x.precio_kg)}</span>`;
+      const pres = x.presentacion ? `<span class="ref">${x.presentacion}</span>` : "";
+      return esGana ? `${wrap}${pres}</div>` : `${wrap}${pres}`;
+    }
+
+    function pillsMinoristas(cadenas) {
+      if (!cadenas || !cadenas.length) return "—";
+      return `<div class="pills">${cadenas.slice(0, 5).map((c) =>
+        `<span class="pill"><span>${c.cadena}</span> <strong>${fmt(c.precio_kg)}</strong></span>`
+      ).join("")}</div>`;
+    }
+
+    let _data = null;
+    let _ordenMargen = false;
+    let _filtroGana = null;
+
+    function normBusq(s) {
+      return (s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function textoBusqueda() {
+      return (document.getElementById("buscar-producto")?.value || "").trim();
+    }
+
+    function coincideBusqueda(f, qNorm) {
+      if (!qNorm) return true;
+      const nom = normBusq(f.producto);
+      const id = normBusq(f.id || "");
+      return nom.includes(qNorm) || id.includes(qNorm) || id.replace(/-/g, " ").includes(qNorm);
+    }
+
+    function filasPorBusqueda(filas) {
+      const q = textoBusqueda();
+      if (!q) return { filas, exacto: false };
+      const qNorm = normBusq(q);
+      const exactas = filas.filter((f) => normBusq(f.producto) === qNorm);
+      if (exactas.length === 1) return { filas: exactas, exacto: true };
+      return { filas: filas.filter((f) => coincideBusqueda(f, qNorm)), exacto: false };
+    }
+
+    function filasVisibles(filas) {
+      const f3 = document.getElementById("filtro-3may").checked;
+      const fc = document.getElementById("filtro-coto").checked;
+      const fp = document.getElementById("filtro-prioridad")?.checked;
+      let out = filas.filter((f) => {
+        const cmp = f.comparacion || {};
+        if (fp && !prioridadSlug(f)) return false;
+        if (f3 && (cmp.fuentes_mayoristas || 0) < 3) return false;
+        if (fc && !f.minoristas?.coto_kg) return false;
+        if (_filtroGana) {
+          const g = ganadorMayorista(f);
+          if (g.ganador !== _filtroGana) return false;
+        }
+        return true;
+      });
+      const busq = filasPorBusqueda(out);
+      out = busq.filas;
+      return { filas: out, busquedaExacta: busq.exacto };
+    }
+
+    function actualizarListaProductos(filas) {
+      const dl = document.getElementById("lista-productos");
+      if (!dl) return;
+      const nombres = [...new Set((filas || []).map((f) => f.producto).filter(Boolean))].sort((a, b) =>
+        a.localeCompare(b, "es")
+      );
+      dl.innerHTML = nombres.map((n) => `<option value="${n.replace(/"/g, "&quot;")}">`).join("");
+    }
+
+    function setFiltroGana(id) {
+      _filtroGana = _filtroGana === id ? null : id;
+      document.querySelectorAll(".btn-gana").forEach((b) => b.classList.remove("activo"));
+      document.querySelectorAll(".th-gana").forEach((th) => th.classList.remove("activo"));
+      if (_filtroGana) {
+        const btn = document.getElementById("btn-gana-" + (_filtroGana === "mercado_central" ? "m" : _filtroGana === "nueva_luna" ? "l" : "q"));
+        const th = document.getElementById("th-gana-" + (_filtroGana === "mercado_central" ? "m" : _filtroGana === "nueva_luna" ? "l" : "q"));
+        if (btn) btn.classList.add("activo");
+        if (th) th.classList.add("activo");
+      } else {
+        document.getElementById("btn-gana-todos")?.classList.add("activo");
+      }
+      if (_data) render(_data);
+    }
+
+    function filasOrdenadas(filas) {
+      let out = ordenarConPrioridad(filas);
+      if (!_ordenMargen) return out;
+      const prio = out.filter((f) => prioridadSlug(f));
+      const resto = out.filter((f) => !prioridadSlug(f));
+      const sortMargen = (arr) => [...arr].sort((a, b) => {
+        const ma = (a.comparacion || {}).mejor_margen_conlat_pct;
+        const mb = (b.comparacion || {}).mejor_margen_conlat_pct;
+        if (ma == null && mb == null) return 0;
+        if (ma == null) return 1;
+        if (mb == null) return -1;
+        return mb - ma;
+      });
+      return [...sortMargen(prio), ...sortMargen(resto)];
+    }
+
+    function filaHtml(f, idx, opts) {
+      const { visLen, busquedaExacta, rankPrefix } = opts;
+      const may = f.mayoristas || {};
+      const mino = f.minoristas || {};
+      const cmp = f.comparacion || {};
+      const gana = ganadorMayorista(f);
+      const tres = (cmp.fuentes_mayoristas || 0) >= 3;
+      const mPct = cmp.mejor_margen_conlat_pct;
+      const prio = prioridadSlug(f);
+      let rowCls = _filtroGana && gana.ganador === _filtroGana ? "fila-destacada-gana" : "";
+      if (prio) rowCls += " fila-prioridad-venta";
+      if (_ordenMargen && mPct != null) {
+        rowCls += idx < 3 ? " top-margen" : idx >= visLen - 3 ? " bajo-margen" : "";
+      }
+      if (visLen === 1 || (busquedaExacta && visLen <= 3)) {
+        rowCls += " fila-producto-activo";
+      }
+      const rank = rankPrefix || (_ordenMargen && mPct != null ? `#${idx + 1} ` : "");
+      const badgeGana = gana.ganador && GANA_LABEL[gana.ganador]
+        ? `<span class="badge-gana-producto ${GANA_LABEL[gana.ganador].badge}">${GANA_LABEL[gana.ganador].corto} ✓</span>`
+        : gana.empate ? `<span class="ref">empate</span>` : "";
+      const badgePrio = prio
+        ? `<span class="badge-3" style="background:#d1fae5;color:#065f46">1ª tanda</span>`
+        : "";
+      const rowId = f.id ? ` id="fila-${f.id}"` : "";
+      return `<tr class="${rowCls.trim()}"${rowId} data-prio-slug="${prio || ""}">
+        <td>${rank}<strong>${f.producto}</strong>${badgePrio}${badgeGana}${tres ? '<span class="badge-3">×3 may.</span>' : ""}
+          ${cmp.spread_mayoristas_pct != null ? `<span class="ref">Spread mayoristas ${pct(cmp.spread_mayoristas_pct)}</span>` : ""}
+        </td>
+        <td class="num">${celdaMay(may, "quilmes", "precio-q", gana)}</td>
+        <td class="num">${celdaMay(may, "nueva_luna", "precio-l", gana)}</td>
+        <td class="num">${celdaMay(may, "mercado_central", "precio-m", gana)}</td>
+        <td class="num"><span class="precio-c">${fmt(mino.conlat_kg)}</span>
+          ${mPct != null ? `<span class="ref">margen ${pct(mPct)} s/mejor may.</span>` : ""}
+        </td>
+        <td class="num"><span class="precio-o">${fmt(mino.coto_kg)}</span>
+          ${mino.coto_nombre ? `<span class="ref">${mino.coto_nombre}</span>` : ""}
+        </td>
+        <td>${pillsMinoristas(mino.cadenas)}</td>
+        <td class="col-barra">${barraHtml(f)}</td>
+      </tr>`;
+    }
+
+    function render(D) {
+      _data = D;
+      document.getElementById("meta").textContent =
+        `${D.titulo || "Comparador unificado"} · generado ${(D.generado || "").slice(0, 16).replace("T", " ")}`;
+      const s = D.stats || {};
+      document.getElementById("stats").innerHTML = `
+        <div class="stat"><strong>${s.productos_total || 0}</strong><span>Productos</span></div>
+        <div class="stat"><strong>${s.con_tres_mayoristas || 0}</strong><span>Con 3 mayoristas</span></div>
+        <div class="stat"><strong>${s.con_coto_o_minorista || 0}</strong><span>Con góndola / Coto</span></div>
+        <div class="stat"><strong>${pct(s.promedio_margen_conlat_pct)}</strong><span>Prom. margen Conlat (mejor costo)</span></div>
+      `;
+
+      actualizarListaProductos(D.filas || []);
+      renderPrioridadVentas(D.filas || []);
+
+      const { filas: filasFiltradas, busquedaExacta } = filasVisibles(D.filas || []);
+      const vis = filasOrdenadas(filasFiltradas);
+      const qBusq = textoBusqueda();
+      const hint = document.getElementById("buscador-hint");
+      if (hint) {
+        if (!qBusq) {
+          hint.textContent = "Escribí para filtrar · elegí de la lista para ir directo al producto";
+        } else if (vis.length === 0) {
+          hint.textContent = `Sin resultados para «${qBusq}»`;
+        } else if (vis.length === 1 || busquedaExacta) {
+          hint.textContent = `Mostrando: ${vis[0].producto}`;
+        } else {
+          hint.textContent = `${vis.length} productos coinciden con «${qBusq}»`;
+        }
+      }
+
+      document.getElementById("tbody").innerHTML = vis.length
+        ? vis.map((f, idx) => filaHtml(f, idx, { visLen: vis.length, busquedaExacta })).join("")
+        : "<tr><td colspan='8'>Ningún producto con estos filtros.</td></tr>";
+
+      if (qBusq && vis.length > 0) {
+        requestAnimationFrame(() => {
+          const row = document.querySelector("tr.fila-producto-activo") || document.querySelector("#tbody tr");
+          row?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      }
+
+      const th = document.getElementById("th-sort");
+      if (th) {
+        th.classList.toggle("activo", _ordenMargen);
+        const hint = th.querySelector(".sort-hint");
+        if (hint) {
+          hint.textContent = _ordenMargen
+            ? "▼ Ordenado por margen (clic = original)"
+            : "↕ Clic: mayor margen arriba";
+        }
+      }
+    }
+
+    function bind() {
+      ["filtro-3may", "filtro-coto", "filtro-prioridad"].forEach((id) => {
+        document.getElementById(id)?.addEventListener("change", () => { if (_data) render(_data); });
+      });
+      document.getElementById("prio-grupos")?.addEventListener("click", (e) => {
+        const barra = e.target.closest(".prio-barra-fila[data-fila-id]");
+        if (!barra || barra.classList.contains("sin-datos")) return;
+        const slug = barra.getAttribute("data-prio");
+        const filaId = barra.getAttribute("data-fila-id");
+        const fp = document.getElementById("filtro-prioridad");
+        if (fp && slug) {
+          fp.checked = true;
+          if (_data) render(_data);
+        }
+        requestAnimationFrame(() => {
+          const tr = filaId ? document.getElementById("fila-" + filaId) : document.querySelector(`tr[data-prio-slug="${slug}"]`);
+          tr?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      });
+      const buscar = document.getElementById("buscar-producto");
+      if (buscar && !buscar.dataset.bound) {
+        buscar.dataset.bound = "1";
+        let t = null;
+        buscar.addEventListener("input", () => {
+          clearTimeout(t);
+          t = setTimeout(() => { if (_data) render(_data); }, 120);
+        });
+        buscar.addEventListener("change", () => { if (_data) render(_data); });
+        buscar.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && _data) render(_data);
+        });
+      }
+      document.getElementById("btn-limpiar-busqueda")?.addEventListener("click", () => {
+        const b = document.getElementById("buscar-producto");
+        if (b) b.value = "";
+        if (_data) render(_data);
+        b?.focus();
+      });
+      const th = document.getElementById("th-sort");
+      if (th && !th.dataset.bound) {
+        th.dataset.bound = "1";
+        th.addEventListener("click", () => {
+          _ordenMargen = !_ordenMargen;
+          if (_data) render(_data);
+        });
+      }
+      if (!document.body.dataset.ganaBound) {
+        document.body.dataset.ganaBound = "1";
+        document.getElementById("btn-gana-todos")?.addEventListener("click", () => {
+          _filtroGana = null;
+          document.querySelectorAll(".btn-gana").forEach((b) => b.classList.remove("activo"));
+          document.querySelectorAll(".th-gana").forEach((t) => t.classList.remove("activo"));
+          document.getElementById("btn-gana-todos")?.classList.add("activo");
+          if (_data) render(_data);
+        });
+        document.getElementById("btn-gana-q")?.addEventListener("click", () => setFiltroGana("quilmes"));
+        document.getElementById("btn-gana-l")?.addEventListener("click", () => setFiltroGana("nueva_luna"));
+        document.getElementById("btn-gana-m")?.addEventListener("click", () => setFiltroGana("mercado_central"));
+        document.getElementById("th-gana-q")?.addEventListener("click", () => setFiltroGana("quilmes"));
+        document.getElementById("th-gana-l")?.addEventListener("click", () => setFiltroGana("nueva_luna"));
+        document.getElementById("th-gana-m")?.addEventListener("click", () => setFiltroGana("mercado_central"));
+      }
+    }
+
+    function boot(d) {
+      if (!d) throw new Error("Sin datos");
+      render(d);
+      bind();
+    }
+
+    if (window.COMPARACION_UNIFICADA) {
+      try { boot(window.COMPARACION_UNIFICADA); }
+      catch (e) {
+        document.getElementById("tbody").innerHTML =
+          "<tr><td colspan='8'>Error al renderizar datos embebidos.</td></tr>";
+      }
+    } else {
+      fetch("/api/comparacion-unificada")
+        .then((r) => { if (!r.ok) throw new Error("No se pudo cargar"); return r.json(); })
+        .then((d) => boot(d))
+        .catch(() => {
+          document.getElementById("tbody").innerHTML =
+            "<tr><td colspan='8'>No se pudo cargar. Abrí con ABRIR-CONLAT.bat o regenerá datos-comparacion-archivo.js</td></tr>";
+        });
+    }
+  </script>
+</body>
+</html>

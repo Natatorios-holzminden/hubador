@@ -1,0 +1,13 @@
+const fs = require('fs');
+const d = fs.readFileSync(__dirname + '/index.html', 'utf8');
+const start = d.indexOf('section className="web-otros"');
+const end = d.indexOf('function WebMisGrupos');
+const chunk = d.slice(start, end);
+console.log(chunk);
+console.log('\n--- BODY CSS ---');
+const re = /\.web-prod-body[^{]*\{[^}]*\}/g;
+let m;
+while ((m = re.exec(d))) console.log(m[0]);
+console.log('\n--- OTROS GRID CSS ---');
+const i = d.indexOf('.web-otros-grid {');
+console.log(d.slice(i, i + 900));
