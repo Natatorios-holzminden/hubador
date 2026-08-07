@@ -1,11 +1,21 @@
 HUBADOR — pack para subir a hubador.com
 =======================================
-Build: HUBADOR_BUILD 20260807d  ·  marcador visible en la UI: · u-v3
+Build: HUBADOR_BUILD 20260807f-auth  ·  marcador visible en la UI: · u-v4
+Auth: Supabase (email + password) — ver SUPABASE.md
 
 Contenido
 ---------
-- index.html  → sitio completo (web + mobile)
-- img/        → imágenes usadas por index.html
+- index.html           → sitio completo (web + mobile + auth) — keys YA cableadas
+- config.js            → URL + publishable (se carga ANTES del app)
+- img/                 → imágenes usadas por index.html
+- supabase-schema.sql  → tabla profiles + RLS (correr en Supabase — PRÓXIMO PASO)
+- SUPABASE.md          → guía de auth paso a paso
+- config.example.js    → plantilla
+
+IMPORTANTE — secrets
+--------------------
+La publishable (sb_publishable_...) VA en el front. OK.
+NUNCA subas ni pegues la secret (sb_secret_...) / service_role.
 
 IMPORTANTE — NO alcanza con subir a rfbconstrucciones
 -----------------------------------------------------
@@ -13,12 +23,23 @@ rfbconstrucciones.com.ar/vconlat/ es OTRO hosting (funciona).
 hubador.com apunta a GitHub Pages (u otro host del dominio).
 Hay que subir ESTE pack al repo/host que sirva hubador.com.
 
+Auth — qué falta de tu lado
+---------------------------
+1. SQL Editor → corré supabase-schema.sql (si no lo hiciste)
+2. Auth → Email → desactivá “Confirm email” para probar
+3. Probá signup en el sitio → login → recargar sesión
+4. Subí este zip de nuevo a hubador.com (index.html + config.js + img/)
+
+Sin keys el sitio queda en modo demo; CON estas keys el demo se apaga.
+Detalle: SUPABASE.md
+Nota: “usuarios online” en tiempo real viene después.
+
 Pasos (GitHub Pages)
 --------------------
 1. Abrí el repo que publica hubador.com
    (ej. natatorios-holzminden/hubador).
 2. Borrá el index.html viejo del repo (y la carpeta img vieja si existe).
-3. Subí TODO el contenido de esta carpeta: index.html + img/
+3. Subí TODO el contenido de esta carpeta: index.html + config.js + img/ (+ SQL/docs si querés)
    (arrastrá los archivos, NO otra carpeta adentro).
 4. Settings → Pages → Deploy from a branch → main / (root).
 5. Esperá 1 minuto a que despliegue.
@@ -26,9 +47,11 @@ Pasos (GitHub Pages)
 
 Cómo verificar que cargó ESTE build
 -----------------------------------
-- En “Productos / listado” debe verse el texto · u-v3 (no u-v2).
-- Ver código fuente (Ctrl+U) y buscar: HUBADOR_BUILD 20260807d
-- Cada card debe mostrar: precio + barra + “Faltan X kg” + timer + botón Unirme al grupo
+- En “Productos / listado” debe verse el texto · u-v4
+- Ver código fuente (Ctrl+U) y buscar: HUBADOR_BUILD 20260807f-auth
+- En el HTML debe aparecer tu Project URL (qthznhtzzgmaekiggypd) — no PEGAR_URL
+- Cada card: precio + barra + “Faltan X kg” + timer + botón Unirme al grupo
+- Con Supabase OK: NO debe salir el toast “Modo demo — configurá Supabase”
 
 Rutas de imágenes
 -----------------
@@ -41,3 +64,4 @@ Vista local
 Doble clic en index.html, o:
   python -m http.server 8765
 luego http://localhost:8765/
+(En file:// a veces falla el auth por URLs; preferí un server local.)

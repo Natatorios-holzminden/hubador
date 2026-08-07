@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HUBADOR — Compra en equipo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d9488'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='800' font-size='18' fill='%23fff'%3EH%3C/text%3E%3C/svg%3E" />
-<!-- hubador-kg100-v1 20260807e cards-img-attrs -->
-<!-- HUBADOR_BUILD 20260807e -->
-<style id="hubador-card-fix-20260807e">
+<!-- hubador-kg100-v1 20260807f-auth supabase-auth -->
+<!-- HUBADOR_BUILD 20260807f-auth -->
+<style id="hubador-card-fix-20260807f">
 /* Early critical card CSS — height on IMG tag + wrap; do not rely on stylesheet alone */
 img { max-width: 100%; }
 html.app-mode .web-prod-card,
@@ -105,6 +105,13 @@ html.app-mode .web-grid-products .web-join-card,
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.112.1/dist/umd/supabase.js"></script>
+<script>
+  // Opcional: keys también en config.js (se carga abajo) o placeholders PEGAR_* en el script de la app.
+  // window.HUBADOR_SUPABASE_URL = 'https://xxxx.supabase.co';
+  // window.HUBADOR_SUPABASE_ANON = 'sb_publishable_...';  // o anon JWT legacy eyJ...
+</script>
+<script src="config.js"></script>
 <script type="text/babel">
 
 // iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
@@ -1450,6 +1457,88 @@ html.app-mode .web-root { min-height: 100vh; }
 
 const { useState } = React;
 
+
+// ─── Supabase Auth (HUBADOR) ─────────────────────────────────
+// Project URL + publishable/anon (o window.HUBADOR_* / localStorage / config.js)
+// Acepta sb_publishable_... (nuevo) o JWT eyJ... (legacy). Nunca pegues sb_secret_...
+const SUPABASE_URL = (typeof localStorage !== 'undefined' && localStorage.getItem('hubadorSupabaseUrl'))
+  || (typeof window !== 'undefined' && window.HUBADOR_SUPABASE_URL)
+  || 'https://qthznhtzzgmaekiggypd.supabase.co';
+const SUPABASE_ANON = (typeof localStorage !== 'undefined' && localStorage.getItem('hubadorSupabaseAnon'))
+  || (typeof window !== 'undefined' && window.HUBADOR_SUPABASE_ANON)
+  || 'sb_publishable_x6SHXYAsVf34EsknTs7rcQ_CoIc-5Mm';
+
+function isSupabaseConfigured() {
+  const u = String(SUPABASE_URL || '').trim();
+  const k = String(SUPABASE_ANON || '').trim();
+  if (!u || !k) return false;
+  if (/PEGAR_/i.test(u) || /PEGAR_/i.test(k)) return false;
+  if (!/^https:\/\//i.test(u)) return false;
+  // Reject secret / service_role keys (never in frontend)
+  if (/^sb_secret_/i.test(k) || /service_role/i.test(k)) return false;
+  return true;
+}
+
+const SUPABASE_OK = isSupabaseConfigured();
+let sb = null;
+if (SUPABASE_OK && typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
+  try {
+    sb = window.supabase.createClient(String(SUPABASE_URL).trim(), String(SUPABASE_ANON).trim());
+  } catch (e) {
+    console.warn('[HUBADOR] Supabase init falló', e);
+    sb = null;
+  }
+}
+
+function hubadorConnectSupabaseDev() {
+  const url = window.prompt('Supabase Project URL', localStorage.getItem('hubadorSupabaseUrl') || String(SUPABASE_URL || '').replace(/PEGAR_.*/, '') || 'https://xxxx.supabase.co');
+  if (url == null) return;
+  const anon = window.prompt('Supabase anon (public) key', localStorage.getItem('hubadorSupabaseAnon') || '');
+  if (anon == null) return;
+  localStorage.setItem('hubadorSupabaseUrl', url.trim());
+  localStorage.setItem('hubadorSupabaseAnon', anon.trim());
+  window.alert('Guardado en este navegador. Recargá la página.');
+  location.reload();
+}
+
+function profileFromRow(row, authUser) {
+  if (!row && !authUser) return null;
+  const meta = (authUser && authUser.user_metadata) || {};
+  const email = (row && row.email) || (authUser && authUser.email) || '';
+  const fallbackName = email ? email.split('@')[0] : 'Vecino';
+  return {
+    id: (row && row.id) || (authUser && authUser.id) || null,
+    email,
+    nombre: (row && row.nombre) || meta.nombre || fallbackName,
+    barrio: (row && row.barrio) || meta.barrio || '',
+    tel: (row && row.tel) || meta.tel || '',
+    role: (row && row.role) || meta.role || 'user',
+  };
+}
+
+async function fetchProfile(userId) {
+  if (!sb || !userId) return null;
+  const { data, error } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
+  if (error) { console.warn('[HUBADOR] profile', error.message || error); return null; }
+  return data;
+}
+
+async function upsertProfile(userId, fields) {
+  if (!sb || !userId) return null;
+  const row = { id: userId, ...fields, updated_at: new Date().toISOString() };
+  const { data, error } = await sb.from('profiles').upsert(row, { onConflict: 'id' }).select().maybeSingle();
+  if (error) { console.warn('[HUBADOR] upsert profile', error.message || error); return null; }
+  return data;
+}
+
+async function resolveUserFromSession(session) {
+  if (!session || !session.user) return null;
+  const authUser = session.user;
+  const row = await fetchProfile(authUser.id);
+  return profileFromRow(row, authUser);
+}
+
+
 // ⏱ Cronómetro de urgencia — deadline persistente por producto (48–72h)
 function getDeadline(key, hours) {
   const storeKey = 'conlat_deadline_' + key;
@@ -2314,15 +2403,33 @@ function MobilePedidos() {
 function MobileLogin() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { login } = React.useContext(SelectionContext);
+  const { login, showToast } = React.useContext(SelectionContext);
   const [email, setEmail] = React.useState('');
   const [pass, setPass] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
   const valid = /\S+@\S+\.\S+/.test(email) && pass.length >= 4;
-  const doLogin = () => {
-    if (!valid) return;
-    const nombre = email.split('@')[0].split(/[._]/)[0].replace(/^./, (c) => c.toUpperCase());
-    login({ nombre, email, barrio: 'Palermo' });
-    navigate('home');
+  const doLogin = async () => {
+    if (!valid || busy) return;
+    setBusy(true);
+    try {
+      if (sb) {
+        const { data, error } = await sb.auth.signInWithPassword({ email: email.trim(), password: pass });
+        if (error) { showToast(error.message || 'Error al ingresar'); return; }
+        const u = await resolveUserFromSession(data.session);
+        login(u || { nombre: email.split('@')[0], email: email.trim(), barrio: '' });
+        showToast('Sesión iniciada');
+        navigate('home');
+      } else {
+        const nombre = email.split('@')[0].split(/[._]/)[0].replace(/^./, (c) => c.toUpperCase());
+        login({ nombre, email, barrio: 'Palermo' });
+        showToast('Modo demo — configurá Supabase');
+        navigate('home');
+      }
+    } catch (e) {
+      showToast((e && e.message) || 'Error al ingresar');
+    } finally {
+      setBusy(false);
+    }
   };
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', display: 'grid', placeItems: 'center', padding: '40px 24px', WebkitFontSmoothing: 'antialiased' }}>
@@ -2330,27 +2437,28 @@ function MobileLogin() {
         <div style={{ width: 48, height: 48, background: primary, borderRadius: 12, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 22, margin: '0 auto 16px' }}>C</div>
         <div style={{ textAlign: 'center', fontWeight: 800, fontSize: 20, marginBottom: 4 }}>Bienvenido</div>
         <div style={{ textAlign: 'center', fontSize: 13.5, color: '#888', marginBottom: 24 }}>Ingresá a tu cuenta de HUBADOR</div>
+        {!sb && <div style={{ fontSize: 11.5, color: '#854d0e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 10px', marginBottom: 14 }}>Modo demo — configurá Supabase (ver LEEME / SUPABASE.md)</div>}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
             <label style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 6 }}>Email</label>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" style={{ width: '100%', height: 42, border: '1px solid #e2e4e8', borderRadius: 9, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" autoComplete="email" style={{ width: '100%', height: 42, border: '1px solid #e2e4e8', borderRadius: 9, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
           </div>
           <div>
             <label style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 6 }}>Contraseña</label>
-            <input value={pass} onChange={(e) => setPass(e.target.value)} type="password" placeholder="••••••••" style={{ width: '100%', height: 42, border: '1px solid #e2e4e8', borderRadius: 9, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+            <input value={pass} onChange={(e) => setPass(e.target.value)} type="password" placeholder="••••••••" autoComplete="current-password" style={{ width: '100%', height: 42, border: '1px solid #e2e4e8', borderRadius: 9, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
           </div>
           <div style={{ textAlign: 'right', fontSize: 12, color: primary, fontWeight: 500, cursor: 'pointer', marginTop: -4 }}>¿Olvidaste tu contraseña?</div>
-          <button onClick={doLogin} disabled={!valid} style={{ width: '100%', background: valid ? primary : '#d4d6da', color: '#fff', border: 'none', borderRadius: 9, padding: '12px', fontWeight: 600, fontSize: 15, fontFamily: 'inherit', cursor: valid ? 'pointer' : 'not-allowed', marginTop: 4 }}>Ingresar</button>
+          <button onClick={doLogin} disabled={!valid || busy} style={{ width: '100%', background: valid && !busy ? primary : '#d4d6da', color: '#fff', border: 'none', borderRadius: 9, padding: '12px', fontWeight: 600, fontSize: 15, fontFamily: 'inherit', cursor: valid && !busy ? 'pointer' : 'not-allowed', marginTop: 4 }}>{busy ? 'Ingresando…' : 'Ingresar'}</button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 16px', color: '#bbb', fontSize: 11.5 }}>
           <div style={{ flex: 1, height: 1, background: '#eee' }} />O CONTINUAR CON<div style={{ flex: 1, height: 1, background: '#eee' }} />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <button style={{ background: '#fff', border: '1px solid #e2e4e8', borderRadius: 9, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <button type="button" style={{ background: '#fff', border: '1px solid #e2e4e8', borderRadius: 9, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
             Google
           </button>
-          <button style={{ background: '#fff', border: '1px solid #e2e4e8', borderRadius: 9, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <button type="button" style={{ background: '#fff', border: '1px solid #e2e4e8', borderRadius: 9, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><path d="M17.05 20.28c-.98.95-2.05.86-3.08.41-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.41C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" /></svg>
             Apple
           </button>
@@ -2366,13 +2474,50 @@ function MobileLogin() {
 function MobileSignup() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { login } = React.useContext(SelectionContext);
+  const { login, showToast } = React.useContext(SelectionContext);
   const [step, setStep] = React.useState(1);
+  const [busy, setBusy] = React.useState(false);
   const [form, setForm] = React.useState({ nombre: '', email: '', pass: '', pass2: '', barrio: '', tel: '', acepto: false });
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const finish = () => {
-    login({ nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel });
-    navigate('home');
+  const finish = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (sb) {
+        const { data, error } = await sb.auth.signUp({
+          email: form.email.trim(),
+          password: form.pass,
+          options: { data: { nombre: form.nombre.trim(), barrio: form.barrio, tel: form.tel || '' } },
+        });
+        if (error) { showToast(error.message || 'Error al registrarse'); return; }
+        const userId = data.user && data.user.id;
+        if (userId) {
+          await upsertProfile(userId, {
+            email: form.email.trim(),
+            nombre: form.nombre.trim(),
+            barrio: form.barrio,
+            tel: form.tel || null,
+          });
+        }
+        if (data.session) {
+          const u = await resolveUserFromSession(data.session);
+          login(u || { nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel });
+          showToast('Cuenta creada');
+          navigate('home');
+        } else {
+          showToast('Revisá tu email para confirmar la cuenta');
+          navigate('login');
+        }
+      } else {
+        login({ nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel });
+        showToast('Modo demo — configurá Supabase');
+        navigate('home');
+      }
+    } catch (e) {
+      showToast((e && e.message) || 'Error al registrarse');
+    } finally {
+      setBusy(false);
+    }
   };
   const inp = { width: '100%', height: 42, border: '1px solid #e2e4e8', borderRadius: 9, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, outline: 'none', boxSizing: 'border-box', background: '#fff' };
   const lab = { fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 6 };
@@ -2399,19 +2544,20 @@ function MobileSignup() {
         <>
             <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px' }}>Tus datos</h1>
             <p style={{ fontSize: 13.5, color: '#888', margin: '0 0 22px' }}>Vamos a crear tu cuenta de HUBADOR para que puedas sumarte a grupos de compra cerca tuyo.</p>
+            {!sb && <div style={{ fontSize: 11.5, color: '#854d0e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 10px', marginBottom: 14 }}>Modo demo — sin Supabase las cuentas no se guardan en la nube.</div>}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
                 <label style={lab}>Nombre completo</label>
-                <input value={form.nombre} onChange={(e) => upd('nombre', e.target.value)} placeholder="María González" style={inp} />
+                <input value={form.nombre} onChange={(e) => upd('nombre', e.target.value)} placeholder="María González" autoComplete="name" style={inp} />
               </div>
               <div>
                 <label style={lab}>Email</label>
-                <input value={form.email} onChange={(e) => upd('email', e.target.value)} type="email" placeholder="tu@email.com" style={inp} />
+                <input value={form.email} onChange={(e) => upd('email', e.target.value)} type="email" placeholder="tu@email.com" autoComplete="email" style={inp} />
               </div>
               <div>
                 <label style={lab}>Contraseña</label>
-                <input value={form.pass} onChange={(e) => upd('pass', e.target.value)} type="password" placeholder="Mínimo 6 caracteres" style={inp} />
+                <input value={form.pass} onChange={(e) => upd('pass', e.target.value)} type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" style={inp} />
                 {form.pass &&
               <div style={{ fontSize: 11.5, marginTop: 5, color: passOk ? '#15803d' : '#b45309' }}>
                     {passOk ? '✓ Contraseña segura' : `Faltan ${6 - form.pass.length} caracteres`}
@@ -2420,7 +2566,7 @@ function MobileSignup() {
               </div>
               <div>
                 <label style={lab}>Repetir contraseña</label>
-                <input value={form.pass2} onChange={(e) => upd('pass2', e.target.value)} type="password" placeholder="••••••••" style={inp} />
+                <input value={form.pass2} onChange={(e) => upd('pass2', e.target.value)} type="password" placeholder="••••••••" autoComplete="new-password" style={inp} />
                 {form.pass2 &&
               <div style={{ fontSize: 11.5, marginTop: 5, color: passMatch ? '#15803d' : '#dc2626' }}>
                     {passMatch ? '✓ Coinciden' : '✗ Las contraseñas no coinciden'}
@@ -2467,7 +2613,7 @@ function MobileSignup() {
               </label>
             </div>
 
-            <button onClick={() => step2Ok && finish()} disabled={!step2Ok} style={{ width: '100%', background: step2Ok ? primary : '#d4d6da', color: '#fff', border: 'none', borderRadius: 9, padding: '13px', fontWeight: 700, fontSize: 15, fontFamily: 'inherit', cursor: step2Ok ? 'pointer' : 'not-allowed', marginTop: 22 }}>Crear cuenta</button>
+            <button onClick={() => step2Ok && finish()} disabled={!step2Ok || busy} style={{ width: '100%', background: step2Ok && !busy ? primary : '#d4d6da', color: '#fff', border: 'none', borderRadius: 9, padding: '13px', fontWeight: 700, fontSize: 15, fontFamily: 'inherit', cursor: step2Ok && !busy ? 'pointer' : 'not-allowed', marginTop: 22 }}>{busy ? 'Creando…' : 'Crear cuenta'}</button>
 
             <div style={{ textAlign: 'center', fontSize: 12, color: '#aaa', marginTop: 14 }}>Al crear la cuenta vas a recibir un email de verificación.</div>
           </>
@@ -2511,6 +2657,28 @@ function AdminShell({ active, children }) {
 
 function MobileAdmin() {
   const primary = 'oklch(0.55 0.15 165)';
+  const { user, showToast } = React.useContext(SelectionContext);
+  const [profiles, setProfiles] = React.useState([]);
+  const [usersMsg, setUsersMsg] = React.useState('');
+  React.useEffect(() => {
+    if (!sb) {
+      setUsersMsg('Supabase no configurado — listado demo abajo.');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await sb.from('profiles').select('id,email,nombre,barrio,role,created_at').order('created_at', { ascending: false }).limit(40);
+      if (cancelled) return;
+      if (error) {
+        setUsersMsg('No se pudieron listar usuarios (hace falta role=admin o política RLS). Ver SUPABASE.md.');
+        setProfiles([]);
+      } else {
+        setProfiles(data || []);
+        setUsersMsg((data && data.length) ? '' : 'Todavía no hay perfiles en la tabla.');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user && user.id]);
   return (
     <AdminShell active="admin">
       <div style={{ padding: 16 }}>
@@ -2524,7 +2692,22 @@ function MobileAdmin() {
             </div>
           )}
         </div>
-        <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>Pedidos recientes</div>
+        <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>Usuarios registrados</div>
+        <div style={{ fontSize: 11.5, color: '#888', marginBottom: 10 }}>Presencia en vivo / “quién está online” viene después. Por ahora: perfiles de Supabase.</div>
+        {usersMsg && <div style={{ fontSize: 12, color: '#854d0e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 10px', marginBottom: 10 }}>{usersMsg}</div>}
+        {(profiles.length ? profiles : [
+          { id: 'demo1', nombre: 'María G.', email: 'maria@demo', barrio: 'Palermo', role: 'user' },
+          { id: 'demo2', nombre: 'Carlos R.', email: 'carlos@demo', barrio: 'Belgrano', role: 'user' },
+        ]).map((p) =>
+        <div key={p.id} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 10, padding: '12px 14px', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>{p.nombre || '—'}</div>
+              <div style={{ fontSize: 12, color: '#888' }}>{p.email || '—'} · {p.barrio || 'sin barrio'}</div>
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: p.role === 'admin' ? primary : '#888' }}>{p.role || 'user'}</div>
+          </div>
+        )}
+        <div style={{ fontWeight: 700, fontSize: 14, margin: '16px 0 10px' }}>Pedidos recientes</div>
         {[
         { id: '#1042', name: 'María G.', product: 'Tomate', amount: '$4.548', status: 'Pagado' },
         { id: '#1041', name: 'Carlos R.', product: 'Banana', amount: '$1.755', status: 'Entregado' },
@@ -4062,20 +4245,40 @@ function WebLogin() {
   const { login, showToast } = React.useContext(SelectionContext);
   const [email, setEmail] = React.useState('');
   const [pass, setPass] = React.useState('');
-  const submit = (e) => {
+  const [busy, setBusy] = React.useState(false);
+  const submit = async (e) => {
     e.preventDefault();
-    login({ nombre: email.split('@')[0] || 'Vecino', email: email || 'hola@hubador.app', barrio: 'Palermo' });
-    showToast('Sesión iniciada');
-    navigate('home');
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (sb) {
+        if (!email.trim() || pass.length < 4) { showToast('Completá email y contraseña'); return; }
+        const { data, error } = await sb.auth.signInWithPassword({ email: email.trim(), password: pass });
+        if (error) { showToast(error.message || 'Error al ingresar'); return; }
+        const u = await resolveUserFromSession(data.session);
+        login(u || { nombre: email.split('@')[0] || 'Vecino', email: email.trim(), barrio: '' });
+        showToast('Sesión iniciada');
+        navigate('home');
+      } else {
+        login({ nombre: email.split('@')[0] || 'Vecino', email: email || 'hola@hubador.app', barrio: 'Palermo' });
+        showToast('Modo demo — configurá Supabase');
+        navigate('home');
+      }
+    } catch (err) {
+      showToast((err && err.message) || 'Error al ingresar');
+    } finally {
+      setBusy(false);
+    }
   };
   return (
     <WebAuthCard title="Ingresar">
       <h1>Ingresá a HUBADOR</h1>
       <p>Comprá en grupo con tus vecinos.</p>
+      {!sb && <p style={{ fontSize: 12, color: '#854d0e' }}>Modo demo — configurá Supabase</p>}
       <form onSubmit={submit} className="web-form">
-        <label>Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" /></label>
-        <label>Contraseña<input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="••••••••" /></label>
-        <button className="web-btn" type="submit">Entrar</button>
+        <label>Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" autoComplete="email" /></label>
+        <label>Contraseña<input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="••••••••" autoComplete="current-password" /></label>
+        <button className="web-btn" type="submit" disabled={busy}>{busy ? 'Ingresando…' : 'Entrar'}</button>
       </form>
       <p className="web-auth-switch">¿No tenés cuenta? <button type="button" onClick={() => navigate('signup')}>Registrate</button></p>
     </WebAuthCard>
@@ -4088,21 +4291,60 @@ function WebSignup() {
   const [nombre, setNombre] = React.useState('');
   const [barrio, setBarrio] = React.useState('Palermo');
   const [email, setEmail] = React.useState('');
-  const submit = (e) => {
+  const [pass, setPass] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
+  const submit = async (e) => {
     e.preventDefault();
-    login({ nombre: nombre || 'Vecino', email: email || 'hola@hubador.app', barrio: barrio || 'Palermo' });
-    showToast('Cuenta creada');
-    navigate('home');
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (sb) {
+        if (!email.trim() || pass.length < 6) { showToast('Email y contraseña (mín. 6)'); return; }
+        const { data, error } = await sb.auth.signUp({
+          email: email.trim(),
+          password: pass,
+          options: { data: { nombre: (nombre || 'Vecino').trim(), barrio: barrio || 'Palermo' } },
+        });
+        if (error) { showToast(error.message || 'Error al registrarse'); return; }
+        const userId = data.user && data.user.id;
+        if (userId) {
+          await upsertProfile(userId, {
+            email: email.trim(),
+            nombre: (nombre || 'Vecino').trim(),
+            barrio: barrio || 'Palermo',
+          });
+        }
+        if (data.session) {
+          const u = await resolveUserFromSession(data.session);
+          login(u || { nombre: nombre || 'Vecino', email: email.trim(), barrio: barrio || 'Palermo' });
+          showToast('Cuenta creada');
+          navigate('home');
+        } else {
+          showToast('Revisá tu email para confirmar la cuenta');
+          navigate('login');
+        }
+      } else {
+        login({ nombre: nombre || 'Vecino', email: email || 'hola@hubador.app', barrio: barrio || 'Palermo' });
+        showToast('Modo demo — configurá Supabase');
+        navigate('home');
+      }
+    } catch (err) {
+      showToast((err && err.message) || 'Error al registrarse');
+    } finally {
+      setBusy(false);
+    }
   };
   return (
     <WebAuthCard title="Crear cuenta">
       <h1>Creá tu cuenta</h1>
       <p>Empezá a sumarte a grupos de tu barrio.</p>
+      {!sb && <p style={{ fontSize: 12, color: '#854d0e' }}>Modo demo — configurá Supabase</p>}
       <form onSubmit={submit} className="web-form">
-        <label>Nombre<input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="María" /></label>
+        <label>Nombre<input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="María" autoComplete="name" /></label>
         <label>Barrio<input value={barrio} onChange={(e) => setBarrio(e.target.value)} placeholder="Palermo" /></label>
-        <label>Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" /></label>
-        <button className="web-btn" type="submit">Crear cuenta</button>
+        <label>Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" autoComplete="email" /></label>
+        <label>Contraseña<input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Mínimo 6 caracteres" autoComplete="new-password" /></label>
+        <button className="web-btn" type="submit" disabled={busy}>{busy ? 'Creando…' : 'Crear cuenta'}</button>
       </form>
       <p className="web-auth-switch">¿Ya tenés cuenta? <button type="button" onClick={() => navigate('login')}>Ingresar</button></p>
     </WebAuthCard>
@@ -4585,9 +4827,60 @@ function App() {
   const [webSearch, setWebSearch] = useState('');
   const [toast, setToast] = useState(null);
   const [user, setUser] = useState(() => {try {return JSON.parse(localStorage.getItem('conlatUser') || 'null');} catch (e) {return null;}});
-  const login = (u) => {setUser(u);localStorage.setItem('conlatUser', JSON.stringify(u));};
-  const logout = () => {setUser(null);localStorage.removeItem('conlatUser');localStorage.removeItem('conlatCart');setCart([]);};
   const [cart, setCart] = useState(() => {try {return JSON.parse(localStorage.getItem('conlatCart') || '[]');} catch (e) {return [];}});
+  const applyUser = (u) => {
+    setUser(u);
+    try {
+      if (u) localStorage.setItem('conlatUser', JSON.stringify(u));
+      else localStorage.removeItem('conlatUser');
+    } catch (e) {}
+  };
+  const login = (u) => { applyUser(u); };
+  const logout = async () => {
+    if (sb) { try { await sb.auth.signOut(); } catch (e) {} }
+    applyUser(null);
+    try { localStorage.removeItem('conlatCart'); } catch (e) {}
+    setCart([]);
+  };
+  React.useEffect(() => {
+    if (!sb) {
+      const t = setTimeout(() => {
+        try {
+          if (!sessionStorage.getItem('hubadorDemoAuthToast')) {
+            sessionStorage.setItem('hubadorDemoAuthToast', '1');
+            setToast('Modo demo — configurá Supabase');
+            setTimeout(() => setToast(null), 2400);
+          }
+        } catch (e) {
+          setToast('Modo demo — configurá Supabase');
+          setTimeout(() => setToast(null), 2400);
+        }
+      }, 700);
+      return () => clearTimeout(t);
+    }
+    let unsub = () => {};
+    let alive = true;
+    (async () => {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (alive && session) {
+          const u = await resolveUserFromSession(session);
+          if (u) applyUser(u);
+        }
+      } catch (e) { console.warn('[HUBADOR] getSession', e); }
+      const { data } = sb.auth.onAuthStateChange(async (event, session) => {
+        if (!alive) return;
+        if (session) {
+          const u = await resolveUserFromSession(session);
+          if (u) applyUser(u);
+        } else if (event === 'SIGNED_OUT') {
+          applyUser(null);
+        }
+      });
+      unsub = () => { try { data.subscription.unsubscribe(); } catch (e) {} };
+    })();
+    return () => { alive = false; unsub(); };
+  }, []);
   const [progressTick, setProgressTick] = useState(0);
   const persistCart = (next) => {setCart(next);localStorage.setItem('conlatCart', JSON.stringify(next));};
   const bumpFilled = (name, qty) => {
@@ -4708,7 +5001,10 @@ function App() {
                   {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cartTotals(cart).items} ítems)</span>}
                 </div>
               </div>
-              {user && <button onClick={logout} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>Cerrar sesión</button>}
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button type="button" onClick={hubadorConnectSupabaseDev} style={{ background: 'transparent', border: '1px solid #3d6b64', color: 'oklch(0.75 0.12 165)', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>{sb ? 'Supabase ✓' : 'Conectar Supabase'}</button>
+              {user && <button onClick={logout} style={{ background: 'transparent', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>Cerrar sesión</button>}
+            </div>
             </div>
             <div className="screen-nav-groups">
               {[
@@ -4796,7 +5092,10 @@ function App() {
           <div className="brand">HUBADOR <span>Mobile</span></div>
           <div className="sub">Vista previa en iPhone 15 Pro · <a href="?both" style={{ color: 'oklch(0.75 0.12 165)' }}>Comparar Web + Mobile</a> {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cartTotals(cart).items} en formación)</span>}</div>
         </div>
-        {user && <button onClick={logout} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>Cerrar sesión</button>}
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button type="button" onClick={hubadorConnectSupabaseDev} style={{ background: 'transparent', border: '1px solid #3d6b64', color: 'oklch(0.75 0.12 165)', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>{sb ? 'Supabase ✓' : 'Conectar Supabase'}</button>
+              {user && <button onClick={logout} style={{ background: 'transparent', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>Cerrar sesión</button>}
+            </div>
       </div>
       <div className="screen-nav-groups">
         {[
