@@ -5,26 +5,28 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HUBADOR — Compra en equipo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d9488'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='800' font-size='18' fill='%23fff'%3EH%3C/text%3E%3C/svg%3E" />
-<!-- hubador-kg100-v1 20260807d cards-hard-fix -->
-<!-- HUBADOR_BUILD 20260807d -->
-<style id="hubador-card-fix-20260807d">
-/* Early critical card CSS — before Babel — high specificity for APP_MODE */
+<!-- hubador-kg100-v1 20260807e cards-img-attrs -->
+<!-- HUBADOR_BUILD 20260807e -->
+<style id="hubador-card-fix-20260807e">
+/* Early critical card CSS — height on IMG tag + wrap; do not rely on stylesheet alone */
+img { max-width: 100%; }
 html.app-mode .web-prod-card,
 .web-grid-products .web-prod-card,
 .web-prod-card {
   display: flex !important;
   flex-direction: column !important;
-  height: auto !important;
+  height: 100% !important;
   max-height: none !important;
   min-height: 0 !important;
-  overflow: visible !important;
-  align-self: start !important;
+  overflow: hidden !important;
+  align-self: stretch !important;
   background: #fff;
 }
 html.app-mode .web-prod-card .web-prod-img,
 html.app-mode .web-prod-img,
 .web-grid-products .web-prod-img,
-.web-prod-card .web-prod-img {
+.web-prod-card .web-prod-img,
+.web-prod-img {
   position: relative !important;
   height: 150px !important;
   max-height: 150px !important;
@@ -37,12 +39,14 @@ html.app-mode .web-prod-img,
 }
 html.app-mode .web-prod-img img,
 html.app-mode .web-prod-card .web-prod-img img,
-.web-prod-img img {
+.web-prod-img img,
+.web-prod-img > img {
   height: 150px !important;
-  width: 100% !important;
   max-height: 150px !important;
+  width: 100% !important;
   object-fit: cover !important;
   display: block !important;
+  flex-shrink: 0 !important;
 }
 html.app-mode .web-prod-body,
 .web-prod-card .web-prod-body {
@@ -733,10 +737,11 @@ html.app-mode .web-root { min-height: 100vh; }
 }
 .web-hero-inner {
   /* Hero más ancho que el grid de productos: se siente full-bleed en monitores grandes */
-  max-width: min(1680px, calc(100% - 48px)); margin: 0 auto; padding: 20px 28px 18px;
-  display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; align-items: stretch;
-  /* Hero un poco más bajo: deja 1 fila de cards con fecha límite + Unirme arriba del fold */
-  min-height: calc(100vh - 72px - 390px);
+  max-width: min(1680px, calc(100% - 48px)); margin: 0 auto; padding: 12px 28px 10px;
+  display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; align-items: stretch;
+  /* u-v4: hero compacto para que la 1ª fila de cards (foto+Unirme) quepa arriba del fold */
+  min-height: 0;
+  max-height: none;
 }
 .web-pill {
   display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; width: fit-content;
@@ -744,12 +749,12 @@ html.app-mode .web-root { min-height: 100vh; }
   padding: 5px 11px; font-size: 12px; font-weight: 700; margin: 0;
 }
 .web-hero-copy {
-  display: flex; flex-direction: column; min-width: 0; min-height: 250px; max-height: none;
+  display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 220px;
 }
 .web-hero-panel {
-  flex: 1; display: grid; grid-template-columns: minmax(150px, .9fr) minmax(220px, 1.2fr);
+  flex: 1; display: grid; grid-template-columns: minmax(120px, .85fr) minmax(200px, 1.25fr);
   align-items: stretch; gap: 0; padding: 0; overflow: hidden;
-  border-radius: 18px; min-height: 250px; max-height: none; height: 100%;
+  border-radius: 16px; min-height: 0; max-height: 210px; height: 210px;
   background:
     linear-gradient(165deg, rgba(255,255,255,.92) 0%, rgba(236,253,245,.78) 55%, rgba(255,255,255,.88) 100%);
   border: 1px solid rgba(167, 198, 182, .55);
@@ -760,7 +765,7 @@ html.app-mode .web-root { min-height: 100vh; }
   -webkit-backdrop-filter: blur(8px);
 }
 .web-hero-panel-media {
-  position: relative; min-height: 250px; height: 100%; max-height: none; background: #1a2e24;
+  position: relative; min-height: 0; height: 100%; max-height: 210px; background: #1a2e24;
 }
 .web-hero-panel-media img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -772,8 +777,9 @@ html.app-mode .web-root { min-height: 100vh; }
 }
 .web-hero-panel-copy {
   display: flex; flex-direction: column; justify-content: center;
-  gap: 12px; padding: 20px 22px 18px;
+  gap: 8px; padding: 12px 16px 12px;
   background: linear-gradient(165deg, rgba(255,255,255,.96) 0%, rgba(236,253,245,.92) 100%);
+  overflow: hidden;
 }
 .web-hero-head { display: flex; flex-direction: column; gap: 8px; }
 .web-hero-photo {
@@ -783,8 +789,8 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-hero-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .web-hero-art { min-width: 0; }
 .web-hero-offer {
-  position: relative; border-radius: 18px; overflow: hidden;
-  border: 1px solid #d7e5dc; min-height: 250px; height: 100%; max-height: none;
+  position: relative; border-radius: 16px; overflow: hidden;
+  border: 1px solid #d7e5dc; min-height: 0; height: 210px; max-height: 210px;
   background: #0b1f18;
   box-shadow: 0 16px 36px rgba(20,32,28,.12);
 }
@@ -837,12 +843,14 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-pill-dark { background: #ecfdf5; color: #0f766e; }
 .web-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 1.6s infinite; }
 .web-hero h1 {
-  font-size: clamp(24px, 2.8vw, 32px); line-height: 1.15; letter-spacing: -0.035em;
+  font-size: clamp(20px, 2.2vw, 28px); line-height: 1.15; letter-spacing: -0.035em;
   font-weight: 900; margin: 0; max-width: 16ch;
 }
 .web-hero h1 em { font-style: normal; color: oklch(0.48 0.12 165); }
-.web-hero p { font-size: 14px; color: #4b564f; line-height: 1.45; max-width: 36ch; margin: 0; }
+.web-hero p { font-size: 13px; color: #4b564f; line-height: 1.4; max-width: 36ch; margin: 0; }
 .web-hero-cta { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 0; }
+/* u-v4: ocultar stats del hero para dejar cards con Unirme arriba del fold */
+.web-hero-panel-copy .web-stats { display: none !important; }
 .web-stats {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
   margin-top: 4px; border-radius: 14px; overflow: hidden;
@@ -1040,13 +1048,14 @@ html.app-mode .web-root { min-height: 100vh; }
 }
 @media (max-width: 900px) {
   .web-hero-inner { grid-template-columns: 1fr; }
-  .web-hero-copy { min-height: 0; }
-  .web-hero-panel { grid-template-columns: 1fr; }
-  .web-hero-panel-media { min-height: 150px; max-height: 170px; }
+  .web-hero-copy { min-height: 0; max-height: none; }
+  .web-hero-panel { grid-template-columns: 1fr; height: auto; max-height: none; }
+  .web-hero-panel-media { min-height: 120px; max-height: 140px; }
+  .web-hero-offer { height: 160px; max-height: 160px; }
   .web-hero-panel-media::after {
     background: linear-gradient(180deg, transparent 40%, rgba(255,255,255,.55) 100%);
   }
-  .web-hero-panel-copy { padding: 16px 18px 14px; }
+  .web-hero-panel-copy { padding: 12px 14px 12px; }
   .web-grid { grid-template-columns: repeat(2, 1fr); }
   .web-links { display: none; }
 }
@@ -1285,19 +1294,21 @@ html.app-mode .web-root { min-height: 100vh; }
   align-items: start;
 }
 .web-otros-grid .web-prod-card {
-  width: auto; min-width: 0; max-width: none; height: auto !important;
-  align-self: start; cursor: pointer;
+  width: auto; min-width: 0; max-width: none; height: 100% !important;
+  align-self: stretch; cursor: pointer;
   border-radius: 16px;
-  display: flex; flex-direction: column;
-  overflow: hidden;
+  display: flex !important; flex-direction: column !important;
+  overflow: hidden !important;
   background: #fff;
 }
 .web-otros-grid .web-prod-img {
-  aspect-ratio: 4 / 3; width: 100%; max-height: 200px;
-  flex: 0 0 auto; flex-shrink: 0; position: relative; overflow: hidden;
+  aspect-ratio: auto !important; width: 100%;
+  height: 150px !important; max-height: 150px !important; min-height: 150px !important;
+  flex: 0 0 150px !important; flex-shrink: 0; position: relative; overflow: hidden !important;
 }
 .web-otros-grid .web-prod-img img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
+  width: 100% !important; height: 150px !important; max-height: 150px !important;
+  object-fit: cover !important; display: block !important;
 }
 .web-otros-grid .web-prod-body {
   display: flex !important; flex-direction: column; visibility: visible !important;
@@ -1382,12 +1393,12 @@ html.app-mode .web-root { min-height: 100vh; }
 }
 
 
-/* CRITICAL card stack — never clip Unirme / countdown / progress */
-.web-grid-products { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important; gap: 14px !important; align-items: start !important; }
+/* CRITICAL card stack — img attrs + fixed 150px; Unirme siempre visible */
+.web-grid-products { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important; gap: 14px !important; align-items: stretch !important; }
 .web-prod-card {
   display: flex !important; flex-direction: column !important;
-  height: auto !important; max-height: none !important;
-  overflow: visible !important; align-self: start !important;
+  height: 100% !important; max-height: none !important;
+  overflow: hidden !important; align-self: stretch !important;
   background: #fff; border: 1px solid #e8eaec; border-radius: 14px;
 }
 .web-prod-img,
@@ -1398,9 +1409,12 @@ html.app-mode .web-root { min-height: 100vh; }
   flex: 0 0 150px !important; overflow: hidden !important; aspect-ratio: auto !important;
   border-radius: 14px 14px 0 0; background: #eef1ee;
 }
+.web-prod-img, .web-prod-img img {
+  height: 150px !important; max-height: 150px !important; overflow: hidden !important;
+}
 .web-prod-img img {
-  width: 100% !important; height: 100% !important; max-height: 150px !important;
-  object-fit: cover !important; display: block !important;
+  width: 100% !important; height: 150px !important; max-height: 150px !important;
+  object-fit: cover !important; display: block !important; flex-shrink: 0 !important;
 }
 .web-prod-body {
   display: flex !important; flex-direction: column !important; gap: 3px;
@@ -3865,7 +3879,7 @@ function WebHome() {
 
       <div className="web-toolbar">
         <div className="web-sort-row">
-          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'} <small style={{ opacity: 0.45, fontWeight: 600 }}>· u-v3</small></span>
+          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'} <small style={{ opacity: 0.45, fontWeight: 600 }}>· u-v4</small></span>
           <div className="web-toolbar-actions">
             <button type="button" className={'web-filter-toggle' + (showFilters || cat !== 'todos' ? ' activo' : '')} onClick={() => setShowFilters((v) => !v)}>
               Filtrar{cat !== 'todos' ? ` · ${categories.find((c) => c.id === cat)?.label || ''}` : ''}
@@ -3903,13 +3917,14 @@ function WebHome() {
               const live = groupProgressView(p.name);
               const miss = live.missing, almost = live.almost;
               return (
-                <article key={p.name} className="web-prod-card" onClick={() => openProduct(p)} style={{ display: 'flex', flexDirection: 'column', overflow: 'visible', height: 'auto', maxHeight: 'none' }}>
-                  <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative' }}>
-                    <img src={p.img} alt={p.name} style={{ width: '100%', height: 150, maxHeight: 150, objectFit: 'cover', display: 'block' }} />
+                <article key={p.name} className="web-prod-card" onClick={() => openProduct(p)} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+                  <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative', width: '100%' }}>
+                    <img src={p.img} alt={p.name} width={400} height={150}
+                      style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
                     <span className="web-badge">↓ {p.disc}%</span>
                     <span className={'web-check' + (p.precioActualizado ? '' : ' web-check-red')}>✓</span>
                   </div>
-                  <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px' }}>
+                  <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px', minHeight: 0 }}>
                     <h3>{p.name}</h3>
                     <div className="web-prod-prices">
                       <div className="web-price-now">
@@ -3923,13 +3938,13 @@ function WebHome() {
                         </div>
                       )}
                     </div>
-                    <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
-                    <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible' }}>
+                    <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', flexShrink: 0 }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
+                    <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible', flexShrink: 0 }}>
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{GOAL_KG} kg
                       </span>
                     </div>
-                    <div className="web-countdown-wrap" style={{ display: 'block' }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
+                    <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
                       type="button"
                       className="web-join-card"
@@ -4238,13 +4253,14 @@ function WebGrupoDetalle() {
               const live = groupProgressView(p.name);
               const miss = live.missing, almost = live.almost;
               return (
-                <article key={p.name} className="web-prod-card" onClick={() => openOther(p)} style={{ display: 'flex', flexDirection: 'column', overflow: 'visible', height: 'auto', maxHeight: 'none' }}>
-                  <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative' }}>
-                    <img src={p.img} alt={p.name} style={{ width: '100%', height: 150, maxHeight: 150, objectFit: 'cover', display: 'block' }} />
+                <article key={p.name} className="web-prod-card" onClick={() => openOther(p)} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+                  <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative', width: '100%' }}>
+                    <img src={p.img} alt={p.name} width={400} height={150}
+                      style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
                     <span className="web-badge">↓ {p.disc}%</span>
                     <span className={'web-check' + (p.precioActualizado ? '' : ' web-check-red')}>✓</span>
                   </div>
-                  <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px' }}>
+                  <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px', minHeight: 0 }}>
                     <h3>{p.name}</h3>
                     <div className="web-prod-prices">
                       <div className="web-price-now">
@@ -4258,13 +4274,13 @@ function WebGrupoDetalle() {
                         </div>
                       )}
                     </div>
-                    <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
-                    <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible' }}>
+                    <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', flexShrink: 0 }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
+                    <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible', flexShrink: 0 }}>
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{GOAL_KG} kg
                       </span>
                     </div>
-                    <div className="web-countdown-wrap" style={{ display: 'block' }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
+                    <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
                       type="button"
                       className="web-join-card"
