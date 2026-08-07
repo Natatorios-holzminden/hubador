@@ -5,7 +5,98 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HUBADOR — Compra en equipo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d9488'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='800' font-size='18' fill='%23fff'%3EH%3C/text%3E%3C/svg%3E" />
-<!-- hubador-kg100-v1 20260807c cards-full-css-head -->
+<!-- hubador-kg100-v1 20260807d cards-hard-fix -->
+<!-- HUBADOR_BUILD 20260807d -->
+<style id="hubador-card-fix-20260807d">
+/* Early critical card CSS — before Babel — high specificity for APP_MODE */
+html.app-mode .web-prod-card,
+.web-grid-products .web-prod-card,
+.web-prod-card {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  align-self: start !important;
+  background: #fff;
+}
+html.app-mode .web-prod-card .web-prod-img,
+html.app-mode .web-prod-img,
+.web-grid-products .web-prod-img,
+.web-prod-card .web-prod-img {
+  position: relative !important;
+  height: 150px !important;
+  max-height: 150px !important;
+  min-height: 150px !important;
+  width: 100% !important;
+  flex: 0 0 150px !important;
+  overflow: hidden !important;
+  aspect-ratio: auto !important;
+  background: #eef1ee;
+}
+html.app-mode .web-prod-img img,
+html.app-mode .web-prod-card .web-prod-img img,
+.web-prod-img img {
+  height: 150px !important;
+  width: 100% !important;
+  max-height: 150px !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+html.app-mode .web-prod-body,
+.web-prod-card .web-prod-body {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 8px 10px 10px !important;
+  background: #fff !important;
+}
+html.app-mode .web-prod-card .web-progress,
+.web-prod-card .web-progress {
+  display: block !important;
+  visibility: visible !important;
+  height: 8px !important;
+  margin: 6px 0 3px !important;
+  flex-shrink: 0 !important;
+}
+html.app-mode .web-prod-card .web-prod-meta,
+.web-prod-card .web-prod-meta {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  flex-shrink: 0 !important;
+}
+html.app-mode .web-prod-card .web-countdown-wrap,
+.web-prod-card .web-countdown-wrap {
+  display: block !important;
+  visibility: visible !important;
+  flex-shrink: 0 !important;
+}
+html.app-mode .web-prod-card .web-join-card,
+html.app-mode .web-grid-products .web-join-card,
+.web-prod-card .web-join-card,
+.web-grid-products .web-join-card {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  flex: 0 0 auto !important;
+  min-height: 38px !important;
+  width: 100% !important;
+  margin-top: 6px !important;
+  background: #0d9488 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  overflow: visible !important;
+}
+</style>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
@@ -3774,7 +3865,7 @@ function WebHome() {
 
       <div className="web-toolbar">
         <div className="web-sort-row">
-          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'} <small style={{ opacity: 0.45, fontWeight: 600 }}>· u-v2</small></span>
+          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'} <small style={{ opacity: 0.45, fontWeight: 600 }}>· u-v3</small></span>
           <div className="web-toolbar-actions">
             <button type="button" className={'web-filter-toggle' + (showFilters || cat !== 'todos' ? ' activo' : '')} onClick={() => setShowFilters((v) => !v)}>
               Filtrar{cat !== 'todos' ? ` · ${categories.find((c) => c.id === cat)?.label || ''}` : ''}
@@ -3812,13 +3903,13 @@ function WebHome() {
               const live = groupProgressView(p.name);
               const miss = live.missing, almost = live.almost;
               return (
-                <article key={p.name} className="web-prod-card" onClick={() => openProduct(p)}>
-                  <div className="web-prod-img">
-                    <img src={p.img} alt={p.name} />
+                <article key={p.name} className="web-prod-card" onClick={() => openProduct(p)} style={{ display: 'flex', flexDirection: 'column', overflow: 'visible', height: 'auto', maxHeight: 'none' }}>
+                  <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative' }}>
+                    <img src={p.img} alt={p.name} style={{ width: '100%', height: 150, maxHeight: 150, objectFit: 'cover', display: 'block' }} />
                     <span className="web-badge">↓ {p.disc}%</span>
                     <span className={'web-check' + (p.precioActualizado ? '' : ' web-check-red')}>✓</span>
                   </div>
-                  <div className="web-prod-body">
+                  <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px' }}>
                     <h3>{p.name}</h3>
                     <div className="web-prod-prices">
                       <div className="web-price-now">
@@ -3832,13 +3923,13 @@ function WebHome() {
                         </div>
                       )}
                     </div>
-                    <div className="web-progress"><i style={{ width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
-                    <div className="web-prod-meta">
+                    <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
+                    <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible' }}>
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{GOAL_KG} kg
                       </span>
                     </div>
-                    <div className="web-countdown-wrap"><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
+                    <div className="web-countdown-wrap" style={{ display: 'block' }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
                       type="button"
                       className="web-join-card"
@@ -4147,13 +4238,13 @@ function WebGrupoDetalle() {
               const live = groupProgressView(p.name);
               const miss = live.missing, almost = live.almost;
               return (
-                <article key={p.name} className="web-prod-card" onClick={() => openOther(p)}>
-                  <div className="web-prod-img">
-                    <img src={p.img} alt={p.name} />
+                <article key={p.name} className="web-prod-card" onClick={() => openOther(p)} style={{ display: 'flex', flexDirection: 'column', overflow: 'visible', height: 'auto', maxHeight: 'none' }}>
+                  <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative' }}>
+                    <img src={p.img} alt={p.name} style={{ width: '100%', height: 150, maxHeight: 150, objectFit: 'cover', display: 'block' }} />
                     <span className="web-badge">↓ {p.disc}%</span>
                     <span className={'web-check' + (p.precioActualizado ? '' : ' web-check-red')}>✓</span>
                   </div>
-                  <div className="web-prod-body">
+                  <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px' }}>
                     <h3>{p.name}</h3>
                     <div className="web-prod-prices">
                       <div className="web-price-now">
@@ -4167,13 +4258,13 @@ function WebGrupoDetalle() {
                         </div>
                       )}
                     </div>
-                    <div className="web-progress"><i style={{ width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
-                    <div className="web-prod-meta">
+                    <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
+                    <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible' }}>
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{GOAL_KG} kg
                       </span>
                     </div>
-                    <div className="web-countdown-wrap"><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
+                    <div className="web-countdown-wrap" style={{ display: 'block' }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
                       type="button"
                       className="web-join-card"

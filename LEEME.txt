@@ -1,36 +1,43 @@
-HUBADOR — pack liviano para publicar
-====================================
+HUBADOR — pack para subir a hubador.com
+=======================================
+Build: HUBADOR_BUILD 20260807d  ·  marcador visible en la UI: · u-v3
 
 Contenido
 ---------
 - index.html  → sitio completo (web + mobile)
-- img/        → solo imágenes usadas por index.html
+- img/        → imágenes usadas por index.html
 
-Subir a GitHub Pages
+IMPORTANTE — NO alcanza con subir a rfbconstrucciones
+-----------------------------------------------------
+rfbconstrucciones.com.ar/vconlat/ es OTRO hosting (funciona).
+hubador.com apunta a GitHub Pages (u otro host del dominio).
+Hay que subir ESTE pack al repo/host que sirva hubador.com.
+
+Pasos (GitHub Pages)
 --------------------
-1. Creá un repo (ej. hubador) o usá uno existente.
-2. Subí SOLO el contenido de esta carpeta (index.html + img/).
-   En Settings → Pages → Source: Deploy from a branch → main / (root).
-3. La URL quedará tipo: https://TU-USUARIO.github.io/hubador/
+1. Abrí el repo que publica hubador.com
+   (ej. natatorios-holzminden/hubador).
+2. Borrá el index.html viejo del repo (y la carpeta img vieja si existe).
+3. Subí TODO el contenido de esta carpeta: index.html + img/
+   (arrastrá los archivos, NO otra carpeta adentro).
+4. Settings → Pages → Deploy from a branch → main / (root).
+5. Esperá 1 minuto a que despliegue.
+6. En el teléfono/PC: Ctrl+Shift+R (o borrar caché del sitio).
 
-Rutas de imágenes (importante)
-------------------------------
+Cómo verificar que cargó ESTE build
+-----------------------------------
+- En “Productos / listado” debe verse el texto · u-v3 (no u-v2).
+- Ver código fuente (Ctrl+U) y buscar: HUBADOR_BUILD 20260807d
+- Cada card debe mostrar: precio + barra + “Faltan X kg” + timer + botón Unirme al grupo
+
+Rutas de imágenes
+-----------------
 Usá rutas RELATIVAS, sin barra al inicio:
   BIEN:  img/tomate.jpg
   MAL:   /img/tomate.jpg
 
-Con la barra inicial GitHub Pages busca en la raíz del dominio
-y las fotos fallan si el sitio está en un subdirectorio.
-
-Dominio hubador.com
--------------------
-- Un solo hogar: apuntá hubador.com (DNS CNAME o A según GitHub)
-  a este mismo GitHub Pages.
-- Dejá cualquier carpeta/demo "rfb" solo como borrador; no la uses
-  como sitio principal del dominio.
-
 Vista local
 -----------
-Doble clic en index.html, o servir la carpeta:
+Doble clic en index.html, o:
   python -m http.server 8765
-luego abrí http://localhost:8765/
+luego http://localhost:8765/
