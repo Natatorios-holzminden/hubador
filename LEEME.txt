@@ -1,12 +1,36 @@
-﻿HUBADOR — pack para revisar / subir
+HUBADOR — pack liviano para publicar
+====================================
 
-Carpeta: conlat-SUBIR-WEB
-Abrir: index.html (doble clic) o http://localhost:8765/ (sirve conlat-ACTUAL)
+Contenido
+---------
+- index.html  → sitio completo (web + mobile)
+- img/        → solo imágenes usadas por index.html
 
-Escritorio (>=900px): sitio WEB
-Celular: app MOBILE
-Forzar web:    ?web=1
-Forzar mobile: ?mobile=1
-Preview menú:  ?dev=1
+Subir a GitHub Pages
+--------------------
+1. Creá un repo (ej. hubador) o usá uno existente.
+2. Subí SOLO el contenido de esta carpeta (index.html + img/).
+   En Settings → Pages → Source: Deploy from a branch → main / (root).
+3. La URL quedará tipo: https://TU-USUARIO.github.io/hubador/
 
-Copia de trabajo (edición): conlat-ACTUAL
+Rutas de imágenes (importante)
+------------------------------
+Usá rutas RELATIVAS, sin barra al inicio:
+  BIEN:  img/tomate.jpg
+  MAL:   /img/tomate.jpg
+
+Con la barra inicial GitHub Pages busca en la raíz del dominio
+y las fotos fallan si el sitio está en un subdirectorio.
+
+Dominio hubador.com
+-------------------
+- Un solo hogar: apuntá hubador.com (DNS CNAME o A según GitHub)
+  a este mismo GitHub Pages.
+- Dejá cualquier carpeta/demo "rfb" solo como borrador; no la uses
+  como sitio principal del dominio.
+
+Vista local
+-----------
+Doble clic en index.html, o servir la carpeta:
+  python -m http.server 8765
+luego abrí http://localhost:8765/

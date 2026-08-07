@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HUBADOR — Marketplace</title>
-<!-- hubador-unirme-v2 20260731 -->
+<!-- hubador-kg100-v1 20260803 -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
@@ -465,6 +465,57 @@ Object.assign(window, {
     flex-wrap: wrap;
   }
 
+  .stage-compare {
+    max-width: 100%;
+    padding: 28px 20px 48px;
+    gap: 24px;
+  }
+  .stage-compare .top-bar { max-width: 1480px; }
+  .stage-compare .top-bar a { text-decoration: none; }
+  .stage-compare .top-bar a:hover { text-decoration: underline; }
+  .compare-row {
+    width: 100%;
+    max-width: 1480px;
+    gap: 28px;
+    align-items: stretch;
+    flex-wrap: nowrap;
+  }
+  .compare-web-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .compare-web-pane {
+    flex: 1;
+    min-height: min(844px, calc(100vh - 220px));
+    max-height: calc(100vh - 160px);
+    overflow: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: #f7f8f5;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  .compare-web-pane .web-root {
+    min-height: 100%;
+    height: auto;
+  }
+  .compare-web-pane .web-page {
+    min-height: 100%;
+  }
+  .compare-web-pane .web-main,
+  .compare-web-pane .web-nav-inner {
+    max-width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  @media (max-width: 1100px) {
+    .compare-row { flex-wrap: wrap; justify-content: center; }
+    .compare-web-wrap { flex: 1 1 100%; }
+    .compare-web-pane { max-height: 70vh; min-height: 480px; }
+  }
+
   .device-wrap {
     display: flex;
     flex-direction: column;
@@ -509,7 +560,7 @@ function getDeadline(key, hours) {
   return ts;
 }
 
-function Countdown({ deadline, big, card, inline }) {
+function Countdown({ deadline, big, card, inline, compact }) {
   const [now, setNow] = React.useState(Date.now());
   React.useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -520,6 +571,8 @@ function Countdown({ deadline, big, card, inline }) {
   const h = Math.floor(totalSec / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
   const s = totalSec % 60;
+  const d = Math.floor(h / 24);
+  const hRem = h % 24;
   const pad = (n) => String(n).padStart(2, '0');
   const urgent = h < 12; // menos de 12h restantes = rojo
   const urgentColor = 'oklch(0.6 0.2 28)';
@@ -532,6 +585,20 @@ function Countdown({ deadline, big, card, inline }) {
       <span style={{ fontSize: size <= 16 ? 8 : 9, fontWeight: 600, color: '#9aa0a6', letterSpacing: '0.04em', marginTop: 2 }}>{lbl}</span>
     </span>);
   const Sep = ({ size }) => <span style={{ fontWeight: 800, fontSize: size, color: '#c8ccd0', alignSelf: 'flex-start', lineHeight: 1 }}>:</span>;
+
+  // Una línea corta para cards de grilla (no abulta la tarjeta)
+  if (compact) {
+    let label;
+    if (diff <= 0) label = 'Cerrado';
+    else if (d > 0) label = `Termina en ${d}d ${hRem}h`;
+    else if (h > 0) label = `Termina en ${h}h ${m}m`;
+    else label = `Termina en ${m}m`;
+    return (
+      <div className="web-deadline-line" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, lineHeight: 1.2, color: urgent ? urgentColor : '#888', letterSpacing: '0.01em' }}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.4" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+        <span>{label}</span>
+      </div>);
+  }
 
   if (inline) {
     return (
@@ -555,24 +622,26 @@ function Countdown({ deadline, big, card, inline }) {
         </div>
       </div>);
   }
-  // card — dentro del cuerpo de la tarjeta, no sobre la foto
+  // card — dentro del cuerpo de la tarjeta, no sobre la foto (compacto pero con HS:MIN:SEG en vivo)
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: urgent ? 'oklch(0.97 0.03 28)' : '#f4f6f5', border: `1px solid ${urgent ? 'oklch(0.86 0.08 28)' : '#e3e7e5'}`, borderRadius: 8, padding: '4px 8px' }}>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-      <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 3 }}>
-        <Seg v={h} lbl="HS" size={14} /><Sep size={14} /><Seg v={m} lbl="MIN" size={14} /><Sep size={14} /><Seg v={s} lbl="SEG" size={14} />
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: urgent ? 'oklch(0.97 0.03 28)' : '#f4f6f5', border: `1px solid ${urgent ? 'oklch(0.86 0.08 28)' : '#e3e7e5'}`, borderRadius: 7, padding: '3px 6px' }}>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+      <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 2 }}>
+        <Seg v={h} lbl="HS" size={12.5} /><Sep size={12.5} /><Seg v={m} lbl="MIN" size={12.5} /><Sep size={12.5} /><Seg v={s} lbl="SEG" size={12.5} />
       </span>
     </div>);
 }
 
 // Solo la app a pantalla completa (sin menú ni marco iPhone).
 // Preview con menú: agregá ?dev=1
+// Comparador Web + Mobile: agregá ?both (o ?compare)
 // Compatibilidad con versión vieja subida: ?app=1 también fuerza modo app.
 const _qs = new URLSearchParams(location.search);
 const DEV_MODE = _qs.has('dev'); // menú + iPhone preview
+const BOTH_MODE = _qs.has('both') || _qs.has('compare'); // Web + Mobile lado a lado
 const FORCE_MOBILE = _qs.has('mobile'); // forzar UI mobile en desktop
 const FORCE_WEB = _qs.has('web'); // forzar UI web
-const APP_MODE = !DEV_MODE; // modo público (sin menú dev)
+const APP_MODE = !DEV_MODE && !BOTH_MODE; // modo público (sin menú dev / sin comparador)
 function isDesktopWidth() {
   return window.matchMedia('(min-width: 900px)').matches;
 }
@@ -604,9 +673,9 @@ const SCREENS = [
 { id: 'productos', label: 'Productos', group: 'cliente' },
 { id: 'grupo-detalle', label: 'Detalle grupo', group: 'cliente' },
 { id: 'mis-grupos', label: 'Mis Grupos', group: 'cliente' },
-{ id: 'comparador', label: 'Comparador', group: 'cliente' },
-{ id: 'grupo-participantes', label: 'Grupo en vivo', group: 'cliente' },
-{ id: 'historial', label: 'Historial', group: 'cliente' },
+{ id: 'comparador', label: 'Comparador', group: 'dev' }, // oculto en UX pública (?dev / ?both)
+{ id: 'grupo-participantes', label: 'Grupo en vivo', group: 'dev' }, // legacy; app pública → mis-grupos
+{ id: 'historial', label: 'Historial', group: 'dev' }, // embebido en Perfil; navegar → perfil
 { id: 'seguimiento', label: 'Seguimiento', group: 'cliente' },
 { id: 'perfil', label: 'Perfil', group: 'cliente' },
 // 🛠️ Admin
@@ -623,6 +692,8 @@ const SCREENS = [
 const IDS_ACTUALIZADOS = new Set(['mandarina', 'naranja', 'tomate', 'manzana', 'morron']);
 const CHECK_AZUL = '#2563eb';
 const CHECK_ROJO = '#dc2626';
+// UI city under brand; future hub assign via IP geo (no GPS permission) + barrio confirm
+const DEFAULT_CITY = 'Buenos Aires';
 function checkBg(ok) { return ok ? CHECK_AZUL : CHECK_ROJO; }
 function checkShadow(ok) { return ok ? '0 1px 4px rgba(37,99,235,.45)' : '0 1px 4px rgba(220,38,38,.45)'; }
 function sortActualizadoPrimero(arr, secondary) {
@@ -635,36 +706,107 @@ function sortActualizadoPrimero(arr, secondary) {
 function fmtPrecioAR(n) {
   return '$' + Number(n).toLocaleString('es-AR');
 }
+function parsePrecioAR(s) {
+  return parseInt(String(s == null ? '0' : s).replace(/[^\d]/g, ''), 10) || 0;
+}
 function calcDisc(grupo, coto) {
   return Math.round((1 - grupo / coto) * 100);
 }
+function cartLineTotals(item) {
+  const priceN = item.priceN != null ? item.priceN : parsePrecioAR(item.price);
+  const oldN = item.oldN != null ? item.oldN : parsePrecioAR(item.old);
+  const qty = Math.max(1, item.qty || 1);
+  const grupo = priceN * qty;
+  const coto = oldN > 0 ? oldN * qty : grupo;
+  return { priceN, oldN, qty, grupo, coto, ahorro: Math.max(0, coto - grupo) };
+}
+function cartTotals(cart) {
+  return (cart || []).reduce((acc, item) => {
+    const t = cartLineTotals(item);
+    acc.grupo += t.grupo;
+    acc.coto += t.coto;
+    acc.ahorro += t.ahorro;
+    acc.items += t.qty;
+    return acc;
+  }, { grupo: 0, coto: 0, ahorro: 0, items: 0 });
+}
+const GOAL_KG = 100;
+const HUBADOR_PROGRESS_KEY = 'hubadorProgress';
+/** Semilla demo (kg llenos hacia 100) — se guarda en localStorage la primera vez. */
+const HUBADOR_SEED_FILLED = {
+  'Papa': 80, 'Tomate Red': 50, 'Morrón rojo': 40, 'Zapallo anco': 45, 'Cebolla': 65,
+  'Lechuga mantecosa': 60, 'Batata': 50, 'Banana': 75, 'Limón': 55, 'Manzana Red': 60,
+  'Naranja Jugo': 70, 'Mandarina Nova': 55,
+};
+function loadHubadorProgress() {
+  try {
+    const raw = localStorage.getItem(HUBADOR_PROGRESS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') return parsed;
+    }
+  } catch (e) {}
+  const seed = Object.assign({}, HUBADOR_SEED_FILLED);
+  try { localStorage.setItem(HUBADOR_PROGRESS_KEY, JSON.stringify(seed)); } catch (e) {}
+  return seed;
+}
+function getGroupFilled(name) {
+  const map = loadHubadorProgress();
+  const v = map[name];
+  if (v != null && !Number.isNaN(Number(v))) return Math.min(GOAL_KG, Math.max(0, Math.round(Number(v))));
+  const seed = HUBADOR_SEED_FILLED[name];
+  return Math.min(GOAL_KG, seed != null ? seed : 40);
+}
+function setGroupFilled(name, kg) {
+  const map = loadHubadorProgress();
+  map[name] = Math.min(GOAL_KG, Math.max(0, Math.round(kg)));
+  try { localStorage.setItem(HUBADOR_PROGRESS_KEY, JSON.stringify(map)); } catch (e) {}
+  return map[name];
+}
+function bumpGroupFilled(name, qty) {
+  return setGroupFilled(name, getGroupFilled(name) + Math.max(0, Number(qty) || 0));
+}
+function groupProgressView(name) {
+  const filled = getGroupFilled(name);
+  const missing = Math.max(0, GOAL_KG - filled);
+  const pct = Math.min(100, Math.round(filled / GOAL_KG * 100));
+  const almost = missing > 0 && missing <= 15;
+  return { filled, missing, pct, almost, goal: GOAL_KG };
+}
+
 const HUBADOR_CATALOG = [
-  { id: 'papa', name: 'Papa', cat: 'verduras', priceN: 1364, oldN: 2099, prog: 80, members: '9/12', time: '1d', deadlineHrs: 35, img: 'img/papa.jpg', goal: 50, unit: '/kg' },
-  { id: 'tomate', name: 'Tomate Red', cat: 'verduras', priceN: 1750, oldN: 3499, prog: 50, members: '5/10', time: '3d', deadlineHrs: 48, img: 'img/tomate.jpg', goal: 15, unit: '/kg' },
-  { id: 'morron', name: 'Morrón rojo', cat: 'verduras', priceN: 4224, oldN: 6499, prog: 40, members: '3/8', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80', goal: 8, unit: '/kg' },
-  { id: 'zapallo', name: 'Zapallo anco', cat: 'verduras', priceN: 1169, oldN: 1799, prog: 45, members: '5/12', time: '3d', deadlineHrs: 45, img: 'img/zapallo-ok-20260730c.jpg', goal: 50, unit: '/kg' },
-  { id: 'cebolla', name: 'Cebolla', cat: 'verduras', priceN: 1105, oldN: 1700, prog: 65, members: '6/10', time: '2d', deadlineHrs: 40, img: 'img/cebolla-ok-20260730c.jpg', goal: 50, unit: '/kg' },
-  { id: 'lechuga', name: 'Lechuga mantecosa', cat: 'verduras', priceN: 2730, oldN: 4200, prog: 60, members: '6/10', time: '2d', deadlineHrs: 41, img: 'img/lechuga.jpg', goal: 50, unit: '/u' },
-  { id: 'batata', name: 'Batata', cat: 'verduras', priceN: 1104, oldN: 1699, prog: 50, members: '6/12', time: '2d', deadlineHrs: 43, img: 'img/batata.jpg', goal: 50, unit: '/kg' },
-  { id: 'banana', name: 'Banana', cat: 'frutas', priceN: 1755, oldN: 2700, prog: 75, members: '7/10', time: '1d', deadlineHrs: 33, img: 'img/banana.jpg', goal: 50, unit: '/kg' },
-  { id: 'limon', name: 'Limón', cat: 'frutas', priceN: 584, oldN: 899, prog: 55, members: '5/9', time: '3d', deadlineHrs: 37, img: 'img/limon.jpg', goal: 50, unit: '/kg' },
-  { id: 'manzana', name: 'Manzana Red', cat: 'frutas', priceN: 2000, oldN: 3999, prog: 60, members: '6/10', time: '2d', deadlineHrs: 44, img: 'img/manzana.jpg', goal: 19, unit: '/kg' },
-  { id: 'naranja', name: 'Naranja Jugo', cat: 'frutas', priceN: 599, oldN: 999, prog: 70, members: '7/10', time: '2d', deadlineHrs: 32, img: 'img/naranja.jpg', goal: 17, unit: '/kg' },
-  { id: 'mandarina', name: 'Mandarina Nova', cat: 'frutas', priceN: 599, oldN: 999, prog: 55, members: '5/10', time: '2d', deadlineHrs: 36, img: 'img/naranja.jpg', goal: 17, unit: '/kg' },
-].map((p) => ({
-  ...p,
-  price: fmtPrecioAR(p.priceN),
-  old: fmtPrecioAR(p.oldN),
-  disc: calcDisc(p.priceN, p.oldN),
-  precioActualizado: IDS_ACTUALIZADOS.has(p.id),
-}));
+  { id: 'papa', name: 'Papa', cat: 'verduras', priceN: 1364, oldN: 2099, members: '9/12', time: '1d', deadlineHrs: 35, img: 'img/papa.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'tomate', name: 'Tomate Red', cat: 'verduras', priceN: 1750, oldN: 3499, members: '5/10', time: '3d', deadlineHrs: 48, img: 'img/tomate.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'morron', name: 'Morrón rojo', cat: 'verduras', priceN: 4224, oldN: 6499, members: '3/8', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg' },
+  { id: 'zapallo', name: 'Zapallo anco', cat: 'verduras', priceN: 1169, oldN: 1799, members: '5/12', time: '3d', deadlineHrs: 45, img: 'img/zapallo-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'cebolla', name: 'Cebolla', cat: 'verduras', priceN: 1105, oldN: 1700, members: '6/10', time: '2d', deadlineHrs: 40, img: 'img/cebolla-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'lechuga', name: 'Lechuga mantecosa', cat: 'verduras', priceN: 2730, oldN: 4200, members: '6/10', time: '2d', deadlineHrs: 41, img: 'img/lechuga.jpg', goal: GOAL_KG, unit: '/u' },
+  { id: 'batata', name: 'Batata', cat: 'verduras', priceN: 1104, oldN: 1699, members: '6/12', time: '2d', deadlineHrs: 43, img: 'img/batata.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'banana', name: 'Banana', cat: 'frutas', priceN: 1755, oldN: 2700, members: '7/10', time: '1d', deadlineHrs: 33, img: 'img/banana.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'limon', name: 'Limón', cat: 'frutas', priceN: 584, oldN: 899, members: '5/9', time: '3d', deadlineHrs: 37, img: 'img/limon.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'manzana', name: 'Manzana Red', cat: 'frutas', priceN: 2000, oldN: 3999, members: '6/10', time: '2d', deadlineHrs: 44, img: 'img/manzana.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'naranja', name: 'Naranja Jugo', cat: 'frutas', priceN: 599, oldN: 999, members: '7/10', time: '2d', deadlineHrs: 32, img: 'img/naranja.jpg', goal: GOAL_KG, unit: '/kg' },
+  { id: 'mandarina', name: 'Mandarina Nova', cat: 'frutas', priceN: 599, oldN: 999, members: '5/10', time: '2d', deadlineHrs: 36, img: 'img/naranja.jpg', goal: GOAL_KG, unit: '/kg' },
+].map((p) => {
+  const live = groupProgressView(p.name);
+  return {
+    ...p,
+    goal: GOAL_KG,
+    prog: live.pct,
+    price: fmtPrecioAR(p.priceN),
+    old: fmtPrecioAR(p.oldN),
+    disc: calcDisc(p.priceN, p.oldN),
+    precioActualizado: IDS_ACTUALIZADOS.has(p.id),
+  };
+});
 const HOME_OFERTAS_IDS = ['mandarina', 'naranja', 'tomate', 'manzana', 'morron', 'papa', 'cebolla', 'limon', 'banana', 'lechuga'];
 function hubadorById(id) { return HUBADOR_CATALOG.find((p) => p.id === id); }
 function hubadorCard(p) {
+  const live = groupProgressView(p.name);
   return {
     id: p.id, name: p.name, cat: p.cat, price: p.price, old: p.old, unit: p.unit, disc: p.disc,
-    prog: p.prog, members: p.members, time: p.time, deadlineHrs: p.deadlineHrs, img: p.img,
-    goal: p.goal, precioActualizado: p.precioActualizado, priceN: p.priceN, oldN: p.oldN,
+    prog: live.pct, members: p.members, time: p.time, deadlineHrs: p.deadlineHrs, img: p.img,
+    goal: GOAL_KG, precioActualizado: p.precioActualizado, priceN: p.priceN, oldN: p.oldN,
   };
 }
 /** Mejor gancho: mayor % descuento; empate → precioActualizado; luego nombre. */
@@ -680,10 +822,11 @@ function hubadorBestGancho() {
   return ranked[0] ? hubadorCard(ranked[0]) : null;
 }
 function grupoFromHubadorProduct(p, barrio) {
+  const live = groupProgressView(p.name);
   return {
-    product: p.name, location: barrio || 'Palermo', members: p.members, progress: p.prog,
+    product: p.name, location: barrio || 'Palermo', members: p.members, progress: live.pct,
     closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit,
-    disc: p.disc, img: p.img, cat: p.cat, totalKg: p.goal || 50,
+    disc: p.disc, img: p.img, cat: p.cat, totalKg: GOAL_KG,
     precioActualizado: !!p.precioActualizado, status: 'abierto',
   };
 }
@@ -691,13 +834,15 @@ function grupoFromHubadorProduct(p, barrio) {
 function MobileHome() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { setSelected, setSelectedGroup, user, cart } = React.useContext(SelectionContext);
+  const { setSelected, setSelectedGroup, user, cart, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
   const openProduct = (p) => {
     // Tocar un producto del catálogo arma un "grupo" y lleva al detalle del grupo
+    const live = groupProgressView(p.name);
     setSelected(p);
     setSelectedGroup({
-      product: p.name, location: user?.barrio || 'Palermo', members: p.members, progress: p.prog,
-      closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, totalKg: p.goal || 50, precioActualizado: !!p.precioActualizado, status: 'abierto'
+      product: p.name, location: user?.barrio || 'Palermo', members: p.members, progress: live.pct,
+      closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, totalKg: GOAL_KG, precioActualizado: !!p.precioActualizado, status: 'abierto'
     });
     navigate('grupo-detalle');
   };
@@ -708,7 +853,7 @@ function MobileHome() {
         <div style={{ width: 28, height: 28, borderRadius: 7, background: primary, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>H</div>
         <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0, maxWidth: 130, minWidth: 0 }}>
           <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: '-0.02em', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user ? `Hola, ${user.nombre}` : 'HUBADOR'}</span>
-          {user && <span style={{ fontSize: 10.5, color: '#888', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>📍 {user.barrio || 'Palermo'}</span>}
+          {user && <span style={{ fontSize: 10.5, color: '#888', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>📍 {DEFAULT_CITY}</span>}
         </div>
         <div style={{ flex: 1, background: '#f0f1f3', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', marginLeft: 6 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
@@ -716,7 +861,7 @@ function MobileHome() {
         </div>
         <div onClick={() => navigate('mis-grupos')} style={{ position: 'relative', width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
-          <div style={{ position: 'absolute', top: 2, right: 2, minWidth: 14, height: 14, padding: '0 3px', borderRadius: 999, background: cart.length > 0 ? primary : '#aaa', color: '#fff', fontSize: 9, fontWeight: 700, display: 'grid', placeItems: 'center', border: '1.5px solid #fff' }}>{cart.length}</div>
+          <div style={{ position: 'absolute', top: 2, right: 2, minWidth: 14, height: 14, padding: '0 3px', borderRadius: 999, background: cart.length > 0 ? primary : '#aaa', color: '#fff', fontSize: 9, fontWeight: 700, display: 'grid', placeItems: 'center', border: '1.5px solid #fff' }}>{cartTotals(cart).items}</div>
         </div>
       </header>
 
@@ -737,18 +882,7 @@ function MobileHome() {
         </p>
       </div>
 
-      <div style={{ padding: '20px 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
-          <div style={{ fontWeight: 800, fontSize: 18, letterSpacing: '-0.02em' }}>Ofertas del marketplace</div>
-          <button onClick={() => navigate('productos')} style={{ background: 'none', border: 'none', color: primary, fontWeight: 700, fontSize: 12.5, fontFamily: 'inherit', cursor: 'pointer', padding: 0 }}>Ver todas →</button>
-        </div>
-        <div style={{ color: '#888', fontSize: 13, marginBottom: 14 }}>Uníte a un grupo y ahorrá</div>
-        {/* Category pills */}
-        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 14 }}>
-          {['▦ Todos', '🍎 Frutas', '🥬 Verduras', '🥔 Hortalizas', '🌿 Orgánicos'].map((c, i) =>
-            <button key={c} style={{ flexShrink: 0, background: i === 0 ? primary : '#fff', color: i === 0 ? '#fff' : '#555', border: `1px solid ${i === 0 ? primary : '#e2e4e8'}`, borderRadius: 999, padding: '6px 14px', fontSize: 12.5, fontWeight: 500, fontFamily: 'inherit', cursor: 'pointer' }}>{c}</button>
-            )}
-        </div>
+      <div style={{ padding: '12px 16px 20px' }}>
         {/* Product list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {HOME_OFERTAS_IDS.map((id) => hubadorCard(hubadorById(id) || hubadorById("papa"))).
@@ -765,16 +899,15 @@ function MobileHome() {
                   <span style={{ fontWeight: 800, fontSize: 17, color: primary }}>{p.price}</span>
                   <span style={{ fontSize: 12, color: '#888' }}>{p.unit}</span>
                   <span style={{ fontSize: 13.5, color: '#9aa0a6', textDecoration: 'line-through', marginLeft: 3 }}>{p.old}</span>
-                  <span style={{ marginLeft: 'auto', position: 'relative', top: -4 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} inline /></span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 11, color: '#888' }}>
-                  {(() => {const kt = p.goal || 50,kf = Math.round(kt * p.prog / 100),miss = kt - kf,almost = miss <= 6;return <>
-                    <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>{almost ? `⚡ Faltan ${miss} kg` : `Faltan ${miss} kg`}</span>
-                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>{kf}/{kt} kg</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#888', gap: 6 }}>
+                  {(() => {const live = groupProgressView(p.name);return <>
+                    <span style={{ color: live.almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: live.almost ? 700 : 500 }}>{live.almost ? `⚡ Faltan ${live.missing} kg` : `Faltan ${live.missing} kg`} · {live.filled}/{GOAL_KG} kg</span>
                   </>;})()}
                 </div>
+                <Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card />
                 <div style={{ height: 4, background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${p.prog}%`, background: p.prog >= 88 ? 'oklch(0.62 0.18 35)' : primary, borderRadius: 999 }} />
+                  <div style={{ height: '100%', width: `${groupProgressView(p.name).pct}%`, background: groupProgressView(p.name).pct >= 85 ? 'oklch(0.62 0.18 35)' : primary, borderRadius: 999 }} />
                 </div>
                 <button onClick={(e) => {e.stopPropagation();openProduct(p);}} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '7px', fontWeight: 600, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', marginTop: 2 }}>Unirme</button>
               </div>
@@ -1046,18 +1179,27 @@ function MobileProductos() {
 function MobileProducto() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { selected, showToast, addToCart, user } = React.useContext(SelectionContext);
+  const { selected, showToast, addToCart, user, bumpFilled, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
   const [qty, setQty] = React.useState(2);
   // Datos del producto seleccionado o fallback a Tomate
   const prod = selected || hubadorCard(hubadorById('tomate'));
+  const live = groupProgressView(prod.name);
   const [m, total] = (prod.members || '7/10').split('/').map((n) => parseInt(n, 10));
-  const priceNum = parseInt((prod.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
+  const priceNum = prod.priceN != null ? prod.priceN : (parseInt((prod.price || '$0').replace(/[^\d]/g, ''), 10) || 0);
+  const oldNum = prod.oldN != null ? prod.oldN : parsePrecioAR(prod.old);
   const totalPrice = priceNum * qty;
+  const unitLabel = prod.unit === '/u' ? 'u' : 'kg';
   const join = () => {
-    if (!user) {showToast('Iniciá sesión para sumarte al grupo');setTimeout(() => navigate('login'), 900);return;}
-    addToCart(prod, qty);
-    showToast(`Sumaste ${qty} ${prod.unit === '/u' ? 'u' : 'kg'} de ${prod.name}`);
-    setTimeout(() => navigate('grupo-participantes'), 900);
+    const q = Math.max(1, qty);
+    addToCart({
+      name: prod.name, price: prod.price, old: prod.old, priceN: priceNum, oldN: oldNum,
+      unit: prod.unit || '/kg', img: prod.img, members: prod.members, progress: live.pct,
+      location: user?.barrio || 'Palermo',
+    }, q);
+    if (typeof bumpFilled === 'function') bumpFilled(prod.name, q);
+    showToast(`Sumaste ${q} ${unitLabel} de ${prod.name} al carrito`);
+    setTimeout(() => navigate('mis-grupos'), 700);
   };
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', WebkitFontSmoothing: 'antialiased' }}>
@@ -1091,7 +1233,10 @@ function MobileProducto() {
             <span>Participantes</span><span style={{ fontWeight: 700 }}>{m} / {total}</span>
           </div>
           <div style={{ height: 6, background: '#e0e0e0', borderRadius: 999, overflow: 'hidden', marginBottom: 8 }}>
-            <div style={{ height: '100%', width: `${prod.prog || 70}%`, background: primary, borderRadius: 999 }} />
+            <div style={{ height: '100%', width: `${live.pct}%`, background: primary, borderRadius: 999 }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#888', marginBottom: 4 }}>
+            <span>Faltan {live.missing} kg · {live.filled}/{GOAL_KG} kg</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#888' }}>
             <Countdown deadline={getDeadline(prod.name, prod.deadlineHrs || 48)} big /><span>📍 Palermo</span>
@@ -1119,8 +1264,8 @@ function MobileProducto() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14, fontWeight: 800, color: '#222', background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '11px 14px', marginBottom: 12 }}>
           <span>Total a pagar</span><span style={{ color: primary }}>${totalPrice.toLocaleString('es-AR')}</span>
         </div>
-        <button onClick={join} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 12, padding: '14px', fontWeight: 700, fontSize: 16, fontFamily: 'inherit', cursor: 'pointer' }}>{user ? 'Sumar al pedido' : 'Iniciar sesión para unirse'}</button>
-        {user && <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 10 }}>Se sumará a "Mis Pedidos" en formación. Solo se cobra cuando el grupo se complete.</div>}
+        <button onClick={join} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 12, padding: '14px', fontWeight: 700, fontSize: 16, fontFamily: 'inherit', cursor: 'pointer' }}>Unirme al grupo</button>
+        <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 10 }}>Se suma a Mis grupos. Otros vecinos pueden seguir uniéndose. Solo se cobra cuando el grupo se complete.</div>
         <MasOfertas excludeName={prod.name} barrio={user?.barrio || 'Palermo'} />
       </div>
     </div>);
@@ -1131,32 +1276,37 @@ function MasOfertas({ excludeName, barrio = 'Palermo' }) {
   const primary = 'oklch(0.55 0.15 165)';
   const danger = 'oklch(0.62 0.18 35)';
   const navigate = React.useContext(NavContext);
-  const { setSelected, showToast, addToCart, user } = React.useContext(SelectionContext);
+  const { setSelected, setSelectedGroup, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
 
-  const baseOffers = React.useMemo(() => [
-  { id: 'mo-nar', name: 'Naranja Jugo', price: 599, old: 999, filled: 12, total: 17, deadlineHrs: 32, img: 'img/naranja.jpg', precioActualizado: true },
-  { id: 'mo-tom', name: 'Tomate Red', price: 1750, old: 3499, filled: 8, total: 15, deadlineHrs: 48, img: 'img/tomate.jpg', precioActualizado: true },
-  { id: 'mo-man', name: 'Manzana Red', price: 2000, old: 3999, filled: 11, total: 19, deadlineHrs: 44, img: 'img/manzana.jpg', precioActualizado: true },
-  { id: 'mo-mand', name: 'Mandarina Nova', price: 599, old: 999, filled: 9, total: 17, deadlineHrs: 36, img: 'img/naranja.jpg', precioActualizado: true },
-  { id: 'mo-mor', name: 'Morrón rojo', price: 4224, old: 6499, filled: 3, total: 8, deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80', precioActualizado: true }].
-  filter((o) => o.name !== excludeName), [excludeName]);
+  const baseOffers = React.useMemo(() =>
+    ['naranja', 'tomate', 'manzana', 'mandarina', 'morron']
+      .map((id) => hubadorById(id))
+      .filter((p) => p && p.name !== excludeName)
+      .map((p) => ({
+        id: 'mo-' + p.id, name: p.name, price: p.priceN, old: p.oldN,
+        deadlineHrs: p.deadlineHrs, img: p.img, precioActualizado: !!p.precioActualizado,
+      })),
+  [excludeName]);
 
   const [offers, setOffers] = React.useState(baseOffers);
   React.useEffect(() => setOffers(baseOffers), [baseOffers]);
 
-  const [qtys, setQtys] = React.useState(() => Object.fromEntries(offers.map((o) => [o.id, Math.min(2, Math.max(1, o.total - o.filled))])));
-  const setQ = (id, v, max) => setQtys((q) => ({ ...q, [id]: Math.max(1, Math.min(max, v)) }));
-
-  const join = (o) => {
-    if (!user) {showToast('Iniciá sesión para sumarte al grupo');setTimeout(() => navigate('login'), 700);return;}
-    const missing = Math.max(0, o.total - o.filled);
-    const q = Math.min(qtys[o.id] || 1, missing);
-    if (q <= 0) return;
-    addToCart({ name: o.name, price: `$${o.price}`, unit: '/kg', img: o.img, members: `${o.filled + q}/${o.total}`, progress: Math.round((o.filled + q) / o.total * 100), location: barrio }, q);
-    showToast(`Sumaste ${q} kg de ${o.name}`);
-    // mover la barra en vivo
-    setOffers((os) => os.map((x) => x.id === o.id ? { ...x, filled: Math.min(x.total, x.filled + q) } : x));
-    setQtys((qs) => ({ ...qs, [o.id]: 1 }));
+  const openOffer = (o) => {
+    const live = groupProgressView(o.name);
+    const disc = Math.round((1 - o.price / o.old) * 100);
+    const card = {
+      name: o.name, price: fmtPrecioAR(o.price), unit: '/kg', old: fmtPrecioAR(o.old),
+      members: `${live.filled}/${GOAL_KG}`, prog: live.pct, time: '2d', disc, img: o.img, goal: GOAL_KG,
+      priceN: o.price, oldN: o.old, precioActualizado: !!o.precioActualizado, deadlineHrs: o.deadlineHrs,
+    };
+    setSelected(card);
+    setSelectedGroup({
+      product: o.name, location: barrio, members: `${live.filled}/${GOAL_KG}`, progress: live.pct,
+      closes: '2d', deadlineHrs: o.deadlineHrs, price: fmtPrecioAR(o.price), old: fmtPrecioAR(o.old),
+      unit: '/kg', disc, img: o.img, totalKg: GOAL_KG, precioActualizado: !!o.precioActualizado, status: 'abierto',
+    });
+    navigate('grupo-detalle');
   };
 
   return (
@@ -1179,23 +1329,22 @@ function MasOfertas({ excludeName, barrio = 'Palermo' }) {
       {/* Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }}>
         {offers.map((o) => {
-          const pct = Math.min(100, Math.round(o.filled / o.total * 100));
-          const missing = Math.max(0, o.total - o.filled);
-          const almost = missing <= 6;
+          const live = groupProgressView(o.name);
+          const pct = live.pct;
+          const missing = live.missing;
+          const almost = live.almost;
           const isFull = missing === 0;
           const disc = Math.round((1 - o.price / o.old) * 100);
           const accent = isFull ? '#888' : almost ? danger : primary;
           const accentBg = isFull ? '#f0f0f0' : almost ? 'oklch(0.96 0.04 35)' : 'oklch(0.96 0.03 165)';
-          const q = Math.min(qtys[o.id] || 1, Math.max(1, missing));
           return (
-            <div key={o.id} style={{ background: '#fafbfc', border: '1px solid #ececef', borderRadius: 13, padding: '10px', display: 'flex', gap: 10 }}>
-              <button onClick={() => {setSelected({ name: o.name, price: fmtPrecioAR(o.price), unit: '/kg', old: fmtPrecioAR(o.old), members: `${o.filled}/${o.total}`, prog: pct, time: '2d', disc, img: o.img, goal: o.total, precioActualizado: !!o.precioActualizado });navigate('producto');}} style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: '#fff', border: '1px solid #e8eaec', padding: 0, cursor: 'pointer', position: 'relative' }}>
+            <div key={o.id} onClick={() => !isFull && openOffer(o)} style={{ background: '#fafbfc', border: '1px solid #ececef', borderRadius: 13, padding: '10px', display: 'flex', gap: 10, cursor: isFull ? 'default' : 'pointer' }}>
+              <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: '#fff', border: '1px solid #e8eaec', position: 'relative' }}>
                 <img src={o.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 <span style={{ position: 'absolute', top: 3, right: 3, width: 16, height: 16, borderRadius: '50%', background: checkBg(o.precioActualizado), color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 800 }}>✓</span>
-              </button>
+              </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                {/* Title row */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14, color: '#1a1a1a', lineHeight: 1.2 }}>{o.name}</div>
@@ -1209,32 +1358,27 @@ function MasOfertas({ excludeName, barrio = 'Palermo' }) {
                   </span>
                 </div>
 
-                {/* Timer + Progress */}
                 {!isFull && <div style={{ marginTop: 8 }}><Countdown deadline={getDeadline(o.name, o.deadlineHrs || 40)} card /></div>}
                 <div style={{ marginTop: 8 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.5, marginBottom: 3 }}>
                     <span style={{ color: almost ? accent : '#666', fontWeight: almost ? 700 : 500 }}>
-                      {almost ? `¡Sólo faltan ${missing} kg!` : <>Faltan <b style={{ color: '#333' }}>{missing} kg</b> · mín. {o.total} kg</>}
+                      {almost ? `¡Sólo faltan ${missing} kg!` : <>Faltan <b style={{ color: '#333' }}>{missing} kg</b> · {live.filled}/{GOAL_KG} kg</>}
                     </span>
-                    <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{o.filled}/{o.total}</span>
+                    <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{live.filled}/{GOAL_KG}</span>
                   </div>
                   <div style={{ height: 5, background: '#ececef', borderRadius: 999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 999, transition: 'width 0.3s' }} />
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 9, gap: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: isFull ? '#f5f5f5' : '#fff', border: '1px solid #e2e4e8', borderRadius: 999, padding: '2px 4px', opacity: isFull ? 0.5 : 1 }}>
-                    <button disabled={isFull || q <= 1} onClick={() => setQ(o.id, q - 1, missing)} style={{ width: 22, height: 22, borderRadius: 999, border: 'none', background: 'transparent', fontWeight: 700, fontSize: 14, cursor: isFull || q <= 1 ? 'not-allowed' : 'pointer', color: '#555', fontFamily: 'inherit', display: 'grid', placeItems: 'center', opacity: q <= 1 ? 0.35 : 1 }}>−</button>
-                    <span style={{ fontWeight: 800, fontSize: 13, minWidth: 14, textAlign: 'center' }}>{isFull ? 0 : q}</span>
-                    <button disabled={isFull || q >= missing} onClick={() => setQ(o.id, q + 1, missing)} style={{ width: 22, height: 22, borderRadius: 999, border: 'none', background: 'transparent', fontWeight: 700, fontSize: 14, cursor: isFull || q >= missing ? 'not-allowed' : 'pointer', color: '#555', fontFamily: 'inherit', display: 'grid', placeItems: 'center', opacity: q >= missing ? 0.35 : 1 }}>+</button>
-                    <span style={{ fontSize: 11, color: '#888', padding: '0 6px 0 2px' }}>kg · <b style={{ color: accent }}>${(o.price * (isFull ? 0 : q)).toLocaleString('es-AR')}</b></span>
-                  </div>
-                  <button disabled={isFull} onClick={() => join(o)} style={{ background: accent, color: '#fff', border: 'none', borderRadius: 999, padding: '7px 12px', fontWeight: 700, fontSize: 12, cursor: isFull ? 'not-allowed' : 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 3, opacity: isFull ? 0.6 : 1 }}>
-                    {isFull ? 'Completo' : '+ Unirme'}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  disabled={isFull}
+                  onClick={(e) => { e.stopPropagation(); if (!isFull) openOffer(o); }}
+                  style={{ marginTop: 9, width: '100%', background: accent, color: '#fff', border: 'none', borderRadius: 999, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: isFull ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: isFull ? 0.6 : 1 }}
+                >
+                  {isFull ? 'Completo' : 'Unirme'}
+                </button>
               </div>
             </div>);
 
@@ -1246,48 +1390,21 @@ function MasOfertas({ excludeName, barrio = 'Palermo' }) {
 
 }
 
-function MobilePedidos() {
-  const primary = 'oklch(0.55 0.15 165)';
-  const navigate = React.useContext(NavContext);
-  const { setSelectedOrder, user } = React.useContext(SelectionContext);
-  const pedidos = [
+// Demo pedidos (estado de compras) — viven en Perfil
+const DEMO_PEDIDOS = [
   { name: 'Tomate', qty: '2 kg', total: '$4.548', status: 'entregado', date: '15 abr', img: 'img/tomate.jpg' },
   { name: 'Banana', qty: '1 kg', total: '$1.755', status: 'pagado', date: '17 abr', img: 'img/banana.jpg' },
-  { name: 'Zapallo anco', qty: '3 kg', total: '$3.507', status: 'pendiente', date: '18 abr', img: 'img/zapallo-ok-20260730c.jpg' }];
+  { name: 'Zapallo anco', qty: '3 kg', total: '$3.507', status: 'pendiente', date: '18 abr', img: 'img/zapallo-ok-20260730c.jpg' },
+];
+const PEDIDO_STATUS_STYLE = {
+  entregado: { bg: '#dcfce7', color: '#166534', label: '✓ Entregado' },
+  pagado: { bg: '#dbeafe', color: '#1d4ed8', label: '💳 Pagado' },
+  pendiente: { bg: '#fef9c3', color: '#854d0e', label: '🕒 Pendiente' },
+};
 
-  const statusStyle = { entregado: { bg: '#dcfce7', color: '#166534', label: '✓ Entregado' }, pagado: { bg: '#dbeafe', color: '#1d4ed8', label: '💳 Pagado' }, pendiente: { bg: '#fef9c3', color: '#854d0e', label: '🕒 Pendiente' } };
-
-  return (
-    <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', WebkitFontSmoothing: 'antialiased' }}>
-      <header style={{ position: 'sticky', top: 0, zIndex: 5, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 52, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={() => navigate('mis-grupos')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-        </button>
-        <span style={{ fontWeight: 800, fontSize: 16 }}>Historial</span>
-      </header>
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ fontSize: 12.5, color: '#888', marginBottom: 2 }}>Tus pedidos pasados ({pedidos.length})</div>
-        {pedidos.map((p) => {
-          const s = statusStyle[p.status];
-          return (
-            <div key={p.name} onClick={() => {setSelectedOrder(p);navigate('seguimiento');}} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 14, display: 'flex', gap: 12, cursor: 'pointer' }}>
-              <div style={{ width: 76, height: 76, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
-                <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13.5, lineHeight: 1.3 }}>{p.name}</div>
-                  <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 600 }}>{s.label}</span>
-                </div>
-                <div style={{ fontSize: 12, color: '#888', margin: '4px 0' }}>{p.qty} · {p.date}</div>
-                <div style={{ fontWeight: 800, fontSize: 18, color: primary }}>{p.total}</div>
-              </div>
-            </div>);
-
-        })}
-      </div>
-    </div>);
-
+// Legacy: historial / pedidos → Perfil (lista embebida ahí)
+function MobilePedidos() {
+  return <MobilePerfil />;
 }
 
 function MobileLogin() {
@@ -1635,21 +1752,27 @@ function MobileAdminProductos() {
 // ─── Grupo Detalle ───────────────────────────────────────────
 function MobileGrupoDetalle() {
   const primary = 'oklch(0.55 0.15 165)';
-  const STEP = 4;
-  const [qty, setQty] = React.useState(STEP);
+  const STEP = 1;
+  const [qty, setQty] = React.useState(2);
   const navigate = React.useContext(NavContext);
-  const { selectedGroup, showToast, addToCart, user } = React.useContext(SelectionContext);
-  const g = selectedGroup || (() => { const p = hubadorById('papa'); return { product: p.name, location: 'Palermo', members: p.members, progress: p.prog, closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, totalKg: p.goal, precioActualizado: false }; })();
-  const [m, total] = (g.members || '9/12').split('/').map((n) => parseInt(n, 10));
+  const { selectedGroup, showToast, addToCart, user, bumpFilled, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
+  const g = selectedGroup || (() => { const p = hubadorById('papa'); const live = groupProgressView(p.name); return { product: p.name, location: 'Palermo', members: p.members, progress: live.pct, closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, totalKg: GOAL_KG, precioActualizado: false }; })();
+  const live = groupProgressView(g.product);
+  const [m] = (g.members || '9/12').split('/').map((n) => parseInt(n, 10));
   const priceNum = parseInt((g.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const oldNum = parseInt((g.old || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const totalPrice = priceNum * qty;
-  const savings = (oldNum - priceNum) * qty;
+  const unitLabel = g.unit === '/u' ? 'u' : 'kg';
   const join = () => {
-    if (!user) {showToast('Iniciá sesión para sumarte al grupo');setTimeout(() => navigate('login'), 900);return;}
-    addToCart({ name: g.product, price: g.price, unit: g.unit || '/kg', img: g.img, members: g.members, progress: g.progress, location: g.location }, qty);
-    showToast(`Pedido enviado: ${qty} ${g.unit === '/u' ? 'u' : 'kg'} de ${g.product}`);
-    setTimeout(() => navigate('grupo-participantes'), 1000);
+    const q = Math.max(1, qty);
+    addToCart({
+      name: g.product, price: g.price, old: g.old, priceN: priceNum, oldN: oldNum,
+      unit: g.unit || '/kg', img: g.img, members: g.members, progress: live.pct, location: g.location,
+    }, q);
+    if (typeof bumpFilled === 'function') bumpFilled(g.product, q);
+    showToast(`Sumaste ${q} ${unitLabel} de ${g.product} al carrito`);
+    setTimeout(() => navigate('mis-grupos'), 700);
   };
   return (
     <div style={{ fontFamily: "'Inter',sans-serif", background: '#f4f5f7', height: '100%', display: 'flex', flexDirection: 'column', WebkitFontSmoothing: 'antialiased' }}>
@@ -1694,11 +1817,7 @@ function MobileGrupoDetalle() {
           </div>
           {/* Group progress */}
           {(() => {
-            const totalKg = g.totalKg || 50;
-            const pct = g.progress != null ? g.progress : Math.round(m / total * 100);
-            const filledKg = Math.min(totalKg, Math.round(pct / 100 * totalKg));
-            const missingKg = Math.max(0, totalKg - filledKg);
-            const almost = missingKg <= 6;
+            const { filled: filledKg, missing: missingKg, pct, almost, goal: totalKg } = live;
             const accent = almost ? 'oklch(0.62 0.18 35)' : primary;
             const bg = almost ? 'oklch(0.97 0.03 35)' : 'oklch(0.97 0.02 165)';
             const border = almost ? 'oklch(0.88 0.08 35)' : 'oklch(0.88 0.06 165)';
@@ -1706,7 +1825,7 @@ function MobileGrupoDetalle() {
               <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 12, padding: '12px 14px', marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 13, marginBottom: 8 }}>
                   <span style={{ fontWeight: 700, color: accent }}>
-                    {almost ? `⚡ ¡Sólo faltan ${missingKg} kg!` : <>Faltan <b>{missingKg} kg</b> · mín. {totalKg} kg</>}
+                    {almost ? `⚡ ¡Sólo faltan ${missingKg} kg!` : <>Faltan <b>{missingKg} kg</b> · {filledKg}/{totalKg} kg</>}
                   </span>
                   <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{filledKg}/{totalKg} kg</span>
                 </div>
@@ -1720,7 +1839,8 @@ function MobileGrupoDetalle() {
               </div>);
 
           })()}
-          <button onClick={join} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 12, padding: '14px', fontWeight: 700, fontSize: 16, fontFamily: 'inherit', cursor: 'pointer', marginBottom: 20 }}>Unirme al grupo ↗</button>
+          <button onClick={join} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 12, padding: '14px', fontWeight: 700, fontSize: 16, fontFamily: 'inherit', cursor: 'pointer', marginBottom: 8 }}>Unirme al grupo ↗</button>
+          <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginBottom: 20 }}>Se suma a Mis grupos. Otros vecinos pueden seguir uniéndose hasta completar el mínimo.</div>
           <MasOfertas excludeName={g.product} barrio={g.location || 'Palermo'} />
           <div style={{ height: 20 }} />
           {/* Cómo funciona */}
@@ -1741,36 +1861,55 @@ function MobileGrupoDetalle() {
 
 }
 
-// ─── Grupo Participantes ──────────────────────────────────────
+// ─── Grupo Participantes (legacy / ?dev — app pública redirige a mis-grupos) ──
 function MobileGrupoParticipantes() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { selectedGroup, selected, cart } = React.useContext(SelectionContext);
-  const ctxProd = selectedGroup || selected || cart && cart[0] || null;
-  const productName = ctxProd?.product || ctxProd?.name || 'tu grupo';
-  const [secs, setSecs] = React.useState(15153);
+  const { selectedGroup, selected, cart, user, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
+  const ctxProd = selectedGroup || selected || (cart && cart[0]) || null;
+  const productName = ctxProd?.product || ctxProd?.name || hubadorById('papa')?.name || 'Papa';
+  const barrio = selectedGroup?.location || ctxProd?.location || user?.barrio || 'Palermo';
+  const cartItem = (cart || []).find((c) => c.name === productName);
+  const yourQty = cartItem ? Math.max(1, cartItem.qty || 1) : 0;
+  const youJoined = yourQty > 0;
+  const youLabel = (user?.nombre || 'Vos').split(/\s+/)[0];
+
+  const liveP = groupProgressView(productName);
+  const totalKg = GOAL_KG;
+  const filledKg = liveP.filled;
+  const missingKg = liveP.missing;
+  const r = 54, circ = 2 * Math.PI * r, filled = circ * (filledKg / totalKg);
+
+  // Vecinos estimados a partir del progreso real (sin nombres fijos tipo María/Luis)
+  const othersKg = Math.max(0, filledKg - (youJoined ? yourQty : 0));
+  const neighborCount = Math.max(youJoined ? 0 : 1, Math.round(othersKg / 10) || (filledKg > 0 ? 1 : 0));
+  const totalPeople = neighborCount + (youJoined ? 1 : 0);
+  const showFaces = Math.min(2, neighborCount);
+  const moreCount = Math.max(0, neighborCount - showFaces);
+  const faceColors = ['#2dd4bf', '#818cf8', '#f87171', '#fb923c'];
+
+  const deadlineHrs = ctxProd?.deadlineHrs || 35;
+  const [now, setNow] = React.useState(() => Date.now());
   React.useEffect(() => {
-    const t = setInterval(() => setSecs((s) => s > 0 ? s - 1 : 0), 1000);
+    const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-  const hh = String(Math.floor(secs / 3600)).padStart(2, '0');
-  const mm = String(Math.floor(secs % 3600 / 60)).padStart(2, '0');
-  const ss = String(secs % 60).padStart(2, '0');
-  const members = [
-  { name: 'María', color: '#2dd4bf' }, { name: 'Luis', color: '#818cf8' }, { name: 'Juan', color: '#f87171' },
-  { name: 'Ana', color: '#fb923c' }, { name: 'Carlos', color: '#a3e635' }, { name: 'Laura', color: '#e879f9' },
-  { name: 'Pedro', color: '#38bdf8' }];
+  const deadlineMs = getDeadline(productName, deadlineHrs);
+  const secsLeft = Math.max(0, Math.floor((deadlineMs - now) / 1000));
+  const hh = String(Math.floor(secsLeft / 3600)).padStart(2, '0');
+  const mm = String(Math.floor(secsLeft % 3600 / 60)).padStart(2, '0');
+  const ss = String(secsLeft % 60).padStart(2, '0');
 
-  const activity = [
-  { name: 'M', color: '#2dd4bf', msg: 'María sumó 2 unidades', time: '14:30' },
-  { name: 'J', color: '#f87171', msg: 'Juan se unió al grupo', time: '14:32' },
-  { name: 'L', color: '#818cf8', msg: 'Lorena: ¡Vamos equipo!', time: '14:35' },
-  { name: 'A', color: '#fb923c', msg: 'Ana confirmó su pedido', time: '14:38' }];
+  const activity = [];
+  if (youJoined) {
+    activity.push({ letter: youLabel[0].toUpperCase(), color: primary, msg: `Sumaste ${yourQty} kg a ${productName}`, time: 'ahora' });
+  }
+  if (neighborCount > 0) {
+    activity.push({ letter: 'V', color: '#2dd4bf', msg: `${neighborCount} vecino${neighborCount === 1 ? '' : 's'} ya sumaron kg`, time: '' });
+  }
+  activity.push({ letter: '·', color: '#94a3b8', msg: liveP.almost ? `¡Casi lleno! Faltan ${missingKg} kg` : `Meta ${GOAL_KG} kg · van ${filledKg} kg`, time: '' });
 
-  const totalKg = 50;
-  const filledKg = 38;
-  const missingKg = totalKg - filledKg;
-  const r = 54,circ = 2 * Math.PI * r,filled = circ * (filledKg / totalKg);
   return (
     <div style={{ fontFamily: "'Inter',sans-serif", background: '#f4f5f7', height: '100%', display: 'flex', flexDirection: 'column', WebkitFontSmoothing: 'antialiased' }}>
       <header style={{ flexShrink: 0, background: 'rgba(255,255,255,0.97)', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 52, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1778,20 +1917,18 @@ function MobileGrupoParticipantes() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
         </button>
         <span style={{ fontWeight: 700, fontSize: 15, flex: 1, color: primary }}>Tu grupo en vivo</span>
-        <span style={{ fontSize: 11, color: '#888' }}>Grupo #2041</span>
+        <span style={{ fontSize: 11, color: '#888' }}>{productName}</span>
       </header>
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-        {/* Confirmación de pedido */}
         <div style={{ background: 'oklch(0.97 0.04 165)', border: '1px solid oklch(0.85 0.08 165)', borderRadius: 14, padding: '12px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: 999, background: primary, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 13.5, color: '#0f5132' }}>¡Te sumaste al grupo!</div>
-            <div style={{ fontSize: 11.5, color: '#555', marginTop: 2 }}>{productName} · Invitá vecinos para que cierre antes</div>
+            <div style={{ fontWeight: 700, fontSize: 13.5, color: '#0f5132' }}>{youJoined ? '¡Te sumaste al grupo!' : 'Grupo en formación'}</div>
+            <div style={{ fontSize: 11.5, color: '#555', marginTop: 2 }}>{productName} · {barrio} · Invitá vecinos para que cierre antes</div>
           </div>
         </div>
-        {/* Circular progress */}
         <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0 16px' }}>
           <div style={{ position: 'relative', width: 140, height: 140 }}>
             <svg width="140" height="140" style={{ transform: 'rotate(-90deg)' }}>
@@ -1807,47 +1944,56 @@ function MobileGrupoParticipantes() {
             </div>
           </div>
         </div>
-        {/* Avatars */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 8 }}>
-          {members.slice(0, 3).map((m) =>
-          <div key={m.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 999, background: m.color, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 700, fontSize: 16 }}>{m.name[0]}</div>
-              <div style={{ fontSize: 11, color: '#555' }}>{m.name}</div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
+          {youJoined && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 999, background: primary, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 700, fontSize: 16 }}>{youLabel[0].toUpperCase()}</div>
+              <div style={{ fontSize: 11, color: '#555' }}>{youLabel}</div>
             </div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 999, background: '#e8eaec', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: 13, color: '#555' }}>+4</div>
-            <div style={{ fontSize: 11, color: '#888' }}>más</div>
-          </div>
+          {Array.from({ length: showFaces }).map((_, i) =>
+            <div key={'v' + i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 999, background: faceColors[i % faceColors.length], display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>V</div>
+              <div style={{ fontSize: 11, color: '#555' }}>Vecino</div>
+            </div>
+          )}
+          {moreCount > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 999, background: '#e8eaec', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: 13, color: '#555' }}>+{moreCount}</div>
+              <div style={{ fontSize: 11, color: '#888' }}>más</div>
+            </div>
+          )}
+        </div>
+        <div style={{ textAlign: 'center', fontSize: 12.5, color: '#555', fontWeight: 600, marginBottom: 6 }}>
+          {youJoined ? `Vos + ${neighborCount} vecino${neighborCount === 1 ? '' : 's'}` : `${totalPeople} vecino${totalPeople === 1 ? '' : 's'} sumando`}
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, fontSize: 12, color: '#888', marginBottom: 16 }}>
           <span>Faltan: <b style={{ color: '#333' }}>{missingKg} kg</b></span>
           <span style={{ color: primary }}>Sumados: <b>{filledKg} kg</b></span>
         </div>
-        {/* Countdown */}
         <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: '14px', textAlign: 'center', marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: '#888', marginBottom: 6 }}>Cierra en</div>
           <div style={{ fontSize: 36, fontWeight: 900, color: '#ef4444', letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums' }}>{hh}:{mm}:{ss}</div>
         </div>
-        {/* Más ofertas */}
-        <MasOfertas excludeName={productName} barrio={selectedGroup?.location || 'Palermo'} />
-        {/* Activity */}
-        <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>Chat de actividad</div>
+        <MasOfertas excludeName={productName} barrio={barrio} />
+        <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>Actividad del grupo</div>
         <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, overflow: 'hidden', marginBottom: 14 }}>
           {activity.map((a, i) =>
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: i < activity.length - 1 ? '1px solid #f0f1f3' : 'none' }}>
-              <div style={{ width: 28, height: 28, borderRadius: 999, background: a.color, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>{a.name}</div>
+              <div style={{ width: 28, height: 28, borderRadius: 999, background: a.color, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>{a.letter}</div>
               <div style={{ flex: 1, fontSize: 13 }}>{a.msg}</div>
-              <div style={{ fontSize: 11, color: '#aaa' }}>{a.time}</div>
+              {a.time ? <div style={{ fontSize: 11, color: '#aaa' }}>{a.time}</div> : null}
             </div>
           )}
         </div>
-        {/* Actions */}
-        <button style={{ width: '100%', background: '#25D366', color: '#fff', border: 'none', borderRadius: 12, padding: '13px', fontWeight: 700, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <button type="button" onClick={() => navigate('mis-grupos')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 12, padding: '13px', fontWeight: 700, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', marginBottom: 8 }}>
+          Ir a Mis grupos
+        </button>
+        <button type="button" style={{ width: '100%', background: '#25D366', color: '#fff', border: 'none', borderRadius: 12, padding: '13px', fontWeight: 700, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
           Invitar por WhatsApp
         </button>
-        <button style={{ width: '100%', background: '#fff', color: '#333', border: '1px solid #e2e4e8', borderRadius: 12, padding: '12px', fontWeight: 600, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <button type="button" style={{ width: '100%', background: '#fff', color: '#333', border: '1px solid #e2e4e8', borderRadius: 12, padding: '12px', fontWeight: 600, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>
           Compartir link
         </button>
@@ -1931,13 +2077,129 @@ function MobileSeguimiento() {
 }
 
 // ─── Mapa en vivo ─────────────────────────────────────────────
+/** Centros realistas por barrio — cubren toda CABA (no solo Palermo). */
+const CABA_MAP_SPOTS = [
+  { barrio: 'Puerto Madero', lat: -34.6118, lng: -58.3631 },
+  { barrio: 'Retiro', lat: -34.5925, lng: -58.3758 },
+  { barrio: 'Recoleta', lat: -34.5875, lng: -58.3974 },
+  { barrio: 'Palermo', lat: -34.5886, lng: -58.4234 },
+  { barrio: 'Belgrano', lat: -34.5620, lng: -58.4530 },
+  { barrio: 'Núñez', lat: -34.5465, lng: -58.4604 },
+  { barrio: 'Colegiales', lat: -34.5738, lng: -58.4351 },
+  { barrio: 'Villa Crespo', lat: -34.5992, lng: -58.4419 },
+  { barrio: 'Caballito', lat: -34.6190, lng: -58.4354 },
+  { barrio: 'Flores', lat: -34.6278, lng: -58.4622 },
+  { barrio: 'Almagro', lat: -34.6079, lng: -58.4188 },
+  { barrio: 'Boedo', lat: -34.6377, lng: -58.4150 },
+  { barrio: 'San Telmo', lat: -34.6196, lng: -58.3725 },
+  { barrio: 'La Boca', lat: -34.6345, lng: -58.3639 },
+  { barrio: 'Barracas', lat: -34.6442, lng: -58.3799 },
+  { barrio: 'Parque Patricios', lat: -34.6402, lng: -58.4011 },
+  { barrio: 'Villa Devoto', lat: -34.6028, lng: -58.5140 },
+  { barrio: 'Villa Urquiza', lat: -34.5739, lng: -58.4886 },
+  { barrio: 'Saavedra', lat: -34.5572, lng: -58.4882 },
+  { barrio: 'Coghlan', lat: -34.5608, lng: -58.4748 },
+  { barrio: 'Chacarita', lat: -34.5906, lng: -58.4579 },
+  { barrio: 'Villa del Parque', lat: -34.5971, lng: -58.4746 },
+  { barrio: 'Monte Castro', lat: -34.6196, lng: -58.5035 },
+  { barrio: 'Mataderos', lat: -34.6548, lng: -58.5010 },
+  { barrio: 'Liniers', lat: -34.6433, lng: -58.5218 },
+  { barrio: 'Villa Lugano', lat: -34.6731, lng: -58.4674 },
+  { barrio: 'Villa Soldati', lat: -34.6655, lng: -58.4478 },
+  { barrio: 'Constitución', lat: -34.6301, lng: -58.3806 },
+  { barrio: 'Monserrat', lat: -34.6150, lng: -58.3794 },
+  { barrio: 'Parque Chacabuco', lat: -34.6358, lng: -58.4408 },
+  { barrio: 'Floresta', lat: -34.6237, lng: -58.4874 },
+  { barrio: 'Paternal', lat: -34.5968, lng: -58.4887 },
+  { barrio: 'Villa Ortúzar', lat: -34.5735, lng: -58.4636 },
+  { barrio: 'Agronomía', lat: -34.5947, lng: -58.5020 },
+  { barrio: 'Vélez Sarsfield', lat: -34.6371, lng: -58.4944 },
+  { barrio: 'Parque Avellaneda', lat: -34.6515, lng: -58.4765 },
+  { barrio: 'Nueva Pompeya', lat: -34.6564, lng: -58.4245 },
+  { barrio: 'San Cristóbal', lat: -34.6241, lng: -58.3996 },
+  { barrio: 'Villa Luro', lat: -34.6385, lng: -58.5030 },
+  { barrio: 'Versalles', lat: -34.6288, lng: -58.5235 },
+  { barrio: 'Villa Pueyrredón', lat: -34.5820, lng: -58.5035 },
+  { barrio: 'Villa Santa Rita', lat: -34.6155, lng: -58.4810 },
+  { barrio: 'Balvanera', lat: -34.6095, lng: -58.4035 },
+  { barrio: 'Once', lat: -34.6080, lng: -58.4065 },
+  { barrio: 'Congreso', lat: -34.6097, lng: -58.3925 },
+  { barrio: 'Villa Riachuelo', lat: -34.6910, lng: -58.4695 },
+  { barrio: 'Villa Real', lat: -34.6205, lng: -58.5280 },
+  { barrio: 'Parque Chas', lat: -34.5850, lng: -58.4790 },
+  { barrio: 'Colegiales Norte', lat: -34.5688, lng: -58.4488 },
+  { barrio: 'Palermo Hollywood', lat: -34.5815, lng: -58.4325 },
+];
+const VERDU_SHOP_POOL = [
+  'Verdulería Don Pedro', 'Mercado Fresco', 'La Canasta Verde', 'Verdulería El Sol',
+  'Fresco del Día', 'Huerta Urbana', 'Punto Orgánico', 'Frutas López',
+  'Verdulería San Martín', 'Mercado del Barrio', 'La Huerta Express', 'Verde Cercano',
+  'Don Julio Verduras', 'Casa de la Fruta', 'El Quinto Cuarto Verde', 'Natura Market',
+  'Verdulería Las Heras', 'Doña Rosa', 'Mercado X', 'Hub {barrio}',
+  'Feria {barrio}', 'Verdulería {barrio}', 'Puesto {barrio}', 'Canasta {barrio}',
+];
+/** Genera 100 ofertas de verdulerías distribuidas por CABA (producto + precio). */
+function resolveOfertaImg(prodName, img) {
+  if (img) return img;
+  const byName = HUBADOR_CATALOG.find((p) => p.name === prodName || (prodName && p.name.startsWith(prodName)));
+  return (byName && byName.img) || (HUBADOR_CATALOG[0] && HUBADOR_CATALOG[0].img) || 'img/papa.jpg';
+}
+
+function buildMapaOfertas100() {
+  const cat = HUBADOR_CATALOG;
+  const n = 100;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const spot = CABA_MAP_SPOTS[i % CABA_MAP_SPOTS.length];
+    const p = cat[i % cat.length];
+    const priceFactor = 0.90 + ((i * 11) % 21) * 0.01;
+    const priceN = Math.round(p.priceN * priceFactor);
+    const oldN = p.oldN;
+    const disc = calcDisc(priceN, oldN);
+    const jLat = (((i * 37) % 19) - 9) * 0.00135;
+    const jLng = (((i * 53) % 19) - 9) * 0.00155;
+    const shopTpl = VERDU_SHOP_POOL[i % VERDU_SHOP_POOL.length];
+    const verduleria = shopTpl.replace(/\{barrio\}/g, spot.barrio);
+    const filled = 3 + ((i * 5) % Math.max(4, GOAL_KG - 3));
+    out.push({
+      kind: 'oferta',
+      id: 'of-' + (i + 1),
+      catalogId: p.id,
+      lat: spot.lat + jLat,
+      lng: spot.lng + jLng,
+      zona: spot.barrio,
+      barrio: spot.barrio,
+      verduleria,
+      prod: p.name,
+      price: fmtPrecioAR(priceN),
+      old: fmtPrecioAR(oldN),
+      unit: p.unit,
+      disc,
+      img: resolveOfertaImg(p.name, p.img),
+      members: Math.min(filled, GOAL_KG),
+      max: GOAL_KG,
+      status: filled >= GOAL_KG ? 'lleno' : 'abierto',
+      time: p.time,
+      deadlineHrs: p.deadlineHrs,
+      cat: p.cat,
+      precioActualizado: !!p.precioActualizado,
+      priceN,
+      oldN,
+    });
+  }
+  return out;
+}
+const MAPA_OFERTAS_100 = buildMapaOfertas100();
+
 function MobileMapa({ compact }) {
   const primary = '#0e9c82';
+  const navigate = React.useContext(NavContext);
+  const { setSelected: setCtxSelected, setSelectedGroup, user } = React.useContext(SelectionContext);
   const mapRef = React.useRef(null);
   const mapInstance = React.useRef(null);
   const [selected, setSelected] = React.useState(null);
   const [ready, setReady] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState('hubs');
+  const [viewMode, setViewMode] = React.useState('ofertas');
   const selectedRef = React.useRef(null);
 
   const ORDERS = [
@@ -2027,6 +2289,32 @@ function MobileMapa({ compact }) {
   [19, 20], [20, 21], [23, 25], [24, 26], [25, 27], [26, 27], [27, 28], [28, 29], [29, 30],
   [30, 31], [31, 32], [7, 26]];
 
+  // Marketplace ofertas — 100 verdulerías en toda CABA (producto + precio)
+  const OFERTAS = MAPA_OFERTAS_100;
+
+  const openMapSelection = (sel) => {
+    if (!sel) return;
+    if (sel.kind === 'oferta' || (sel.catalogId && hubadorById(sel.catalogId)) || (sel.id && hubadorById(sel.id))) {
+      const raw = hubadorById(sel.catalogId) || hubadorById(sel.id) || HUBADOR_CATALOG.find((x) => x.name === sel.prod);
+      if (!raw) return;
+      const base = hubadorCard(raw);
+      const p = sel.kind === 'oferta' && sel.priceN != null
+        ? { ...base, price: sel.price || base.price, old: sel.old || base.old, priceN: sel.priceN, oldN: sel.oldN != null ? sel.oldN : base.oldN, disc: sel.disc != null ? sel.disc : base.disc }
+        : base;
+      setCtxSelected(p);
+      setSelectedGroup(grupoFromHubadorProduct(p, sel.zona || user?.barrio || 'Palermo'));
+      navigate('grupo-detalle');
+      return;
+    }
+    const short = String(sel.prod || '').split('·')[0].trim().toLowerCase();
+    const raw = HUBADOR_CATALOG.find((x) => x.name.toLowerCase() === short || x.name.toLowerCase().startsWith(short) || short.startsWith(x.name.toLowerCase().split(' ')[0]));
+    if (raw) {
+      const p = hubadorCard(raw);
+      setCtxSelected(p);
+      setSelectedGroup(grupoFromHubadorProduct(p, sel.zona || user?.barrio || 'Palermo'));
+      navigate('grupo-detalle');
+    }
+  };
 
   React.useEffect(() => {
     if (!mapRef.current) return;
@@ -2042,6 +2330,9 @@ function MobileMapa({ compact }) {
         @keyframes dashMove { to { stroke-dashoffset: -20; } }
         .leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important; }
         .leaflet-popup-tip-container { display:none; }
+        .hubador-oferta-pin { background:transparent!important;border:none!important }
+        .hubador-oferta-pin div { font-family:Inter,system-ui,sans-serif }
+        .hubador-oferta-thumb { background-size:cover!important;background-position:center!important }
       `;
       document.head.appendChild(style);
     }
@@ -2060,8 +2351,9 @@ function MobileMapa({ compact }) {
     });
 
     const initMap = (userLat, userLng) => {
+      const defaultZoom = viewMode === 'ofertas' ? 11 : 13;
       const map = window.L.map(mapRef.current, { zoomControl: false, attributionControl: false }).
-      setView([userLat, userLng], 13);
+      setView(viewMode === 'ofertas' ? [-34.6150, -58.4450] : [userLat, userLng], defaultZoom);
       mapInstance.current = map;
 
       // Clean light tiles
@@ -2096,7 +2388,7 @@ function MobileMapa({ compact }) {
           const icon = window.L.divIcon({ html, iconSize: [40, 40], iconAnchor: [20, 20], className: '' });
           window.L.marker([g.lat, g.lng], { icon }).addTo(map).on('click', () => {setSelected({ ...g });map.panTo([g.lat, g.lng]);});
         });
-      } else {
+      } else if (viewMode === 'ordenes') {
         // ÓRDENES view — individual pins with leader crown + pulse + colored connections
         const PC = { 'Papa': '#f59e0b', 'Manzana': '#ef4444', 'Naranja': '#f97316', 'Zapallo anco': '#fb923c', 'Banana': '#eab308', 'Cebolla': '#8b5cf6', 'Tomate': '#dc2626', 'Lechuga': '#22c55e', 'Limón': '#a3e635', 'Batata': '#14b8a6' };
         ORDERS.forEach((a, i) => {ORDERS.slice(i + 1).forEach((b) => {
@@ -2113,6 +2405,39 @@ function MobileMapa({ compact }) {
           const icon = window.L.divIcon({ html, iconSize: [36, 48], iconAnchor: [18, 48], className: '' });
           window.L.marker([o.lat, o.lng], { icon }).addTo(map).on('click', () => {setSelected({ ...o });map.panTo([o.lat, o.lng]);});
         });
+      } else {
+        // OFERTAS — 100 verdulerías en CABA: chips foto + producto + precio
+        const ofertaLayer = window.L.featureGroup();
+        OFERTAS.forEach((o) => {
+          const c = o.status === 'lleno' ? '#ef4444' : primary;
+          const shortName = o.prod.length > 12 ? o.prod.slice(0, 11) + '…' : o.prod;
+          const priceLabel = o.price || '';
+          const discBit = o.disc != null ? `<span style="color:${c};font-weight:800">↓${o.disc}%</span>` : '';
+          const thumb = resolveOfertaImg(o.prod, o.img).replace(/'/g, '%27');
+          const html = `<div style="display:flex;flex-direction:column;align-items:center;pointer-events:auto">
+            <div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.97);border:1px solid ${c}66;border-radius:8px;padding:2px 6px 2px 2px;box-shadow:0 1px 5px rgba(0,0,0,0.12);max-width:118px;white-space:nowrap">
+              <div class="hubador-oferta-thumb" style="width:30px;height:30px;border-radius:6px;flex-shrink:0;background:#e8ebe9 url('${thumb}') center/cover no-repeat;border:1px solid ${c}33"></div>
+              <div style="min-width:0;text-align:left;line-height:1.15">
+                <div style="font-size:9px;font-weight:800;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;max-width:78px">${shortName}</div>
+                <div style="font-size:9.5px;font-weight:800;color:${c}">${priceLabel}${discBit ? ' · ' + discBit : ''}</div>
+              </div>
+            </div>
+            <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid ${c};margin-top:-1px;filter:drop-shadow(0 1px 1px rgba(0,0,0,0.15))"></div>
+          </div>`;
+          const icon = window.L.divIcon({ html, iconSize: [118, 42], iconAnchor: [59, 42], className: 'hubador-oferta-pin' });
+          const m = window.L.marker([o.lat, o.lng], { icon, zIndexOffset: 200 });
+          m.on('click', () => {
+            setSelected({ ...o });
+            map.panTo([o.lat, o.lng]);
+            openMapSelection(o);
+          });
+          ofertaLayer.addLayer(m);
+        });
+        ofertaLayer.addTo(map);
+        try {
+          const b = ofertaLayer.getBounds();
+          if (b && b.isValid()) map.fitBounds(b.pad(0.06), { maxZoom: 13, animate: false });
+        } catch (e) {}
       }
 
       // User location
@@ -2155,11 +2480,13 @@ function MobileMapa({ compact }) {
   }, [compact, ready]);
 
   const sel = selected;
+  const viewCount = viewMode === 'hubs' ? GROUPS.length : viewMode === 'ordenes' ? ORDERS.length : OFERTAS.length;
+  const viewCountLabel = viewMode === 'hubs' ? 'hubs' : viewMode === 'ordenes' ? 'órdenes' : 'ofertas';
   const viewToggle = (
     <div style={{ display: 'flex', background: compact ? 'rgba(255,255,255,0.96)' : '#f0f1f3', borderRadius: 999, padding: 2, gap: 2, flexShrink: 0, boxShadow: compact ? '0 2px 10px rgba(0,0,0,0.12)' : 'none' }}>
-      {['hubs', 'ordenes'].map((m) =>
-      <button key={m} onClick={() => setViewMode(m)} style={{ border: 'none', borderRadius: 999, padding: compact ? '3px 8px' : '4px 10px', fontSize: compact ? 10 : 11, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', background: viewMode === m ? '#fff' : 'transparent', color: viewMode === m ? primary : '#888', boxShadow: viewMode === m ? '0 1px 3px rgba(0,0,0,0.12)' : 'none', transition: 'all .15s' }}>
-          {m === 'hubs' ? 'Hubs' : 'Órdenes'}
+      {[['ofertas', 'Ofertas'], ['hubs', 'Hubs'], ['ordenes', 'Órdenes']].map(([m, label]) =>
+      <button key={m} onClick={() => setViewMode(m)} style={{ border: 'none', borderRadius: 999, padding: compact ? '3px 7px' : '4px 9px', fontSize: compact ? 10 : 11, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', background: viewMode === m ? '#fff' : 'transparent', color: viewMode === m ? primary : '#888', boxShadow: viewMode === m ? '0 1px 3px rgba(0,0,0,0.12)' : 'none', transition: 'all .15s' }}>
+          {label}
         </button>
       )}
     </div>
@@ -2174,13 +2501,17 @@ function MobileMapa({ compact }) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
               <span style={{ color: '#aaa', fontSize: 13 }}>Buscar producto o barrio...</span>
             </div>
-            <div style={{ fontSize: 11, color: primary, fontWeight: 600, whiteSpace: 'nowrap' }}>{viewMode === 'hubs' ? `${GROUPS.length} hubs` : `${ORDERS.length} órdenes`}</div>
+            <div style={{ fontSize: 11, color: primary, fontWeight: 600, whiteSpace: 'nowrap' }}>{viewCount} {viewCountLabel}</div>
             {viewToggle}
           </header>
 
           {/* Legend strip — didáctica */}
           <div style={{ flexShrink: 0, background: '#fff', borderBottom: '1px solid #e8eaec', padding: '8px 14px', display: 'flex', gap: 12, fontSize: 11, alignItems: 'center', flexWrap: 'wrap' }}>
-            {viewMode === 'hubs' ? <>
+            {viewMode === 'ofertas' ? <>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: 4, background: primary, display: 'inline-block' }} /><b>Chip</b> — producto + precio de verdulería</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><b>{OFERTAS.length} ofertas</b> en toda CABA</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6', display: 'inline-block' }} /><b>Vos</b></span>
+            </> : viewMode === 'hubs' ? <>
               <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: '50%', background: '#0e9c82', display: 'inline-block' }} /><b>Hub activo</b> — punto de retiro</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} /><b>Hub lleno</b></span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ borderTop: '2px dashed #0e9c82', width: 16, display: 'inline-block' }} /><b>Red conectada</b></span>
@@ -2194,7 +2525,14 @@ function MobileMapa({ compact }) {
       )}
 
       {compact && (
-        <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 500 }}>{viewToggle}</div>
+        <>
+          <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 500 }}>{viewToggle}</div>
+          {viewMode === 'ofertas' && (
+            <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 500, background: 'rgba(255,255,255,0.96)', borderRadius: 999, padding: '4px 10px', fontSize: 10.5, fontWeight: 700, color: primary, boxShadow: '0 2px 10px rgba(0,0,0,0.12)' }}>
+              {OFERTAS.length} ofertas
+            </div>
+          )}
+        </>
       )}
 
       {/* Map canvas */}
@@ -2209,18 +2547,29 @@ function MobileMapa({ compact }) {
         }
       </div>
 
-      {/* Bottom sheet — selected group */}
+      {/* Bottom sheet — selected group / oferta */}
       {sel &&
       <div style={{ flexShrink: 0, background: '#fff', borderTop: '2px solid #e8eaec', padding: compact ? '8px 10px 6px' : '14px 16px 8px', boxShadow: '0 -8px 24px rgba(0,0,0,0.08)', animation: 'slideUp .25s ease', position: compact ? 'absolute' : 'relative', left: compact ? 0 : undefined, right: compact ? 0 : undefined, bottom: compact ? 0 : undefined, zIndex: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: compact ? 6 : 10 }}>
-            <div>
-              <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>
-                {sel.lider ? `👑 Líder: ${sel.lider}` : `Hub · ${sel.zona}`}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: compact ? 6 : 10, gap: 10 }}>
+            <div style={{ display: 'flex', gap: 10, minWidth: 0 }}>
+              {sel.kind === 'oferta' && sel.img && (
+                <div style={{ width: compact ? 40 : 48, height: compact ? 40 : 48, borderRadius: 10, overflow: 'hidden', flexShrink: 0, border: '1px solid #e8eaec' }}>
+                  <img src={sel.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+              )}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 11, color: '#888', marginBottom: 2 }}>
+                  {sel.kind === 'oferta' ? `${sel.verduleria || 'Verdulería'} · ${sel.zona}` : sel.lider ? `👑 Líder: ${sel.lider}` : `Hub · ${sel.zona}`}
+                </div>
+                <div style={{ fontWeight: 800, fontSize: compact ? 13 : 15 }}>{sel.prod}</div>
+                <div style={{ fontSize: 11, color: primary, fontWeight: 600, marginTop: 2 }}>
+                  {sel.kind === 'oferta'
+                    ? `${sel.price}${sel.unit || ''} · ↓${sel.disc}% · ${sel.members}/${sel.max} kg · ${sel.zona}`
+                    : `↓${sel.disc}% · ${sel.members}/${sel.max} vecinos ${sel.lider ? `· ${sel.zona}` : ''}`}
+                </div>
               </div>
-              <div style={{ fontWeight: 800, fontSize: compact ? 13 : 15 }}>{sel.prod}</div>
-              <div style={{ fontSize: 11, color: primary, fontWeight: 600, marginTop: 2 }}>↓{sel.disc}% · {sel.members}/{sel.max} vecinos {sel.lider ? `· ${sel.zona}` : ''}</div>
             </div>
-            <button onClick={() => setSelected(null)} style={{ border: 'none', background: '#f0f1f3', borderRadius: 999, width: 28, height: 28, cursor: 'pointer', display: 'grid', placeItems: 'center', color: '#555', fontSize: 14, fontWeight: 700 }}>✕</button>
+            <button onClick={() => setSelected(null)} style={{ border: 'none', background: '#f0f1f3', borderRadius: 999, width: 28, height: 28, cursor: 'pointer', display: 'grid', placeItems: 'center', color: '#555', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>✕</button>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: compact ? 0 : 10 }}>
             <div style={{ flex: 1, height: 6, background: '#e8eaec', borderRadius: 999, overflow: 'hidden' }}>
@@ -2229,8 +2578,16 @@ function MobileMapa({ compact }) {
             <span style={{ fontSize: 12, fontWeight: 700, color: sel.status === 'lleno' ? '#ef4444' : '#333', whiteSpace: 'nowrap' }}>{sel.members}/{sel.max}</span>
           </div>
           {!compact &&
-          <button style={{ width: '100%', background: sel.status === 'lleno' ? '#f0f1f3' : primary, color: sel.status === 'lleno' ? '#aaa' : '#fff', border: 'none', borderRadius: 10, padding: '11px', fontWeight: 700, fontSize: 14, fontFamily: 'inherit', cursor: sel.status === 'lleno' ? 'default' : 'pointer' }}>
-            {sel.status === 'lleno' ? 'Cupo completo — avisame si se libera' : 'Unirme al grupo →'}
+          <button
+            type="button"
+            onClick={() => { if (sel.kind === 'oferta' || sel.status !== 'lleno') openMapSelection(sel); }}
+            style={{ width: '100%', background: (sel.kind !== 'oferta' && sel.status === 'lleno') ? '#f0f1f3' : primary, color: (sel.kind !== 'oferta' && sel.status === 'lleno') ? '#aaa' : '#fff', border: 'none', borderRadius: 10, padding: '11px', fontWeight: 700, fontSize: 14, fontFamily: 'inherit', cursor: (sel.kind !== 'oferta' && sel.status === 'lleno') ? 'default' : 'pointer' }}>
+            {sel.kind === 'oferta' ? 'Ver oferta y unirme →' : sel.status === 'lleno' ? 'Cupo completo — avisame si se libera' : 'Unirme al grupo →'}
+          </button>
+          }
+          {compact && sel.kind === 'oferta' && sel.status !== 'lleno' &&
+          <button type="button" onClick={() => openMapSelection(sel)} style={{ width: '100%', marginTop: 6, background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '8px', fontWeight: 700, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer' }}>
+            Ver oferta →
           </button>
           }
         </div>
@@ -2242,19 +2599,25 @@ function MobileMapa({ compact }) {
 // ─── Bottom nav shared ────────────────────────────────────────
 function BottomNav({ active }) {
   const navigate = React.useContext(NavContext);
+  const { cart } = React.useContext(SelectionContext);
   const primary = 'oklch(0.55 0.15 165)';
+  const cartCount = cartTotals(cart).items;
   const items = [
   { id: 'home', label: 'Inicio', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
   { id: 'productos', label: 'Productos', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg> },
   { id: 'mapa', label: 'Mapa', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg> },
-  { id: 'comparador', label: 'Precios', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18" /><path d="M7 16V9" /><path d="M12 16V5" /><path d="M17 16v-3" /></svg> },
-  { id: 'mis-grupos', label: 'Mis Grupos', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> }];
+  { id: 'mis-grupos', label: 'Mis Grupos', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, badge: cartCount }];
 
   return (
     <div style={{ flexShrink: 0, background: '#fff', borderTop: '1px solid #e8eaec', padding: '6px 0 10px', display: 'flex' }}>
       {items.map((it) =>
-      <div key={it.id + it.label} onClick={() => navigate(it.id)} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, cursor: 'pointer', color: active === it.id ? primary : '#aaa' }}>
-          {it.icon}
+      <div key={it.id + it.label} onClick={() => navigate(it.id)} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, cursor: 'pointer', color: active === it.id ? primary : '#aaa', position: 'relative' }}>
+          <span style={{ position: 'relative', display: 'inline-flex' }}>
+            {it.icon}
+            {it.badge > 0 && (
+              <span style={{ position: 'absolute', top: -6, right: -10, minWidth: 15, height: 15, padding: '0 4px', borderRadius: 999, background: primary, color: '#fff', fontSize: 9, fontWeight: 800, display: 'grid', placeItems: 'center', lineHeight: 1 }}>{it.badge}</span>
+            )}
+          </span>
           <span style={{ fontSize: 9.5, fontWeight: active === it.id ? 700 : 400, textAlign: 'center', lineHeight: 1.15 }}>{it.label}</span>
         </div>
       )}
@@ -2269,34 +2632,9 @@ const SelectionContext = React.createContext({ selected: null, setSelected: () =
 function MobileMisGrupos() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { cart, user, setSelectedGroup, setSelectedOrder } = React.useContext(SelectionContext);
-
-  if (!user) {
-    return (
-      <div style={{ fontFamily: "'Inter',sans-serif", background: '#f4f5f7', minHeight: '100%', display: 'grid', placeItems: 'center', padding: 30 }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 46, marginBottom: 8 }}>🔒</div>
-          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>Iniciá sesión</div>
-          <div style={{ fontSize: 13, color: '#888', marginBottom: 18 }}>Para ver los grupos en los que estás participando.</div>
-          <button onClick={() => navigate('login')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '10px 22px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ingresar</button>
-        </div>
-      </div>);
-
-  }
-
-  // Cada item del carrito = un grupo al que se unió
-  const grupos = cart.map((c) => {
-    const [m, t] = (c.members || '?/?').split('/').map((n) => parseInt(n, 10) || 0);
-    return { ...c, m, t, status: m >= t ? 'cerrando' : 'formando' };
-  });
-
-  const totalGastos = cart.reduce((acc, c) => {
-    const pn = parseInt((c.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
-    return acc + pn * c.qty;
-  }, 0);
-
-  const cerrando = grupos.filter((g) => g.status === 'cerrando').length;
-  const formando = grupos.filter((g) => g.status === 'formando').length;
+  const { cart, user, removeFromCart, updateCartQty, showToast } = React.useContext(SelectionContext);
+  const totals = cartTotals(cart);
+  const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', WebkitFontSmoothing: 'antialiased' }}>
@@ -2307,144 +2645,187 @@ function MobileMisGrupos() {
           </button>
           <span style={{ fontWeight: 800, fontSize: 16 }}>Mis Grupos</span>
         </div>
-        <div style={{ fontSize: 11.5, color: '#888' }}>👤 {user.nombre}</div>
+        <div style={{ fontSize: 11.5, color: '#888' }}>{user ? `👤 ${user.nombre}` : 'Invitado'}</div>
       </header>
 
-      {/* KPIs estilo dashboard, pero del cliente */}
       <div style={{ padding: '16px 16px 0' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 10 }}>
           <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 11, padding: '10px 12px' }}>
-            <div style={{ fontSize: 10.5, color: '#888', fontWeight: 500, marginBottom: 3 }}>Grupos</div>
-            <div style={{ fontWeight: 800, fontSize: 20 }}>{grupos.length}</div>
-          </div>
-          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 11, padding: '10px 12px' }}>
-            <div style={{ fontSize: 10.5, color: '#888', fontWeight: 500, marginBottom: 3 }}>Formándose</div>
-            <div style={{ fontWeight: 800, fontSize: 20, color: 'oklch(0.55 0.15 55)' }}>{formando}</div>
+            <div style={{ fontSize: 10.5, color: '#888', fontWeight: 500, marginBottom: 3 }}>Ítems</div>
+            <div style={{ fontWeight: 800, fontSize: 20 }}>{totals.items}</div>
           </div>
           <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 11, padding: '10px 12px' }}>
             <div style={{ fontSize: 10.5, color: '#888', fontWeight: 500, marginBottom: 3 }}>A pagar</div>
-            <div style={{ fontWeight: 800, fontSize: 16, color: primary }}>${totalGastos.toLocaleString('es-AR')}</div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: primary }}>{fmtPrecioAR(totals.grupo)}</div>
+          </div>
+          <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 11, padding: '10px 12px' }}>
+            <div style={{ fontSize: 10.5, color: '#0f766e', fontWeight: 600, marginBottom: 3 }}>Ahorro</div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: '#0f766e' }}>{fmtPrecioAR(totals.ahorro)}</div>
           </div>
         </div>
+        {totals.coto > 0 && cart.length > 0 && (
+          <div style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
+            En Coto serían <s>{fmtPrecioAR(totals.coto)}</s> · ahorrás <b style={{ color: '#0f766e' }}>{fmtPrecioAR(totals.ahorro)}</b>
+          </div>
+        )}
       </div>
 
       <div style={{ padding: '0 16px 24px' }}>
-        <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span>Grupos activos</span>
-          <span style={{ fontSize: 11.5, color: '#888', fontWeight: 500 }}>{grupos.length} {grupos.length === 1 ? 'grupo' : 'grupos'}</span>
-        </div>
-
-        {grupos.length === 0 ?
-        <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '28px 16px', textAlign: 'center' }}>
+        {cart.length === 0 ? (
+          <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '28px 16px', textAlign: 'center' }}>
             <div style={{ fontSize: 36, marginBottom: 8 }}>👥</div>
             <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Todavía no te uniste a ningún grupo</div>
             <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Sumate a un grupo de compra cerca tuyo para empezar a ahorrar.</div>
             <button onClick={() => navigate('home')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Explorar productos</button>
-          </div> :
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {grupos.map((g) => {
-            const pn = parseInt((g.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
-            const ln = pn * g.qty;
-            const isClose = g.status === 'cerrando';
-            return (
-              <div key={g.id} onClick={() => {setSelectedGroup({ product: g.name, location: g.location, members: g.members, progress: g.progress, closes: '2d', price: g.price, unit: g.unit, img: g.img, status: 'abierto' });navigate('grupo-participantes');}} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, display: 'flex', gap: 12, cursor: 'pointer' }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
-                    <img src={g.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                      <div style={{ fontWeight: 700, fontSize: 14 }}>{g.name}</div>
-                      <span style={{ flexShrink: 0, background: isClose ? '#dcfce7' : '#fef9c3', color: isClose ? '#166534' : '#854d0e', borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 700 }}>{isClose ? '✓ Listo' : '🕒 Formando'}</span>
-                    </div>
-                    <div style={{ fontSize: 11.5, color: '#888', margin: '3px 0' }}>{g.qty} {g.unit === '/u' ? 'u' : 'kg'} · 👥 {g.members} · 📍 {g.location}</div>
-                    <div style={{ height: 4, background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', marginTop: 5 }}>
-                      <div style={{ height: '100%', width: `${Math.min(100, g.m / g.t * 100 || 40)}%`, background: isClose ? 'oklch(0.65 0.2 145)' : primary, borderRadius: 999 }} />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, fontSize: 11.5 }}>
-                      <span style={{ color: '#888' }}>Mi pedido</span>
-                      <span style={{ fontWeight: 700, color: primary }}>${ln.toLocaleString('es-AR')}</span>
-                    </div>
-                  </div>
-                </div>);
-
-          })}
-            <button onClick={() => navigate('home')} style={{ background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 4 }}>+ Unirme a otro grupo</button>
           </div>
-        }
+        ) : (
+          <>
+            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>Pedidos en formación</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {cart.map((g) => {
+                const t = cartLineTotals(g);
+                return (
+                  <div key={g.id || g.name} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, display: 'flex', gap: 12 }}>
+                    <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                      <img src={g.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>{g.name}</div>
+                        <button type="button" onClick={() => removeFromCart(g.id || g.name)} style={{ background: 'none', border: 'none', color: '#aaa', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>Quitar</button>
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#888', margin: '3px 0' }}>
+                        {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
+                        {t.oldN > 0 && <> · <s>{fmtPrecioAR(t.oldN)}</s> Coto</>}
+                        {g.location ? <> · 📍 {g.location}</> : null}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f5f7', borderRadius: 999, padding: '4px 6px' }}>
+                          <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(1, t.qty - 1))} style={{ width: 28, height: 28, borderRadius: 999, border: '1px solid #ddd', background: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
+                          <span style={{ fontWeight: 800, fontSize: 13, minWidth: 36, textAlign: 'center' }}>{t.qty} {unitOf(g.unit)}</span>
+                          <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + 1)} style={{ width: 28, height: 28, borderRadius: 999, border: 'none', background: primary, color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontWeight: 800, fontSize: 14, color: primary }}>{fmtPrecioAR(t.grupo)}</div>
+                          {t.ahorro > 0 && <div style={{ fontSize: 10.5, color: '#0f766e', fontWeight: 600 }}>Ahorrás {fmtPrecioAR(t.ahorro)}</div>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
-        {/* Link al historial de pedidos pasados */}
-        <div onClick={() => navigate('historial')} style={{ marginTop: 18, background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+            <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 14, marginTop: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 }}>
+                <span style={{ color: '#666' }}>Si compraras en Coto</span>
+                <s style={{ color: '#888' }}>{fmtPrecioAR(totals.coto)}</s>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8 }}>
+                <span style={{ fontWeight: 600 }}>Total en grupo</span>
+                <strong style={{ color: primary }}>{fmtPrecioAR(totals.grupo)}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 14, color: '#0f766e' }}>
+                <span style={{ fontWeight: 700 }}>Ahorro total</span>
+                <strong>{fmtPrecioAR(totals.ahorro)}</strong>
+              </div>
+              {!user ? (
+                <button type="button" onClick={() => navigate('login')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ingresar para confirmar</button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => showToast('Pedido guardado · te avisamos cuando cierre el grupo')}
+                  style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Confirmar mi pedido
+                </button>
+              )}
+              <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 10, lineHeight: 1.4 }}>
+                Otros vecinos pueden seguir uniéndose al grupo hasta completar el mínimo.
+              </div>
+              <button type="button" onClick={() => navigate('home')} style={{ width: '100%', marginTop: 10, background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Seguir sumando productos</button>
+            </div>
+          </>
+        )}
+
+        <div onClick={() => navigate('perfil')} style={{ marginTop: 18, background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
           <div style={{ width: 36, height: 36, borderRadius: 9, background: '#f4f5f7', display: 'grid', placeItems: 'center', fontSize: 18, flexShrink: 0 }}>📋</div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 13.5 }}>Historial de pedidos</div>
-            <div style={{ fontSize: 11.5, color: '#888' }}>Pedidos entregados y pagados</div>
+            <div style={{ fontWeight: 600, fontSize: 13.5 }}>Tus pedidos</div>
+            <div style={{ fontSize: 11.5, color: '#888' }}>Estado en Perfil · entregados y pagados</div>
           </div>
           <span style={{ color: '#bbb', fontSize: 18 }}>›</span>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 // ─── Perfil (lado cliente) ──────────────────────────────
 function MobilePerfil() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { user, logout, cart } = React.useContext(SelectionContext);
-  if (!user) {
-    return (
-      <div style={{ fontFamily: "'Inter',sans-serif", background: '#f4f5f7', minHeight: '100%', display: 'grid', placeItems: 'center', padding: 30 }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 46, marginBottom: 8 }}>👤</div>
-          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>No iniciaste sesión</div>
-          <button onClick={() => navigate('login')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '10px 22px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 10 }}>Ingresar</button>
-        </div>
-      </div>);
-
-  }
-  const items = [
-  ['👥', 'Mis grupos', 'mis-grupos'],
-  ['📋', 'Historial de pedidos', 'historial'],
-  ['📍', 'Cambiar barrio', null],
-  ['🔔', 'Notificaciones', null],
-  ['❓', 'Ayuda', null]];
+  const { user, logout, cart, setSelectedOrder } = React.useContext(SelectionContext);
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', WebkitFontSmoothing: 'antialiased' }}>
       <header style={{ position: 'sticky', top: 0, zIndex: 5, background: 'rgba(255,255,255,0.97)', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 52, display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontWeight: 800, fontSize: 16 }}>Mi cuenta</span>
+        <span style={{ fontWeight: 800, fontSize: 16 }}>Perfil</span>
       </header>
       <div style={{ padding: 16 }}>
-        <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 18, textAlign: 'center', marginBottom: 14 }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: primary, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 28, margin: '0 auto 10px' }}>{user.nombre[0]?.toUpperCase()}</div>
-          <div style={{ fontWeight: 800, fontSize: 17 }}>{user.nombre}</div>
-          <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{user.email}</div>
-          <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>📍 {user.barrio || 'Palermo'}</div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: 12, textAlign: 'center' }}>
-            <div style={{ fontWeight: 800, fontSize: 20, color: primary }}>{cart.length}</div>
-            <div style={{ fontSize: 11.5, color: '#888' }}>Grupos activos</div>
+        {!user ? (
+          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 28, textAlign: 'center' }}>
+            <div style={{ fontSize: 14, color: '#555', marginBottom: 14 }}>No hay sesión activa.</div>
+            <button type="button" onClick={() => navigate('login')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '10px 22px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ingresar</button>
           </div>
-          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: 12, textAlign: 'center' }}>
-            <div style={{ fontWeight: 800, fontSize: 20, color: '#15803d' }}>$3.240</div>
-            <div style={{ fontSize: 11.5, color: '#888' }}>Ahorrado en total</div>
-          </div>
-        </div>
-        <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, overflow: 'hidden' }}>
-          {items.map(([ic, lbl, dest], i) =>
-          <div key={lbl} onClick={() => dest && navigate(dest)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderTop: i === 0 ? 'none' : '1px solid #f0f1f3', cursor: dest ? 'pointer' : 'default' }}>
-              <span style={{ fontSize: 18 }}>{ic}</span>
-              <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>{lbl}</span>
-              <span style={{ color: '#bbb', fontSize: 18 }}>›</span>
+        ) : (
+          <>
+            <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 18, display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: primary, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 22, flexShrink: 0 }}>{(user.nombre || 'V').slice(0, 1).toUpperCase()}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: 800, fontSize: 17 }}>{user.nombre}</div>
+                <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{user.email}</div>
+                <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>📍 {user.barrio}</div>
+                <div style={{ fontSize: 12, color: '#555', marginTop: 4 }}>{cart.length} pedido(s) en formación</div>
+              </div>
             </div>
-          )}
-        </div>
-        <button onClick={() => {logout();navigate('login');}} style={{ width: '100%', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 16 }}>Cerrar sesión</button>
-      </div>
-    </div>);
 
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#333', marginBottom: 4 }}>Tus pedidos</div>
+            <div style={{ fontSize: 12, color: '#888', marginBottom: 10 }}>Estado de lo que compraste o te uniste ({DEMO_PEDIDOS.length})</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
+              {DEMO_PEDIDOS.map((p) => {
+                const s = PEDIDO_STATUS_STYLE[p.status];
+                return (
+                  <div key={p.name} onClick={() => { setSelectedOrder(p); navigate('seguimiento'); }} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 14, display: 'flex', gap: 12, cursor: 'pointer' }}>
+                    <div style={{ width: 76, height: 76, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                        <div style={{ fontWeight: 600, fontSize: 13.5, lineHeight: 1.3 }}>{p.name}</div>
+                        <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 600 }}>{s.label}</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: '#888', margin: '4px 0' }}>{p.qty} · {p.date}</div>
+                      <div style={{ fontWeight: 800, fontSize: 18, color: primary }}>{p.total}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, overflow: 'hidden' }}>
+              <div onClick={() => navigate('mis-grupos')} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer' }}>
+                <span style={{ fontSize: 18 }}>👥</span>
+                <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>Mis grupos</span>
+                <span style={{ color: '#bbb', fontSize: 18 }}>›</span>
+              </div>
+            </div>
+            <button type="button" onClick={() => { logout(); navigate('login'); }} style={{ width: '100%', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 16 }}>Cerrar sesión</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ─── Comparador de precios (Coto · mayoristas · Conlat) ──────
@@ -2504,7 +2885,8 @@ function MobileComparador() {
 function WebHome() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { user, cart, setSelected, setSelectedGroup, webSearch, setWebSearch } = React.useContext(SelectionContext);
+  const { user, cart, setSelected, setSelectedGroup, webSearch, setWebSearch, addToCart, showToast, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
   const search = webSearch || '';
   const setSearch = (v) => { if (typeof setWebSearch === 'function') setWebSearch(v); };
   const [cat, setCat] = React.useState('todos');
@@ -2531,10 +2913,11 @@ function WebHome() {
   sortActualizadoPrimero(filtered, secondary);
 
   const openProduct = (p) => {
+    const live = groupProgressView(p.name);
     setSelected(p);
     setSelectedGroup({
-      product: p.name, location: user?.barrio || 'Palermo', members: p.members, progress: p.prog,
-      closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, cat: p.cat, totalKg: p.goal || 50, precioActualizado: !!p.precioActualizado, status: 'abierto'
+      product: p.name, location: user?.barrio || 'Palermo', members: p.members, progress: live.pct,
+      closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, cat: p.cat, totalKg: GOAL_KG, precioActualizado: !!p.precioActualizado, status: 'abierto'
     });
     navigate('grupo-detalle');
   };
@@ -2627,7 +3010,8 @@ function WebHome() {
         ) : (
           <div className="web-grid web-grid-products">
             {filtered.map((p) => {
-              const kt = p.goal || 50, kf = Math.round(kt * p.prog / 100), miss = kt - kf, almost = miss <= 6;
+              const live = groupProgressView(p.name);
+              const miss = live.missing, almost = live.almost;
               return (
                 <article key={p.name} className="web-prod-card" onClick={() => openProduct(p)}>
                   <div className="web-prod-img">
@@ -2649,22 +3033,19 @@ function WebHome() {
                         </div>
                       )}
                     </div>
+                    <div className="web-progress"><i style={{ width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
+                    <div className="web-prod-meta">
+                      <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
+                        {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{GOAL_KG} kg
+                      </span>
+                    </div>
+                    <div className="web-countdown-wrap"><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
                       type="button"
                       className="web-join-card"
                       onClick={(e) => { e.stopPropagation(); openProduct(p); }}
                       style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
                     >Unirme al grupo</button>
-                    <div className="web-countdown-wrap">
-                      <Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card />
-                    </div>
-                    <div className="web-progress"><i style={{ width: p.prog + '%', background: p.prog >= 88 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
-                    <div className="web-prod-meta">
-                      <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
-                        {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`}
-                      </span>
-                      <span>{kf}/{kt}kg</span>
-                    </div>
                   </div>
                 </article>
               );
@@ -2716,7 +3097,7 @@ function WebHeader({ showSearch = true }) {
           <div className="web-logo">H</div>
           <div>
             <div className="web-brand-name">HUBADOR</div>
-            <div className="web-brand-sub">📍 {user?.barrio || 'Palermo'} · {nAvail} disponibles</div>
+            <div className="web-brand-sub">📍 {DEFAULT_CITY} · {nAvail} disponibles</div>
           </div>
         </div>
         {showSearch && (
@@ -2741,9 +3122,9 @@ function WebHeader({ showSearch = true }) {
           {user
             ? <button className="web-btn-ghost" type="button" onClick={() => navigate('perfil')}>👤 {user.nombre}</button>
             : <button className="web-btn-ghost" type="button" onClick={() => navigate('login')}>Ingresar</button>}
-          <button className="web-cart" type="button" onClick={() => navigate('mis-grupos')} aria-label="Mis grupos">
+          <button className="web-cart" type="button" onClick={() => navigate('mis-grupos')} aria-label="Carrito / Mis grupos">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
-            <span>{cart.length}</span>
+            <span>{cartTotals(cart).items}</span>
           </button>
         </div>
       </div>
@@ -2843,10 +3224,11 @@ function WebProductos() {
 
 function WebGrupoDetalle() {
   const primary = 'oklch(0.55 0.15 165)';
-  const [qty, setQty] = React.useState(1);
+  const [qty, setQty] = React.useState(2);
   const navigate = React.useContext(NavContext);
-  const { selectedGroup, setSelected, setSelectedGroup, showToast, addToCart, user } = React.useContext(SelectionContext);
-  const g = selectedGroup || { product: 'Papa', location: 'Palermo', members: '9/12', progress: 75, closes: '2d', deadlineHrs: 35, price: '$1.364', old: '$2.099', unit: '/kg', disc: 35, img: 'img/papa.jpg', cat: 'verduras' };
+  const { selectedGroup, setSelected, setSelectedGroup, showToast, addToCart, user, bumpFilled, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
+  const g = selectedGroup || { product: 'Papa', location: 'Palermo', members: '9/12', progress: groupProgressView('Papa').pct, closes: '2d', deadlineHrs: 35, price: '$1.364', old: '$2.099', unit: '/kg', disc: 35, img: 'img/papa.jpg', cat: 'verduras', totalKg: GOAL_KG };
   const catalog = HUBADOR_CATALOG.map(hubadorCard);
   const catFromCatalog = (catalog.find((p) => p.name === g.product) || {}).cat || g.cat || 'frescos';
   const catLabel = catFromCatalog === 'frutas' ? 'Fruta' : catFromCatalog === 'verduras' ? 'Verdura' : 'Fresco';
@@ -2854,7 +3236,7 @@ function WebGrupoDetalle() {
   const detailBlurb = `${catLabel} fresca · se vende ${unitLong}. Cosecha de la semana, sin intermediarios. Retirás en el hub de ${g.location || 'tu barrio'}.`;
 
   React.useEffect(() => {
-    setQty(1);
+    setQty(2);
     const scrollTop = () => {
       window.scrollTo(0, 0);
       if (document.documentElement) document.documentElement.scrollTop = 0;
@@ -2867,24 +3249,26 @@ function WebGrupoDetalle() {
   const priceNum = parseInt((g.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const totalPrice = priceNum * qty;
   const unitLabel = g.unit === '/u' ? 'u' : 'kg';
+  const live = groupProgressView(g.product);
   const join = () => {
-    if (!user) { showToast('Iniciá sesión para sumarte al grupo'); setTimeout(() => navigate('login'), 700); return; }
     const q = Math.max(1, qty);
-    addToCart({ name: g.product, price: g.price, unit: g.unit || '/kg', img: g.img, members: g.members, progress: g.progress, location: g.location }, q);
-    showToast(`Sumaste ${q} ${unitLabel} de ${g.product}`);
+    addToCart({ name: g.product, price: g.price, old: g.old, priceN: parsePrecioAR(g.price), oldN: parsePrecioAR(g.old), unit: g.unit || '/kg', img: g.img, members: g.members, progress: live.pct, location: g.location }, q);
+    if (typeof bumpFilled === 'function') bumpFilled(g.product, q);
+    showToast(`Sumaste ${q} ${unitLabel} de ${g.product} al carrito`);
     setTimeout(() => navigate('mis-grupos'), 700);
   };
-  const totalKg = g.totalKg || 50;
-  const pct = g.progress != null ? g.progress : 75;
-  const filledKg = Math.round(pct / 100 * totalKg);
-  const missingKg = Math.max(0, totalKg - filledKg);
+  const totalKg = GOAL_KG;
+  const pct = live.pct;
+  const filledKg = live.filled;
+  const missingKg = live.missing;
 
   const others = sortActualizadoPrimero(catalog.filter((p) => p.name !== g.product));
   const openOther = (p) => {
+    const oLive = groupProgressView(p.name);
     setSelected(p);
     setSelectedGroup({
-      product: p.name, location: user?.barrio || g.location || 'Palermo', members: p.members, progress: p.prog,
-      closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, cat: p.cat, totalKg: p.goal || 50, precioActualizado: !!p.precioActualizado, status: 'abierto'
+      product: p.name, location: user?.barrio || g.location || 'Palermo', members: p.members, progress: oLive.pct,
+      closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, cat: p.cat, totalKg: GOAL_KG, precioActualizado: !!p.precioActualizado, status: 'abierto'
     });
   };
 
@@ -2961,7 +3345,8 @@ function WebGrupoDetalle() {
           </div>
           <div className="web-grid web-grid-products web-otros-grid">
             {others.map((p) => {
-              const kt = p.goal || 50, kf = Math.round(kt * p.prog / 100), miss = kt - kf, almost = miss <= 6;
+              const live = groupProgressView(p.name);
+              const miss = live.missing, almost = live.almost;
               return (
                 <article key={p.name} className="web-prod-card" onClick={() => openOther(p)}>
                   <div className="web-prod-img">
@@ -2983,19 +3368,19 @@ function WebGrupoDetalle() {
                         </div>
                       )}
                     </div>
+                    <div className="web-progress"><i style={{ width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
+                    <div className="web-prod-meta">
+                      <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
+                        {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{GOAL_KG} kg
+                      </span>
+                    </div>
+                    <div className="web-countdown-wrap"><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
                       type="button"
                       className="web-join-card"
                       onClick={(e) => { e.stopPropagation(); openOther(p); }}
                       style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
                     >Unirme al grupo</button>
-                    <div className="web-progress"><i style={{ width: p.prog + '%', background: p.prog >= 88 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
-                    <div className="web-prod-meta">
-                      <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
-                        {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`}
-                      </span>
-                      <span>{kf}/{kt}kg</span>
-                    </div>
                   </div>
                 </article>
               );
@@ -3009,36 +3394,84 @@ function WebGrupoDetalle() {
 
 function WebMisGrupos() {
   const navigate = React.useContext(NavContext);
-  const { user, cart, removeFromCart } = React.useContext(SelectionContext);
+  const { user, cart, removeFromCart, updateCartQty, showToast } = React.useContext(SelectionContext);
+  const totals = cartTotals(cart);
+  const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
+
   return (
-    <WebShell title="Mis grupos">
-      <div className="web-panel">
-        <h1>Mis grupos</h1>
-        {!user ? (
-          <div className="web-empty-panel">
-            <p>Ingresá para ver tus grupos en formación.</p>
-            <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar</button>
+    <WebShell title="Carrito · Mis grupos">
+      <div className="web-panel web-cart-panel">
+        <div className="web-cart-head">
+          <div>
+            <h1>Mi carrito</h1>
+            <p className="web-cart-sub">Mis grupos · pedidos en formación</p>
           </div>
-        ) : cart.length === 0 ? (
+          {cart.length > 0 && (
+            <span className="web-cart-count">{totals.items} {totals.items === 1 ? 'ítem' : 'ítems'}</span>
+          )}
+        </div>
+
+        {cart.length === 0 ? (
           <div className="web-empty-panel">
             <p>Todavía no te sumaste a ningún grupo.</p>
             <button type="button" className="web-btn" onClick={() => navigate('home')}>Explorar productos</button>
           </div>
         ) : (
-          <div className="web-list">
-            {cart.map((g) => (
-              <article key={g.id} className="web-list-item">
-                <img src={g.img} alt={g.name} />
-                <div>
-                  <h3>{g.name}</h3>
-                  <p>{g.qty} {g.unit === '/u' ? 'u' : 'kg'} · {g.price} · {g.location}</p>
-                </div>
-                <button type="button" className="web-btn-ghost" onClick={() => removeFromCart(g.id)}>Quitar</button>
-              </article>
-            ))}
-          </div>
+          <>
+            <div className="web-cart-list">
+              {cart.map((g) => {
+                const t = cartLineTotals(g);
+                return (
+                  <article key={g.id || g.name} className="web-cart-item">
+                    <img src={g.img} alt={g.name} />
+                    <div className="web-cart-item-main">
+                      <h3>{g.name}</h3>
+                      <p className="web-cart-item-meta">
+                        {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
+                        {t.oldN > 0 && <> · <s className="web-cart-coto">{fmtPrecioAR(t.oldN)}</s> Coto</>}
+                        {g.location ? <> · 📍 {g.location}</> : null}
+                      </p>
+                      <div className="web-cart-qty">
+                        <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(1, t.qty - 1))}>−</button>
+                        <span>{t.qty} {unitOf(g.unit)}</span>
+                        <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + 1)}>+</button>
+                      </div>
+                    </div>
+                    <div className="web-cart-item-side">
+                      <strong>{fmtPrecioAR(t.grupo)}</strong>
+                      {t.ahorro > 0 && <em>Ahorrás {fmtPrecioAR(t.ahorro)}</em>}
+                      <button type="button" className="web-btn-ghost" onClick={() => removeFromCart(g.id || g.name)}>Quitar</button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <aside className="web-cart-summary">
+              <div className="web-cart-row"><span>Si compraras en Coto</span><s>{fmtPrecioAR(totals.coto)}</s></div>
+              <div className="web-cart-row"><span>Total en grupo</span><strong>{fmtPrecioAR(totals.grupo)}</strong></div>
+              <div className="web-cart-row web-cart-ahorro">
+                <span>Ahorro total</span>
+                <strong>{fmtPrecioAR(totals.ahorro)}</strong>
+              </div>
+              {!user ? (
+                <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar para confirmar</button>
+              ) : (
+                <button
+                  type="button"
+                  className="web-btn"
+                  onClick={() => showToast('Pedido guardado · te avisamos cuando cierre el grupo')}
+                >
+                  Confirmar mi pedido
+                </button>
+              )}
+              <p className="web-muted" style={{ margin: '8px 0 0', fontSize: 12, textAlign: 'center', lineHeight: 1.4 }}>
+                Otros vecinos pueden seguir uniéndose al grupo hasta completar el mínimo.
+              </p>
+              <button type="button" className="web-linkish" onClick={() => navigate('home')}>+ Seguir sumando productos</button>
+            </aside>
+          </>
         )}
-        <button type="button" className="web-linkish" onClick={() => navigate('historial')}>Ver historial →</button>
       </div>
     </WebShell>
   );
@@ -3046,7 +3479,7 @@ function WebMisGrupos() {
 
 function WebPerfil() {
   const navigate = React.useContext(NavContext);
-  const { user, logout, cart } = React.useContext(SelectionContext);
+  const { user, logout, cart, setSelectedOrder } = React.useContext(SelectionContext);
   return (
     <WebShell title="Perfil">
       <div className="web-panel web-panel-narrow">
@@ -3067,9 +3500,27 @@ function WebPerfil() {
                 <p>{cart.length} pedido(s) en formación</p>
               </div>
             </div>
+
+            <h2 className="web-profile-section-title">Tus pedidos</h2>
+            <p className="web-profile-section-sub">Estado de lo que compraste o te uniste ({DEMO_PEDIDOS.length})</p>
+            <div className="web-list" style={{ marginBottom: 18 }}>
+              {DEMO_PEDIDOS.map((p) => {
+                const s = PEDIDO_STATUS_STYLE[p.status];
+                return (
+                  <article key={p.name + p.date} className="web-list-item" onClick={() => { setSelectedOrder(p); navigate('seguimiento'); }} style={{ cursor: 'pointer' }}>
+                    <img src={p.img} alt={p.name} />
+                    <div>
+                      <h3>{p.name}</h3>
+                      <p>{p.qty} · {p.total} · {p.date}</p>
+                    </div>
+                    <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{s.label}</span>
+                  </article>
+                );
+              })}
+            </div>
+
             <div className="web-list-links">
               <button type="button" onClick={() => navigate('mis-grupos')}>Mis grupos</button>
-              <button type="button" onClick={() => navigate('historial')}>Historial</button>
             </div>
             <button type="button" className="web-btn-danger" onClick={() => { logout(); navigate('login'); }}>Cerrar sesión</button>
           </>
@@ -3080,31 +3531,7 @@ function WebPerfil() {
 }
 
 function WebHistorial() {
-  const navigate = React.useContext(NavContext);
-  const pedidos = [
-    { name: 'Tomate', qty: '2 kg', total: '$4.548', status: 'entregado', date: '15 abr', img: 'img/tomate.jpg' },
-    { name: 'Banana', qty: '1 kg', total: '$1.755', status: 'pagado', date: '17 abr', img: 'img/banana.jpg' },
-    { name: 'Zapallo anco', qty: '3 kg', total: '$3.507', status: 'pendiente', date: '18 abr', img: 'img/zapallo-ok-20260730c.jpg' },
-  ];
-  return (
-    <WebShell title="Historial">
-      <div className="web-panel">
-        <h1>Historial de pedidos</h1>
-        <div className="web-list">
-          {pedidos.map((p) => (
-            <article key={p.name + p.date} className="web-list-item" onClick={() => navigate('seguimiento')} style={{ cursor: 'pointer' }}>
-              <img src={p.img} alt={p.name} />
-              <div>
-                <h3>{p.name}</h3>
-                <p>{p.qty} · {p.total} · {p.date}</p>
-              </div>
-              <span className="web-status">{p.status}</span>
-            </article>
-          ))}
-        </div>
-      </div>
-    </WebShell>
-  );
+  return <WebPerfil />;
 }
 
 function WebSeguimiento() {
@@ -3191,8 +3618,8 @@ const WEB_SCREEN_COMPONENTS = {
   home: WebHome,
   productos: WebProductos,
   producto: WebGrupoDetalle,
-  pedidos: WebHistorial,
-  historial: WebHistorial,
+  pedidos: WebPerfil,
+  historial: WebPerfil,
   'mis-grupos': WebMisGrupos,
   comparador: WebComparador,
   perfil: WebPerfil,
@@ -3211,8 +3638,8 @@ const SCREEN_COMPONENTS = {
   home: MobileHome,
   productos: MobileProductos,
   producto: MobileProducto,
-  pedidos: MobilePedidos,
-  historial: MobilePedidos,
+  pedidos: MobilePerfil,
+  historial: MobilePerfil,
   'mis-grupos': MobileMisGrupos,
   comparador: MobileComparador,
   perfil: MobilePerfil,
@@ -3228,7 +3655,24 @@ const SCREEN_COMPONENTS = {
 };
 
 function App() {
-  const [active, setActive] = useState(() => localStorage.getItem('mobileScreen') || 'home');
+  const [active, setActive] = useState(() => {
+    const s = localStorage.getItem('mobileScreen') || 'home';
+    // Precios/Comparador y Grupo en vivo (legacy) ocultos en app pública
+    if (APP_MODE && s === 'comparador') {
+      try { localStorage.setItem('mobileScreen', 'home'); } catch (e) {}
+      return 'home';
+    }
+    if (APP_MODE && s === 'grupo-participantes') {
+      try { localStorage.setItem('mobileScreen', 'mis-grupos'); } catch (e) {}
+      return 'mis-grupos';
+    }
+    // Historial vive dentro de Perfil
+    if (s === 'historial' || s === 'pedidos') {
+      try { localStorage.setItem('mobileScreen', 'perfil'); } catch (e) {}
+      return 'perfil';
+    }
+    return s;
+  });
   const [selected, setSelected] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -3238,13 +3682,53 @@ function App() {
   const login = (u) => {setUser(u);localStorage.setItem('conlatUser', JSON.stringify(u));};
   const logout = () => {setUser(null);localStorage.removeItem('conlatUser');localStorage.removeItem('conlatCart');setCart([]);};
   const [cart, setCart] = useState(() => {try {return JSON.parse(localStorage.getItem('conlatCart') || '[]');} catch (e) {return [];}});
+  const [progressTick, setProgressTick] = useState(0);
   const persistCart = (next) => {setCart(next);localStorage.setItem('conlatCart', JSON.stringify(next));};
+  const bumpFilled = (name, qty) => {
+    bumpGroupFilled(name, qty);
+    setProgressTick((t) => t + 1);
+  };
   const addToCart = (product, qty) => {
-    const id = `${product.name}-${Date.now()}`;
-    const next = [...cart, { id, name: product.name, price: product.price, unit: product.unit || '/kg', qty, img: product.img, members: product.members || '?', progress: product.progress || product.prog || 0, location: product.location || 'Palermo', joinedAt: Date.now() }];
+    const q = Math.max(1, qty || 1);
+    const priceN = product.priceN != null ? product.priceN : parsePrecioAR(product.price);
+    const oldN = product.oldN != null ? product.oldN : parsePrecioAR(product.old);
+    const unit = product.unit || '/kg';
+    const name = product.name || product.product;
+    const existing = cart.find((c) => c.name === name);
+    let next;
+    if (existing) {
+      next = cart.map((c) => c.name === name ? {
+        ...c,
+        qty: (c.qty || 1) + q,
+        priceN: priceN || c.priceN,
+        oldN: oldN || c.oldN,
+        price: product.price || c.price || fmtPrecioAR(priceN || c.priceN || 0),
+        old: product.old || c.old || (oldN ? fmtPrecioAR(oldN) : c.old),
+      } : c);
+    } else {
+      next = [...cart, {
+        id: name,
+        name,
+        price: product.price || fmtPrecioAR(priceN),
+        old: product.old || (oldN ? fmtPrecioAR(oldN) : null),
+        priceN,
+        oldN,
+        unit,
+        qty: q,
+        img: product.img,
+        members: product.members || '?',
+        progress: product.progress != null ? product.progress : (product.prog || 0),
+        location: product.location || 'Palermo',
+        joinedAt: Date.now(),
+      }];
+    }
     persistCart(next);
   };
-  const removeFromCart = (id) => persistCart(cart.filter((c) => c.id !== id));
+  const updateCartQty = (id, qty) => {
+    const q = Math.max(1, qty || 1);
+    persistCart(cart.map((c) => c.id === id || c.name === id ? { ...c, qty: q } : c));
+  };
+  const removeFromCart = (id) => persistCart(cart.filter((c) => c.id !== id && c.name !== id));
 
   const showToast = (msg) => {
     setToast(msg);
@@ -3253,6 +3737,11 @@ function App() {
   };
 
   const setScreen = (id) => {
+    // En app pública no abrir Comparador/Precios ni Grupo en vivo legacy (solo ?dev / ?both)
+    if (APP_MODE && id === 'comparador') id = 'home';
+    if (APP_MODE && id === 'grupo-participantes') id = 'mis-grupos';
+    // Historial / pedidos → Perfil (lista de estados embebida ahí)
+    if (id === 'historial' || id === 'pedidos') id = 'perfil';
     if (id === 'productos') {
       const p = hubadorBestGancho();
       if (p) {
@@ -3274,7 +3763,7 @@ function App() {
 
   const appInner = (
     <NavContext.Provider value={setScreen}>
-      <SelectionContext.Provider value={{ selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, removeFromCart, webSearch, setWebSearch }}>
+      <SelectionContext.Provider value={{ selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, webSearch, setWebSearch, bumpFilled, progressTick }}>
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
           <ScreenComp />
         </div>
@@ -3294,13 +3783,83 @@ function App() {
   const isDesktop = useIsDesktop();
   try { window.__hubadorActive = active; } catch (e) {}
 
+  const selectionValue = { selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, webSearch, setWebSearch, bumpFilled, progressTick };
+
+  // ── Comparador Web + Mobile (estado compartido, misma pantalla activa) ──
+  if (BOTH_MODE) {
+    const WebComp = WEB_SCREEN_COMPONENTS[active] || WebHome;
+    return (
+      <NavContext.Provider value={setScreen}>
+        <SelectionContext.Provider value={selectionValue}>
+          <div className="stage stage-compare">
+            <div className="top-bar">
+              <div>
+                <div className="brand">HUBADOR <span>Comparador Web · Mobile</span></div>
+                <div className="sub">
+                  Misma pantalla y carrito en ambos lados · <a href="?dev" style={{ color: 'oklch(0.75 0.12 165)' }}>Solo mobile (?dev)</a>
+                  {' · '}
+                  <a href="./" style={{ color: 'oklch(0.75 0.12 165)' }}>App pública</a>
+                  {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cartTotals(cart).items} ítems)</span>}
+                </div>
+              </div>
+              {user && <button onClick={logout} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>Cerrar sesión</button>}
+            </div>
+            <div className="screen-nav-groups">
+              {[
+              { key: 'auth', title: '🔐 Entrada', color: '#888' },
+              { key: 'cliente', title: '👥 Cliente', color: 'oklch(0.65 0.18 165)' },
+              { key: 'dev', title: '🔧 Ocultos', color: '#999' },
+              { key: 'admin', title: '🛠️ Admin', color: 'oklch(0.70 0.15 50)' }].
+              map((g) =>
+              <div key={g.key} className="screen-nav-group">
+                  <div className="screen-nav-group-title" style={{ color: g.color }}>{g.title}</div>
+                  <div className="screen-nav-buttons">
+                    {SCREENS.filter((s) => s.group === g.key).map((s) =>
+                  <button key={s.id} className={active === s.id ? 'active' : ''} onClick={() => setScreen(s.id)}>
+                        {s.label}
+                      </button>
+                  )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="devices-row compare-row">
+              <div className="compare-web-wrap">
+                <div className="device-label">Web · {screen?.label}</div>
+                <div className="compare-web-pane">
+                  <div className="web-root">
+                    <WebComp />
+                  </div>
+                </div>
+              </div>
+              <div className="device-wrap">
+                <div className="device-label">Mobile · {screen?.label}</div>
+                <IOSDevice width={390} height={844} dark={false}>
+                  <div style={{ flex: 1, minHeight: 0, boxSizing: 'border-box', paddingTop: 62, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                    {appInner}
+                    {toastEl}
+                  </div>
+                </IOSDevice>
+              </div>
+            </div>
+            {toast && (
+              <div className="web-toast" style={{ position: 'fixed' }}>
+                <span>✓</span>{toast}
+              </div>
+            )}
+          </div>
+        </SelectionContext.Provider>
+      </NavContext.Provider>
+    );
+  }
+
   // ── Público: WEB completa en escritorio · MOBILE intacto en celular ──
   if (APP_MODE) {
     if (isDesktop) {
       const WebComp = WEB_SCREEN_COMPONENTS[active] || WebHome;
       return (
         <NavContext.Provider value={setScreen}>
-          <SelectionContext.Provider value={{ selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, removeFromCart, webSearch, setWebSearch }}>
+          <SelectionContext.Provider value={selectionValue}>
             <div className="web-root">
               <WebComp />
               {toast && (
@@ -3329,7 +3888,7 @@ function App() {
       <div className="top-bar">
         <div>
           <div className="brand">HUBADOR <span>Mobile</span></div>
-          <div className="sub">Vista previa en iPhone 15 Pro {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cart.length} en formación)</span>}</div>
+          <div className="sub">Vista previa en iPhone 15 Pro · <a href="?both" style={{ color: 'oklch(0.75 0.12 165)' }}>Comparar Web + Mobile</a> {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cartTotals(cart).items} en formación)</span>}</div>
         </div>
         {user && <button onClick={logout} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #555', color: '#aaa', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>Cerrar sesión</button>}
       </div>
@@ -3337,6 +3896,7 @@ function App() {
         {[
         { key: 'auth', title: '🔐 Entrada', color: '#888' },
         { key: 'cliente', title: '👥 Cliente', color: 'oklch(0.65 0.18 165)' },
+        { key: 'dev', title: '🔧 Ocultos', color: '#999' },
         { key: 'admin', title: '🛠️ Admin', color: 'oklch(0.70 0.15 50)' }].
         map((g) =>
         <div key={g.key} className="screen-nav-group">
@@ -3464,32 +4024,34 @@ html.app-mode, html.app-mode body {
   border-bottom: 1px solid #e6e8e3;
 }
 .web-hero-inner {
-  max-width: min(1400px, 92vw); margin: 0 auto; padding: 12px 32px 10px;
+  max-width: min(1400px, 92vw); margin: 0 auto; padding: 16px 32px 14px;
   display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; align-items: stretch;
+  /* Hero un poco más bajo: deja 1 fila de cards con fecha límite + Unirme arriba del fold */
+  min-height: calc(100vh - 72px - 390px);
 }
 .web-pill {
   display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; width: fit-content;
   background: #fff7ed; color: #9a3412; border-radius: 999px;
-  padding: 4px 10px; font-size: 11.5px; font-weight: 700; margin: 0;
+  padding: 5px 11px; font-size: 12px; font-weight: 700; margin: 0;
 }
 .web-hero-copy {
-  display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 200px;
+  display: flex; flex-direction: column; min-width: 0; min-height: 250px; max-height: none;
 }
 .web-hero-panel {
-  flex: 1; display: grid; grid-template-columns: minmax(120px, .85fr) minmax(200px, 1.2fr);
+  flex: 1; display: grid; grid-template-columns: minmax(150px, .9fr) minmax(220px, 1.2fr);
   align-items: stretch; gap: 0; padding: 0; overflow: hidden;
-  border-radius: 16px; max-height: 200px;
+  border-radius: 18px; min-height: 250px; max-height: none; height: 100%;
   background:
     linear-gradient(165deg, rgba(255,255,255,.92) 0%, rgba(236,253,245,.78) 55%, rgba(255,255,255,.88) 100%);
   border: 1px solid rgba(167, 198, 182, .55);
   box-shadow:
     0 1px 0 rgba(255,255,255,.9) inset,
-    0 10px 28px rgba(20, 48, 36, .07);
+    0 14px 36px rgba(20, 48, 36, .08);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 .web-hero-panel-media {
-  position: relative; min-height: 0; height: 100%; max-height: 200px; background: #1a2e24;
+  position: relative; min-height: 250px; height: 100%; max-height: none; background: #1a2e24;
 }
 .web-hero-panel-media img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -3501,10 +4063,10 @@ html.app-mode, html.app-mode body {
 }
 .web-hero-panel-copy {
   display: flex; flex-direction: column; justify-content: center;
-  gap: 8px; padding: 12px 16px 12px;
+  gap: 12px; padding: 20px 22px 18px;
   background: linear-gradient(165deg, rgba(255,255,255,.96) 0%, rgba(236,253,245,.92) 100%);
 }
-.web-hero-head { display: flex; flex-direction: column; gap: 4px; }
+.web-hero-head { display: flex; flex-direction: column; gap: 8px; }
 .web-hero-photo {
   border-radius: 20px; overflow: hidden; border: 1px solid #e6e8e3;
   box-shadow: 0 20px 50px rgba(20,32,28,.08); aspect-ratio: 4/3; background: #ddd;
@@ -3512,10 +4074,10 @@ html.app-mode, html.app-mode body {
 .web-hero-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .web-hero-art { min-width: 0; }
 .web-hero-offer {
-  position: relative; border-radius: 16px; overflow: hidden;
-  border: 1px solid #d7e5dc; height: 200px; max-height: 200px;
+  position: relative; border-radius: 18px; overflow: hidden;
+  border: 1px solid #d7e5dc; min-height: 250px; height: 100%; max-height: none;
   background: #0b1f18;
-  box-shadow: 0 12px 28px rgba(20,32,28,.12);
+  box-shadow: 0 16px 36px rgba(20,32,28,.12);
 }
 .web-hero-offer-bg {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -3523,8 +4085,8 @@ html.app-mode, html.app-mode body {
 }
 .web-hero-offer-panel {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
-  padding: 10px 14px 12px;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  padding: 14px 16px 14px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
   background: linear-gradient(180deg, transparent 0%, rgba(8,28,20,.55) 18%, rgba(8,28,20,.94) 55%);
   color: #fff;
 }
@@ -3566,12 +4128,12 @@ html.app-mode, html.app-mode body {
 .web-pill-dark { background: #ecfdf5; color: #0f766e; }
 .web-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 1.6s infinite; }
 .web-hero h1 {
-  font-size: clamp(20px, 2.2vw, 26px); line-height: 1.15; letter-spacing: -0.035em;
+  font-size: clamp(24px, 2.8vw, 32px); line-height: 1.15; letter-spacing: -0.035em;
   font-weight: 900; margin: 0; max-width: 16ch;
 }
 .web-hero h1 em { font-style: normal; color: oklch(0.48 0.12 165); }
-.web-hero p { font-size: 13px; color: #4b564f; line-height: 1.4; max-width: 36ch; margin: 0; }
-.web-hero-cta { display: flex; gap: 8px; flex-wrap: wrap; margin: 0; }
+.web-hero p { font-size: 14px; color: #4b564f; line-height: 1.45; max-width: 36ch; margin: 0; }
+.web-hero-cta { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 0; }
 .web-stats {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
   margin-top: 4px; border-radius: 14px; overflow: hidden;
@@ -3580,12 +4142,12 @@ html.app-mode, html.app-mode body {
 }
 .web-stat {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1px; padding: 7px 6px; text-align: center;
+  gap: 2px; padding: 10px 8px; text-align: center;
   border-right: 1px solid rgba(167, 198, 182, .4);
 }
 .web-stat:last-child { border-right: none; }
-.web-stats strong { display: block; font-size: 16px; font-weight: 900; color: oklch(0.48 0.12 165); line-height: 1.1; }
-.web-stats span { font-size: 10.5px; color: #6b736e; font-weight: 600; }
+.web-stats strong { display: block; font-size: 18px; font-weight: 900; color: oklch(0.48 0.12 165); line-height: 1.1; }
+.web-stats span { font-size: 11px; color: #6b736e; font-weight: 600; }
 .web-hero-card {
   background: #fff; border: 1px solid #e6e8e3; border-radius: 20px; overflow: hidden;
   box-shadow: 0 20px 50px rgba(20,32,28,.08); display: grid; grid-template-columns: 1.1fr 1fr;
@@ -3693,7 +4255,8 @@ html.app-mode, html.app-mode body {
 .web-banner-copy h1 { margin: 8px 0 6px; font-size: 36px; letter-spacing: -0.03em; font-weight: 900; }
 .web-banner-copy p { margin: 0; font-size: 16px; opacity: 0.92; }
 .web-banner-copy strong { color: #bbf7d0; }
-.web-toolbar { max-width: min(1400px, 92vw); margin: 0 auto; padding: 6px 32px 0; }
+.web-toolbar { max-width: min(1400px, 92vw); margin: 0 auto; padding: 10px 32px 0; }
+.web-section-tight { padding-top: 12px; }
 .web-cats { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 0; }
 .web-cats button {
   border: none; border-radius: 999px; padding: 5px 11px; font: inherit; font-size: 12px;
@@ -3714,7 +4277,6 @@ html.app-mode, html.app-mode body {
 .web-sort-row select {
   border: 1px solid #e2e4e8; border-radius: 6px; padding: 4px 8px; font: inherit; font-size: 12px; background: #fff;
 }
-.web-section-tight { padding-top: 8px; }
 .web-grid-products { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
 .web-prod-card {
   background: #fff; border: 1px solid #e8eaec; border-radius: 14px;
@@ -3724,14 +4286,14 @@ html.app-mode, html.app-mode body {
   transition: transform .12s ease, box-shadow .12s ease;
 }
 .web-prod-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.08); }
-/* Compactar SOLO la foto de la card para que entren Unirme + timer + barra arriba del fold */
+/* Foto de card: tamaño cómodo; el hero alto deja solo 1 fila arriba del fold */
 .web-prod-img {
-  position: relative; height: 120px; max-height: 120px; min-height: 120px;
-  aspect-ratio: auto; overflow: hidden; flex: 0 0 120px;
+  position: relative; height: 150px; max-height: 150px; min-height: 150px;
+  aspect-ratio: auto; overflow: hidden; flex: 0 0 150px;
   border-radius: 14px 14px 0 0; background: #eef1ee;
 }
 .web-grid-products:not(.web-otros-grid) .web-prod-img {
-  height: 120px; max-height: 120px; min-height: 120px; flex: 0 0 120px;
+  height: 150px; max-height: 150px; min-height: 150px; flex: 0 0 150px;
 }
 .web-prod-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .web-prod-body {
@@ -3748,8 +4310,10 @@ html.app-mode, html.app-mode body {
 .web-price-coto { display: flex !important; flex-direction: column; line-height: 1; }
 .web-price-coto s { font-size: 13px; color: #e0524a; font-weight: 600; text-decoration-color: #e0524a; }
 .web-price-coto em { font-style: normal; font-size: 10px; color: #e0524a; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; }
-.web-countdown-wrap { margin: 1px 0; }
-.web-prod-meta { display: flex; justify-content: space-between; font-size: 11.5px; color: #888; }
+.web-countdown-wrap { margin: 1px 0 2px; }
+.web-prod-meta { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 11.5px; color: #888; }
+.web-prod-meta .web-deadline-line { flex-shrink: 0; white-space: nowrap; }
+.web-prod-body > .web-countdown-wrap { align-self: flex-start; }
 .web-grid.web-grid-products { align-items: start; overflow: visible !important; }
 .web-section-tight .web-grid-products { overflow: visible !important; }
 .web-page-market .web-prod-card > .web-join-card { margin-top: 2px; }
@@ -3818,6 +4382,48 @@ html.app-mode, html.app-mode body {
 .web-list-item h3 { margin: 0 0 4px; font-size: 16px; }
 .web-list-item p { margin: 0; color: #667; font-size: 13px; }
 .web-list-item > div { flex: 1; }
+.web-cart-panel { max-width: 920px; }
+.web-cart-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 18px; }
+.web-cart-head h1 { margin: 0; }
+.web-cart-sub { margin: 6px 0 0; color: #6b736e; font-size: 14px; }
+.web-cart-count {
+  background: #ecfdf5; color: #0f766e; border-radius: 999px;
+  padding: 6px 12px; font-size: 13px; font-weight: 700; white-space: nowrap;
+}
+.web-cart-list { display: grid; gap: 12px; margin-bottom: 18px; }
+.web-cart-item {
+  display: grid; grid-template-columns: 72px 1fr auto; gap: 14px; align-items: center;
+  background: #fff; border: 1px solid #e6e8e3; border-radius: 14px; padding: 12px 14px;
+}
+.web-cart-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; }
+.web-cart-item-main h3 { margin: 0 0 4px; font-size: 16px; }
+.web-cart-item-meta { margin: 0 0 8px; color: #667; font-size: 13px; }
+.web-cart-coto { color: #e0524a; }
+.web-cart-qty {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid #e2e4e8; border-radius: 999px; padding: 3px 6px; background: #fafafa;
+}
+.web-cart-qty button {
+  width: 28px; height: 28px; border: none; border-radius: 50%; background: #fff;
+  font-size: 16px; font-weight: 700; cursor: pointer; color: #14201c;
+  box-shadow: 0 0 0 1px #e6e8e3;
+}
+.web-cart-qty span { min-width: 52px; text-align: center; font-size: 13px; font-weight: 700; }
+.web-cart-item-side { display: grid; gap: 4px; justify-items: end; text-align: right; }
+.web-cart-item-side strong { font-size: 16px; color: oklch(0.48 0.12 165); }
+.web-cart-item-side em { font-style: normal; font-size: 12px; color: #0f766e; font-weight: 700; }
+.web-cart-summary {
+  background: #fff; border: 1px solid #e6e8e3; border-radius: 16px; padding: 18px 20px;
+  display: grid; gap: 12px; max-width: 420px; margin-left: auto;
+}
+.web-cart-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; }
+.web-cart-row s { color: #e0524a; font-weight: 600; }
+.web-cart-row strong { font-size: 18px; color: #14201c; }
+.web-cart-ahorro {
+  background: #ecfdf5; border-radius: 12px; padding: 12px 14px; margin: 2px 0 4px;
+}
+.web-cart-ahorro span { color: #0f766e; font-weight: 700; }
+.web-cart-ahorro strong { color: #0f766e; font-size: 22px; }
 .web-status { font-size: 12px; font-weight: 700; text-transform: uppercase; color: oklch(0.48 0.12 165); }
 .web-linkish { background: none; border: none; color: oklch(0.48 0.12 165); font: inherit; font-weight: 700; cursor: pointer; margin-top: 16px; padding: 0; }
 .web-profile-card {
@@ -3830,6 +4436,8 @@ html.app-mode, html.app-mode body {
 }
 .web-profile-card h2 { margin: 0 0 4px; }
 .web-profile-card p { margin: 0; color: #667; font-size: 13.5px; }
+.web-profile-section-title { margin: 4px 0 2px; font-size: 17px; letter-spacing: -0.02em; }
+.web-profile-section-sub { margin: 0 0 12px; color: #667; font-size: 13px; }
 .web-list-links { display: grid; gap: 8px; margin: 12px 0 18px; }
 .web-list-links button {
   text-align: left; background: #fff; border: 1px solid #e6e8e3; border-radius: 12px;
@@ -4029,7 +4637,8 @@ html.app-mode, html.app-mode body {
   display: grid; place-items: center; font-weight: 800;
 }
 .web-progress { height: 8px; background: #e8eaec; border-radius: 999px; overflow: hidden; margin: 10px 0 6px; }
-.web-prod-card .web-progress { height: 6px; margin: 4px 0 2px; }
+.web-prod-card .web-progress { height: 8px; margin: 6px 0 3px; display: block !important; }
+.web-prod-card .web-prod-meta { display: flex !important; justify-content: space-between; font-size: 11.5px; color: #888; margin-bottom: 2px; }
 .web-progress i { display: block; height: 100%; border-radius: 999px; }
 .web-badge {
   position: absolute; top: 14px; left: 14px; background: oklch(0.65 0.2 145); color: #fff;
