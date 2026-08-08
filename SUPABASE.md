@@ -1,6 +1,6 @@
 # HUBADOR — Auth con Supabase (registro / login)
 
-Build: `HUBADOR_BUILD 20260807h-activos` · UI sigue con marcador `· u-v5`
+Build: `HUBADOR_BUILD 20260808a-compra` · UI sigue con marcador `· u-v5`
 
 ## Qué hace
 - Registro y login con **email + contraseña** (Supabase Auth).
@@ -11,13 +11,12 @@ Build: `HUBADOR_BUILD 20260807h-activos` · UI sigue con marcador `· u-v5`
 - Admin: lista mínima de usuarios desde `profiles` (hace falta `role = 'admin'`).
 - Presencia en vivo (“quién está online”) **no** está incluido: viene en un siguiente paso.
 
-## Pedidos (flujo Carrito → Confirmar → Activos)
-- **Carrito** (Mis grupos → pestaña Carrito) = solo ítems sin confirmar (`conlatCart`).
-- **Confirmar mi pedido** = guarda líneas en `localStorage` (`hubadorOrders` + `hubadorActiveGroups`), vacía el carrito y abre **Activos**.
-- **Perfil → Tus pedidos** muestra solo pedidos reales (chip *En formación*); sin demos falsos.
-- **Authentication → Users** = quién se registró. **No** muestra kilos ni compras.
-- Para ver qty/precio en el dashboard: corré `supabase-orders.sql` y mirá **Table Editor → `orders`**.
-  Si hay sesión Supabase al confirmar, el front hace `insert` (fire-and-forget); si falla, igual queda en localStorage.
+## Pedidos (flujo Carrito → Confirmar → Grupos activos)
+- **Carrito** (Mis grupos → pestaña Carrito) = solo ítems sin confirmar (`conlatCart`). El badge del menú cuenta solo el carrito.
+- **Confirmar mi pedido** = guarda en `localStorage` (`hubadorOrders` + `hubadorActiveGroups`), vacía el carrito, abre **Grupos activos** y muestra un toast breve.
+- Si hay sesión Supabase: `insert` en tabla `orders` (columnas `product_name`, `qty`, `unit_price`, `total`, `status`). Si falla el insert, igual queda en el celular.
+- **Perfil → Tus pedidos** = pedidos reales con kg y chip *En formación*. **Sin demos falsos.**
+- Auth → Users = quién se registró (sin kilos). Table Editor → **`orders`** = cantidades.
 
 ## Estado de este pack
 Las keys **ya están cableadas** (Project URL + publishable `sb_publishable_...`).  
@@ -25,7 +24,7 @@ Las keys **ya están cableadas** (Project URL + publishable `sb_publishable_...`
 
 ## Siguiente paso (vos)
 1. En Supabase → **SQL Editor** → pegá y corré `supabase-schema.sql` (si aún no lo hiciste).
-2. Misma pantalla → corré `supabase-orders.sql` (tabla de compras).
+2. Misma pantalla → corré **`supabase-orders.sql`** (tabla de compras — necesario para ver qty en el dashboard).
 3. Authentication → Providers → Email → **desactivá “Confirm email”** para probar signup sin mail.
 4. Authentication → **URL Configuration**:
    - **Site URL:** `https://hubador.com`
@@ -35,7 +34,7 @@ Las keys **ya están cableadas** (Project URL + publishable `sb_publishable_...`
      - `http://hubador.com/**`
      - `https://hubador.com/**`
      - `http://localhost:8765` (si probás local)
-5. Abrí el sitio → **Registrate** (no solo Ingresar) → login → confirmá un pedido → Table Editor → `orders`.
+5. Abrí el sitio → **Registrate** (no solo Ingresar) → login → confirmá un pedido → **Table Editor → `orders`**.
 6. Subí de nuevo el zip a hubador.com (`index.html` + `config.js` + `img/`).
 
 ### HTTP vs HTTPS

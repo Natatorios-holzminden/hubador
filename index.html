@@ -643,10 +643,17 @@ Object.assign(window, {
 
 /* —— MOBILE app (celular): pantalla completa, sin cambios de flujo —— */
 /* Público: fondo claro full-bleed (evita “tarjeta” sobre #1a1a2e del stage/dev) */
-html.app-mode, html.app-mode body {
+/* Scroll en html; body/root overflow visible para que .web-nav sticky funcione */
+html.app-mode {
   margin: 0; width: 100%; max-width: none;
   min-height: 100%; height: auto;
   overflow-x: clip; overflow-y: auto;
+  background: #f4f5f7;
+}
+html.app-mode body {
+  margin: 0; width: 100%; max-width: none;
+  min-height: 100%; height: auto;
+  overflow: visible;
   background: #f4f5f7;
 }
 html.app-mode #root,
@@ -654,6 +661,7 @@ html.app-mode .web-root,
 html.app-mode .web-page {
   width: 100%; max-width: none; margin: 0;
   min-height: 100%;
+  overflow: visible;
 }
 html.app-mode .web-root { min-height: 100vh; }
 .app-shell-mobile {
@@ -684,9 +692,9 @@ html.app-mode .web-root { min-height: 100vh; }
   overflow: visible;
 }
 .web-nav {
-  position: sticky; top: 0; z-index: 20;
+  position: sticky; top: 0; z-index: 100;
   width: 100%;
-  background: rgba(255,255,255,.92); backdrop-filter: blur(10px);
+  background: #fff;
   border-bottom: 1px solid #e6e8e3;
 }
 .web-nav-inner {
@@ -1871,7 +1879,7 @@ function MobileHome() {
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', fontSize: 14, WebkitFontSmoothing: 'antialiased' }}>
       {/* Header — fijo dentro del flex, nunca se mueve */}
-      <header style={{ flexShrink: 0, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 56, display: 'flex', alignItems: 'center', gap: 10, zIndex: 5 }}>
+      <header style={{ flexShrink: 0, position: 'sticky', top: 0, background: '#fff', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 56, display: 'flex', alignItems: 'center', gap: 10, zIndex: 100 }}>
         <div style={{ width: 28, height: 28, borderRadius: 7, background: primary, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>H</div>
         <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0, maxWidth: 130, minWidth: 0 }}>
           <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: '-0.02em', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user ? `Hola, ${user.nombre}` : 'HUBADOR'}</span>
@@ -4259,7 +4267,7 @@ function WebHome() {
 
       <div className="web-toolbar">
         <div className="web-sort-row">
-          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'} <small style={{ opacity: 0.45, fontWeight: 600 }}>· u-v5</small></span>
+          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'} <small style={{ opacity: 0.45, fontWeight: 600 }}>· u-v5 sticky</small></span>
           <div className="web-toolbar-actions">
             <button type="button" className={'web-filter-toggle' + (showFilters || cat !== 'todos' ? ' activo' : '')} onClick={() => setShowFilters((v) => !v)}>
               Filtrar{cat !== 'todos' ? ` · ${categories.find((c) => c.id === cat)?.label || ''}` : ''}
