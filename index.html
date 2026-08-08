@@ -1520,6 +1520,7 @@ function profileFromRow(row, authUser) {
     nombre: (row && row.nombre) || meta.nombre || fallbackName,
     barrio: (row && row.barrio) || meta.barrio || '',
     tel: (row && row.tel) || meta.tel || '',
+    direccion: (row && row.direccion) || meta.direccion || '',
     role: (row && row.role) || meta.role || 'user',
   };
 }
@@ -2428,8 +2429,35 @@ const PEDIDO_STATUS_STYLE = {
   en_formacion: { bg: '#fef9c3', color: '#854d0e', label: 'En formación' },
   pendiente: { bg: '#ffedd5', color: '#9a3412', label: '🕒 Pendiente' },
   entregado: { bg: '#dcfce7', color: '#166534', label: '✓ Entregado' },
-  pagado: { bg: '#dbeafe', color: '#1d4ed8', label: '💳 Pagado' },
+  pagado: { bg: '#dcfce7', color: '#166534', label: 'Pagado' },
 };
+const HUBADOR_PROFILE_EXTRA_KEY = 'hubadorProfileExtra';
+function loadHubadorProfileExtra() {
+  try {
+    const raw = localStorage.getItem(HUBADOR_PROFILE_EXTRA_KEY);
+    const o = raw ? JSON.parse(raw) : {};
+    return o && typeof o === 'object' ? o : {};
+  } catch (e) { return {}; }
+}
+function saveHubadorProfileExtra(extra) {
+  try {
+    const prev = loadHubadorProfileExtra();
+    const next = Object.assign({}, prev, extra || {});
+    localStorage.setItem(HUBADOR_PROFILE_EXTRA_KEY, JSON.stringify(next));
+    return next;
+  } catch (e) { return extra || {}; }
+}
+function resolveUserContact(user) {
+  const extra = loadHubadorProfileExtra();
+  return {
+    tel: String((user && user.tel) || extra.tel || '').trim(),
+    direccion: String((user && user.direccion) || extra.direccion || '').trim(),
+  };
+}
+function isActivoPedidoStatus(status) {
+  const s = status || 'en_formacion';
+  return s === 'en_formacion' || s === 'pagado';
+}
 function loadHubadorOrders() {
   try {
     const raw = localStorage.getItem(HUBADOR_ORDERS_KEY);
@@ -2438,7 +2466,7 @@ function loadHubadorOrders() {
   } catch (e) { return []; }
 }
 function syncActiveGroupsFromOrders(list) {
-  const active = (list || []).filter((o) => (o.status || 'en_formacion') === 'en_formacion');
+  const active = (list || []).filter((o) => isActivoPedidoStatus(o.status));
   try { localStorage.setItem(HUBADOR_ACTIVE_GROUPS_KEY, JSON.stringify(active)); } catch (e) {}
   return active;
 }
@@ -2460,7 +2488,7 @@ function formatPedidoDate(ts) {
   return d.getDate() + ' ' + months[d.getMonth()];
 }
 function orderOwnerEmail(o) { return (o && (o.email || o.userEmail)) || null; }
-function orderFromCartLine(item, user, stamp) {
+function orderFromCartLine(item, user, stamp, status) {
   const t = cartLineTotals(item);
   const unitLabel = item.unit === '/u' ? 'u' : 'kg';
   const createdAt = stamp || Date.now();
@@ -2475,7 +2503,7 @@ function orderFromCartLine(item, user, stamp) {
     oldN: t.oldN || 0,
     total: fmtPrecioAR(t.grupo),
     totalN: t.grupo,
-    status: 'en_formacion',
+    status: status || 'en_formacion',
     date: formatPedidoDate(createdAt),
     createdAt,
     confirmedAt: createdAt,
@@ -2484,16 +2512,18 @@ function orderFromCartLine(item, user, stamp) {
     email,
     userEmail: email,
     cartId: item.id || item.name,
+    payDemo: (status || 'en_formacion') === 'pagado',
   };
 }
-function mergeCartIntoOrders(existing, cart, user) {
+function mergeCartIntoOrders(existing, cart, user, opts) {
   const stamp = Date.now();
+  const status = (opts && opts.status) || 'en_formacion';
   let next = Array.isArray(existing) ? existing.slice() : [];
   const email = user && user.email ? user.email : null;
   (cart || []).forEach((item, i) => {
-    const draft = orderFromCartLine(item, user, stamp + i);
+    const draft = orderFromCartLine(item, user, stamp + i, status);
     const idx = next.findIndex((o) =>
-      o.status === 'en_formacion' &&
+      (o.status || 'en_formacion') === status &&
       (o.cartId === draft.cartId || o.name === draft.name) &&
       (!email || !orderOwnerEmail(o) || orderOwnerEmail(o) === email)
     );
@@ -3848,17 +3878,72 @@ function BottomNav({ active }) {
 const NavContext = React.createContext(() => {});
 const SelectionContext = React.createContext({ selected: null, setSelected: () => {}, selectedOrder: null, setSelectedOrder: () => {}, selectedGroup: null, setSelectedGroup: () => {}, showToast: () => {}, webSearch: '', setWebSearch: () => {} });
 
+function HubadorProfileGateModal({ open, initialTel, initialDireccion, onSave, onCancel }) {
+  const [tel, setTel] = React.useState(initialTel || '');
+  const [direccion, setDireccion] = React.useState(initialDireccion || '');
+  React.useEffect(() => {
+    if (open) {
+      setTel(initialTel || '');
+      setDireccion(initialDireccion || '');
+    }
+  }, [open, initialTel, initialDireccion]);
+  if (!open) return null;
+  const ok = String(tel).trim() && String(direccion).trim();
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 220, background: 'rgba(15,23,30,0.48)', display: 'grid', placeItems: 'center', padding: 18 }} onClick={onCancel}>
+      <div role="dialog" aria-modal="true" aria-label="Datos de entrega" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 390, background: '#fff', borderRadius: 16, padding: '22px 20px', boxShadow: '0 18px 48px rgba(0,0,0,.18)', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 4, color: '#0f172a' }}>Datos para el pedido</div>
+        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 16, lineHeight: 1.45 }}>Necesitamos teléfono y dirección antes del pago demo.</div>
+        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>Teléfono</label>
+        <input value={tel} onChange={(e) => setTel(e.target.value)} type="tel" placeholder="+54 9 11 …" style={{ width: '100%', height: 42, border: '1px solid #e2e8f0', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, marginBottom: 12, boxSizing: 'border-box', outline: 'none' }} />
+        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>Dirección</label>
+        <input value={direccion} onChange={(e) => setDireccion(e.target.value)} type="text" placeholder="Calle, número, barrio" style={{ width: '100%', height: 42, border: '1px solid #e2e8f0', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, marginBottom: 16, boxSizing: 'border-box', outline: 'none' }} />
+        <button type="button" disabled={!ok} onClick={() => onSave && onSave(String(tel).trim(), String(direccion).trim())} style={{ width: '100%', background: ok ? '#0d9488' : '#cbd5e1', color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: ok ? 'pointer' : 'not-allowed' }}>Continuar al pago</button>
+        <button type="button" onClick={onCancel} style={{ width: '100%', marginTop: 8, background: 'transparent', border: 'none', color: '#64748b', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 8 }}>Cancelar</button>
+      </div>
+    </div>
+  );
+}
+
+function HubadorMpDemoModal({ open, totalLabel, onApprove, onCancel }) {
+  if (!open) return null;
+  const mpBlue = '#009ee3';
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 230, background: 'rgba(15,23,30,0.52)', display: 'grid', placeItems: 'center', padding: 18 }} onClick={onCancel}>
+      <div role="dialog" aria-modal="true" aria-label="Mercado Pago demo" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 390, background: '#fff', borderRadius: 16, padding: '22px 20px', boxShadow: '0 18px 48px rgba(0,0,0,.2)', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a', letterSpacing: '-0.02em' }}>Mercado Pago</div>
+          <span style={{ fontSize: 10.5, fontWeight: 700, color: '#0369a1', background: '#e0f2fe', borderRadius: 999, padding: '3px 8px' }}>DEMO</span>
+        </div>
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 14px', marginBottom: 14 }}>
+          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Monto a pagar</div>
+          <div style={{ fontWeight: 800, fontSize: 26, color: '#0f172a' }}>{totalLabel}</div>
+        </div>
+        <div style={{ fontSize: 12.5, color: '#64748b', lineHeight: 1.45, marginBottom: 16 }}>
+          En producción el pago irá a MP; demo local. No se cobra plata real.
+        </div>
+        <button type="button" onClick={onApprove} style={{ width: '100%', background: mpBlue, color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14.5, fontWeight: 700, cursor: 'pointer', boxShadow: '0 6px 16px rgba(0,158,227,.28)' }}>
+          Simular pago aprobado
+        </button>
+        <button type="button" onClick={onCancel} style={{ width: '100%', marginTop: 10, background: '#fff', border: '1px solid #e2e8f0', color: '#475569', borderRadius: 10, padding: '11px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
+          Cancelar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Mis Grupos: Carrito (borrador) | Grupos activos (confirmados) ───
 function MobileMisGrupos() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { cart, user, orders, removeFromCart, updateCartQty, confirmCartAsOrders, misGruposTab, setMisGruposTab, setSelectedOrder } = React.useContext(SelectionContext);
+  const { cart, user, orders, removeFromCart, updateCartQty, startMpDemoPay, misGruposTab, setMisGruposTab, setSelectedOrder } = React.useContext(SelectionContext);
   const tab = misGruposTab === 'activos' ? 'activos' : 'carrito';
   const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
   const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
   const email = user && user.email;
-  const activos = ordersForProfile(orders, email).filter((o) => (o.status || 'en_formacion') === 'en_formacion');
+  const activos = ordersForProfile(orders, email).filter((o) => isActivoPedidoStatus(o.status));
   const segBtn = (id, label, count) => {
     const on = tab === id;
     return (
@@ -3916,7 +4001,7 @@ function MobileMisGrupos() {
               <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '28px 16px', textAlign: 'center' }}>
                 <div style={{ fontSize: 36, marginBottom: 8 }}>🛒</div>
                 <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Carrito vacío</div>
-                <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Sumá productos y confirmá el pedido para pasarlos a Grupos activos.</div>
+                <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Sumá productos y pagá con Mercado Pago (demo) para pasarlos a Grupos activos.</div>
                 <button onClick={() => navigate('home')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Explorar productos</button>
                 {activos.length > 0 && (
                   <button type="button" onClick={() => setTab('activos')} style={{ display: 'block', width: '100%', marginTop: 10, background: 'transparent', border: 'none', color: primary, fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>Ver Grupos activos →</button>
@@ -3974,18 +4059,21 @@ function MobileMisGrupos() {
                     <strong>{fmtPrecioAR(totals.ahorro)}</strong>
                   </div>
                   {!user ? (
-                    <button type="button" onClick={() => navigate('login')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ingresar para confirmar</button>
+                    <button type="button" onClick={() => navigate('login')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ingresar para pagar</button>
                   ) : (
                     <button
                       type="button"
-                      onClick={() => confirmCartAsOrders && confirmCartAsOrders()}
-                      style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+                      onClick={() => startMpDemoPay && startMpDemoPay()}
+                      style={{ width: '100%', background: '#009ee3', color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
                     >
-                      Confirmar mi pedido
+                      Pagar con Mercado Pago
                     </button>
                   )}
                   <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 10, lineHeight: 1.4 }}>
-                    Al confirmar, pasan a Grupos activos y al Perfil.
+                    Demo · no se cobra plata real
+                  </div>
+                  <div style={{ textAlign: 'center', fontSize: 11, color: '#94a3b8', marginTop: 4, lineHeight: 1.4 }}>
+                    En producción el pago irá a MP; demo local.
                   </div>
                   <button type="button" onClick={() => navigate('home')} style={{ width: '100%', marginTop: 10, background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Seguir sumando productos</button>
                 </div>
@@ -4011,7 +4099,7 @@ function MobileMisGrupos() {
             <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '28px 16px', textAlign: 'center' }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>👥</div>
               <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Sin grupos activos</div>
-              <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Confirmá un pedido desde el Carrito para verlo acá.</div>
+              <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Pagá un pedido desde el Carrito para verlo acá.</div>
               <button type="button" onClick={() => setTab('carrito')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ir al carrito</button>
             </div>
           ) : (
@@ -4079,7 +4167,7 @@ function MobilePerfil() {
             {list.length === 0 ? (
               <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '24px 16px', textAlign: 'center', marginBottom: 14 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Todavía no confirmaste pedidos</div>
-                <div style={{ fontSize: 12, color: '#888', marginBottom: 14 }}>Armá el carrito en Mis grupos y tocá Confirmar mi pedido.</div>
+                <div style={{ fontSize: 12, color: '#888', marginBottom: 14 }}>Armá el carrito en Mis grupos y tocá Pagar con Mercado Pago.</div>
                 <button type="button" onClick={() => { setMisGruposTab && setMisGruposTab('carrito'); navigate('mis-grupos'); }} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ir al carrito</button>
               </div>
             ) : (
@@ -4751,12 +4839,12 @@ function WebGrupoDetalle() {
 
 function WebMisGrupos() {
   const navigate = React.useContext(NavContext);
-  const { user, cart, orders, removeFromCart, updateCartQty, confirmCartAsOrders, misGruposTab, setMisGruposTab, setSelectedOrder } = React.useContext(SelectionContext);
+  const { user, cart, orders, removeFromCart, updateCartQty, startMpDemoPay, misGruposTab, setMisGruposTab, setSelectedOrder } = React.useContext(SelectionContext);
   const tab = misGruposTab === 'activos' ? 'activos' : 'carrito';
   const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
   const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
-  const activos = ordersForProfile(orders, user && user.email).filter((o) => (o.status || 'en_formacion') === 'en_formacion');
+  const activos = ordersForProfile(orders, user && user.email).filter((o) => isActivoPedidoStatus(o.status));
 
   return (
     <WebShell title="Carrito · Mis grupos">
@@ -4786,7 +4874,7 @@ function WebMisGrupos() {
         {tab === 'carrito' ? (
           cart.length === 0 ? (
             <div className="web-empty-panel">
-              <p>Carrito vacío. Sumá productos y confirmá para pasarlos a Grupos activos.</p>
+              <p>Carrito vacío. Sumá productos y pagá (demo MP) para pasarlos a Grupos activos.</p>
               <button type="button" className="web-btn" onClick={() => navigate('home')}>Explorar productos</button>
               {activos.length > 0 && (
                 <button type="button" className="web-linkish" onClick={() => setTab('activos')}>Ver Grupos activos →</button>
@@ -4831,18 +4919,22 @@ function WebMisGrupos() {
                   <strong>{fmtPrecioAR(totals.ahorro)}</strong>
                 </div>
                 {!user ? (
-                  <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar para confirmar</button>
+                  <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar para pagar</button>
                 ) : (
                   <button
                     type="button"
                     className="web-btn"
-                    onClick={() => confirmCartAsOrders && confirmCartAsOrders()}
+                    onClick={() => startMpDemoPay && startMpDemoPay()}
+                    style={{ background: '#009ee3' }}
                   >
-                    Confirmar mi pedido
+                    Pagar con Mercado Pago
                   </button>
                 )}
                 <p className="web-muted" style={{ margin: '8px 0 0', fontSize: 12, textAlign: 'center', lineHeight: 1.4 }}>
-                  Al confirmar, pasan a Grupos activos y al Perfil.
+                  Demo · no se cobra plata real
+                </p>
+                <p className="web-muted" style={{ margin: '4px 0 0', fontSize: 11, textAlign: 'center', lineHeight: 1.4, color: '#94a3b8' }}>
+                  En producción el pago irá a MP; demo local.
                 </p>
                 <button type="button" className="web-linkish" onClick={() => navigate('home')}>+ Seguir sumando productos</button>
               </aside>
@@ -4851,7 +4943,7 @@ function WebMisGrupos() {
         ) : (
           activos.length === 0 ? (
             <div className="web-empty-panel">
-              <p>Sin grupos activos. Confirmá un pedido desde el Carrito.</p>
+              <p>Sin grupos activos. Pagá un pedido desde el Carrito.</p>
               <button type="button" className="web-btn" onClick={() => setTab('carrito')}>Ir al carrito</button>
             </div>
           ) : (
@@ -5096,6 +5188,8 @@ function App() {
     return list;
   });
   const [misGruposTab, setMisGruposTab] = useState('carrito');
+  const [mpDemoOpen, setMpDemoOpen] = useState(false);
+  const [profileGateOpen, setProfileGateOpen] = useState(false);
   const applyUser = (u) => {
     setUser(u);
     try {
@@ -5203,26 +5297,72 @@ function App() {
     showToast._t = setTimeout(() => setToast(null), typeof ms === 'number' ? ms : 2400);
   };
 
-  const confirmCartAsOrders = () => {
+  const confirmCartAsOrders = (opts) => {
     if (!cart.length) {
       showToast('No hay productos en el carrito');
       return;
     }
+    const status = (opts && opts.status) || 'pagado';
     const prev = loadHubadorOrders();
-    const next = mergeCartIntoOrders(prev, cart, user);
+    const next = mergeCartIntoOrders(prev, cart, user, { status });
     saveHubadorOrders(next);
     setOrders(next);
     const stampFloor = Date.now() - 5000;
-    const touched = next.filter((o) => o.status === 'en_formacion' && (o.confirmedAt || o.createdAt || 0) >= stampFloor);
+    const touched = next.filter((o) => (o.status || '') === status && (o.confirmedAt || o.createdAt || 0) >= stampFloor);
     maybeInsertOrdersRemote(touched);
     persistCart([]);
+    setMpDemoOpen(false);
+    setProfileGateOpen(false);
     setMisGruposTab('activos');
     setActive('mis-grupos');
     try { window.__hubadorActive = 'mis-grupos'; } catch (e) {}
     try { localStorage.setItem('mobileScreen', 'mis-grupos'); } catch (e) {}
     setToast(null);
     clearTimeout(showToast._t);
-    showToast('Pedido confirmado · lo ves en Grupos activos y en Perfil', 2800);
+    showToast((opts && opts.toast) || 'Pago demo aprobado · pedido en Grupos activos', 2800);
+  };
+
+  const startMpDemoPay = () => {
+    if (!cart.length) {
+      showToast('No hay productos en el carrito');
+      return;
+    }
+    if (!user) {
+      showToast('Ingresá para pagar');
+      setScreen('login');
+      return;
+    }
+    const contact = resolveUserContact(user);
+    if (!contact.tel || !contact.direccion) {
+      setProfileGateOpen(true);
+      return;
+    }
+    setMpDemoOpen(true);
+  };
+
+  const saveContactAndContinuePay = async (tel, direccion) => {
+    const t = String(tel || '').trim();
+    const d = String(direccion || '').trim();
+    if (!t || !d) {
+      showToast('Completá teléfono y dirección');
+      return;
+    }
+    saveHubadorProfileExtra({ tel: t, direccion: d });
+    const nextUser = Object.assign({}, user || {}, { tel: t, direccion: d });
+    applyUser(nextUser);
+    if (sb && nextUser.id) {
+      try {
+        await upsertProfile(nextUser.id, {
+          email: nextUser.email || null,
+          nombre: nextUser.nombre || null,
+          barrio: nextUser.barrio || null,
+          tel: t,
+          direccion: d,
+        });
+      } catch (e) { /* localStorage alcanza para la demo */ }
+    }
+    setProfileGateOpen(false);
+    setMpDemoOpen(true);
   };
 
   const setScreen = (id) => {
@@ -5252,7 +5392,7 @@ function App() {
 
   const appInner = (
     <NavContext.Provider value={setScreen}>
-      <SelectionContext.Provider value={{ selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, confirmCartAsOrders, orders, misGruposTab, setMisGruposTab, webSearch, setWebSearch, bumpFilled, progressTick }}>
+      <SelectionContext.Provider value={{ selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, confirmCartAsOrders, startMpDemoPay, orders, misGruposTab, setMisGruposTab, webSearch, setWebSearch, bumpFilled, progressTick }}>
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
           <ScreenComp />
         </div>
@@ -5269,10 +5409,29 @@ function App() {
       <span style={{ flex: 1 }}>{toast}</span>
     </div>;
 
+  const gateContact = resolveUserContact(user);
+  const checkoutOverlays = (
+    <>
+      <HubadorProfileGateModal
+        open={profileGateOpen}
+        initialTel={gateContact.tel}
+        initialDireccion={gateContact.direccion}
+        onCancel={() => setProfileGateOpen(false)}
+        onSave={saveContactAndContinuePay}
+      />
+      <HubadorMpDemoModal
+        open={mpDemoOpen}
+        totalLabel={fmtPrecioAR(cartTotals(cart).grupo)}
+        onCancel={() => setMpDemoOpen(false)}
+        onApprove={() => confirmCartAsOrders({ status: 'pagado', toast: 'Pago demo aprobado · pedido en Grupos activos' })}
+      />
+    </>
+  );
+
   const isDesktop = useIsDesktop();
   try { window.__hubadorActive = active; } catch (e) {}
 
-  const selectionValue = { selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, confirmCartAsOrders, orders, misGruposTab, setMisGruposTab, webSearch, setWebSearch, bumpFilled, progressTick };
+  const selectionValue = { selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, confirmCartAsOrders, startMpDemoPay, orders, misGruposTab, setMisGruposTab, webSearch, setWebSearch, bumpFilled, progressTick };
 
   // ── Comparador Web + Mobile (estado compartido, misma pantalla activa) ──
   if (BOTH_MODE) {
@@ -5339,6 +5498,7 @@ function App() {
                 <span>✓</span>{toast}
               </div>
             )}
+            {checkoutOverlays}
           </div>
         </SelectionContext.Provider>
       </NavContext.Provider>
@@ -5359,6 +5519,7 @@ function App() {
                   <span>✓</span>{toast}
                 </div>
               )}
+              {checkoutOverlays}
             </div>
           </SelectionContext.Provider>
         </NavContext.Provider>
@@ -5370,6 +5531,7 @@ function App() {
           <div style={{ flex: 1, minHeight: 0, boxSizing: 'border-box', paddingTop: 'env(safe-area-inset-top, 0px)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
             {appInner}
             {toastEl}
+            {checkoutOverlays}
           </div>
         </div>
       </div>);
@@ -5417,6 +5579,7 @@ function App() {
           </IOSDevice>
         </div>
       </div>
+      {checkoutOverlays}
     </div>);
 }
 
