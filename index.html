@@ -1814,6 +1814,106 @@ function groupProgressView(name) {
   return { filled, missing, pct, almost, goal: GOAL_KG };
 }
 
+function demoHubProgressSeed(order) {
+  const key = String((order && (order.id || order.name)) || 'x');
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  return 40 + (h % 46); // 40–85
+}
+function resolveHubProgressPct(order) {
+  const name = order && order.name;
+  if (name) return groupProgressView(name).pct;
+  if (order && order.hubProgress != null && !Number.isNaN(Number(order.hubProgress))) {
+    return Math.min(100, Math.max(0, Math.round(Number(order.hubProgress))));
+  }
+  return demoHubProgressSeed(order);
+}
+function hubProgressHelperText(pct) {
+  if (pct >= 100) return 'Listo para retirar en hub';
+  if (pct >= 85) return '¡Cerrado! Preparando entrega al hub';
+  if (pct >= 55) return 'Casi cerramos · retiro estimado mañana';
+  return 'El grupo se está armando · retiro en hub cuando cierre';
+}
+function buildOrderShareUrl(order) {
+  let base = 'https://hubador.com';
+  try {
+    if (typeof location !== 'undefined' && location.origin && location.origin !== 'null' && !/^file:/i.test(location.protocol || '')) {
+      base = location.origin;
+    }
+  } catch (e) { /* hubador.com */ }
+  const hint = encodeURIComponent((order && order.name) || '');
+  return hint ? (base.replace(/\/$/, '') + '/?producto=' + hint) : (base.replace(/\/$/, '') + '/');
+}
+function buildOrderShareText(order) {
+  const name = (order && order.name) || 'este producto';
+  return 'Sumate a mi grupo de ' + name + ' en Hubador — si cerramos la venta, puede llegar mañana… o hoy mismo. ' + buildOrderShareUrl(order);
+}
+async function shareOrderWithFriends(order, showToast) {
+  const url = buildOrderShareUrl(order);
+  const text = buildOrderShareText(order);
+  const title = 'Hubador — sumate a mi grupo';
+  try {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      await navigator.share({ title, text, url });
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    if (showToast) showToast('Link copiado');
+  } catch (e2) {
+    if (showToast) showToast('No se pudo compartir');
+  }
+}
+
+function ActivoHubJourney({ order }) {
+  const primary = 'oklch(0.55 0.15 165)';
+  const { showToast, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
+  const pct = resolveHubProgressPct(order);
+  const helper = hubProgressHelperText(pct);
+  const barColor = pct >= 85 ? 'oklch(0.62 0.18 35)' : primary;
+  return (
+    <div style={{ marginTop: 11 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 5 }}>
+        <span style={{ fontSize: 11.5, fontWeight: 700, color: '#333' }}>Camino al hub</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: primary, fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
+      </div>
+      <div style={{ height: 5, background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', marginBottom: 6 }}>
+        <div style={{ height: '100%', width: pct + '%', background: barColor, borderRadius: 999, transition: 'width .35s ease' }} />
+      </div>
+      <div style={{ fontSize: 11, color: '#888', lineHeight: 1.35, marginBottom: 10 }}>{helper}</div>
+      <div style={{ background: '#f7faf9', border: '1px solid #e6f0ec', borderRadius: 10, padding: '10px 11px' }}>
+        <div style={{ fontSize: 12, color: '#333', lineHeight: 1.4, marginBottom: 8 }}>
+          <b>¿Querés que llegue más rápido?</b> Compartí esta orden con tus conocidos: si se cierra la venta, puede llegar <b>mañana</b>… o <b>hoy mismo</b>.
+        </div>
+        <button
+          type="button"
+          onClick={() => shareOrderWithFriends(order, showToast)}
+          style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 12px', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}
+        >
+          Compartir orden
+        </button>
+        <div style={{ fontSize: 10.5, color: '#8a938e', marginTop: 6, textAlign: 'center' }}>Invitar acelera el cierre del grupo</div>
+      </div>
+    </div>
+  );
+}
+
 const HUBADOR_CATALOG = [
   { id: 'papa', name: 'Papa', cat: 'verduras', priceN: 1364, oldN: 2099, members: '9/12', time: '1d', deadlineHrs: 35, img: 'img/papa.jpg', goal: GOAL_KG, unit: '/kg' },
   { id: 'tomate', name: 'Tomate Red', cat: 'verduras', priceN: 1750, oldN: 3499, members: '5/10', time: '3d', deadlineHrs: 48, img: 'img/tomate.jpg', goal: GOAL_KG, unit: '/kg' },
@@ -2502,6 +2602,7 @@ function orderFromCartLine(item, user, stamp, status) {
   const unitLabel = item.unit === '/u' ? 'u' : 'kg';
   const createdAt = stamp || Date.now();
   const email = user && user.email ? user.email : null;
+  const livePct = item.name ? groupProgressView(item.name).pct : demoHubProgressSeed({ name: item.name, id: String(createdAt) });
   return {
     id: 'ord-' + createdAt + '-' + Math.random().toString(36).slice(2, 7),
     name: item.name,
@@ -2522,6 +2623,7 @@ function orderFromCartLine(item, user, stamp, status) {
     userEmail: email,
     cartId: item.id || item.name,
     payDemo: (status || 'en_formacion') === 'pagado',
+    hubProgress: livePct >= 40 ? livePct : demoHubProgressSeed({ name: item.name, id: String(createdAt) }),
   };
 }
 function mergeCartIntoOrders(existing, cart, user, opts) {
@@ -4120,18 +4222,21 @@ function MobileMisGrupos() {
               {activos.map((p) => {
                 const s = PEDIDO_STATUS_STYLE[p.status] || PEDIDO_STATUS_STYLE.en_formacion;
                 return (
-                  <div key={p.id || p.name} onClick={() => { setSelectedOrder && setSelectedOrder(p); navigate('seguimiento'); }} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, display: 'flex', gap: 12, cursor: 'pointer' }}>
-                    <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
-                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                        <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
-                        <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 600 }}>{s.label}</span>
+                  <div key={p.id || p.name} onClick={() => { setSelectedOrder && setSelectedOrder(p); navigate('seguimiento'); }} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                        <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       </div>
-                      <div style={{ fontSize: 12, color: '#888', margin: '4px 0' }}>{p.qty} · {p.date}</div>
-                      <div style={{ fontWeight: 800, fontSize: 15, color: primary }}>{p.total}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                          <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
+                          <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 600 }}>{s.label}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: '#888', margin: '4px 0' }}>{p.qty} · {p.date}</div>
+                        <div style={{ fontWeight: 800, fontSize: 15, color: primary }}>{p.total}</div>
+                      </div>
                     </div>
+                    <ActivoHubJourney order={p} />
                   </div>
                 );
               })}
@@ -4971,13 +5076,16 @@ function WebMisGrupos() {
               {activos.map((p) => {
                 const s = PEDIDO_STATUS_STYLE[p.status] || PEDIDO_STATUS_STYLE.en_formacion;
                 return (
-                  <article key={p.id || p.name} className="web-list-item" onClick={() => { setSelectedOrder && setSelectedOrder(p); navigate('seguimiento'); }} style={{ cursor: 'pointer' }}>
-                    <img src={p.img} alt={p.name} />
-                    <div>
-                      <h3>{p.name}</h3>
-                      <p>{p.qty} · {p.total} · {p.date}</p>
+                  <article key={p.id || p.name} className="web-list-item" onClick={() => { setSelectedOrder && setSelectedOrder(p); navigate('seguimiento'); }} style={{ cursor: 'pointer', alignItems: 'stretch', flexDirection: 'column', gap: 0 }}>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center', width: '100%', flex: '0 0 auto' }}>
+                      <img src={p.img} alt={p.name} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3>{p.name}</h3>
+                        <p>{p.qty} · {p.total} · {p.date}</p>
+                      </div>
+                      <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{s.label}</span>
                     </div>
-                    <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{s.label}</span>
+                    <ActivoHubJourney order={p} />
                   </article>
                 );
               })}
