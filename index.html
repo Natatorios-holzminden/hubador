@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HUBADOR — Compra en equipo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d9488'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='800' font-size='18' fill='%23fff'%3EH%3C/text%3E%3C/svg%3E" />
-<!-- hubador-kg100-v1 20260807f-auth supabase-auth -->
-<!-- HUBADOR_BUILD 20260807f-auth -->
-<style id="hubador-card-fix-20260807f">
+<!-- hubador-kg100-v1 20260808a-compra supabase-auth -->
+<!-- HUBADOR_BUILD 20260808a-compra -->
+<style id="hubador-card-fix-20260807h">
 /* Early critical card CSS — height on IMG tag + wrap; do not rely on stylesheet alone */
 img { max-width: 100%; }
 html.app-mode .web-prod-card,
@@ -746,7 +746,7 @@ html.app-mode .web-root { min-height: 100vh; }
   /* Hero más ancho que el grid de productos: se siente full-bleed en monitores grandes */
   max-width: min(1680px, calc(100% - 48px)); margin: 0 auto; padding: 12px 28px 10px;
   display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; align-items: stretch;
-  /* u-v4: hero compacto para que la 1ª fila de cards (foto+Unirme) quepa arriba del fold */
+  /* u-v5: hero compacto para que la 1ª fila de cards (foto+Unirme) quepa arriba del fold */
   min-height: 0;
   max-height: none;
 }
@@ -856,7 +856,7 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-hero h1 em { font-style: normal; color: oklch(0.48 0.12 165); }
 .web-hero p { font-size: 13px; color: #4b564f; line-height: 1.4; max-width: 36ch; margin: 0; }
 .web-hero-cta { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 0; }
-/* u-v4: ocultar stats del hero para dejar cards con Unirme arriba del fold */
+/* u-v5: ocultar stats del hero para dejar cards con Unirme arriba del fold */
 .web-hero-panel-copy .web-stats { display: none !important; }
 .web-stats {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
@@ -1536,6 +1536,35 @@ async function resolveUserFromSession(session) {
   const authUser = session.user;
   const row = await fetchProfile(authUser.id);
   return profileFromRow(row, authUser);
+}
+
+/** Mensajes de Auth en español (Supabase suele devolver inglés). */
+function formatAuthErrorEs(error) {
+  const raw = (error && (error.message || error.error_description || error.msg)) || '';
+  const msg = String(raw);
+  const lower = msg.toLowerCase();
+  if (/email not confirmed|email_not_confirmed/.test(lower)) {
+    return 'Confirmá el mail o desactivá confirmación (Supabase → Authentication → Providers → Email → Confirm email)';
+  }
+  if (/invalid login credentials|invalid_credentials|invalid email or password/.test(lower)) {
+    return 'Email o contraseña incorrectos. Si nunca te registraste, usá Registrate primero.';
+  }
+  if (/user already registered|already registered|already been registered|email address has already/.test(lower)) {
+    return 'Ese email ya está registrado. Probá Ingresar.';
+  }
+  if (/signup is disabled|signups not allowed|sign up is disabled/.test(lower)) {
+    return 'El registro está deshabilitado en Supabase Auth.';
+  }
+  if (/password/.test(lower) && (/at least|characters|weak|short|least 6|minimum/.test(lower))) {
+    return 'La contraseña es muy corta (mínimo 6 caracteres).';
+  }
+  if (/rate limit|too many|over_request_rate_limit/.test(lower)) {
+    return 'Demasiados intentos. Esperá un momento y reintentá.';
+  }
+  if (/failed to fetch|networkerror|network request failed|load failed|cors/.test(lower)) {
+    return 'No se pudo conectar con Supabase. Revisá internet y Auth → URL Configuration (Site URL).';
+  }
+  return msg || 'Error al autenticar';
 }
 
 
@@ -2383,17 +2412,113 @@ function MasOfertas({ excludeName, barrio = 'Palermo' }) {
 
 }
 
-// Demo pedidos (estado de compras) — viven en Perfil
-const DEMO_PEDIDOS = [
-  { name: 'Tomate', qty: '2 kg', total: '$4.548', status: 'entregado', date: '15 abr', img: 'img/tomate.jpg' },
-  { name: 'Banana', qty: '1 kg', total: '$1.755', status: 'pagado', date: '17 abr', img: 'img/banana.jpg' },
-  { name: 'Zapallo anco', qty: '3 kg', total: '$3.507', status: 'pendiente', date: '18 abr', img: 'img/zapallo-ok-20260730c.jpg' },
-];
+// Pedidos confirmados → hubadorOrders + hubadorActiveGroups (en formación)
+// Carrito (conlatCart) = solo borradores sin confirmar
+const HUBADOR_ORDERS_KEY = 'hubadorOrders';
+const HUBADOR_ACTIVE_GROUPS_KEY = 'hubadorActiveGroups';
 const PEDIDO_STATUS_STYLE = {
+  en_formacion: { bg: '#fef9c3', color: '#854d0e', label: 'En formación' },
+  pendiente: { bg: '#ffedd5', color: '#9a3412', label: '🕒 Pendiente' },
   entregado: { bg: '#dcfce7', color: '#166534', label: '✓ Entregado' },
   pagado: { bg: '#dbeafe', color: '#1d4ed8', label: '💳 Pagado' },
-  pendiente: { bg: '#fef9c3', color: '#854d0e', label: '🕒 Pendiente' },
 };
+function loadHubadorOrders() {
+  try {
+    const raw = localStorage.getItem(HUBADOR_ORDERS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function syncActiveGroupsFromOrders(list) {
+  const active = (list || []).filter((o) => (o.status || 'en_formacion') === 'en_formacion');
+  try { localStorage.setItem(HUBADOR_ACTIVE_GROUPS_KEY, JSON.stringify(active)); } catch (e) {}
+  return active;
+}
+function saveHubadorOrders(list) {
+  try { localStorage.setItem(HUBADOR_ORDERS_KEY, JSON.stringify(list || [])); } catch (e) {}
+  syncActiveGroupsFromOrders(list);
+}
+function loadActiveGroups() {
+  try {
+    const raw = localStorage.getItem(HUBADOR_ACTIVE_GROUPS_KEY);
+    const arr = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(arr)) return arr;
+  } catch (e) {}
+  return syncActiveGroupsFromOrders(loadHubadorOrders());
+}
+function formatPedidoDate(ts) {
+  const d = ts ? new Date(ts) : new Date();
+  const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  return d.getDate() + ' ' + months[d.getMonth()];
+}
+function orderOwnerEmail(o) { return (o && (o.email || o.userEmail)) || null; }
+function orderFromCartLine(item, user, stamp) {
+  const t = cartLineTotals(item);
+  const unitLabel = item.unit === '/u' ? 'u' : 'kg';
+  const createdAt = stamp || Date.now();
+  const email = user && user.email ? user.email : null;
+  return {
+    id: 'ord-' + createdAt + '-' + Math.random().toString(36).slice(2, 7),
+    name: item.name,
+    qty: t.qty + ' ' + unitLabel,
+    qtyN: t.qty,
+    price: fmtPrecioAR(t.priceN),
+    priceN: t.priceN,
+    oldN: t.oldN || 0,
+    total: fmtPrecioAR(t.grupo),
+    totalN: t.grupo,
+    status: 'en_formacion',
+    date: formatPedidoDate(createdAt),
+    createdAt,
+    confirmedAt: createdAt,
+    img: item.img,
+    userId: user && user.id ? user.id : null,
+    email,
+    userEmail: email,
+    cartId: item.id || item.name,
+  };
+}
+function mergeCartIntoOrders(existing, cart, user) {
+  const stamp = Date.now();
+  let next = Array.isArray(existing) ? existing.slice() : [];
+  const email = user && user.email ? user.email : null;
+  (cart || []).forEach((item, i) => {
+    const draft = orderFromCartLine(item, user, stamp + i);
+    const idx = next.findIndex((o) =>
+      o.status === 'en_formacion' &&
+      (o.cartId === draft.cartId || o.name === draft.name) &&
+      (!email || !orderOwnerEmail(o) || orderOwnerEmail(o) === email)
+    );
+    if (idx >= 0) next[idx] = Object.assign({}, next[idx], draft, { id: next[idx].id });
+    else next.unshift(draft);
+  });
+  next.sort((a, b) => (b.confirmedAt || b.createdAt || 0) - (a.confirmedAt || a.createdAt || 0));
+  return next;
+}
+/** Solo pedidos reales — sin demos falsos */
+function ordersForProfile(orders, userEmail) {
+  return (orders || []).filter((o) => !userEmail || !orderOwnerEmail(o) || orderOwnerEmail(o) === userEmail);
+}
+function maybeInsertOrdersRemote(newRows) {
+  if (!sb || !newRows || !newRows.length) return;
+  (async () => {
+    try {
+      const { data: sess } = await sb.auth.getSession();
+      const uid = sess && sess.session && sess.session.user && sess.session.user.id;
+      if (!uid) return;
+      const payload = newRows.map((o) => ({
+        user_id: uid,
+        product_name: o.name,
+        qty: o.qtyN != null ? o.qtyN : null,
+        unit_price: o.priceN != null ? o.priceN : null,
+        total: o.totalN != null ? o.totalN : null,
+        status: o.status || 'en_formacion',
+      }));
+      const { error } = await sb.from('orders').insert(payload);
+      if (error) console.warn('[HUBADOR] orders insert (opcional)', error.message || error);
+    } catch (e) { console.warn('[HUBADOR] orders insert skipped', e); }
+  })();
+}
 
 // Legacy: historial / pedidos → Perfil (lista embebida ahí)
 function MobilePedidos() {
@@ -2414,7 +2539,7 @@ function MobileLogin() {
     try {
       if (sb) {
         const { data, error } = await sb.auth.signInWithPassword({ email: email.trim(), password: pass });
-        if (error) { showToast(error.message || 'Error al ingresar'); return; }
+        if (error) { showToast(formatAuthErrorEs(error), 5200); return; }
         const u = await resolveUserFromSession(data.session);
         login(u || { nombre: email.split('@')[0], email: email.trim(), barrio: '' });
         showToast('Sesión iniciada');
@@ -2426,7 +2551,7 @@ function MobileLogin() {
         navigate('home');
       }
     } catch (e) {
-      showToast((e && e.message) || 'Error al ingresar');
+      showToast(formatAuthErrorEs(e), 5200);
     } finally {
       setBusy(false);
     }
@@ -2489,7 +2614,7 @@ function MobileSignup() {
           password: form.pass,
           options: { data: { nombre: form.nombre.trim(), barrio: form.barrio, tel: form.tel || '' } },
         });
-        if (error) { showToast(error.message || 'Error al registrarse'); return; }
+        if (error) { showToast(formatAuthErrorEs(error), 5200); return; }
         const userId = data.user && data.user.id;
         if (userId) {
           await upsertProfile(userId, {
@@ -2505,7 +2630,7 @@ function MobileSignup() {
           showToast('Cuenta creada');
           navigate('home');
         } else {
-          showToast('Revisá tu email para confirmar la cuenta');
+          showToast('Revisá tu email para confirmar la cuenta (o desactivá Confirm email en Supabase Auth)', 5200);
           navigate('login');
         }
       } else {
@@ -2514,7 +2639,7 @@ function MobileSignup() {
         navigate('home');
       }
     } catch (e) {
-      showToast((e && e.message) || 'Error al registrarse');
+      showToast(formatAuthErrorEs(e), 5200);
     } finally {
       setBusy(false);
     }
@@ -3715,13 +3840,25 @@ function BottomNav({ active }) {
 const NavContext = React.createContext(() => {});
 const SelectionContext = React.createContext({ selected: null, setSelected: () => {}, selectedOrder: null, setSelectedOrder: () => {}, selectedGroup: null, setSelectedGroup: () => {}, showToast: () => {}, webSearch: '', setWebSearch: () => {} });
 
-// ─── Mis Grupos (lado cliente) ───────────────────────────────
+// ─── Mis Grupos: Carrito (borrador) | Grupos activos (confirmados) ───
 function MobileMisGrupos() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { cart, user, removeFromCart, updateCartQty, showToast } = React.useContext(SelectionContext);
+  const { cart, user, orders, removeFromCart, updateCartQty, confirmCartAsOrders, misGruposTab, setMisGruposTab, setSelectedOrder } = React.useContext(SelectionContext);
+  const tab = misGruposTab === 'activos' ? 'activos' : 'carrito';
+  const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
   const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
+  const email = user && user.email;
+  const activos = ordersForProfile(orders, email).filter((o) => (o.status || 'en_formacion') === 'en_formacion');
+  const segBtn = (id, label, count) => {
+    const on = tab === id;
+    return (
+      <button type="button" onClick={() => setTab(id)} style={{ flex: 1, border: 'none', borderRadius: 9, padding: '9px 8px', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', background: on ? primary : 'transparent', color: on ? '#fff' : '#555' }}>
+        {label}{count > 0 ? ` (${count})` : ''}
+      </button>
+    );
+  };
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', WebkitFontSmoothing: 'antialiased' }}>
@@ -3735,115 +3872,164 @@ function MobileMisGrupos() {
         <div style={{ fontSize: 11.5, color: '#888' }}>{user ? `👤 ${user.nombre}` : 'Invitado'}</div>
       </header>
 
-      <div style={{ padding: '16px 16px 0' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 10 }}>
-          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 11, padding: '10px 12px' }}>
-            <div style={{ fontSize: 10.5, color: '#888', fontWeight: 500, marginBottom: 3 }}>Ítems</div>
-            <div style={{ fontWeight: 800, fontSize: 20 }}>{totals.items}</div>
-          </div>
-          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 11, padding: '10px 12px' }}>
-            <div style={{ fontSize: 10.5, color: '#888', fontWeight: 500, marginBottom: 3 }}>A pagar</div>
-            <div style={{ fontWeight: 800, fontSize: 15, color: primary }}>{fmtPrecioAR(totals.grupo)}</div>
-          </div>
-          <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 11, padding: '10px 12px' }}>
-            <div style={{ fontSize: 10.5, color: '#0f766e', fontWeight: 600, marginBottom: 3 }}>Ahorro</div>
-            <div style={{ fontWeight: 800, fontSize: 15, color: '#0f766e' }}>{fmtPrecioAR(totals.ahorro)}</div>
-          </div>
+      <div style={{ padding: '12px 16px 0' }}>
+        <div style={{ display: 'flex', background: '#e8eaec', borderRadius: 11, padding: 3, marginBottom: 14, gap: 2 }}>
+          {segBtn('carrito', 'Carrito', totals.items)}
+          {segBtn('activos', 'Grupos activos', activos.length)}
         </div>
-        {totals.coto > 0 && cart.length > 0 && (
-          <div style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
-            En Coto serían <s>{fmtPrecioAR(totals.coto)}</s> · ahorrás <b style={{ color: '#0f766e' }}>{fmtPrecioAR(totals.ahorro)}</b>
-          </div>
-        )}
       </div>
 
-      <div style={{ padding: '0 16px 24px' }}>
-        {cart.length === 0 ? (
-          <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '28px 16px', textAlign: 'center' }}>
-            <div style={{ fontSize: 36, marginBottom: 8 }}>👥</div>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Todavía no te uniste a ningún grupo</div>
-            <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Sumate a un grupo de compra cerca tuyo para empezar a ahorrar.</div>
-            <button onClick={() => navigate('home')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Explorar productos</button>
+      {tab === 'carrito' ? (
+        <>
+          <div style={{ padding: '0 16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 10 }}>
+              <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 11, padding: '10px 12px' }}>
+                <div style={{ fontSize: 10.5, color: '#888', fontWeight: 500, marginBottom: 3 }}>Ítems</div>
+                <div style={{ fontWeight: 800, fontSize: 20 }}>{totals.items}</div>
+              </div>
+              <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 11, padding: '10px 12px' }}>
+                <div style={{ fontSize: 10.5, color: '#888', fontWeight: 500, marginBottom: 3 }}>A pagar</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: primary }}>{fmtPrecioAR(totals.grupo)}</div>
+              </div>
+              <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 11, padding: '10px 12px' }}>
+                <div style={{ fontSize: 10.5, color: '#0f766e', fontWeight: 600, marginBottom: 3 }}>Ahorro</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: '#0f766e' }}>{fmtPrecioAR(totals.ahorro)}</div>
+              </div>
+            </div>
+            {totals.coto > 0 && cart.length > 0 && (
+              <div style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
+                En Coto serían <s>{fmtPrecioAR(totals.coto)}</s> · ahorrás <b style={{ color: '#0f766e' }}>{fmtPrecioAR(totals.ahorro)}</b>
+              </div>
+            )}
           </div>
-        ) : (
-          <>
-            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>Pedidos en formación</div>
+
+          <div style={{ padding: '0 16px 24px' }}>
+            {cart.length === 0 ? (
+              <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '28px 16px', textAlign: 'center' }}>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>🛒</div>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Carrito vacío</div>
+                <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Sumá productos y confirmá el pedido para pasarlos a Grupos activos.</div>
+                <button onClick={() => navigate('home')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Explorar productos</button>
+                {activos.length > 0 && (
+                  <button type="button" onClick={() => setTab('activos')} style={{ display: 'block', width: '100%', marginTop: 10, background: 'transparent', border: 'none', color: primary, fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>Ver Grupos activos →</button>
+                )}
+              </div>
+            ) : (
+              <>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>Armá tu pedido</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {cart.map((g) => {
+                    const t = cartLineTotals(g);
+                    return (
+                      <div key={g.id || g.name} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, display: 'flex', gap: 12 }}>
+                        <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                          <img src={g.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                            <div style={{ fontWeight: 700, fontSize: 14 }}>{g.name}</div>
+                            <button type="button" onClick={() => removeFromCart(g.id || g.name)} style={{ background: 'none', border: 'none', color: '#aaa', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>Quitar</button>
+                          </div>
+                          <div style={{ fontSize: 11.5, color: '#888', margin: '3px 0' }}>
+                            {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
+                            {t.oldN > 0 && <> · <s>{fmtPrecioAR(t.oldN)}</s> Coto</>}
+                            {g.location ? <> · 📍 {g.location}</> : null}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f5f7', borderRadius: 999, padding: '4px 6px' }}>
+                              <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(1, t.qty - 1))} style={{ width: 28, height: 28, borderRadius: 999, border: '1px solid #ddd', background: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
+                              <span style={{ fontWeight: 800, fontSize: 13, minWidth: 36, textAlign: 'center' }}>{t.qty} {unitOf(g.unit)}</span>
+                              <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + 1)} style={{ width: 28, height: 28, borderRadius: 999, border: 'none', background: primary, color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontWeight: 800, fontSize: 14, color: primary }}>{fmtPrecioAR(t.grupo)}</div>
+                              {t.ahorro > 0 && <div style={{ fontSize: 10.5, color: '#0f766e', fontWeight: 600 }}>Ahorrás {fmtPrecioAR(t.ahorro)}</div>}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 14, marginTop: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 }}>
+                    <span style={{ color: '#666' }}>Si compraras en Coto</span>
+                    <s style={{ color: '#888' }}>{fmtPrecioAR(totals.coto)}</s>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8 }}>
+                    <span style={{ fontWeight: 600 }}>Total en grupo</span>
+                    <strong style={{ color: primary }}>{fmtPrecioAR(totals.grupo)}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 14, color: '#0f766e' }}>
+                    <span style={{ fontWeight: 700 }}>Ahorro total</span>
+                    <strong>{fmtPrecioAR(totals.ahorro)}</strong>
+                  </div>
+                  {!user ? (
+                    <button type="button" onClick={() => navigate('login')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ingresar para confirmar</button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => confirmCartAsOrders && confirmCartAsOrders()}
+                      style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      Confirmar mi pedido
+                    </button>
+                  )}
+                  <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 10, lineHeight: 1.4 }}>
+                    Al confirmar, pasan a Grupos activos y al Perfil.
+                  </div>
+                  <button type="button" onClick={() => navigate('home')} style={{ width: '100%', marginTop: 10, background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Seguir sumando productos</button>
+                </div>
+              </>
+            )}
+
+            <div onClick={() => navigate('perfil')} style={{ marginTop: 18, background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 9, background: '#f4f5f7', display: 'grid', placeItems: 'center', fontSize: 18, flexShrink: 0 }}>📋</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, fontSize: 13.5 }}>Tus pedidos</div>
+                <div style={{ fontSize: 11.5, color: '#888' }}>Confirmados · estado en Perfil</div>
+              </div>
+              <span style={{ color: '#bbb', fontSize: 18 }}>›</span>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div style={{ padding: '0 16px 24px' }}>
+          <div style={{ fontSize: 12, color: '#666', marginBottom: 12, lineHeight: 1.4 }}>
+            Pedidos confirmados esperando que el grupo cierre. También los ves en Perfil → Tus pedidos.
+          </div>
+          {activos.length === 0 ? (
+            <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '28px 16px', textAlign: 'center' }}>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>👥</div>
+              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Sin grupos activos</div>
+              <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Confirmá un pedido desde el Carrito para verlo acá.</div>
+              <button type="button" onClick={() => setTab('carrito')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ir al carrito</button>
+            </div>
+          ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {cart.map((g) => {
-                const t = cartLineTotals(g);
+              {activos.map((p) => {
+                const s = PEDIDO_STATUS_STYLE[p.status] || PEDIDO_STATUS_STYLE.en_formacion;
                 return (
-                  <div key={g.id || g.name} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, display: 'flex', gap: 12 }}>
+                  <div key={p.id || p.name} onClick={() => { setSelectedOrder && setSelectedOrder(p); navigate('seguimiento'); }} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, display: 'flex', gap: 12, cursor: 'pointer' }}>
                     <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
-                      <img src={g.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                        <div style={{ fontWeight: 700, fontSize: 14 }}>{g.name}</div>
-                        <button type="button" onClick={() => removeFromCart(g.id || g.name)} style={{ background: 'none', border: 'none', color: '#aaa', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>Quitar</button>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
+                        <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 600 }}>{s.label}</span>
                       </div>
-                      <div style={{ fontSize: 11.5, color: '#888', margin: '3px 0' }}>
-                        {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
-                        {t.oldN > 0 && <> · <s>{fmtPrecioAR(t.oldN)}</s> Coto</>}
-                        {g.location ? <> · 📍 {g.location}</> : null}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 8 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f5f7', borderRadius: 999, padding: '4px 6px' }}>
-                          <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(1, t.qty - 1))} style={{ width: 28, height: 28, borderRadius: 999, border: '1px solid #ddd', background: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
-                          <span style={{ fontWeight: 800, fontSize: 13, minWidth: 36, textAlign: 'center' }}>{t.qty} {unitOf(g.unit)}</span>
-                          <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + 1)} style={{ width: 28, height: 28, borderRadius: 999, border: 'none', background: primary, color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontWeight: 800, fontSize: 14, color: primary }}>{fmtPrecioAR(t.grupo)}</div>
-                          {t.ahorro > 0 && <div style={{ fontSize: 10.5, color: '#0f766e', fontWeight: 600 }}>Ahorrás {fmtPrecioAR(t.ahorro)}</div>}
-                        </div>
-                      </div>
+                      <div style={{ fontSize: 12, color: '#888', margin: '4px 0' }}>{p.qty} · {p.date}</div>
+                      <div style={{ fontWeight: 800, fontSize: 15, color: primary }}>{p.total}</div>
                     </div>
                   </div>
                 );
               })}
             </div>
-
-            <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 14, marginTop: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 }}>
-                <span style={{ color: '#666' }}>Si compraras en Coto</span>
-                <s style={{ color: '#888' }}>{fmtPrecioAR(totals.coto)}</s>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8 }}>
-                <span style={{ fontWeight: 600 }}>Total en grupo</span>
-                <strong style={{ color: primary }}>{fmtPrecioAR(totals.grupo)}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 14, color: '#0f766e' }}>
-                <span style={{ fontWeight: 700 }}>Ahorro total</span>
-                <strong>{fmtPrecioAR(totals.ahorro)}</strong>
-              </div>
-              {!user ? (
-                <button type="button" onClick={() => navigate('login')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ingresar para confirmar</button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => showToast('Pedido guardado · te avisamos cuando cierre el grupo')}
-                  style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
-                >
-                  Confirmar mi pedido
-                </button>
-              )}
-              <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 10, lineHeight: 1.4 }}>
-                Otros vecinos pueden seguir uniéndose al grupo hasta completar el mínimo.
-              </div>
-              <button type="button" onClick={() => navigate('home')} style={{ width: '100%', marginTop: 10, background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Seguir sumando productos</button>
-            </div>
-          </>
-        )}
-
-        <div onClick={() => navigate('perfil')} style={{ marginTop: 18, background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
-          <div style={{ width: 36, height: 36, borderRadius: 9, background: '#f4f5f7', display: 'grid', placeItems: 'center', fontSize: 18, flexShrink: 0 }}>📋</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 13.5 }}>Tus pedidos</div>
-            <div style={{ fontSize: 11.5, color: '#888' }}>Estado en Perfil · entregados y pagados</div>
-          </div>
-          <span style={{ color: '#bbb', fontSize: 18 }}>›</span>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -3852,7 +4038,8 @@ function MobileMisGrupos() {
 function MobilePerfil() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { user, logout, cart, setSelectedOrder } = React.useContext(SelectionContext);
+  const { user, logout, cart, setSelectedOrder, orders, setMisGruposTab } = React.useContext(SelectionContext);
+  const list = ordersForProfile(orders, user && user.email);
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', WebkitFontSmoothing: 'antialiased' }}>
@@ -3873,35 +4060,45 @@ function MobilePerfil() {
                 <div style={{ fontWeight: 800, fontSize: 17 }}>{user.nombre}</div>
                 <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{user.email}</div>
                 <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>📍 {user.barrio}</div>
-                <div style={{ fontSize: 12, color: '#555', marginTop: 4 }}>{cart.length} pedido(s) en formación</div>
+                <div style={{ fontSize: 12, color: '#555', marginTop: 4 }}>{cart.length} en carrito · {list.length} pedido{list.length === 1 ? '' : 's'}</div>
               </div>
             </div>
 
             <div style={{ fontSize: 13, fontWeight: 700, color: '#333', marginBottom: 4 }}>Tus pedidos</div>
-            <div style={{ fontSize: 12, color: '#888', marginBottom: 10 }}>Estado de lo que compraste o te uniste ({DEMO_PEDIDOS.length})</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
-              {DEMO_PEDIDOS.map((p) => {
-                const s = PEDIDO_STATUS_STYLE[p.status];
-                return (
-                  <div key={p.name} onClick={() => { setSelectedOrder(p); navigate('seguimiento'); }} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 14, display: 'flex', gap: 12, cursor: 'pointer' }}>
-                    <div style={{ width: 76, height: 76, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
-                      <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                        <div style={{ fontWeight: 600, fontSize: 13.5, lineHeight: 1.3 }}>{p.name}</div>
-                        <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 600 }}>{s.label}</span>
-                      </div>
-                      <div style={{ fontSize: 12, color: '#888', margin: '4px 0' }}>{p.qty} · {p.date}</div>
-                      <div style={{ fontWeight: 800, fontSize: 18, color: primary }}>{p.total}</div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ fontSize: 12, color: '#888', marginBottom: 10 }}>
+              {list.length ? `Confirmados (${list.length})` : 'Acá ves lo que confirmaste'}
             </div>
+            {list.length === 0 ? (
+              <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '24px 16px', textAlign: 'center', marginBottom: 14 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Todavía no confirmaste pedidos</div>
+                <div style={{ fontSize: 12, color: '#888', marginBottom: 14 }}>Armá el carrito en Mis grupos y tocá Confirmar mi pedido.</div>
+                <button type="button" onClick={() => { setMisGruposTab && setMisGruposTab('carrito'); navigate('mis-grupos'); }} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ir al carrito</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
+                {list.map((p) => {
+                  const s = PEDIDO_STATUS_STYLE[p.status] || PEDIDO_STATUS_STYLE.en_formacion;
+                  return (
+                    <div key={p.id || (p.name + p.date)} onClick={() => { setSelectedOrder(p); navigate('seguimiento'); }} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 14, display: 'flex', gap: 12, cursor: 'pointer' }}>
+                      <div style={{ width: 76, height: 76, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                        <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                          <div style={{ fontWeight: 600, fontSize: 13.5, lineHeight: 1.3 }}>{p.name}</div>
+                          <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 600 }}>{s.label}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: '#888', margin: '4px 0' }}>{p.qty} · {p.date}</div>
+                        <div style={{ fontWeight: 800, fontSize: 18, color: primary }}>{p.total}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, overflow: 'hidden' }}>
-              <div onClick={() => navigate('mis-grupos')} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer' }}>
+              <div onClick={() => { setMisGruposTab && setMisGruposTab('carrito'); navigate('mis-grupos'); }} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer' }}>
                 <span style={{ fontSize: 18 }}>👥</span>
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>Mis grupos</span>
                 <span style={{ color: '#bbb', fontSize: 18 }}>›</span>
@@ -4062,7 +4259,7 @@ function WebHome() {
 
       <div className="web-toolbar">
         <div className="web-sort-row">
-          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'} <small style={{ opacity: 0.45, fontWeight: 600 }}>· u-v4</small></span>
+          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'} <small style={{ opacity: 0.45, fontWeight: 600 }}>· u-v5</small></span>
           <div className="web-toolbar-actions">
             <button type="button" className={'web-filter-toggle' + (showFilters || cat !== 'todos' ? ' activo' : '')} onClick={() => setShowFilters((v) => !v)}>
               Filtrar{cat !== 'todos' ? ` · ${categories.find((c) => c.id === cat)?.label || ''}` : ''}
@@ -4160,7 +4357,7 @@ function WebHome() {
 
 // ─── WEB SHELL + pantallas escritorio (mobile intacto) ─────────
 
-function WebHeader({ showSearch = true }) {
+function WebHeader({ showSearch = true, authMode = null }) {
   const navigate = React.useContext(NavContext);
   const { user, cart, webSearch, setWebSearch } = React.useContext(SelectionContext);
   const nAvail = HUBADOR_CATALOG.length;
@@ -4209,7 +4406,11 @@ function WebHeader({ showSearch = true }) {
         <div className="web-nav-actions">
           {user
             ? <button className="web-btn-ghost" type="button" onClick={() => navigate('perfil')}>👤 {user.nombre}</button>
-            : <button className="web-btn-ghost" type="button" onClick={() => navigate('login')}>Ingresar</button>}
+            : authMode === 'login'
+              ? <button className="web-btn-ghost" type="button" onClick={() => navigate('signup')}>Registrate</button>
+              : authMode === 'signup'
+                ? <button className="web-btn-ghost" type="button" onClick={() => navigate('login')}>Ingresar</button>
+                : <button className="web-btn-ghost" type="button" onClick={() => navigate('login')}>Ingresar</button>}
           <button className="web-cart" type="button" onClick={() => navigate('mis-grupos')} aria-label="Carrito / Mis grupos">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
             <span>{cartTotals(cart).items}</span>
@@ -4221,18 +4422,18 @@ function WebHeader({ showSearch = true }) {
 }
 
 
-function WebShell({ children, title, wide, auth }) {
+function WebShell({ children, title, wide, auth, authMode }) {
   return (
     <div className={'web-page' + (wide ? ' web-page-wide' : '')}>
-      <WebHeader showSearch={!auth} />
+      <WebHeader showSearch={!auth} authMode={authMode || null} />
       <main className={wide ? 'web-main web-main-wide' : 'web-main'}>{children}</main>
     </div>
   );
 }
 
-function WebAuthCard({ title, children }) {
+function WebAuthCard({ title, children, authMode }) {
   return (
-    <WebShell title={title} auth>
+    <WebShell title={title} auth authMode={authMode}>
       <div className="web-auth-wrap">
         <div className="web-auth-card">{children}</div>
       </div>
@@ -4254,7 +4455,7 @@ function WebLogin() {
       if (sb) {
         if (!email.trim() || pass.length < 4) { showToast('Completá email y contraseña'); return; }
         const { data, error } = await sb.auth.signInWithPassword({ email: email.trim(), password: pass });
-        if (error) { showToast(error.message || 'Error al ingresar'); return; }
+        if (error) { showToast(formatAuthErrorEs(error), 5200); return; }
         const u = await resolveUserFromSession(data.session);
         login(u || { nombre: email.split('@')[0] || 'Vecino', email: email.trim(), barrio: '' });
         showToast('Sesión iniciada');
@@ -4265,20 +4466,20 @@ function WebLogin() {
         navigate('home');
       }
     } catch (err) {
-      showToast((err && err.message) || 'Error al ingresar');
+      showToast(formatAuthErrorEs(err), 5200);
     } finally {
       setBusy(false);
     }
   };
   return (
-    <WebAuthCard title="Ingresar">
+    <WebAuthCard title="Ingresar" authMode="login">
       <h1>Ingresá a HUBADOR</h1>
-      <p>Comprá en grupo con tus vecinos.</p>
+      <p>Comprá en grupo con tus vecinos. ¿Primera vez? Usá Registrate.</p>
       {!sb && <p style={{ fontSize: 12, color: '#854d0e' }}>Modo demo — configurá Supabase</p>}
       <form onSubmit={submit} className="web-form">
         <label>Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" autoComplete="email" /></label>
         <label>Contraseña<input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="••••••••" autoComplete="current-password" /></label>
-        <button className="web-btn" type="submit" disabled={busy}>{busy ? 'Ingresando…' : 'Entrar'}</button>
+        <button className="web-btn" type="submit" disabled={busy}>{busy ? 'Ingresando…' : 'Ingresar'}</button>
       </form>
       <p className="web-auth-switch">¿No tenés cuenta? <button type="button" onClick={() => navigate('signup')}>Registrate</button></p>
     </WebAuthCard>
@@ -4305,7 +4506,7 @@ function WebSignup() {
           password: pass,
           options: { data: { nombre: (nombre || 'Vecino').trim(), barrio: barrio || 'Palermo' } },
         });
-        if (error) { showToast(error.message || 'Error al registrarse'); return; }
+        if (error) { showToast(formatAuthErrorEs(error), 5200); return; }
         const userId = data.user && data.user.id;
         if (userId) {
           await upsertProfile(userId, {
@@ -4320,7 +4521,7 @@ function WebSignup() {
           showToast('Cuenta creada');
           navigate('home');
         } else {
-          showToast('Revisá tu email para confirmar la cuenta');
+          showToast('Revisá tu email para confirmar la cuenta (o desactivá Confirm email en Supabase Auth)', 5200);
           navigate('login');
         }
       } else {
@@ -4329,13 +4530,13 @@ function WebSignup() {
         navigate('home');
       }
     } catch (err) {
-      showToast((err && err.message) || 'Error al registrarse');
+      showToast(formatAuthErrorEs(err), 5200);
     } finally {
       setBusy(false);
     }
   };
   return (
-    <WebAuthCard title="Crear cuenta">
+    <WebAuthCard title="Crear cuenta" authMode="signup">
       <h1>Creá tu cuenta</h1>
       <p>Empezá a sumarte a grupos de tu barrio.</p>
       {!sb && <p style={{ fontSize: 12, color: '#854d0e' }}>Modo demo — configurá Supabase</p>}
@@ -4542,83 +4743,126 @@ function WebGrupoDetalle() {
 
 function WebMisGrupos() {
   const navigate = React.useContext(NavContext);
-  const { user, cart, removeFromCart, updateCartQty, showToast } = React.useContext(SelectionContext);
+  const { user, cart, orders, removeFromCart, updateCartQty, confirmCartAsOrders, misGruposTab, setMisGruposTab, setSelectedOrder } = React.useContext(SelectionContext);
+  const tab = misGruposTab === 'activos' ? 'activos' : 'carrito';
+  const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
   const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
+  const activos = ordersForProfile(orders, user && user.email).filter((o) => (o.status || 'en_formacion') === 'en_formacion');
 
   return (
     <WebShell title="Carrito · Mis grupos">
       <div className="web-panel web-cart-panel">
         <div className="web-cart-head">
           <div>
-            <h1>Mi carrito</h1>
-            <p className="web-cart-sub">Mis grupos · pedidos en formación</p>
+            <h1>Mis grupos</h1>
+            <p className="web-cart-sub">Carrito para armar · Grupos activos = confirmados</p>
           </div>
-          {cart.length > 0 && (
+          {tab === 'carrito' && cart.length > 0 && (
             <span className="web-cart-count">{totals.items} {totals.items === 1 ? 'ítem' : 'ítems'}</span>
+          )}
+          {tab === 'activos' && activos.length > 0 && (
+            <span className="web-cart-count">{activos.length} activo{activos.length === 1 ? '' : 's'}</span>
           )}
         </div>
 
-        {cart.length === 0 ? (
-          <div className="web-empty-panel">
-            <p>Todavía no te sumaste a ningún grupo.</p>
-            <button type="button" className="web-btn" onClick={() => navigate('home')}>Explorar productos</button>
-          </div>
-        ) : (
-          <>
-            <div className="web-cart-list">
-              {cart.map((g) => {
-                const t = cartLineTotals(g);
-                return (
-                  <article key={g.id || g.name} className="web-cart-item">
-                    <img src={g.img} alt={g.name} />
-                    <div className="web-cart-item-main">
-                      <h3>{g.name}</h3>
-                      <p className="web-cart-item-meta">
-                        {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
-                        {t.oldN > 0 && <> · <s className="web-cart-coto">{fmtPrecioAR(t.oldN)}</s> Coto</>}
-                        {g.location ? <> · 📍 {g.location}</> : null}
-                      </p>
-                      <div className="web-cart-qty">
-                        <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(1, t.qty - 1))}>−</button>
-                        <span>{t.qty} {unitOf(g.unit)}</span>
-                        <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + 1)}>+</button>
+        <div style={{ display: 'flex', background: '#e8eaec', borderRadius: 11, padding: 3, marginBottom: 18, gap: 2, maxWidth: 480 }}>
+          <button type="button" className="web-btn" onClick={() => setTab('carrito')} style={{ flex: 1, background: tab === 'carrito' ? '#0d9488' : 'transparent', color: tab === 'carrito' ? '#fff' : '#555', boxShadow: 'none' }}>
+            Carrito{totals.items ? ` (${totals.items})` : ''}
+          </button>
+          <button type="button" className="web-btn" onClick={() => setTab('activos')} style={{ flex: 1, background: tab === 'activos' ? '#0d9488' : 'transparent', color: tab === 'activos' ? '#fff' : '#555', boxShadow: 'none', fontSize: 13 }}>
+            Grupos activos{activos.length ? ` (${activos.length})` : ''}
+          </button>
+        </div>
+
+        {tab === 'carrito' ? (
+          cart.length === 0 ? (
+            <div className="web-empty-panel">
+              <p>Carrito vacío. Sumá productos y confirmá para pasarlos a Grupos activos.</p>
+              <button type="button" className="web-btn" onClick={() => navigate('home')}>Explorar productos</button>
+              {activos.length > 0 && (
+                <button type="button" className="web-linkish" onClick={() => setTab('activos')}>Ver Grupos activos →</button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="web-cart-list">
+                {cart.map((g) => {
+                  const t = cartLineTotals(g);
+                  return (
+                    <article key={g.id || g.name} className="web-cart-item">
+                      <img src={g.img} alt={g.name} />
+                      <div className="web-cart-item-main">
+                        <h3>{g.name}</h3>
+                        <p className="web-cart-item-meta">
+                          {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
+                          {t.oldN > 0 && <> · <s className="web-cart-coto">{fmtPrecioAR(t.oldN)}</s> Coto</>}
+                          {g.location ? <> · 📍 {g.location}</> : null}
+                        </p>
+                        <div className="web-cart-qty">
+                          <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(1, t.qty - 1))}>−</button>
+                          <span>{t.qty} {unitOf(g.unit)}</span>
+                          <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + 1)}>+</button>
+                        </div>
                       </div>
+                      <div className="web-cart-item-side">
+                        <strong>{fmtPrecioAR(t.grupo)}</strong>
+                        {t.ahorro > 0 && <em>Ahorrás {fmtPrecioAR(t.ahorro)}</em>}
+                        <button type="button" className="web-btn-ghost" onClick={() => removeFromCart(g.id || g.name)}>Quitar</button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <aside className="web-cart-summary">
+                <div className="web-cart-row"><span>Si compraras en Coto</span><s>{fmtPrecioAR(totals.coto)}</s></div>
+                <div className="web-cart-row"><span>Total en grupo</span><strong>{fmtPrecioAR(totals.grupo)}</strong></div>
+                <div className="web-cart-row web-cart-ahorro">
+                  <span>Ahorro total</span>
+                  <strong>{fmtPrecioAR(totals.ahorro)}</strong>
+                </div>
+                {!user ? (
+                  <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar para confirmar</button>
+                ) : (
+                  <button
+                    type="button"
+                    className="web-btn"
+                    onClick={() => confirmCartAsOrders && confirmCartAsOrders()}
+                  >
+                    Confirmar mi pedido
+                  </button>
+                )}
+                <p className="web-muted" style={{ margin: '8px 0 0', fontSize: 12, textAlign: 'center', lineHeight: 1.4 }}>
+                  Al confirmar, pasan a Grupos activos y al Perfil.
+                </p>
+                <button type="button" className="web-linkish" onClick={() => navigate('home')}>+ Seguir sumando productos</button>
+              </aside>
+            </>
+          )
+        ) : (
+          activos.length === 0 ? (
+            <div className="web-empty-panel">
+              <p>Sin grupos activos. Confirmá un pedido desde el Carrito.</p>
+              <button type="button" className="web-btn" onClick={() => setTab('carrito')}>Ir al carrito</button>
+            </div>
+          ) : (
+            <div className="web-list">
+              {activos.map((p) => {
+                const s = PEDIDO_STATUS_STYLE[p.status] || PEDIDO_STATUS_STYLE.en_formacion;
+                return (
+                  <article key={p.id || p.name} className="web-list-item" onClick={() => { setSelectedOrder && setSelectedOrder(p); navigate('seguimiento'); }} style={{ cursor: 'pointer' }}>
+                    <img src={p.img} alt={p.name} />
+                    <div>
+                      <h3>{p.name}</h3>
+                      <p>{p.qty} · {p.total} · {p.date}</p>
                     </div>
-                    <div className="web-cart-item-side">
-                      <strong>{fmtPrecioAR(t.grupo)}</strong>
-                      {t.ahorro > 0 && <em>Ahorrás {fmtPrecioAR(t.ahorro)}</em>}
-                      <button type="button" className="web-btn-ghost" onClick={() => removeFromCart(g.id || g.name)}>Quitar</button>
-                    </div>
+                    <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{s.label}</span>
                   </article>
                 );
               })}
             </div>
-
-            <aside className="web-cart-summary">
-              <div className="web-cart-row"><span>Si compraras en Coto</span><s>{fmtPrecioAR(totals.coto)}</s></div>
-              <div className="web-cart-row"><span>Total en grupo</span><strong>{fmtPrecioAR(totals.grupo)}</strong></div>
-              <div className="web-cart-row web-cart-ahorro">
-                <span>Ahorro total</span>
-                <strong>{fmtPrecioAR(totals.ahorro)}</strong>
-              </div>
-              {!user ? (
-                <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar para confirmar</button>
-              ) : (
-                <button
-                  type="button"
-                  className="web-btn"
-                  onClick={() => showToast('Pedido guardado · te avisamos cuando cierre el grupo')}
-                >
-                  Confirmar mi pedido
-                </button>
-              )}
-              <p className="web-muted" style={{ margin: '8px 0 0', fontSize: 12, textAlign: 'center', lineHeight: 1.4 }}>
-                Otros vecinos pueden seguir uniéndose al grupo hasta completar el mínimo.
-              </p>
-              <button type="button" className="web-linkish" onClick={() => navigate('home')}>+ Seguir sumando productos</button>
-            </aside>
-          </>
+          )
         )}
       </div>
     </WebShell>
@@ -4627,7 +4871,8 @@ function WebMisGrupos() {
 
 function WebPerfil() {
   const navigate = React.useContext(NavContext);
-  const { user, logout, cart, setSelectedOrder } = React.useContext(SelectionContext);
+  const { user, logout, cart, setSelectedOrder, orders, setMisGruposTab } = React.useContext(SelectionContext);
+  const list = ordersForProfile(orders, user && user.email);
   return (
     <WebShell title="Perfil">
       <div className="web-panel web-panel-narrow">
@@ -4645,30 +4890,39 @@ function WebPerfil() {
                 <h2>{user.nombre}</h2>
                 <p>{user.email}</p>
                 <p>📍 {user.barrio}</p>
-                <p>{cart.length} pedido(s) en formación</p>
+                <p>{cart.length} en carrito · {list.length} pedido{list.length === 1 ? '' : 's'}</p>
               </div>
             </div>
 
             <h2 className="web-profile-section-title">Tus pedidos</h2>
-            <p className="web-profile-section-sub">Estado de lo que compraste o te uniste ({DEMO_PEDIDOS.length})</p>
-            <div className="web-list" style={{ marginBottom: 18 }}>
-              {DEMO_PEDIDOS.map((p) => {
-                const s = PEDIDO_STATUS_STYLE[p.status];
-                return (
-                  <article key={p.name + p.date} className="web-list-item" onClick={() => { setSelectedOrder(p); navigate('seguimiento'); }} style={{ cursor: 'pointer' }}>
-                    <img src={p.img} alt={p.name} />
-                    <div>
-                      <h3>{p.name}</h3>
-                      <p>{p.qty} · {p.total} · {p.date}</p>
-                    </div>
-                    <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{s.label}</span>
-                  </article>
-                );
-              })}
-            </div>
+            <p className="web-profile-section-sub">
+              {list.length ? `Confirmados (${list.length})` : 'Acá ves lo que confirmaste'}
+            </p>
+            {list.length === 0 ? (
+              <div className="web-empty-panel" style={{ marginBottom: 18 }}>
+                <p>Todavía no confirmaste pedidos</p>
+                <button type="button" className="web-btn" onClick={() => { setMisGruposTab && setMisGruposTab('carrito'); navigate('mis-grupos'); }}>Ir al carrito</button>
+              </div>
+            ) : (
+              <div className="web-list" style={{ marginBottom: 18 }}>
+                {list.map((p) => {
+                  const s = PEDIDO_STATUS_STYLE[p.status] || PEDIDO_STATUS_STYLE.en_formacion;
+                  return (
+                    <article key={p.id || (p.name + p.date)} className="web-list-item" onClick={() => { setSelectedOrder(p); navigate('seguimiento'); }} style={{ cursor: 'pointer' }}>
+                      <img src={p.img} alt={p.name} />
+                      <div>
+                        <h3>{p.name}</h3>
+                        <p>{p.qty} · {p.total} · {p.date}</p>
+                      </div>
+                      <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{s.label}</span>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="web-list-links">
-              <button type="button" onClick={() => navigate('mis-grupos')}>Mis grupos</button>
+              <button type="button" onClick={() => { setMisGruposTab && setMisGruposTab('carrito'); navigate('mis-grupos'); }}>Mis grupos</button>
             </div>
             <button type="button" className="web-btn-danger" onClick={() => { logout(); navigate('login'); }}>Cerrar sesión</button>
           </>
@@ -4828,6 +5082,12 @@ function App() {
   const [toast, setToast] = useState(null);
   const [user, setUser] = useState(() => {try {return JSON.parse(localStorage.getItem('conlatUser') || 'null');} catch (e) {return null;}});
   const [cart, setCart] = useState(() => {try {return JSON.parse(localStorage.getItem('conlatCart') || '[]');} catch (e) {return [];}});
+  const [orders, setOrders] = useState(() => {
+    const list = loadHubadorOrders();
+    syncActiveGroupsFromOrders(list);
+    return list;
+  });
+  const [misGruposTab, setMisGruposTab] = useState('carrito');
   const applyUser = (u) => {
     setUser(u);
     try {
@@ -4929,10 +5189,32 @@ function App() {
   };
   const removeFromCart = (id) => persistCart(cart.filter((c) => c.id !== id && c.name !== id));
 
-  const showToast = (msg) => {
+  const showToast = (msg, ms) => {
     setToast(msg);
     clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => setToast(null), 2400);
+    showToast._t = setTimeout(() => setToast(null), typeof ms === 'number' ? ms : 2400);
+  };
+
+  const confirmCartAsOrders = () => {
+    if (!cart.length) {
+      showToast('No hay productos en el carrito');
+      return;
+    }
+    const prev = loadHubadorOrders();
+    const next = mergeCartIntoOrders(prev, cart, user);
+    saveHubadorOrders(next);
+    setOrders(next);
+    const stampFloor = Date.now() - 5000;
+    const touched = next.filter((o) => o.status === 'en_formacion' && (o.confirmedAt || o.createdAt || 0) >= stampFloor);
+    maybeInsertOrdersRemote(touched);
+    persistCart([]);
+    setMisGruposTab('activos');
+    setActive('mis-grupos');
+    try { window.__hubadorActive = 'mis-grupos'; } catch (e) {}
+    try { localStorage.setItem('mobileScreen', 'mis-grupos'); } catch (e) {}
+    setToast(null);
+    clearTimeout(showToast._t);
+    showToast('Pedido confirmado · lo ves en Grupos activos y en Perfil', 2800);
   };
 
   const setScreen = (id) => {
@@ -4962,7 +5244,7 @@ function App() {
 
   const appInner = (
     <NavContext.Provider value={setScreen}>
-      <SelectionContext.Provider value={{ selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, webSearch, setWebSearch, bumpFilled, progressTick }}>
+      <SelectionContext.Provider value={{ selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, confirmCartAsOrders, orders, misGruposTab, setMisGruposTab, webSearch, setWebSearch, bumpFilled, progressTick }}>
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
           <ScreenComp />
         </div>
@@ -4982,7 +5264,7 @@ function App() {
   const isDesktop = useIsDesktop();
   try { window.__hubadorActive = active; } catch (e) {}
 
-  const selectionValue = { selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, webSearch, setWebSearch, bumpFilled, progressTick };
+  const selectionValue = { selected, setSelected, selectedOrder, setSelectedOrder, selectedGroup, setSelectedGroup, showToast, user, login, logout, cart, addToCart, updateCartQty, removeFromCart, confirmCartAsOrders, orders, misGruposTab, setMisGruposTab, webSearch, setWebSearch, bumpFilled, progressTick };
 
   // ── Comparador Web + Mobile (estado compartido, misma pantalla activa) ──
   if (BOTH_MODE) {

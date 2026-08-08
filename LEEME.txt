@@ -1,16 +1,26 @@
 HUBADOR — pack para subir a hubador.com
 =======================================
-Build: HUBADOR_BUILD 20260807f-auth  ·  marcador visible en la UI: · u-v4
+Build: HUBADOR_BUILD 20260807h-activos  ·  marcador visible en la UI: · u-v5
 Auth: Supabase (email + password) — ver SUPABASE.md
 
 Contenido
 ---------
 - index.html           → sitio completo (web + mobile + auth) — keys YA cableadas
-- config.js            → URL + publishable (se carga ANTES del app)
+- config.js            → URL + publishable (se carga ANTES del app) — ruta RELATIVA: config.js
 - img/                 → imágenes usadas por index.html
 - supabase-schema.sql  → tabla profiles + RLS (correr en Supabase — PRÓXIMO PASO)
-- SUPABASE.md          → guía de auth paso a paso
+- supabase-orders.sql  → tabla orders (compras; Auth Users ≠ pedidos)
+- supabase-schema-orders.sql → mismo SQL (alias)
+- SUPABASE.md          → guía de auth + pedidos
 - config.example.js    → plantilla
+
+Flujo de compra
+---------------
+1. Mis grupos → Carrito = armá qty / productos (conlatCart). NO es el destino final.
+2. Confirmar mi pedido → saca del carrito y guarda en hubadorOrders + hubadorActiveGroups.
+3. Cambia a pestaña Activos + toast “Pedido confirmado · lo ves en Grupos activos y en Perfil”.
+4. Perfil → Tus pedidos = solo pedidos reales (chip En formación). Sin demos falsos.
+5. Auth → Users = quién se logueó. Table Editor → orders = qty (tras correr supabase-orders.sql).
 
 IMPORTANTE — secrets
 --------------------
@@ -26,13 +36,25 @@ Hay que subir ESTE pack al repo/host que sirva hubador.com.
 Auth — qué falta de tu lado
 ---------------------------
 1. SQL Editor → corré supabase-schema.sql (si no lo hiciste)
-2. Auth → Email → desactivá “Confirm email” para probar
-3. Probá signup en el sitio → login → recargar sesión
-4. Subí este zip de nuevo a hubador.com (index.html + config.js + img/)
+2. SQL Editor → corré supabase-orders.sql (para ver compras en el dashboard)
+3. Auth → Providers → Email → desactivá “Confirm email” para probar
+4. Authentication → URL Configuration:
+     Site URL: https://hubador.com
+     Redirect URLs: http://hubador.com/**  y  https://hubador.com/**  (+ localhost si probás local)
+5. Probá **Registrate** en el sitio → luego login → confirmar pedido → Activos / Perfil
+6. Subí este zip de nuevo a hubador.com (index.html + config.js + img/)
 
 Sin keys el sitio queda en modo demo; CON estas keys el demo se apaga.
 Detalle: SUPABASE.md
 Nota: “usuarios online” en tiempo real viene después.
+
+Si no podés ingresar
+--------------------
+- Dos “Ingresar” (header + título de la página) es normal: el del header abre la misma pantalla.
+- Login ≠ registro: si nunca hiciste Registrate, el login falla.
+- En Supabase → Authentication → Users: ¿aparece tu email?
+- Si dice “confirmá el mail”: confirmá el correo o desactivá Confirm email.
+- El toast ahora muestra el error de Supabase en español.
 
 Pasos (GitHub Pages)
 --------------------
@@ -47,9 +69,11 @@ Pasos (GitHub Pages)
 
 Cómo verificar que cargó ESTE build
 -----------------------------------
-- En “Productos / listado” debe verse el texto · u-v4
-- Ver código fuente (Ctrl+U) y buscar: HUBADOR_BUILD 20260807f-auth
+- En “Productos / listado” debe verse el texto · u-v5
+- Ver código fuente (Ctrl+U) y buscar: HUBADOR_BUILD 20260807h-activos
+- Tras Confirmar: carrito vacío, pestaña Activos con el ítem, Perfil con chip «En formación»
 - En el HTML debe aparecer tu Project URL (qthznhtzzgmaekiggypd) — no PEGAR_URL
+- config.js debe cargar con ruta relativa: src="config.js" (NO /config.js)
 - Cada card: precio + barra + “Faltan X kg” + timer + botón Unirme al grupo
 - Con Supabase OK: NO debe salir el toast “Modo demo — configurá Supabase”
 
@@ -58,10 +82,3 @@ Rutas de imágenes
 Usá rutas RELATIVAS, sin barra al inicio:
   BIEN:  img/tomate.jpg
   MAL:   /img/tomate.jpg
-
-Vista local
------------
-Doble clic en index.html, o:
-  python -m http.server 8765
-luego http://localhost:8765/
-(En file:// a veces falla el auth por URLs; preferí un server local.)

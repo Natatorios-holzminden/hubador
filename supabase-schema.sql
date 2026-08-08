@@ -96,4 +96,10 @@ create trigger on_auth_user_created
 -- 4) Cómo marcar un admin (desde SQL, con el UUID del usuario en Authentication → Users):
 -- update public.profiles set role = 'admin' where email = 'tu@email.com';
 
+-- 5) Auth troubleshooting (solo lectura / ops en Dashboard):
+-- Authentication → Users: ver si el email existe y si email_confirmed_at está lleno.
+-- select id, email, email_confirmed_at, created_at from auth.users order by created_at desc limit 20;
+-- Si Confirm email está ON y el user no confirmó → login falla con "Email not confirmed".
+-- Dashboard → Authentication → Providers → Email → desactivar Confirm email para pruebas.
+
 -- Nota: usuarios online / presencia realtime → siguiente iteración (Realtime Presence).
