@@ -1600,7 +1600,7 @@ function getDeadline(key, hours) {
   return ts;
 }
 
-function Countdown({ deadline, big, card, inline, compact }) {
+function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) {
   const [now, setNow] = React.useState(Date.now());
   React.useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -1628,11 +1628,12 @@ function Countdown({ deadline, big, card, inline, compact }) {
 
   // Una línea corta para cards de grilla (no abulta la tarjeta)
   if (compact) {
+    const verb = prefix || 'Termina en';
     let label;
-    if (diff <= 0) label = 'Cerrado';
-    else if (d > 0) label = `Termina en ${d}d ${hRem}h`;
-    else if (h > 0) label = `Termina en ${h}h ${m}m`;
-    else label = `Termina en ${m}m`;
+    if (diff <= 0) label = doneLabel || (prefix ? 'Listo' : 'Cerrado');
+    else if (d > 0) label = `${verb} ${d}d ${hRem}h`;
+    else if (h > 0) label = `${verb} ${h}h ${m}m`;
+    else label = `${verb} ${m}m`;
     return (
       <div className="web-deadline-line" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, lineHeight: 1.2, color: urgent ? urgentColor : '#888', letterSpacing: '0.01em' }}>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.4" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
@@ -1834,6 +1835,16 @@ function hubProgressHelperText(pct) {
   if (pct >= 55) return 'Casi cerramos · retiro estimado mañana';
   return 'El grupo se está armando · retiro en hub cuando cierre';
 }
+/** Llegada / retiro estimado ~72h desde confirmación del pedido. */
+function getOrderArrivalDeadline(order) {
+  const base = order && (order.confirmedAt || order.joinedAt || order.createdAt);
+  const n = Number(base);
+  if (base != null && !Number.isNaN(n) && n > 0) {
+    return n + 72 * 3600 * 1000;
+  }
+  const key = (order && (order.name || order.id)) || 'pedido';
+  return getDeadline(key, 72);
+}
 function buildOrderShareUrl(order) {
   let base = 'https://hubador.com';
   try {
@@ -1880,39 +1891,63 @@ async function shareOrderWithFriends(order, showToast) {
   }
 }
 
-function ActivoHubJourney({ order }) {
+function ActiveOrderExtras({ order }) {
   const primary = 'oklch(0.55 0.15 165)';
   const { showToast, progressTick } = React.useContext(SelectionContext);
   void progressTick;
-  const pct = resolveHubProgressPct(order);
-  const helper = hubProgressHelperText(pct);
+  const name = (order && order.name) || '';
+  let live;
+  if (name) {
+    live = groupProgressView(name);
+  } else {
+    const pctFallback = resolveHubProgressPct(order);
+    const filled = Math.round((pctFallback / 100) * GOAL_KG);
+    live = { filled, missing: Math.max(0, GOAL_KG - filled), pct: pctFallback, goal: GOAL_KG };
+  }
+  const pct = Math.min(100, Math.max(0, live.pct));
   const barColor = pct >= 85 ? 'oklch(0.62 0.18 35)' : primary;
+  const deadline = getOrderArrivalDeadline(order);
   return (
-    <div style={{ marginTop: 11 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 5 }}>
-        <span style={{ fontSize: 11.5, fontWeight: 700, color: '#333' }}>Camino al hub</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: primary, fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
+    <div style={{ marginTop: 10 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+      <div style={{ marginBottom: 5 }}>
+        <span style={{ fontSize: 11.5, fontWeight: 600, color: '#444', fontVariantNumeric: 'tabular-nums', letterSpacing: '0.01em' }}>
+          Faltan {live.missing} kg · {live.filled}/{GOAL_KG} kg
+        </span>
       </div>
-      <div style={{ height: 5, background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', marginBottom: 6 }}>
+      <div style={{ height: 5, background: '#e8ecea', borderRadius: 999, overflow: 'hidden', marginBottom: 8 }} aria-hidden="true">
         <div style={{ height: '100%', width: pct + '%', background: barColor, borderRadius: 999, transition: 'width .35s ease' }} />
       </div>
-      <div style={{ fontSize: 11, color: '#888', lineHeight: 1.35, marginBottom: 10 }}>{helper}</div>
-      <div style={{ background: '#f7faf9', border: '1px solid #e6f0ec', borderRadius: 10, padding: '10px 11px' }}>
-        <div style={{ fontSize: 12, color: '#333', lineHeight: 1.4, marginBottom: 8 }}>
-          <b>¿Querés que llegue más rápido?</b> Compartí esta orden con tus conocidos: si se cierra la venta, puede llegar <b>mañana</b>… o <b>hoy mismo</b>.
-        </div>
+      <div style={{ marginBottom: 8 }}>
+        <Countdown deadline={deadline} compact prefix="Llegada est. en" doneLabel="Retiro est. en hub" />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <button
           type="button"
           onClick={() => shareOrderWithFriends(order, showToast)}
-          style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 12px', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}
+          style={{
+            background: 'transparent',
+            color: primary,
+            border: `1px solid ${primary}`,
+            borderRadius: 7,
+            padding: '6px 10px',
+            fontFamily: 'inherit',
+            fontSize: 12,
+            fontWeight: 700,
+            cursor: 'pointer',
+            flexShrink: 0,
+            lineHeight: 1.2,
+          }}
         >
-          Compartir orden
+          Compartir
         </button>
-        <div style={{ fontSize: 10.5, color: '#8a938e', marginTop: 6, textAlign: 'center' }}>Invitar acelera el cierre del grupo</div>
+        <span style={{ fontSize: 10.5, color: '#8a938e', lineHeight: 1.35, flex: '1 1 140px', minWidth: 0 }}>
+          Compartí y puede llegar mañana u hoy si cierra
+        </span>
       </div>
     </div>
   );
 }
+const ActivoHubJourney = ActiveOrderExtras;
 
 const HUBADOR_CATALOG = [
   { id: 'papa', name: 'Papa', cat: 'verduras', priceN: 1364, oldN: 2099, members: '9/12', time: '1d', deadlineHrs: 35, img: 'img/papa.jpg', goal: GOAL_KG, unit: '/kg' },
@@ -4236,7 +4271,7 @@ function MobileMisGrupos() {
                         <div style={{ fontWeight: 800, fontSize: 15, color: primary }}>{p.total}</div>
                       </div>
                     </div>
-                    <ActivoHubJourney order={p} />
+                    <ActiveOrderExtras order={p} />
                   </div>
                 );
               })}
@@ -5085,7 +5120,7 @@ function WebMisGrupos() {
                       </div>
                       <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{s.label}</span>
                     </div>
-                    <ActivoHubJourney order={p} />
+                    <ActiveOrderExtras order={p} />
                   </article>
                 );
               })}
