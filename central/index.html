@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor de Sobreprecio: Mercado Central vs Coto</title>
+  <meta name="description" content="Comparador en tiempo real de precios mayoristas del Mercado Central de Buenos Aires vs precios al consumidor en Coto.">
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Live Top Ticker -->
+  <div class="top-ticker" id="topTicker">
+    <div class="ticker-content">
+      <span class="ticker-badge"><i class="fa-solid fa-triangle-exclamation"></i> ALERTA DE REMARCACIÓN</span>
+      <span class="ticker-text" id="tickerText">El Tomate Redondo presenta una brecha de +352% ($550 mayorista vs $2.490 en Coto)</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="main-header">
+    <div class="header-container container">
+      <div class="brand-area">
+        <div class="brand-logo">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">Brecha<span class="highlight">Góndola</span></h1>
+          <p class="brand-subtitle">Mercado Central de Buenos Aires vs. Coto Digital</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="live-status">
+          <span class="status-dot"></span>
+          <span>Catalogo Vivo (79 Productos)</span>
+        </div>
+        <button class="btn btn-secondary" id="syncLiveBtn" title="Sincronizar datos reales del Mercado Central y Coto">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Refrescar Vivo</span>
+        </button>
+        <button class="btn btn-primary" id="openCalcBtn">
+          <i class="fa-solid fa-calculator"></i>
+          <span>Mi Changuito</span>
+          <span class="calc-badge" id="calcItemsCount">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <!-- Hero / KPI Section -->
+    <section class="kpi-grid">
+      <div class="kpi-card glass-card border-accent-danger">
+        <div class="kpi-icon icon-danger">
+          <i class="fa-solid fa-percent"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Brecha Promedio Global</span>
+          <div class="kpi-value text-danger" id="avgMarkupVal">+238.5%</div>
+          <span class="kpi-subtext">Remarcación promedio Coto</span>
+        </div>
+      </div>
+
+      <div class="kpi-card glass-card border-accent-warning">
+        <div class="kpi-icon icon-warning">
+          <i class="fa-solid fa-arrow-trend-up"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Mayor Sobreprecio</span>
+          <div class="kpi-value text-warning" id="maxMarkupProduct">Tomate (+352%)</div>
+          <span class="kpi-subtext">Diferencia: $1.940 / Kg</span>
+        </div>
+      </div>
+
+      <div class="kpi-card glass-card border-accent-success">
+        <div class="kpi-icon icon-success">
+          <i class="fa-solid fa-piggy-bank"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Ahorro Promedio por Kg</span>
+          <div class="kpi-value text-success" id="avgSavingsVal">$ 1.540</div>
+          <span class="kpi-subtext">Comprando mayorista</span>
+        </div>
+      </div>
+
+      <div class="kpi-card glass-card">
+        <div class="kpi-icon icon-info">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Productos Monitoreados</span>
+          <div class="kpi-value" id="totalProductsVal">14</div>
+          <span class="kpi-subtext">Frutas y Verduras frescas</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Source References -->
+    <section class="sources-banner glass-card">
+      <div class="sources-info">
+        <i class="fa-solid fa-link text-primary"></i>
+        <span>Fuentes verificadas en tiempo real:</span>
+        <a href="https://preciosdelcentral.com.ar/buenosaires#TOMATE" target="_blank" class="source-link">
+          <i class="fa-solid fa-building"></i> Mercado Central (Precios del Central)
+        </a>
+        <span class="divider">•</span>
+        <a href="https://www.coto.com.ar/productos/categorias/catalogo-frescos-frutas-y-verduras/catv00003285" target="_blank" class="source-link">
+          <i class="fa-solid fa-cart-shopping"></i> Coto Digital (Sección Frescos)
+        </a>
+      </div>
+    </section>
+
+    <!-- Filters & Search Toolbar -->
+    <section class="toolbar-section">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Buscar por producto (ej: Tomate, Papa, Manzana)...">
+      </div>
+
+      <div class="filter-controls">
+        <div class="category-pills">
+          <button class="pill active" data-category="todos">Todos</button>
+          <button class="pill pill-top10" data-category="top10-verduras">🔥 Top 10 Verduras Arg</button>
+          <button class="pill pill-top10" data-category="top10-frutas">🔥 Top 10 Frutas Arg</button>
+          <button class="pill" data-category="verduras">Verduras</button>
+          <button class="pill" data-category="frutas">Frutas</button>
+        </div>
+
+        <div class="sort-box">
+          <label for="sortSelect"><i class="fa-solid fa-arrow-down-wide-short"></i> Ordenar por:</label>
+          <select id="sortSelect">
+            <option value="markup-desc">Mayor Remarcación (%)</option>
+            <option value="diff-desc">Mayor Diferencia ($)</option>
+            <option value="coto-desc">Precio Coto más alto</option>
+            <option value="mercado-asc">Precio Mercado más bajo</option>
+            <option value="name-asc">Nombre (A - Z)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-header">
+      <button class="tab-btn active" data-tab="tablaView">
+        <i class="fa-solid fa-table-list"></i> Comparativa en Tabla
+      </button>
+      <button class="tab-btn" data-tab="chartView">
+        <i class="fa-solid fa-chart-column"></i> Gráficos de Brecha
+      </button>
+      <button class="tab-btn" data-tab="calcView">
+        <i class="fa-solid fa-calculator"></i> Calculadora de Ahorro
+      </button>
+    </div>
+
+    <!-- Tab Content: Table View -->
+    <section class="tab-content active" id="tablaView">
+      <div class="table-container glass-card">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th class="th-sortable" data-sort="name">Producto <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-sort="mercado">Mercado Central <small>(Mayorista/kg)</small> <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-sort="coto">Coto Góndola <small>(Retail/kg)</small> <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-sort="markup">Sobreprecio <small>(%)</small> <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-sort="savings">Brecha <small>($/kg)</small> <span class="sort-arrow"></span></th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dynamic rows rendered by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab Content: Visual Gap Chart View -->
+    <section class="tab-content" id="chartView">
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <h2><i class="fa-solid fa-chart-bar"></i> Comparativa Visual de Precios ($ / Kg)</h2>
+          <p>Verde = Precio Mayorista Mercado Central | Rojo = Precio Final Coto</p>
+        </div>
+        <div class="bar-chart-container" id="barChartContainer">
+          <!-- Dynamic Chart Bars -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab Content: Savings Calculator View -->
+    <section class="tab-content" id="calcView">
+      <div class="calculator-layout">
+        <div class="glass-card calc-selector">
+          <h3><i class="fa-solid fa-basket-shopping"></i> Armá tu Compra del Mes</h3>
+          <p class="section-desc">Ingresá los kilogramos que consumís habitualmente para calcular la diferencia de costo total.</p>
+          <div class="calc-items-grid" id="calcItemsGrid">
+            <!-- Dynamic quantity inputs -->
+          </div>
+        </div>
+
+        <div class="glass-card calc-summary-card">
+          <h3><i class="fa-solid fa-receipt"></i> Resumen de Ahorro</h3>
+          <div class="summary-divider"></div>
+          
+          <div class="summary-row">
+            <span>Total en Coto:</span>
+            <span class="summary-val text-danger" id="calcCotoTotal">$ 0</span>
+          </div>
+          
+          <div class="summary-row">
+            <span>Total Mercado Central:</span>
+            <span class="summary-val text-success" id="calcMercadoTotal">$ 0</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row highlight-row">
+            <span>AHORRO DIRECTO:</span>
+            <span class="summary-val text-accent" id="calcSavingsTotal">$ 0</span>
+          </div>
+
+          <div class="savings-percentage-badge" id="calcSavingsPercentBadge">
+            Ahorrás un 0% comprando mayorista
+          </div>
+
+          <div class="calc-actions">
+            <button class="btn btn-secondary" id="resetCalcBtn"><i class="fa-solid fa-rotate-left"></i> Limpiar</button>
+            <button class="btn btn-success" id="shareCalcBtn"><i class="fa-solid fa-share-nodes"></i> Compartir Changuito</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal / Floating Calculator Drawer -->
+  <div class="modal-overlay" id="calcModalOverlay">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-calculator"></i> Calculadora Rápida de Changuito</h3>
+        <button class="close-modal-btn" id="closeCalcModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" id="modalCalcBody">
+        <!-- Quick list rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary w-100" id="goToCalcTabBtn">Ver Detalle Completo de Ahorro</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="main-footer">
+    <div class="container footer-content">
+      <p>© 2026 Monitor de Sobreprecio - Mercado Central vs. Coto. Información con fines de transparencia de precios.</p>
+      <p class="subtext">Desarrollado para comparar la brecha de distribución y remarcar el valor de la compra en origen y comunitaria.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
