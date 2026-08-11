@@ -1458,3 +1458,344 @@ body {
     padding: 0.4rem;
   }
 }
+
+/* ==========================================================================
+   Timeline & Multi-Session Control Panel Styles
+   ========================================================================== */
+.timeline-panel {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid var(--primary-color);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.timeline-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-light);
+}
+
+.timeline-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+}
+
+.btn-outline {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-light);
+}
+
+.btn-outline:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.btn-outline-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.btn-outline-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.timeline-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+@media (max-width: 992px) {
+  .timeline-controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.timeline-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.timeline-control-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.session-select {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.session-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.timeline-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-sm);
+  color: #60a5fa;
+  font-size: 0.82rem;
+  font-weight: 600;
+  height: 38px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Delta Variation Badges (Comparative Timeline)
+   ========================================================================== */
+.delta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.delta-badge.up {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.delta-badge.down {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.delta-badge.neutral {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.kpi-delta {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Mini Deltas & Temporal Comparative Mini-Bars
+   ========================================================================== */
+.mini-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+  white-space: nowrap;
+}
+
+.mini-delta.up {
+  background: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.mini-delta.down {
+  background: rgba(16, 185, 129, 0.22);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.mini-delta.neutral {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Temporal Comparative Card in Table Column */
+.temporal-comp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  min-width: 175px;
+}
+
+.comp-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.comp-item-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.comp-item-title .up { color: #f87171; font-weight: 700; }
+.comp-item-title .down { color: #34d399; font-weight: 700; }
+.comp-item-title .neutral { color: #94a3b8; }
+
+.mini-bar-track-dual {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mini-bar-row {
+  height: 4px;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.mini-bar-base {
+  background: rgba(148, 163, 184, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.mini-bar-coto-up { background: #ef4444; }
+.mini-bar-coto-down { background: #10b981; }
+.mini-bar-mc-up { background: #f59e0b; }
+.mini-bar-mc-down { background: #10b981; }
+
+/* Striped ghost bars for baseline comparison in Gráficos de Brecha */
+.bar-fill-coto-base {
+  background: repeating-linear-gradient(45deg, rgba(239,68,68,0.45), rgba(239,68,68,0.45) 6px, rgba(239,68,68,0.15) 6px, rgba(239,68,68,0.15) 12px) !important;
+  border: 1px dashed rgba(239,68,68,0.7) !important;
+}
+
+/* ==========================================================================
+   PRINT & PDF EXPORT STYLES
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10pt;
+  }
+
+  .top-ticker,
+  .timeline-actions,
+  .toolbar-section,
+  .tabs-header,
+  .td-action,
+  .header-actions,
+  #openCalcBtn,
+  #syncLiveBtn {
+    display: none !important;
+  }
+
+  .glass-card,
+  .timeline-panel,
+  .kpi-card,
+  .table-container {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+  }
+
+  .brand-title {
+    color: #0f172a !important;
+  }
+
+  .brand-title .highlight {
+    color: #2563eb !important;
+  }
+
+  .kpi-value {
+    color: #0f172a !important;
+  }
+
+  .text-danger { color: #dc2626 !important; }
+  .text-success { color: #16a34a !important; }
+
+  .comparison-table th {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+  }
+
+  .comparison-table td {
+    border-bottom: 1px solid #e2e8f0 !important;
+    color: #1e293b !important;
+  }
+
+  .product-title {
+    color: #0f172a !important;
+  }
+
+  .temporal-comp-card {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .timeline-panel {
+    border-left: 4px solid #2563eb !important;
+  }
+
+  .timeline-status-badge {
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border: 1px solid #bfdbfe !important;
+  }
+}
+
+
+

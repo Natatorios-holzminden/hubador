@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 
@@ -118,6 +118,51 @@
       </div>
     </section>
 
+    <!-- Timeline & Multi-Session Control Panel -->
+    <section class="timeline-panel glass-card">
+      <div class="timeline-header">
+        <div class="timeline-title">
+          <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+          <span>Línea de Tiempo e Historial de Sesiones</span>
+        </div>
+        <div class="timeline-actions">
+          <button class="btn btn-sm btn-primary" id="downloadPdfBtn" title="Descargar reporte actual en PDF para guardar o imprimir">
+            <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+          </button>
+          <button class="btn btn-sm btn-outline" id="exportDataBtn" title="Descargar datos de la sesión actual en formato CSV / Excel">
+            <i class="fa-solid fa-file-csv"></i> Descargar CSV
+          </button>
+          <button class="btn btn-sm btn-outline" id="saveSnapshotBtn" title="Guardar estado actual como nueva sesión en la línea de tiempo">
+            <i class="fa-solid fa-camera"></i> Guardar Captura
+          </button>
+          <button class="btn btn-sm btn-outline-danger" id="clearHistoryBtn" title="Reiniciar historial de capturas guardadas">
+            <i class="fa-solid fa-trash-can"></i> Reiniciar Histórico
+          </button>
+        </div>
+      </div>
+      
+      <div class="timeline-controls-grid">
+        <div class="timeline-control-group">
+          <label for="viewSessionSelect"><i class="fa-solid fa-calendar-day"></i> Ver Precios de Fecha/Sesión:</label>
+          <select id="viewSessionSelect" class="session-select">
+            <!-- Cargado dinámicamente -->
+          </select>
+        </div>
+
+        <div class="timeline-control-group">
+          <label for="compareSessionSelect"><i class="fa-solid fa-code-compare"></i> Comparar Variación Contra:</label>
+          <select id="compareSessionSelect" class="session-select">
+            <!-- Cargado dinámicamente -->
+          </select>
+        </div>
+
+        <div class="timeline-status-badge" id="timelineStatusBadge">
+          <i class="fa-solid fa-arrow-trend-up"></i>
+          <span id="timelineStatusText">Visualizando Comparativa de Cambios</span>
+        </div>
+      </div>
+    </section>
+
     <!-- Filters & Search Toolbar -->
     <section class="toolbar-section">
       <div class="search-box">
@@ -174,6 +219,7 @@
               <th class="th-sortable" data-sort="coto">Coto Góndola <small>(Retail/kg)</small> <span class="sort-arrow"></span></th>
               <th class="th-sortable" data-sort="markup">Sobreprecio <small>(%)</small> <span class="sort-arrow"></span></th>
               <th class="th-sortable" data-sort="savings">Brecha <small>($/kg)</small> <span class="sort-arrow"></span></th>
+              <th class="th-sortable" data-sort="delta" id="thDelta">Variación vs Base <span class="sort-arrow"></span></th>
               <th>Acción</th>
             </tr>
           </thead>
@@ -352,6 +398,8 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="data.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

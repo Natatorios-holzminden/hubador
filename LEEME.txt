@@ -1,3 +1,3 @@
 ﻿HUBADOR - subir a hubador.com
 =============================
-Build: HUBADOR_BUILD 20260810n-hero-fix  ·  mobile hero: foto full-bleed (sin chrome blanco a la derecha)
+Build: HUBADOR_BUILD 20260811-hero-mapa-spread  ·  hero map preview = spaced teal pins (min ~100m) across dashed ~400m ring + several outside toward card edges; −% chips; zoom 15; click → mapa; web signup = mobile; BottomNav Perfil
