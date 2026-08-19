@@ -206,6 +206,9 @@
       <button class="tab-btn" data-tab="seasonalityView">
         <i class="fa-solid fa-chart-line"></i> Estacionalidad y Proyección
       </button>
+      <button class="tab-btn" data-tab="temporalComparisonView" id="tabBtnTemporalComp">
+        <i class="fa-solid fa-clock-rotate-left"></i> Comparador 19-Ago vs 11-Ago
+      </button>
     </div>
 
     <!-- Tab Content: Table View -->
@@ -373,6 +376,91 @@
       </div>
     </section>
 
+    <!-- Tab Content: 19-Ago vs 11-Ago Temporal Comparison View -->
+    <section class="tab-content" id="temporalComparisonView">
+      <div class="glass-card" style="padding:1.5rem;">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1rem;">
+          <div>
+            <h3 style="margin:0; font-family:'Outfit',sans-serif; color:var(--text-bright); font-size:1.4rem;">
+              <i class="fa-solid fa-clock-rotate-left text-primary"></i> Comparador de Evolución: <span style="color:#60a5fa;">19-Ago vs 11-Ago</span>
+            </h3>
+            <p style="margin:0.25rem 0 0 0; color:var(--text-muted); font-size:0.88rem;">
+              Análisis de variación de precios en un período de 8 días para Mercado Central y Coto Digital.
+            </p>
+          </div>
+          <div style="display:flex; gap:0.5rem;" id="temporalFilterPills">
+            <button class="pill active" data-temp-filter="all">Todos</button>
+            <button class="pill" data-temp-filter="mc-up" style="color:#f87171;">📈 Subió Central</button>
+            <button class="pill" data-temp-filter="mc-down" style="color:#34d399;">📉 Bajó Central</button>
+            <button class="pill" data-temp-filter="coto-up" style="color:#f87171;">🛒 Subió Coto</button>
+            <button class="pill" data-temp-filter="coto-down" style="color:#34d399;">📉 Bajó Coto</button>
+          </div>
+        </div>
+
+        <!-- KPI Grid Summary for 19-Ago vs 11-Ago -->
+        <div class="kpi-grid" style="margin-bottom:1.5rem;">
+          <div class="kpi-card border-accent-success">
+            <div class="kpi-icon icon-success"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="kpi-content">
+              <span class="kpi-label">Mercado Central (11-Ago vs 19-Ago)</span>
+              <div class="kpi-value text-success" id="kpiMcTempSummary">14 Subieron / 9 Bajaron</div>
+              <span class="kpi-subtext">8 productos se mantuvieron sin cambio</span>
+            </div>
+          </div>
+
+          <div class="kpi-card border-accent-danger">
+            <div class="kpi-icon icon-danger"><i class="fa-solid fa-cart-shopping"></i></div>
+            <div class="kpi-content">
+              <span class="kpi-label">Coto Góndola (11-Ago vs 19-Ago)</span>
+              <div class="kpi-value text-danger" id="kpiCotoTempSummary">4 Subieron / 23 Bajaron</div>
+              <span class="kpi-subtext">4 productos se mantuvieron sin cambio</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dedicated Temporal Comparison Table -->
+        <div class="table-container">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>PRODUCTO</th>
+                <th>🟢 MERCADO CENTRAL<br><small>11-Ago vs 19-Ago ($/Kg)</small></th>
+                <th>VARIACIÓN CENTRAL<br><small>(Diferencia $ / %)</small></th>
+                <th>🛒 COTO GÓNDOLA<br><small>11-Ago vs 19-Ago ($/Kg)</small></th>
+                <th>VARIACIÓN COTO<br><small>(Diferencia $ / %)</small></th>
+                <th>TENDENCIA COMBINADA</th>
+              </tr>
+            </thead>
+            <tbody id="temporalTableBody">
+              <!-- Rendered dynamically by app.js -->
+            </tbody>
+          </table>
+        <!-- Dynamic 4-Price Trend Chart Visualizer -->
+        <div class="temporal-chart-card" style="margin-top:2rem; background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:1rem;">
+            <div>
+              <h4 style="margin:0; font-family:'Outfit',sans-serif; color:var(--text-bright); font-size:1.2rem;">
+                <i class="fa-solid fa-chart-column text-primary"></i> Evolución Visual de los 4 Precios y Apertura de Brecha
+              </h4>
+              <small style="color:var(--text-muted); font-size:0.85rem;">Comparativa visual de las 4 barras de precio (Central 11-Ago vs Central 19-Ago vs Coto 11-Ago vs Coto 19-Ago).</small>
+            </div>
+            <div style="display:flex; gap:1rem; font-size:0.8rem; flex-wrap:wrap;">
+              <span style="display:flex; align-items:center; gap:0.4rem;"><span style="width:12px; height:12px; background:#34d399; border-radius:3px;"></span> Central 11-Ago</span>
+              <span style="display:flex; align-items:center; gap:0.4rem;"><span style="width:12px; height:12px; background:#10b981; border-radius:3px;"></span> Central 19-Ago (Hoy)</span>
+              <span style="display:flex; align-items:center; gap:0.4rem;"><span style="width:12px; height:12px; background:#f87171; border-radius:3px;"></span> Coto 11-Ago</span>
+              <span style="display:flex; align-items:center; gap:0.4rem;"><span style="width:12px; height:12px; background:#ef4444; border-radius:3px;"></span> Coto 19-Ago (Hoy)</span>
+            </div>
+          </div>
+
+          <div id="temporalBarsContainer" style="display:flex; flex-direction:column; gap:1.75rem;">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
   <!-- Modal / Floating Calculator Drawer -->
@@ -399,7 +487,8 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="data.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="baseline_11aug.js?v=5"></script>
+  <script src="data.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

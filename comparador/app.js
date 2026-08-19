@@ -170,9 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadInitialData();
 
-  // --- SESSION MANAGER LOGIC (PURE REAL DATA) ---
+  // --- SESSION MANAGER LOGIC (PURE REAL HISTORICAL DATA) ---
   function initSessionManager(liveData) {
-    const saved = localStorage.getItem('mercado_coto_sessions_v4');
+    const saved = localStorage.getItem('mercado_coto_sessions_v5');
     if (saved) {
       try { sessions = JSON.parse(saved); } catch(e) { sessions = []; }
     }
@@ -181,25 +181,39 @@ document.addEventListener('DOMContentLoaded', () => {
       sessions = generateDefaultSessions(liveData);
       saveSessions();
     } else {
-      // Update session-live with current live products
+      // Update session-live with current live products for Today (19-Ago)
       const liveIndex = sessions.findIndex(s => s.id === 'session-live');
       if (liveIndex >= 0) {
         sessions[liveIndex].products = JSON.parse(JSON.stringify(liveData));
+        sessions[liveIndex].label = `🟢 Hoy 19-Ago - Relevamiento Vivo en Tiempo Real (${formatTimeStr(new Date())})`;
       } else {
         const now = new Date();
         sessions.unshift({
           id: 'session-live',
           timestamp: now.getTime(),
           dateStr: formatDateStr(now),
-          label: `🟢 Hoy 11-Ago - Datos Reales (${formatTimeStr(now)})`,
+          label: `🟢 Hoy 19-Ago - Relevamiento Vivo en Tiempo Real (${formatTimeStr(now)})`,
           isLive: true,
           products: JSON.parse(JSON.stringify(liveData))
+        });
+      }
+
+      // Ensure August 11 baseline session exists in history
+      const hasBase11 = sessions.some(s => s.id === 'session-11aug');
+      if (!hasBase11 && window.BASELINE_11AUG_DATA) {
+        sessions.push({
+          id: 'session-11aug',
+          timestamp: new Date('2026-08-11T17:54:00').getTime(),
+          dateStr: '11/08/2026',
+          label: '📅 Base Real 11-Ago (Relevamiento Inicial)',
+          products: JSON.parse(JSON.stringify(window.BASELINE_11AUG_DATA))
         });
       }
     }
 
     activeSessionId = 'session-live';
-    baseSessionId = sessions.length > 1 ? sessions[1].id : 'none';
+    const base11Sess = sessions.find(s => s.id === 'session-11aug');
+    baseSessionId = base11Sess ? 'session-11aug' : (sessions.length > 1 ? sessions[1].id : 'none');
 
     populateSessionDropdowns();
     setupSessionListeners();
@@ -213,17 +227,27 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'session-live',
       timestamp: now.getTime(),
       dateStr: formatDateStr(now),
-      label: `🟢 Hoy 11-Ago - Datos Reales Relevados (${formatTimeStr(now)})`,
+      label: `🟢 Hoy 19-Ago - Relevamiento Vivo en Tiempo Real (${formatTimeStr(now)})`,
       isLive: true,
       products: liveCopy
     };
 
-    // PURE REAL DATA ONLY - No simulated/mocked historical sessions!
-    return [sLive];
+    const base11Copy = window.BASELINE_11AUG_DATA ? JSON.parse(JSON.stringify(window.BASELINE_11AUG_DATA)) : liveCopy;
+
+    const s11Aug = {
+      id: 'session-11aug',
+      timestamp: new Date('2026-08-11T17:54:00').getTime(),
+      dateStr: '11/08/2026',
+      label: '📅 Base Real 11-Ago (Relevamiento Inicial)',
+      products: base11Copy
+    };
+
+    // PURE REAL HISTORICAL SESSIONS ONLY (19-Ago Live vs 11-Ago Baseline)!
+    return [sLive, s11Aug];
   }
 
   function saveSessions() {
-    localStorage.setItem('mercado_coto_sessions_v4', JSON.stringify(sessions));
+    localStorage.setItem('mercado_coto_sessions_v5', JSON.stringify(sessions));
   }
 
   function populateSessionDropdowns() {
@@ -235,9 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
 
     // Baseline Comparison Options
-    let compareOptions = sessions.length > 1
-      ? `<option value="none">Sin comparativa (Solo lectura)</option>`
-      : `<option value="none">Sin comparativa aún (Esperando captura de mañana)</option>`;
+    let compareOptions = `<option value="none">Sin comparativa (Solo lectura)</option>`;
 
     sessions.forEach(s => {
       if (s.id !== activeSessionId) {
@@ -254,13 +276,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const baseSess = sessions.find(s => s.id === baseSessionId);
 
     if (baseSess && baseSessionId !== 'none') {
-      timelineStatusText.textContent = `Comparando: ${activeSess.label.split('(')[0].trim()} vs ${baseSess.label.split('(')[0].trim()}`;
+      timelineStatusText.textContent = `Comparando: ${activeSess.label.split('-')[0].trim()} (${activeSess.label.includes('19-Ago') ? '19-Ago' : 'Sesión'}) vs ${baseSess.label.split('-')[0].trim()} (${baseSess.label.includes('11-Ago') ? '11-Ago' : 'Base'})`;
       timelineStatusBadge.style.background = 'rgba(59, 130, 246, 0.15)';
       timelineStatusBadge.style.color = '#60a5fa';
     } else {
-      timelineStatusText.textContent = sessions.length > 1 
-        ? `Viendo precios de: ${activeSess.label}`
-        : `🟢 Captura Base Real Registrada (Hoy 11-Ago)`;
+      timelineStatusText.textContent = `Viendo precios de: ${activeSess.label}`;
       timelineStatusBadge.style.background = 'rgba(16, 185, 129, 0.15)';
       timelineStatusBadge.style.color = '#34d399';
     }
@@ -582,12 +602,252 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  let currentTemporalFilter = 'all';
+
   function renderAll() {
     const filtered = getFilteredProducts();
     renderTable(filtered);
     renderCharts(filtered);
     renderCalculatorGrid();
     updateCalculatorSummary();
+    renderTemporalComparisonTable();
+  }
+
+  function findBaseMatch(p, baseMap) {
+    if (!baseMap) return null;
+    if (baseMap[p.id]) return baseMap[p.id];
+
+    const normId = (p.id || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    for (let k in baseMap) {
+      const normK = k.replace(/[^a-z0-9]/gi, '').toLowerCase();
+      if (normId === normK) return baseMap[k];
+    }
+
+    const normName = (p.nombre || '').toLowerCase().trim();
+    for (let k in baseMap) {
+      const bName = (baseMap[k].nombre || '').toLowerCase().trim();
+      if (bName && (bName === normName || normName.includes(bName) || bName.includes(normName))) {
+        return baseMap[k];
+      }
+    }
+
+    return null;
+  }
+
+  function renderTemporalComparisonTable() {
+    const temporalTableBody = document.getElementById('temporalTableBody');
+    if (!temporalTableBody) return;
+
+    const baseMap = getBaseProductsMap();
+    const activeList = getFilteredProducts();
+
+    if (!baseMap) {
+      temporalTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center; padding:3rem; color:var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem; margin-bottom:0.5rem;"></i>
+            <p>Por favor selecciona una sesión base en la Línea de Tiempo arriba para visualizar los cambios de precios.</p>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    let mcUpCount = 0, mcDownCount = 0, mcSameCount = 0;
+    let cotoUpCount = 0, cotoDownCount = 0, cotoSameCount = 0;
+
+    let items = activeList.map(p => {
+      const baseP = findBaseMatch(p, baseMap);
+      if (!baseP) return null;
+
+      const mcDelta = p.precioMercadoCentral - baseP.precioMercadoCentral;
+      const mcPct = baseP.precioMercadoCentral > 0 ? (mcDelta / baseP.precioMercadoCentral) * 100 : 0;
+
+      const cotoDelta = p.precioCoto - baseP.precioCoto;
+      const cotoPct = baseP.precioCoto > 0 ? (cotoDelta / baseP.precioCoto) * 100 : 0;
+
+      if (mcDelta > 0) mcUpCount++;
+      else if (mcDelta < 0) mcDownCount++;
+      else mcSameCount++;
+
+      if (cotoDelta > 0) cotoUpCount++;
+      else if (cotoDelta < 0) cotoDownCount++;
+      else cotoSameCount++;
+
+      return {
+        ...p,
+        baseMC: baseP.precioMercadoCentral,
+        baseCoto: baseP.precioCoto,
+        mcDelta,
+        mcPct,
+        cotoDelta,
+        cotoPct
+      };
+    }).filter(Boolean);
+
+    const kpiMcSummary = document.getElementById('kpiMcTempSummary');
+    const kpiCotoSummary = document.getElementById('kpiCotoTempSummary');
+    if (kpiMcSummary) kpiMcSummary.textContent = `${mcUpCount} Subieron / ${mcDownCount} Bajaron (${mcSameCount} sin cambio)`;
+    if (kpiCotoSummary) kpiCotoSummary.textContent = `${cotoUpCount} Subieron / ${cotoDownCount} Bajaron (${cotoSameCount} sin cambio)`;
+
+    if (currentTemporalFilter === 'mc-up') items = items.filter(x => x.mcDelta > 0);
+    if (currentTemporalFilter === 'mc-down') items = items.filter(x => x.mcDelta < 0);
+    if (currentTemporalFilter === 'coto-up') items = items.filter(x => x.cotoDelta > 0);
+    if (currentTemporalFilter === 'coto-down') items = items.filter(x => x.cotoDelta < 0);
+
+    // Prioritize Top 10 Argentine Consumed Items at the top by default
+    items.sort((a, b) => {
+      const isTopA = (a.topVerduraRank || a.topFrutaRank) ? 1 : 0;
+      const isTopB = (b.topVerduraRank || b.topFrutaRank) ? 1 : 0;
+      if (isTopA !== isTopB) return isTopB - isTopA;
+      return a.nombre.localeCompare(b.nombre);
+    });
+
+    if (items.length === 0) {
+      temporalTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center; padding:3rem; color:var(--text-muted);">
+            No hay productos que coincidan con el filtro seleccionado.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    temporalTableBody.innerHTML = items.map(p => {
+      const rankBadge = p.topVerduraRank ? `<span class="top10-rank-badge" style="font-size:0.7rem; padding:0.15rem 0.4rem; margin-left:0.4rem;"><i class="fa-solid fa-fire"></i> #${p.topVerduraRank} Top Consumo</span>` :
+                        p.topFrutaRank ? `<span class="top10-rank-badge" style="font-size:0.7rem; padding:0.15rem 0.4rem; margin-left:0.4rem;"><i class="fa-solid fa-fire"></i> #${p.topFrutaRank} Top Consumo</span>` : '';
+      let mcBadge = '';
+      if (p.mcDelta > 0) {
+        mcBadge = `<span class="mini-delta up" style="font-weight:700;"><i class="fa-solid fa-arrow-trend-up"></i> +$${formatNumber(p.mcDelta)} (+${p.mcPct.toFixed(1)}%)</span>`;
+      } else if (p.mcDelta < 0) {
+        mcBadge = `<span class="mini-delta down" style="font-weight:700;"><i class="fa-solid fa-arrow-trend-down"></i> -$${formatNumber(Math.abs(p.mcDelta))} (${p.mcPct.toFixed(1)}%)</span>`;
+      } else {
+        mcBadge = `<span class="mini-delta neutral"><i class="fa-solid fa-minus"></i> Sin cambio</span>`;
+      }
+
+      let cotoBadge = '';
+      if (p.cotoDelta > 0) {
+        cotoBadge = `<span class="mini-delta up" style="font-weight:700;"><i class="fa-solid fa-arrow-trend-up"></i> +$${formatNumber(p.cotoDelta)} (+${p.cotoPct.toFixed(1)}%)</span>`;
+      } else if (p.cotoDelta < 0) {
+        cotoBadge = `<span class="mini-delta down" style="font-weight:700;"><i class="fa-solid fa-arrow-trend-down"></i> -$${formatNumber(Math.abs(p.cotoDelta))} (${p.cotoPct.toFixed(1)}%)</span>`;
+      } else {
+        cotoBadge = `<span class="mini-delta neutral"><i class="fa-solid fa-minus"></i> Sin cambio</span>`;
+      }
+
+      let trendText = '';
+      if (p.cotoDelta < 0 && p.mcDelta > 0) {
+        trendText = `<span style="color:#34d399; font-weight:700;"><i class="fa-solid fa-thumbs-up"></i> Coto redujo brecha (Coto bajó, Central subió)</span>`;
+      } else if (p.cotoDelta > 0 && p.mcDelta < 0) {
+        trendText = `<span style="color:#f87171; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> Coto aumentó remarcación (Coto subió, Central bajó)</span>`;
+      } else if (p.cotoDelta < 0 && p.mcDelta < 0) {
+        trendText = `<span style="color:#60a5fa;"><i class="fa-solid fa-arrow-down"></i> Ambos bajaron de precio</span>`;
+      } else if (p.cotoDelta > 0 && p.mcDelta > 0) {
+        trendText = `<span style="color:#f97316;"><i class="fa-solid fa-arrow-up"></i> Ambos subieron de precio</span>`;
+      } else {
+        trendText = `<span style="color:var(--text-muted);"><i class="fa-solid fa-minus"></i> Tendencia estable</span>`;
+      }
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:700; color:var(--text-bright); display:flex; align-items:center; flex-wrap:wrap; gap:0.2rem;">
+              <span>${p.nombre}</span> ${rankBadge}
+            </div>
+            <small style="color:var(--text-muted);">${p.variedad}</small>
+          </td>
+          <td>
+            <div style="font-size:0.95rem; font-weight:700; color:#10b981;">
+              $${formatNumber(p.baseMC)} <i class="fa-solid fa-arrow-right" style="font-size:0.75rem; color:var(--text-muted);"></i> $${formatNumber(p.precioMercadoCentral)}
+            </div>
+          </td>
+          <td>${mcBadge}</td>
+          <td>
+            <div style="font-size:0.95rem; font-weight:700; color:#ef4444;">
+              $${formatNumber(p.baseCoto)} <i class="fa-solid fa-arrow-right" style="font-size:0.75rem; color:var(--text-muted);"></i> $${formatNumber(p.precioCoto)}
+            </div>
+          </td>
+          <td>${cotoBadge}</td>
+          <td style="font-size:0.85rem;">${trendText}</td>
+        </tr>
+      `;
+    }).join('');
+
+    // Render 4-Price Bars & Gap Expansion Chart
+    const temporalBarsContainer = document.getElementById('temporalBarsContainer');
+    if (temporalBarsContainer) {
+      const chartItems = items.slice(0, 10);
+
+      temporalBarsContainer.innerHTML = chartItems.map(p => {
+        const maxPrice = Math.max(p.baseMC, p.precioMercadoCentral, p.baseCoto, p.precioCoto, 1);
+        
+        const wBaseMC = Math.round((p.baseMC / maxPrice) * 100);
+        const wCurrMC = Math.round((p.precioMercadoCentral / maxPrice) * 100);
+        const wBaseCoto = Math.round((p.baseCoto / maxPrice) * 100);
+        const wCurrCoto = Math.round((p.precioCoto / maxPrice) * 100);
+
+        const baseGap = p.baseCoto - p.baseMC;
+        const currGap = p.precioCoto - p.precioMercadoCentral;
+        const gapDiff = currGap - baseGap;
+        const gapDiffStr = gapDiff > 0 ? `+$${formatNumber(gapDiff)} (Ensanchamiento de sobreprecio 🚀)` : gapDiff < 0 ? `-$${formatNumber(Math.abs(gapDiff))} (Reducción de sobreprecio 📉)` : `Brecha constante`;
+
+        return `
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+              <div style="font-weight:700; color:var(--text-bright); font-size:1.05rem;">
+                ${p.nombre} <small style="color:var(--text-muted); font-weight:400;">(${p.variedad})</small>
+              </div>
+              <div style="font-size:0.85rem; background:rgba(59,130,246,0.12); color:#60a5fa; padding:0.35rem 0.85rem; border-radius:20px; border:1px solid rgba(59,130,246,0.3);">
+                Brecha 11-Ago: <strong>$${formatNumber(baseGap)}</strong> ➔ Brecha 19-Ago: <strong style="color:#f87171;">$${formatNumber(currGap)}</strong> (${gapDiffStr})
+              </div>
+            </div>
+
+            <!-- 4 Bar Rows -->
+            <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem;">
+              <!-- 1. Central 11-Ago -->
+              <div style="display:flex; align-items:center; gap:0.75rem;">
+                <div style="width:130px; text-align:right; color:var(--text-muted); font-size:0.78rem;">Central 11-Ago</div>
+                <div style="flex:1; background:rgba(255,255,255,0.05); height:22px; border-radius:6px; overflow:hidden; position:relative;">
+                  <div style="width:${wBaseMC}%; background:#34d399; height:100%; border-radius:6px; display:flex; align-items:center; padding-left:0.5rem; color:#064e3b; font-weight:700; font-size:0.75rem;">
+                    $${formatNumber(p.baseMC)}
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Central 19-Ago (Hoy) -->
+              <div style="display:flex; align-items:center; gap:0.75rem;">
+                <div style="width:130px; text-align:right; color:#10b981; font-weight:700; font-size:0.78rem;">Central 19-Ago</div>
+                <div style="flex:1; background:rgba(255,255,255,0.05); height:22px; border-radius:6px; overflow:hidden; position:relative;">
+                  <div style="width:${wCurrMC}%; background:#10b981; height:100%; border-radius:6px; display:flex; align-items:center; padding-left:0.5rem; color:#fff; font-weight:700; font-size:0.75rem;">
+                    $${formatNumber(p.precioMercadoCentral)} (${p.mcDelta < 0 ? '📉 -$'+formatNumber(Math.abs(p.mcDelta)) : p.mcDelta > 0 ? '📈 +$'+formatNumber(p.mcDelta) : '$0'})
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Coto 11-Ago -->
+              <div style="display:flex; align-items:center; gap:0.75rem;">
+                <div style="width:130px; text-align:right; color:var(--text-muted); font-size:0.78rem;">Coto 11-Ago</div>
+                <div style="flex:1; background:rgba(255,255,255,0.05); height:22px; border-radius:6px; overflow:hidden; position:relative;">
+                  <div style="width:${wBaseCoto}%; background:#f87171; height:100%; border-radius:6px; display:flex; align-items:center; padding-left:0.5rem; color:#7f1d1d; font-weight:700; font-size:0.75rem;">
+                    $${formatNumber(p.baseCoto)}
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Coto 19-Ago (Hoy) -->
+              <div style="display:flex; align-items:center; gap:0.75rem;">
+                <div style="width:130px; text-align:right; color:#ef4444; font-weight:700; font-size:0.78rem;">Coto 19-Ago</div>
+                <div style="flex:1; background:rgba(255,255,255,0.05); height:22px; border-radius:6px; overflow:hidden; position:relative;">
+                  <div style="width:${wCurrCoto}%; background:#ef4444; height:100%; border-radius:6px; display:flex; align-items:center; padding-left:0.5rem; color:#fff; font-weight:700; font-size:0.75rem;">
+                    $${formatNumber(p.precioCoto)} (${p.cotoDelta > 0 ? '📈 +$'+formatNumber(p.cotoDelta) : p.cotoDelta < 0 ? '📉 -$'+formatNumber(Math.abs(p.cotoDelta)) : '$0'})
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
   }
 
   function renderTable(list) {
@@ -992,7 +1252,18 @@ document.addEventListener('DOMContentLoaded', () => {
         tabContents.forEach(c => c.classList.remove('active'));
         
         e.currentTarget.classList.add('active');
-        document.getElementById(targetTab).classList.add('active');
+        const targetEl = document.getElementById(targetTab);
+        if (targetEl) targetEl.classList.add('active');
+      });
+    });
+
+    const temporalPills = document.querySelectorAll('#temporalFilterPills .pill');
+    temporalPills.forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        temporalPills.forEach(p => p.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        currentTemporalFilter = e.currentTarget.getAttribute('data-temp-filter');
+        renderTemporalComparisonTable();
       });
     });
 
