@@ -510,15 +510,52 @@ document.addEventListener('DOMContentLoaded', () => {
     populateSessionDropdowns();
   }
 
+  const TOP_VERDURAS_MAP = {
+    'papa': 1, 'tomate': 2, 'cebolla': 3, 'zanahoria': 4, 'zapallo': 5,
+    'zapallito': 6, 'acelga': 7, 'lechuga': 8, 'batata': 9, 'espinaca': 10,
+    'pepino': 10, 'berenjena': 10
+  };
+
+  const TOP_FRUTAS_MAP = {
+    'banana': 1, 'manzana': 2, 'naranja': 3, 'mandarina': 4, 'pera': 5,
+    'limon': 6, 'frutilla': 7, 'pomelo': 8, 'palta': 9
+  };
+
+  function ensureTopRanks(list) {
+    if (!list) return;
+    list.forEach(p => {
+      const norm = (p.nombre || '').toLowerCase();
+      if (!p.topVerduraRank) {
+        for (let key in TOP_VERDURAS_MAP) {
+          if (norm.includes(key)) {
+            p.topVerduraRank = TOP_VERDURAS_MAP[key];
+            break;
+          }
+        }
+      }
+      if (!p.topFrutaRank) {
+        for (let key in TOP_FRUTAS_MAP) {
+          if (norm.includes(key)) {
+            p.topFrutaRank = TOP_FRUTAS_MAP[key];
+            break;
+          }
+        }
+      }
+    });
+  }
+
   function getCurrentActiveProductList() {
     const s = sessions.find(sess => sess.id === activeSessionId);
-    return s ? s.products : products;
+    const list = s ? s.products : products;
+    ensureTopRanks(list);
+    return list;
   }
 
   function getBaseProductsMap() {
     if (baseSessionId === 'none' || baseSessionId === activeSessionId) return null;
     const baseS = sessions.find(s => s.id === baseSessionId);
     if (!baseS) return null;
+    ensureTopRanks(baseS.products);
     const map = {};
     baseS.products.forEach(p => { map[p.id] = p; });
     return map;
@@ -636,6 +673,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentTemporalFilter = 'all';
 
+  let currentStackedCategory = 'top10-verduras';
+
   function renderAll() {
     const filtered = getFilteredProducts();
     renderTable(filtered);
@@ -643,6 +682,130 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCalculatorGrid();
     updateCalculatorSummary();
     renderTemporalComparisonTable();
+    renderStackedCardsGrid();
+  }
+
+  function renderStackedCardsGrid() {
+    const grid1 = document.getElementById('stackedCardsGrid');
+    const grid2 = document.getElementById('stackedCardsGridAlt');
+
+    if (!grid1 && !grid2) return;
+
+    const baseMap = getBaseProductsMap();
+    const activeList = getCurrentActiveProductList();
+
+    let htmlOutput = '';
+
+    if (!baseMap) {
+      htmlOutput = `<p style="color:var(--text-muted); padding:1.5rem; text-align:center;">Por favor selecciona una sesión base en la Línea de Tiempo para visualizar la evolución gráfica.</p>`;
+    } else {
+      let filteredItems = activeList.filter(p => {
+        if (currentStackedCategory === 'top10-verduras') return p.topVerduraRank > 0;
+        if (currentStackedCategory === 'top10-frutas') return p.topFrutaRank > 0;
+        return true;
+      });
+
+      filteredItems.sort((a, b) => {
+        const rA = a.topVerduraRank || a.topFrutaRank || 99;
+        const rB = b.topVerduraRank || b.topFrutaRank || 99;
+        return rA - rB;
+      });
+
+      if (filteredItems.length === 0) {
+        htmlOutput = `<p style="color:var(--text-muted); padding:1.5rem; text-align:center;">No se encontraron productos para esta categoría.</p>`;
+      } else {
+        htmlOutput = filteredItems.map(p => {
+          const baseP = findBaseMatch(p, baseMap);
+          if (!baseP) return '';
+
+          const baseMC = baseP.precioMercadoCentral;
+          const baseCoto = baseP.precioCoto;
+          const baseGap = baseCoto - baseMC;
+          const baseMult = (baseCoto / Math.max(1, baseMC)).toFixed(1).replace('.', ',');
+
+          const currMC = p.precioMercadoCentral;
+          const currCoto = p.precioCoto;
+          const currGap = currCoto - currMC;
+          const currMult = (currCoto / Math.max(1, currMC)).toFixed(1).replace('.', ',');
+
+          const gapDiff = currGap - baseGap;
+          const gapDiffPct = baseGap > 0 ? Math.round((gapDiff / baseGap) * 100) : 0;
+          const gapSign = gapDiff > 0 ? '+' : '';
+
+          const maxPrice = Math.max(baseCoto, currCoto, 1);
+          const leftTotalH = Math.round((baseCoto / maxPrice) * 160);
+          const rightTotalH = Math.round((currCoto / maxPrice) * 160);
+
+          const leftGreenH = Math.round((baseMC / Math.max(1, baseCoto)) * leftTotalH);
+          const leftRedH = Math.max(0, leftTotalH - leftGreenH);
+
+          const rightGreenH = Math.round((currMC / Math.max(1, currCoto)) * rightTotalH);
+          const rightRedH = Math.max(0, rightTotalH - rightGreenH);
+
+          const baseSess = sessions.find(s => s.id === baseSessionId);
+          const activeSess = sessions.find(s => s.id === activeSessionId);
+
+          const baseDateStr = baseSess ? (baseSess.label.includes('11-Ago') ? '11-Ago' : (baseSess.label.includes('19-Ago') ? '19-Ago' : 'Base')) : '11-Ago';
+          const currDateStr = activeSess ? (activeSess.label.includes('21-Ago') ? '21-Ago' : (activeSess.label.includes('19-Ago') ? '19-Ago' : 'Hoy')) : 'Hoy';
+
+          return `
+            <div class="stacked-card">
+              <div class="stacked-card-header">
+                <div>
+                  <h3 class="stacked-card-title">${p.nombre}</h3>
+                  <div class="stacked-card-subtitle">Precio de góndola = costo mayorista + recargo</div>
+                </div>
+                <div class="stacked-card-multiplier">
+                  <div class="multiplier-value">${currMult}×</div>
+                  <div class="multiplier-label">lo que Coto cobra sobre el mayorista</div>
+                  <div class="multiplier-prev">antes ${baseMult}×</div>
+                </div>
+              </div>
+
+              <div class="stacked-bars-area">
+                <div class="stacked-column-group">
+                  <div class="stacked-top-label">$${formatNumber(baseCoto)}</div>
+                  <div class="stacked-bar-track" style="height:${leftTotalH}px;">
+                    <div class="stacked-segment-red" style="height:${leftRedH}px;">
+                      ${leftRedH > 22 ? `Brecha<br>$${formatNumber(baseGap)}` : ''}
+                    </div>
+                    <div class="stacked-segment-green" style="height:${leftGreenH}px;">
+                      ${leftGreenH > 22 ? `Central<br>$${formatNumber(baseMC)}` : ''}
+                    </div>
+                  </div>
+                  <div class="stacked-bottom-date">${baseDateStr}</div>
+                </div>
+
+                <div class="stacked-column-group">
+                  <div class="stacked-top-label">$${formatNumber(currCoto)}</div>
+                  <div class="stacked-bar-track" style="height:${rightTotalH}px;">
+                    <div class="stacked-segment-red" style="height:${rightRedH}px;">
+                      ${rightRedH > 22 ? `Brecha<br>$${formatNumber(currGap)}` : ''}
+                    </div>
+                    <div class="stacked-segment-green" style="height:${rightGreenH}px;">
+                      ${rightGreenH > 22 ? `Central<br>$${formatNumber(currMC)}` : ''}
+                    </div>
+                  </div>
+                  <div class="stacked-bottom-date">${currDateStr}</div>
+                </div>
+              </div>
+
+              <div class="stacked-card-legend">
+                <span class="stacked-legend-item"><span class="stacked-legend-dot" style="background:#10b981;"></span> Central (mayorista)</span>
+                <span class="stacked-legend-item"><span class="stacked-legend-dot" style="background:#ef4444;"></span> Brecha (recargo de góndola)</span>
+              </div>
+
+              <div class="stacked-card-footer-pill">
+                La brecha pasó de $${formatNumber(baseGap)} a <strong style="color:#f87171;">$${formatNumber(currGap)}</strong> (${gapSign}$${formatNumber(gapDiff)}, ${gapSign}${gapDiffPct}%).
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    if (grid1) grid1.innerHTML = htmlOutput;
+    if (grid2) grid2.innerHTML = htmlOutput;
   }
 
   function findBaseMatch(p, baseMap) {
@@ -1309,6 +1472,16 @@ document.addEventListener('DOMContentLoaded', () => {
         e.currentTarget.classList.add('active');
         currentTemporalFilter = e.currentTarget.getAttribute('data-temp-filter');
         renderTemporalComparisonTable();
+      });
+    });
+
+    const stackedPills = document.querySelectorAll('#stackedCategoryFilterPills .pill');
+    stackedPills.forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        stackedPills.forEach(p => p.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        currentStackedCategory = e.currentTarget.getAttribute('data-stacked-cat');
+        renderStackedCardsGrid();
       });
     });
 

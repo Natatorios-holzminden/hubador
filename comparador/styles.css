@@ -691,6 +691,180 @@ body {
   font-size: 0.85rem;
 }
 
+/* --- STACKED VERTICAL BAR CHART CARDS (EXACT USER DESIGN MATCH) --- */
+.stacked-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.stacked-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 1.5rem;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stacked-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+.stacked-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.stacked-card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.stacked-card-subtitle {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+.stacked-card-multiplier {
+  text-align: right;
+}
+
+.stacked-card-multiplier .multiplier-value {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #ef4444;
+  line-height: 1;
+  font-family: 'Outfit', sans-serif;
+}
+
+.stacked-card-multiplier .multiplier-label {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  line-height: 1.2;
+}
+
+.stacked-card-multiplier .multiplier-prev {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+/* Vertical Stacked Bars */
+.stacked-bars-area {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 3.5rem;
+  height: 230px;
+  margin: 1.25rem 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stacked-column-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.stacked-top-label {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.stacked-bar-track {
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.stacked-segment-red {
+  background: #ef4444;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.stacked-segment-green {
+  background: #10b981;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.stacked-bottom-date {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  margin-top: 0.6rem;
+  font-weight: 600;
+}
+
+/* Legend & Footer */
+.stacked-card-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  margin-top: 0.75rem;
+}
+
+.stacked-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stacked-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.stacked-card-footer-pill {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  margin-top: 0.85rem;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+  text-align: center;
+}
+
 .bar-chart-container {
   display: flex;
   flex-direction: column;

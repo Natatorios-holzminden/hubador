@@ -12,7 +12,8 @@
     "markup": 275.7,
     "savings": 1387,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 7
   },
   {
     "id": "achicoria",
@@ -162,7 +163,8 @@
     "markup": 120.0,
     "savings": 2948,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 1
   },
   {
     "id": "bananananica",
@@ -177,7 +179,8 @@
     "markup": 120.0,
     "savings": 1678,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 1
   },
   {
     "id": "batata_arapey",
@@ -192,7 +195,8 @@
     "markup": 25.4,
     "savings": 302,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 9
   },
   {
     "id": "batata_beauregard",
@@ -207,7 +211,8 @@
     "markup": -21.9,
     "savings": -419,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 9
   },
   {
     "id": "berro",
@@ -297,7 +302,8 @@
     "markup": 9.8,
     "savings": 223,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 3
   },
   {
     "id": "cebolla_optima",
@@ -312,7 +318,8 @@
     "markup": -8.5,
     "savings": -110,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 3
   },
   {
     "id": "cebolla_valenciana",
@@ -327,7 +334,8 @@
     "markup": 11.5,
     "savings": 123,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 3
   },
   {
     "id": "chauchaesmeralda",
@@ -552,7 +560,8 @@
     "markup": 73.0,
     "savings": 840,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 10
   },
   {
     "id": "frutilla",
@@ -567,7 +576,8 @@
     "markup": 120.0,
     "savings": 10152,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 7
   },
   {
     "id": "haba",
@@ -747,7 +757,8 @@
     "markup": 360.1,
     "savings": 2895,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 8
   },
   {
     "id": "lechuga_criolla",
@@ -762,7 +773,8 @@
     "markup": 205.8,
     "savings": 1743,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 8
   },
   {
     "id": "lechuga_francesa",
@@ -777,7 +789,8 @@
     "markup": 242.7,
     "savings": 2124,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 8
   },
   {
     "id": "lechuga_mantecosa",
@@ -792,7 +805,8 @@
     "markup": 328.5,
     "savings": 4599,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 8
   },
   {
     "id": "limatahiti",
@@ -837,7 +851,8 @@
     "markup": 120.0,
     "savings": 667,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 6
   },
   {
     "id": "mandarina_afourer",
@@ -852,7 +867,8 @@
     "markup": 186.0,
     "savings": 1034,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 4
   },
   {
     "id": "mandarina_dancy",
@@ -867,7 +883,8 @@
     "markup": 138.4,
     "savings": 923,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 4
   },
   {
     "id": "mandarinaellendale",
@@ -882,7 +899,8 @@
     "markup": 119.9,
     "savings": 800,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 4
   },
   {
     "id": "mandarinaencore",
@@ -897,7 +915,8 @@
     "markup": 120.0,
     "savings": 833,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 4
   },
   {
     "id": "mandarinamurcot",
@@ -912,7 +931,8 @@
     "markup": 120.0,
     "savings": 1133,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 4
   },
   {
     "id": "mandarinanova",
@@ -927,7 +947,8 @@
     "markup": 119.9,
     "savings": 566,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 4
   },
   {
     "id": "mandioca",
@@ -972,7 +993,8 @@
     "markup": 120.0,
     "savings": 2333,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 2
   },
   {
     "id": "manzana_granny_smith",
@@ -987,7 +1009,8 @@
     "markup": 30.5,
     "savings": 769,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 2
   },
   {
     "id": "manzana_red_delicious",
@@ -1002,7 +1025,8 @@
     "markup": 24.5,
     "savings": 568,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 2
   },
   {
     "id": "manzanaromebeaut",
@@ -1017,7 +1041,8 @@
     "markup": 120.0,
     "savings": 2833,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 2
   },
   {
     "id": "melonamarillo",
@@ -1107,7 +1132,8 @@
     "markup": 78.9,
     "savings": 657,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 3
   },
   {
     "id": "naranja_salustiana",
@@ -1122,7 +1148,8 @@
     "markup": 143.9,
     "savings": 879,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 3
   },
   {
     "id": "nuez",
@@ -1182,7 +1209,8 @@
     "markup": 120.0,
     "savings": 6181,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 9
   },
   {
     "id": "paltatorres",
@@ -1197,7 +1225,8 @@
     "markup": 120.0,
     "savings": 3480,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 9
   },
   {
     "id": "papa_agata",
@@ -1212,7 +1241,8 @@
     "markup": 121.1,
     "savings": 1259,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 1
   },
   {
     "id": "papa_spunta",
@@ -1227,7 +1257,8 @@
     "markup": 127.4,
     "savings": 1288,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 1
   },
   {
     "id": "pepino",
@@ -1257,7 +1288,8 @@
     "markup": 120.0,
     "savings": 6720,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 5
   },
   {
     "id": "pera_packhams",
@@ -1272,7 +1304,8 @@
     "markup": 120.0,
     "savings": 1903,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 5
   },
   {
     "id": "perejil",
@@ -1377,7 +1410,8 @@
     "markup": 120.0,
     "savings": 667,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 8
   },
   {
     "id": "pomelo_starruby",
@@ -1392,7 +1426,8 @@
     "markup": 119.5,
     "savings": 1029,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topFrutaRank": 8
   },
   {
     "id": "puerro",
@@ -1557,7 +1592,8 @@
     "markup": 9.6,
     "savings": 280,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 2
   },
   {
     "id": "tomate_perita",
@@ -1572,7 +1608,8 @@
     "markup": 58.6,
     "savings": 960,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 2
   },
   {
     "id": "tomate_redondo",
@@ -1587,7 +1624,8 @@
     "markup": 62.6,
     "savings": 924,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 2
   },
   {
     "id": "tomillo",
@@ -1692,7 +1730,8 @@
     "markup": 73.9,
     "savings": 548,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 4
   },
   {
     "id": "zapallito_largo",
@@ -1707,7 +1746,8 @@
     "markup": 76.0,
     "savings": 1295,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 6
   },
   {
     "id": "zapallito_redondo",
@@ -1722,6 +1762,7 @@
     "markup": 66.1,
     "savings": 1193,
     "bultoMercadoCentral": "Venta mayorista",
-    "imagen": ""
+    "imagen": "",
+    "topVerduraRank": 6
   }
 ]
