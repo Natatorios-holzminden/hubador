@@ -170,9 +170,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadInitialData();
 
+  const MONTH_NAMES_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+  function formatTodayLabel(d) {
+    const now = d || new Date();
+    const day = now.getDate();
+    const monthStr = MONTH_NAMES_SHORT[now.getMonth()];
+    const timeStr = formatTimeStr(now);
+    return `🟢 Hoy ${day}-${monthStr} - Relevamiento Vivo en Tiempo Real (${timeStr})`;
+  }
+
   // --- SESSION MANAGER LOGIC (PURE REAL HISTORICAL DATA) ---
   function initSessionManager(liveData) {
-    const saved = localStorage.getItem('mercado_coto_sessions_v5');
+    const saved = localStorage.getItem('mercado_coto_sessions_v6');
     if (saved) {
       try { sessions = JSON.parse(saved); } catch(e) { sessions = []; }
     }
@@ -181,20 +191,32 @@ document.addEventListener('DOMContentLoaded', () => {
       sessions = generateDefaultSessions(liveData);
       saveSessions();
     } else {
-      // Update session-live with current live products for Today (19-Ago)
+      // Update session-live with current live products for Today
       const liveIndex = sessions.findIndex(s => s.id === 'session-live');
       if (liveIndex >= 0) {
         sessions[liveIndex].products = JSON.parse(JSON.stringify(liveData));
-        sessions[liveIndex].label = `🟢 Hoy 19-Ago - Relevamiento Vivo en Tiempo Real (${formatTimeStr(new Date())})`;
+        sessions[liveIndex].label = formatTodayLabel(new Date());
       } else {
         const now = new Date();
         sessions.unshift({
           id: 'session-live',
           timestamp: now.getTime(),
           dateStr: formatDateStr(now),
-          label: `🟢 Hoy 19-Ago - Relevamiento Vivo en Tiempo Real (${formatTimeStr(now)})`,
+          label: formatTodayLabel(now),
           isLive: true,
           products: JSON.parse(JSON.stringify(liveData))
+        });
+      }
+
+      // Ensure August 19 session exists in history
+      const hasBase19 = sessions.some(s => s.id === 'session-19aug');
+      if (!hasBase19 && window.BASELINE_19AUG_DATA) {
+        sessions.push({
+          id: 'session-19aug',
+          timestamp: new Date('2026-08-19T17:00:00').getTime(),
+          dateStr: '19/08/2026',
+          label: '📅 Relevamiento Real 19-Ago (Papa Coto $2.299 / Central $1.097)',
+          products: JSON.parse(JSON.stringify(window.BASELINE_19AUG_DATA))
         });
       }
 
@@ -212,8 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     activeSessionId = 'session-live';
+    const base19Sess = sessions.find(s => s.id === 'session-19aug');
     const base11Sess = sessions.find(s => s.id === 'session-11aug');
-    baseSessionId = base11Sess ? 'session-11aug' : (sessions.length > 1 ? sessions[1].id : 'none');
+    baseSessionId = base19Sess ? 'session-19aug' : (base11Sess ? 'session-11aug' : (sessions.length > 1 ? sessions[1].id : 'none'));
 
     populateSessionDropdowns();
     setupSessionListeners();
@@ -227,12 +250,21 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'session-live',
       timestamp: now.getTime(),
       dateStr: formatDateStr(now),
-      label: `🟢 Hoy 19-Ago - Relevamiento Vivo en Tiempo Real (${formatTimeStr(now)})`,
+      label: formatTodayLabel(now),
       isLive: true,
       products: liveCopy
     };
 
+    const base19Copy = window.BASELINE_19AUG_DATA ? JSON.parse(JSON.stringify(window.BASELINE_19AUG_DATA)) : liveCopy;
     const base11Copy = window.BASELINE_11AUG_DATA ? JSON.parse(JSON.stringify(window.BASELINE_11AUG_DATA)) : liveCopy;
+
+    const s19Aug = {
+      id: 'session-19aug',
+      timestamp: new Date('2026-08-19T17:00:00').getTime(),
+      dateStr: '19/08/2026',
+      label: '📅 Relevamiento Real 19-Ago (Papa Coto $2.299 / Central $1.097)',
+      products: base19Copy
+    };
 
     const s11Aug = {
       id: 'session-11aug',
@@ -242,12 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
       products: base11Copy
     };
 
-    // PURE REAL HISTORICAL SESSIONS ONLY (19-Ago Live vs 11-Ago Baseline)!
-    return [sLive, s11Aug];
+    // PURE REAL HISTORICAL SESSIONS ONLY (Live 21-Ago vs 19-Ago vs 11-Ago Baseline)!
+    return [sLive, s19Aug, s11Aug];
   }
 
   function saveSessions() {
-    localStorage.setItem('mercado_coto_sessions_v5', JSON.stringify(sessions));
+    localStorage.setItem('mercado_coto_sessions_v6', JSON.stringify(sessions));
   }
 
   function populateSessionDropdowns() {
@@ -880,7 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (mcDelta < 0) {
           mcDeltaBadge = `<span class="mini-delta down" title="Baja en Mercado Central vs sesión base"><i class="fa-solid fa-arrow-trend-down"></i> -$${formatNumber(Math.abs(mcDelta))} (${mcDeltaPct.toFixed(1)}%)</span>`;
         } else {
-          mcDeltaBadge = `<span class="mini-delta neutral"><i class="fa-solid fa-minus"></i> $0</span>`;
+          mcDeltaBadge = '';
         }
 
         // 2. Coto Deltas
@@ -891,52 +923,59 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (cotoDelta < 0) {
           cotoDeltaBadge = `<span class="mini-delta down" title="Reducción en Coto vs sesión base"><i class="fa-solid fa-arrow-trend-down"></i> -$${formatNumber(Math.abs(cotoDelta))} (${cotoDeltaPct.toFixed(1)}%)</span>`;
         } else {
-          cotoDeltaBadge = `<span class="mini-delta neutral"><i class="fa-solid fa-minus"></i> $0</span>`;
+          cotoDeltaBadge = '';
         }
 
         // 3. Mini Visual Progress Bar Math
-        const maxCoto = Math.max(p.precioCoto, baseP.precioCoto, 1);
-        const cotoBaseW = Math.round((baseP.precioCoto / maxCoto) * 100);
-        const cotoCurrW = Math.round((p.precioCoto / maxCoto) * 100);
-        const cotoBarClass = cotoDelta > 0 ? 'mini-bar-coto-up' : cotoDelta < 0 ? 'mini-bar-coto-down' : 'mini-bar-base';
-        const cotoTextClass = cotoDelta > 0 ? 'up' : cotoDelta < 0 ? 'down' : 'neutral';
-        const cotoStr = cotoDelta > 0 ? `+$${formatNumber(cotoDelta)}` : cotoDelta < 0 ? `-$${formatNumber(Math.abs(cotoDelta))}` : `$0`;
+        if (mcDelta === 0 && cotoDelta === 0) {
+          compCardHtml = `<span class="mini-delta neutral" style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-minus"></i> Sin cambio de precio</span>`;
+        } else {
+          const maxCoto = Math.max(p.precioCoto, baseP.precioCoto, 1);
+          const cotoBaseW = Math.round((baseP.precioCoto / maxCoto) * 100);
+          const cotoCurrW = Math.round((p.precioCoto / maxCoto) * 100);
+          const cotoBarClass = cotoDelta > 0 ? 'mini-bar-coto-up' : cotoDelta < 0 ? 'mini-bar-coto-down' : 'mini-bar-base';
+          const cotoTextClass = cotoDelta > 0 ? 'up' : cotoDelta < 0 ? 'down' : 'neutral';
+          const cotoStr = cotoDelta > 0 ? `+$${formatNumber(cotoDelta)}` : cotoDelta < 0 ? `-$${formatNumber(Math.abs(cotoDelta))}` : `Sin cambio`;
 
-        const maxMC = Math.max(p.precioMercadoCentral, baseP.precioMercadoCentral, 1);
-        const mcBaseW = Math.round((baseP.precioMercadoCentral / maxMC) * 100);
-        const mcCurrW = Math.round((p.precioMercadoCentral / maxMC) * 100);
-        const mcBarClass = mcDelta > 0 ? 'mini-bar-mc-up' : mcDelta < 0 ? 'mini-bar-mc-down' : 'mini-bar-base';
-        const mcTextClass = mcDelta > 0 ? 'up' : mcDelta < 0 ? 'down' : 'neutral';
-        const mcStr = mcDelta > 0 ? `+$${formatNumber(mcDelta)}` : mcDelta < 0 ? `-$${formatNumber(Math.abs(mcDelta))}` : `$0`;
+          const maxMC = Math.max(p.precioMercadoCentral, baseP.precioMercadoCentral, 1);
+          const mcBaseW = Math.round((baseP.precioMercadoCentral / maxMC) * 100);
+          const mcCurrW = Math.round((p.precioMercadoCentral / maxMC) * 100);
+          const mcBarClass = mcDelta > 0 ? 'mini-bar-mc-up' : mcDelta < 0 ? 'mini-bar-mc-down' : 'mini-bar-base';
+          const mcTextClass = mcDelta > 0 ? 'up' : mcDelta < 0 ? 'down' : 'neutral';
+          const mcStr = mcDelta > 0 ? `+$${formatNumber(mcDelta)}` : mcDelta < 0 ? `-$${formatNumber(Math.abs(mcDelta))}` : `Sin cambio`;
 
-        compCardHtml = `
-          <div class="temporal-comp-card">
-            <div class="comp-item">
-              <div class="comp-item-title">
-                <span><i class="fa-solid fa-cart-shopping text-danger"></i> Coto:</span>
-                <span class="${cotoTextClass}">${cotoStr}</span>
+          compCardHtml = `
+            <div class="temporal-comp-card">
+              <div class="comp-item">
+                <div class="comp-item-title">
+                  <span><i class="fa-solid fa-cart-shopping text-danger"></i> Coto:</span>
+                  <span class="${cotoTextClass}">${cotoStr}</span>
+                </div>
+                <div class="mini-bar-track-dual" title="Gris: Base ($${formatNumber(baseP.precioCoto)}) | Color: Actual ($${formatNumber(p.precioCoto)})">
+                  <div class="mini-bar-row mini-bar-base" style="width: ${cotoBaseW}%;"></div>
+                  <div class="mini-bar-row ${cotoBarClass}" style="width: ${cotoCurrW}%;"></div>
+                </div>
               </div>
-              <div class="mini-bar-track-dual" title="Gris: Base ($${formatNumber(baseP.precioCoto)}) | Color: Actual ($${formatNumber(p.precioCoto)})">
-                <div class="mini-bar-row mini-bar-base" style="width: ${cotoBaseW}%;"></div>
-                <div class="mini-bar-row ${cotoBarClass}" style="width: ${cotoCurrW}%;"></div>
+
+              <div class="comp-item">
+                <div class="comp-item-title">
+                  <span><i class="fa-solid fa-building text-success"></i> Central:</span>
+                  <span class="${mcTextClass}">${mcStr}</span>
+                </div>
+                <div class="mini-bar-track-dual" title="Gris: Base ($${formatNumber(baseP.precioMercadoCentral)}) | Color: Actual ($${formatNumber(p.precioMercadoCentral)})">
+                  <div class="mini-bar-row mini-bar-base" style="width: ${mcBaseW}%;"></div>
+                  <div class="mini-bar-row ${mcBarClass}" style="width: ${mcCurrW}%;"></div>
+                </div>
               </div>
             </div>
-
-            <div class="comp-item">
-              <div class="comp-item-title">
-                <span><i class="fa-solid fa-building text-success"></i> Central:</span>
-                <span class="${mcTextClass}">${mcStr}</span>
-              </div>
-              <div class="mini-bar-track-dual" title="Gris: Base ($${formatNumber(baseP.precioMercadoCentral)}) | Color: Actual ($${formatNumber(p.precioMercadoCentral)})">
-                <div class="mini-bar-row mini-bar-base" style="width: ${mcBaseW}%;"></div>
-                <div class="mini-bar-row ${mcBarClass}" style="width: ${mcCurrW}%;"></div>
-              </div>
-            </div>
-          </div>
-        `;
+          `;
+        }
       } else {
         compCardHtml = `<span style="color:var(--text-muted); font-size:0.82rem;">-</span>`;
       }
+
+      const unitStr = p.unidad || 'kg';
+      const origStr = p.origen || 'Nacional';
 
       return `
         <tr class="product-row">
@@ -945,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <img src="${iconUrl}" alt="${p.nombre}" class="product-img">
               <div>
                 <div class="product-title">${p.nombre} ${rankBadge}</div>
-                <div class="product-sub">${p.variedad} • ${p.origen}</div>
+                <div class="product-sub">${p.variedad} • ${origStr}</div>
               </div>
             </div>
           </td>
@@ -953,16 +992,16 @@ document.addEventListener('DOMContentLoaded', () => {
           <td class="td-mercado">
             <div class="price-strip strip-mercado">
               <span class="price-source"><i class="fa-solid fa-building text-success"></i> Mercado Central</span>
-              <div class="price-mercado">$ ${formatNumber(p.precioMercadoCentral)} / ${p.unidad}</div>
+              <div class="price-mercado">$ ${formatNumber(p.precioMercadoCentral)} / ${unitStr}</div>
             </div>
             ${mcDeltaBadge}
-            <small class="desktop-subtext">${p.bultoMercadoCentral}</small>
+            <small class="desktop-subtext">${p.bultoMercadoCentral || 'Venta mayorista'}</small>
           </td>
 
           <td class="td-coto">
             <div class="price-strip strip-coto">
               <span class="price-source"><i class="fa-solid fa-cart-shopping text-danger"></i> Coto Góndola</span>
-              <div class="price-coto">$ ${formatNumber(p.precioCoto)} / ${p.unidad}</div>
+              <div class="price-coto">$ ${formatNumber(p.precioCoto)} / ${unitStr}</div>
             </div>
             ${cotoDeltaBadge}
             <small class="desktop-subtext">Coto Digital Góndola</small>
@@ -977,7 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           <td class="td-gap">
             <span class="desktop-label">Brecha ($/kg)</span>
-            <div class="gap-value">+$ ${formatNumber(p.savings)} / ${p.unidad}</div>
+            <div class="gap-value">+$ ${formatNumber(p.savings)} / ${unitStr}</div>
           </td>
 
           <td class="td-delta">
@@ -987,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           <td class="td-action">
             <button class="btn-add-calc" data-id="${p.id}">
-              <i class="fa-solid fa-cart-plus"></i> +1 ${p.unidad}
+              <i class="fa-solid fa-cart-plus"></i> +1 ${unitStr}
             </button>
           </td>
         </tr>
@@ -1185,23 +1224,29 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(data => {
             products = data;
             const liveS = sessions.find(s => s.id === 'session-live');
-            if (liveS) liveS.products = JSON.parse(JSON.stringify(data));
+            if (liveS) {
+              liveS.products = JSON.parse(JSON.stringify(data));
+              liveS.label = formatTodayLabel(new Date());
+            }
             saveSessions();
             populateSessionDropdowns();
             calculateKPIs();
             renderAll();
-            showNotification("✅ ¡Datos actualizados y captura anterior guardada en la línea de tiempo!");
+            showNotification("✅ ¡Datos actualizados y fecha ajustada a hoy!");
           })
           .catch(err => {
             console.warn("No se pudo cargar data.json vía fetch, usando fallback:", err);
             const fallbackData = window.INITIAL_DATA || products;
             const liveS = sessions.find(s => s.id === 'session-live');
-            if (liveS) liveS.products = JSON.parse(JSON.stringify(fallbackData));
+            if (liveS) {
+              liveS.products = JSON.parse(JSON.stringify(fallbackData));
+              liveS.label = formatTodayLabel(new Date());
+            }
             saveSessions();
             populateSessionDropdowns();
             calculateKPIs();
             renderAll();
-            showNotification("✅ ¡Captura de estado guardada en la línea de tiempo!");
+            showNotification("✅ ¡Datos sincronizados!");
           })
           .finally(() => {
             setTimeout(() => syncLiveBtn.querySelector('i').classList.remove('fa-spin'), 600);
