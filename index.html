@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -4928,7 +4928,11 @@ function MobileComparador() {
             <div style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Coto · Mayoristas · HUBADOR</div>
           </div>
         </div>
-        <button onClick={openFull} style={{ flexShrink: 0, background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>Tabla →</button>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <button onClick={() => window.open('fresco/', '_blank')} style={{ background: '#06b6d4', color: '#fff', border: 'none', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>🟢 FRESCO.BA</button>
+          <button onClick={() => window.open('jorge/', '_blank')} style={{ background: '#f59e0b', color: '#000', border: 'none', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>🟡 Jorge</button>
+          <button onClick={openFull} style={{ flexShrink: 0, background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>Tabla →</button>
+        </div>
       </header>
 
       <div style={{ flexShrink: 0, padding: '10px 14px', background: '#fff', borderBottom: '1px solid #e8eaec' }}>
