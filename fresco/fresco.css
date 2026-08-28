@@ -1,0 +1,262 @@
+/* FRESCO.BA 3-Way Bar Comparative Styles */
+:root {
+  --bg-dark: #0f172a;
+  --bg-card: rgba(30, 41, 59, 0.7);
+  --border-card: rgba(255, 255, 255, 0.1);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --mc-color: #10b981;
+  --fresco-color: #06b6d4;
+  --coto-color: #ef4444;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-main);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Header */
+.main-header {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-card);
+  padding: 1.25rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.brand-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.brand-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.brand-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0.2rem 0 0 0;
+}
+
+/* KPI Dashboard */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.kpi-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+/* Tabs */
+.tabs-navigation {
+  margin-bottom: 1.5rem;
+}
+
+.tabs-header {
+  display: flex;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border-card);
+  padding-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-card);
+  color: var(--text-muted);
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background: #10b981;
+  color: #fff;
+  border-color: #10b981;
+}
+
+/* 3-Bar Grid Cards View (Full Width Cards like Jorge) */
+.bars-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.bar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.bar-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bar-card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.bars-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 130px;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.88rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.bar-row.cheapest-row {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.bar-label {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.bar-track {
+  height: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.4s ease;
+}
+
+.bar-fill-mc { background: linear-gradient(90deg, #059669, #10b981); }
+.bar-fill-fresco { background: linear-gradient(90deg, #0284c7, #06b6d4); }
+.bar-fill-coto { background: linear-gradient(90deg, #dc2626, #ef4444); }
+
+.bar-val {
+  font-weight: 800;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .bar-row {
+    grid-template-columns: 140px 1fr 95px;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+  }
+  .bar-label {
+    font-size: 0.75rem;
+  }
+  .bar-val {
+    font-size: 0.8rem;
+  }
+}
+
+.bar-card-footer {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.bulto-info-pill {
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  color: #06b6d4;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
