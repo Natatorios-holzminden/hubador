@@ -4544,7 +4544,13 @@ function BottomNav({ active }) {
   return (
     <div style={{ flexShrink: 0, background: '#fff', borderTop: '1px solid #e8eaec', padding: '6px 0 10px', display: 'flex', position: 'relative', zIndex: 12, pointerEvents: 'auto' }}>
       {items.map((it) =>
-      <div key={it.id + it.label} onClick={() => navigate(it.id)} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, cursor: 'pointer', color: active === it.id ? primary : '#aaa', position: 'relative' }}>
+      <div key={it.id + it.label} onClick={() => {
+        if (it.id === 'perfil') {
+          window.location.href = 'indice.html';
+        } else {
+          navigate(it.id);
+        }
+      }} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, cursor: 'pointer', color: active === it.id ? primary : '#aaa', position: 'relative' }}>
           <span style={{ position: 'relative', display: 'inline-flex' }}>
             {it.icon}
             {it.badge > 0 && (
@@ -4834,9 +4840,10 @@ function MobilePerfil() {
       </header>
       <div style={{ padding: 16 }}>
         {!user ? (
-          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 28, textAlign: 'center' }}>
-            <div style={{ fontSize: 14, color: '#555', marginBottom: 14 }}>No hay sesión activa.</div>
-            <button type="button" onClick={() => navigate('login')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '10px 22px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ingresar</button>
+          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 24, textAlign: 'center' }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#111', marginBottom: 6 }}>📊 Índice de Comparadores y Margen</div>
+            <div style={{ fontSize: 12.5, color: '#666', marginBottom: 16, lineHeight: 1.4 }}>Accedé a los comparadores de FRESCO.BA, Mercado Central, Verdulería Jorge y las reglas de margen CONLAT.</div>
+            <button type="button" onClick={() => { window.location.href = 'indice.html'; }} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '11px 22px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>Abrir Índice General →</button>
           </div>
         ) : (
           <>
