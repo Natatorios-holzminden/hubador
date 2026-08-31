@@ -80,6 +80,7 @@
     let filtered = products.filter(p => {
       const matchQ = p.nombre.toLowerCase().includes(searchQuery.toLowerCase());
       if (currentCategory === 'quilmes') return matchQ && p.esOfertaQuilmes;
+      if (currentCategory === 'vlopez') return matchQ && p.esVLopez;
       if (currentCategory === 'verduras') return matchQ && (p.categoria === 'verduras' || !['frutilla', 'banana', 'manzana', 'naranja', 'pera', 'mandarina', 'pomelo', 'uva', 'kiwi', 'arandanos', 'anana', 'mango', 'palta', 'melon'].some(k => p.id.includes(k)));
       if (currentCategory === 'frutas') return matchQ && ['frutilla', 'banana', 'manzana', 'naranja', 'pera', 'mandarina', 'pomelo', 'uva', 'kiwi', 'arandanos', 'anana', 'mango', 'palta', 'melon'].some(k => p.id.includes(k));
       return matchQ;
@@ -132,6 +133,17 @@
         fillClass: 'bar-fill-fresco',
         isFloat: true
       });
+
+      if (p.esVLopez && p.precioVLopez !== null) {
+        channels.push({
+          name: '🏠 Verdulería V. López',
+          price: p.precioVLopez,
+          icon: 'fa-shop',
+          color: '#c084fc',
+          fillClass: 'bar-fill-vlopez',
+          isFloat: false
+        });
+      }
 
       if (!p.sinDatoMC && p.precioMercadoCentral !== null) {
         channels.push({

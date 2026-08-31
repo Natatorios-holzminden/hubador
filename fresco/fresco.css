@@ -218,6 +218,7 @@ body {
 .bar-fill-mc { background: linear-gradient(90deg, #059669, #10b981); }
 .bar-fill-fresco { background: linear-gradient(90deg, #0284c7, #06b6d4); }
 .bar-fill-quilmes { background: linear-gradient(90deg, #ea580c, #f97316); }
+.bar-fill-vlopez { background: linear-gradient(90deg, #9333ea, #c084fc); }
 .bar-fill-coto { background: linear-gradient(90deg, #dc2626, #ef4444); }
 
 .quilmes-badge {
