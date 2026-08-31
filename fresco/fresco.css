@@ -217,7 +217,21 @@ body {
 
 .bar-fill-mc { background: linear-gradient(90deg, #059669, #10b981); }
 .bar-fill-fresco { background: linear-gradient(90deg, #0284c7, #06b6d4); }
+.bar-fill-quilmes { background: linear-gradient(90deg, #ea580c, #f97316); }
 .bar-fill-coto { background: linear-gradient(90deg, #dc2626, #ef4444); }
+
+.quilmes-badge {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(239, 68, 68, 0.25));
+  border: 1px solid rgba(249, 115, 22, 0.5);
+  color: #fb923c;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 
 .bar-val {
   font-weight: 800;

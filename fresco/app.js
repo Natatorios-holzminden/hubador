@@ -78,106 +78,86 @@
   function getFilteredList() {
     let filtered = products.filter(p => {
       const matchQ = p.nombre.toLowerCase().includes(searchQuery.toLowerCase());
+      if (currentCategory === 'quilmes') return matchQ && p.esOfertaQuilmes;
       if (currentCategory === 'verduras') return matchQ && (p.categoria === 'verduras' || !['frutilla', 'banana', 'manzana', 'naranja', 'pera', 'mandarina', 'pomelo', 'uva', 'kiwi', 'arandanos', 'anana', 'mango', 'palta', 'melon'].some(k => p.id.includes(k)));
       if (currentCategory === 'frutas') return matchQ && ['frutilla', 'banana', 'manzana', 'naranja', 'pera', 'mandarina', 'pomelo', 'uva', 'kiwi', 'arandanos', 'anana', 'mango', 'palta', 'melon'].some(k => p.id.includes(k));
       return matchQ;
     });
 
     if (currentSort === 'fresco-asc') {
-      filtered.sort((a, b) => a.precioUnidadConIva - b.precioUnidadConIva);
+      filtered.sort((a, b) => (a.quilmesPrecioUnidadConIva || a.precioUnidadConIva) - (b.quilmesPrecioUnidadConIva || b.precioUnidadConIva));
     } else if (currentSort === 'savings-desc') {
       filtered.sort((a, b) => ((b.precioCoto || 0) - b.precioUnidadConIva) - ((a.precioCoto || 0) - a.precioUnidadConIva));
     } else if (currentSort === 'name-asc') {
       filtered.sort((a, b) => a.nombre.localeCompare(b.nombre));
     } else if (currentSort === 'coto-desc') {
       filtered.sort((a, b) => (b.precioCoto || 0) - (a.precioCoto || 0));
+    } else {
+      // Default: Pin Quilmes offers AT THE TOP first
+      filtered.sort((a, b) => (b.esOfertaQuilmes ? 1 : 0) - (a.esOfertaQuilmes ? 1 : 0));
     }
 
     return filtered;
   }
 
-  // --- RENDER 3-BAR REAL COMPARATIVE CARDS ---
+  // --- RENDER REAL COMPARATIVE CARDS ---
   function render3BarGrid(list) {
     if (!barsGrid) return;
     if (list.length === 0) {
-      barsGrid.innerHTML = `<p style="text-align:center; grid-column: 1/-1; padding:2rem; color:var(--text-muted);">No se encontraron resultados en FRESCO.BA.</p>`;
+      barsGrid.innerHTML = `<p style="text-align:center; grid-column: 1/-1; padding:2rem; color:var(--text-muted);">No se encontraron resultados.</p>`;
       return;
     }
 
     barsGrid.innerHTML = list.map(p => {
-      // If sinDato (missing 1-to-1 match in MC or Coto)
-      if (p.sinDato) {
-        return `
-          <div class="bar-card" style="opacity: 0.85;">
-            <div class="bar-card-header">
-              <div>
-                <div class="bar-card-title">${getFruitIcon(p.nombre)} ${p.nombre}</div>
-                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">
-                  Bulto: <strong>$${formatNumber(p.bultoSinIva)}</strong> + 10.5% IVA = <strong style="color:#60a5fa;">$${formatNumber(p.bultoConIva)}</strong> (${p.cantidadBulto} ${p.unidad})
-                </div>
-              </div>
-            </div>
+      // Build channels list
+      const channels = [];
 
-            <div class="bars-stack">
-              <!-- FRESCO.BA -->
-              <div class="bar-row">
-                <div class="bar-label" style="color: #06b6d4;">
-                  <i class="fa-solid fa-leaf"></i> FRESCO.BA (+10.5% IVA)
-                </div>
-                <div class="bar-track">
-                  <div class="bar-fill bar-fill-fresco" style="width: 60%;"></div>
-                </div>
-                <div class="bar-val" style="color: #06b6d4;">
-                  $ ${formatFloat(p.precioUnidadConIva)} <small style="font-weight:500; font-size:0.75rem; color:var(--text-muted);">/ ${p.unidad}</small>
-                </div>
-              </div>
-
-              <!-- Mercado Central -->
-              <div class="bar-row">
-                <div class="bar-label" style="color: var(--text-muted);">
-                  <i class="fa-solid fa-building-columns"></i> Mercado Central
-                </div>
-                <div class="bar-track" style="opacity:0.25;"></div>
-                <div class="bar-val" style="color: var(--text-muted); font-weight:500;">
-                  Sin dato
-                </div>
-              </div>
-
-              <!-- Coto Góndola -->
-              <div class="bar-row">
-                <div class="bar-label" style="color: var(--text-muted);">
-                  <i class="fa-solid fa-cart-shopping"></i> Coto Góndola
-                </div>
-                <div class="bar-track" style="opacity:0.25;"></div>
-                <div class="bar-val" style="color: var(--text-muted); font-weight:500;">
-                  Sin dato
-                </div>
-              </div>
-            </div>
-
-            <div class="bar-card-footer">
-              <span class="bulto-info-pill" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:var(--text-muted);">
-                <i class="fa-solid fa-circle-question"></i> Sin dato comparativo 1-a-1
-              </span>
-              <span style="font-weight:600; color:var(--text-muted); font-size:0.78rem;">
-                Sin cálculo artificial
-              </span>
-            </div>
-          </div>
-        `;
+      if (p.esOfertaQuilmes && p.quilmesPrecioUnidadConIva) {
+        channels.push({
+          name: '⚡ Oferta Quilmes (+10.5% IVA)',
+          price: p.quilmesPrecioUnidadConIva,
+          icon: 'fa-bolt',
+          color: '#f97316',
+          fillClass: 'bar-fill-quilmes',
+          isFloat: true
+        });
       }
 
-      // Valid 3-way real data
-      const channels = [
-        { name: 'Mercado Central', price: p.precioMercadoCentral, icon: 'fa-building-columns', color: '#10b981', fillClass: 'bar-fill-mc', isFloat: false },
-        { name: 'FRESCO.BA (+10.5% IVA)', price: p.precioUnidadConIva, icon: 'fa-leaf', color: '#06b6d4', fillClass: 'bar-fill-fresco', isFloat: true },
-        { name: 'Coto Góndola', price: p.precioCoto, icon: 'fa-cart-shopping', color: '#ef4444', fillClass: 'bar-fill-coto', isFloat: false }
-      ];
+      channels.push({
+        name: 'FRESCO.BA (+10.5% IVA)',
+        price: p.precioUnidadConIva,
+        icon: 'fa-leaf',
+        color: '#06b6d4',
+        fillClass: 'bar-fill-fresco',
+        isFloat: true
+      });
+
+      if (!p.sinDatoMC && p.precioMercadoCentral !== null) {
+        channels.push({
+          name: 'Mercado Central',
+          price: p.precioMercadoCentral,
+          icon: 'fa-building-columns',
+          color: '#10b981',
+          fillClass: 'bar-fill-mc',
+          isFloat: false
+        });
+      }
+
+      if (!p.sinDatoCoto && p.precioCoto !== null) {
+        channels.push({
+          name: 'Coto Góndola',
+          price: p.precioCoto,
+          icon: 'fa-cart-shopping',
+          color: '#ef4444',
+          fillClass: 'bar-fill-coto',
+          isFloat: false
+        });
+      }
 
       // Sort channels: cheapest top row, most expensive bottom row
       channels.sort((a, b) => a.price - b.price);
 
-      const maxVal = Math.max(p.precioMercadoCentral, p.precioUnidadConIva, p.precioCoto, 1);
+      const maxVal = Math.max(...channels.map(c => c.price), 1);
 
       const rowsHtml = channels.map((ch, idx) => {
         const pct = Math.max(Math.round((ch.price / maxVal) * 100), 4);
@@ -200,24 +180,77 @@
         `;
       }).join('');
 
+      // Add missing rows for MC/Coto if sinDato
+      let missingRowsHtml = '';
+      if (p.sinDatoMC || p.precioMercadoCentral === null) {
+        missingRowsHtml += `
+          <div class="bar-row">
+            <div class="bar-label" style="color: var(--text-muted);"><i class="fa-solid fa-building-columns"></i> Mercado Central</div>
+            <div class="bar-track" style="opacity:0.25;"></div>
+            <div class="bar-val" style="color: var(--text-muted); font-weight:500;">Sin dato</div>
+          </div>`;
+      }
+      if (p.sinDatoCoto || p.precioCoto === null) {
+        missingRowsHtml += `
+          <div class="bar-row">
+            <div class="bar-label" style="color: var(--text-muted);"><i class="fa-solid fa-cart-shopping"></i> Coto Góndola</div>
+            <div class="bar-track" style="opacity:0.25;"></div>
+            <div class="bar-val" style="color: var(--text-muted); font-weight:500;">Sin dato</div>
+          </div>`;
+      }
+
+      // Card Header HTML
+      const quilmesBadgeHtml = p.esOfertaQuilmes ?
+        `<span class="quilmes-badge"><i class="fa-solid fa-fire"></i> SUPER OFERTA QUILMES ($${formatNumber(p.quilmesBultoSinIva)} bulto)</span>` : '';
+
+      let bultoSubtitle = `Bulto Fresco: <strong>$${formatNumber(p.bultoSinIva)}</strong> + 10.5% IVA = <strong style="color:#60a5fa;">$${formatNumber(p.bultoConIva)}</strong> (${p.cantidadBulto} ${p.unidad})`;
+      if (p.esOfertaQuilmes) {
+        bultoSubtitle += ` | ⚡ Bulto Quilmes: <strong style="color:#fb923c;">$${formatNumber(p.quilmesBultoSinIva)}</strong> + IVA = <strong style="color:#fb923c;">$${formatNumber(p.quilmesBultoConIva)}</strong>`;
+      }
+
       // Position badge
       let badgeHtml = '';
-      if (p.precioUnidadConIva <= p.precioMercadoCentral) {
+      const cheapest = channels[0];
+      if (cheapest && cheapest.name.includes('Quilmes')) {
+        badgeHtml = `<span class="bulto-info-pill" style="background:rgba(249,115,22,0.2); border-color:rgba(249,115,22,0.4); color:#fb923c;"><i class="fa-solid fa-bolt"></i> ¡DISTRIBUIDOR QUILMES ES EL MÁS BARATO!</span>`;
+      } else if (p.precioUnidadConIva <= p.precioMercadoCentral) {
         badgeHtml = `<span class="bulto-info-pill" style="background:rgba(16,185,129,0.2); color:#34d399;"><i class="fa-solid fa-bolt"></i> ¡FRESCO.BA MÁS BARATO QUE EL CENTRAL!</span>`;
-      } else if (p.precioUnidadConIva < p.precioCoto) {
+      } else if (p.precioCoto && p.precioUnidadConIva < p.precioCoto) {
         const pctSave = Math.round(((p.precioCoto - p.precioUnidadConIva) / p.precioCoto) * 100);
         badgeHtml = `<span class="bulto-info-pill" style="background:rgba(6,182,212,0.2); color:#06b6d4;"><i class="fa-solid fa-store"></i> FRESCO.BA en el medio (Ahorro ${pctSave}% vs Coto)</span>`;
       } else {
-        const pctOver = Math.round(((p.precioUnidadConIva - p.precioCoto) / p.precioCoto) * 100);
-        badgeHtml = `<span class="bulto-info-pill" style="background:rgba(239,68,68,0.2); color:#f87171;"><i class="fa-solid fa-tag"></i> Coto de oferta (+${pctOver}%)</span>`;
+        badgeHtml = `<span class="bulto-info-pill" style="background:rgba(255,255,255,0.05); color:var(--text-muted);"><i class="fa-solid fa-circle-info"></i> Precios Reales de Origen</span>`;
       }
 
       return `
-        <div class="bar-card">
+        <div class="bar-card" style="${p.esOfertaQuilmes ? 'border: 1.5px solid rgba(249, 115, 22, 0.4); background: rgba(249, 115, 22, 0.03);' : ''}">
           <div class="bar-card-header">
             <div>
-              <div class="bar-card-title">${getFruitIcon(p.nombre)} ${p.nombre}</div>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <div class="bar-card-title">${getFruitIcon(p.nombre)} ${p.nombre}</div>
+                ${quilmesBadgeHtml}
+              </div>
               <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">
+                ${bultoSubtitle}
+              </div>
+            </div>
+          </div>
+
+          <div class="bars-stack">
+            ${rowsHtml}
+            ${missingRowsHtml}
+          </div>
+
+          <div class="bar-card-footer">
+            ${badgeHtml}
+            <span style="font-weight:700; color:var(--text-muted);">
+              ${p.cotoMarkupVsFresco ? (p.cotoMarkupVsFresco >= 0 ? `Coto +${Math.round(p.cotoMarkupVsFresco)}%` : `Coto -${Math.abs(Math.round(p.cotoMarkupVsFresco))}%`) : ''}
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
                 Bulto: <strong>$${formatNumber(p.bultoSinIva)}</strong> + 10.5% IVA = <strong style="color:#60a5fa;">$${formatNumber(p.bultoConIva)}</strong> (${p.cantidadBulto} ${p.unidad})
               </div>
             </div>
