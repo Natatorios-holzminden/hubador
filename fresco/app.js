@@ -42,6 +42,7 @@
     if (n.includes('zapallito') || n.includes('zucchini') || n.includes('anco')) return '🎃';
     if (n.includes('frutilla')) return '🍓';
     if (n.includes('palta')) return '🥑';
+    if (n.includes('morron') || n.includes('ají')) return '🌶️';
     return '🌱';
   }
 
@@ -68,10 +69,10 @@
       const avgCoto = totalCoto / countReal;
       const savingsPct = totalCoto > 0 ? Math.round(((totalCoto - totalFresco) / totalCoto) * 100) : 0;
 
-      kpiAvgMc.textContent = `$ ${formatNumber(avgMC)} / kg`;
-      kpiAvgFresco.textContent = `$ ${formatFloat(avgFresco)} / kg`;
-      kpiAvgCoto.textContent = `$ ${formatNumber(avgCoto)} / kg`;
-      kpiAvgSavings.textContent = `Ahorro ${savingsPct}% (${countReal} con datos 3-vías)`;
+      if (kpiAvgMc) kpiAvgMc.textContent = `$ ${formatNumber(avgMC)} / kg`;
+      if (kpiAvgFresco) kpiAvgFresco.textContent = `$ ${formatFloat(avgFresco)} / kg`;
+      if (kpiAvgCoto) kpiAvgCoto.textContent = `$ ${formatNumber(avgCoto)} / kg`;
+      if (kpiAvgSavings) kpiAvgSavings.textContent = `Ahorro ${savingsPct}% (${countReal} con datos 3-vías)`;
     }
   }
 
@@ -85,7 +86,7 @@
     });
 
     if (currentSort === 'fresco-asc') {
-      filtered.sort((a, b) => (a.quilmesPrecioUnidadConIva || a.precioUnidadConIva) - (b.quilmesPrecioUnidadConIva || b.precioUnidadConIva));
+      filtered.sort((a, b) => (a.quilmesPrecioUnidad || a.precioUnidadConIva) - (b.quilmesPrecioUnidad || b.precioUnidadConIva));
     } else if (currentSort === 'savings-desc') {
       filtered.sort((a, b) => ((b.precioCoto || 0) - b.precioUnidadConIva) - ((a.precioCoto || 0) - a.precioUnidadConIva));
     } else if (currentSort === 'name-asc') {
@@ -100,7 +101,7 @@
     return filtered;
   }
 
-  // --- RENDER REAL COMPARATIVE CARDS ---
+  // --- RENDER COMPARATIVE CARDS ---
   function render3BarGrid(list) {
     if (!barsGrid) return;
     if (list.length === 0) {
@@ -109,13 +110,13 @@
     }
 
     barsGrid.innerHTML = list.map(p => {
-      // Build channels list
+      // Build channels list for card
       const channels = [];
 
-      if (p.esOfertaQuilmes && p.quilmesPrecioUnidadConIva) {
+      if (p.esOfertaQuilmes && p.quilmesPrecioUnidad) {
         channels.push({
-          name: '⚡ Oferta Quilmes (+10.5% IVA)',
-          price: p.quilmesPrecioUnidadConIva,
+          name: '⚡ Oferta Quilmes (Sin IVA)',
+          price: p.quilmesPrecioUnidad,
           icon: 'fa-bolt',
           color: '#f97316',
           fillClass: 'bar-fill-quilmes',
@@ -201,11 +202,11 @@
 
       // Card Header HTML
       const quilmesBadgeHtml = p.esOfertaQuilmes ?
-        `<span class="quilmes-badge"><i class="fa-solid fa-fire"></i> SUPER OFERTA QUILMES ($${formatNumber(p.quilmesBultoSinIva)} bulto)</span>` : '';
+        `<span class="quilmes-badge"><i class="fa-solid fa-fire"></i> SUPER OFERTA QUILMES ($${formatNumber(p.quilmesBulto)} bulto ${p.quilmesCantBulto}kg)</span>` : '';
 
       let bultoSubtitle = `Bulto Fresco: <strong>$${formatNumber(p.bultoSinIva)}</strong> + 10.5% IVA = <strong style="color:#60a5fa;">$${formatNumber(p.bultoConIva)}</strong> (${p.cantidadBulto} ${p.unidad})`;
       if (p.esOfertaQuilmes) {
-        bultoSubtitle += ` | ⚡ Bulto Quilmes: <strong style="color:#fb923c;">$${formatNumber(p.quilmesBultoSinIva)}</strong> + IVA = <strong style="color:#fb923c;">$${formatNumber(p.quilmesBultoConIva)}</strong>`;
+        bultoSubtitle += ` | ⚡ Bulto Quilmes: <strong style="color:#fb923c;">$${formatNumber(p.quilmesBulto)}</strong> (${p.quilmesCantBulto} kg)`;
       }
 
       // Position badge
@@ -251,25 +252,6 @@
       `;
     }).join('');
   }
-                Bulto: <strong>$${formatNumber(p.bultoSinIva)}</strong> + 10.5% IVA = <strong style="color:#60a5fa;">$${formatNumber(p.bultoConIva)}</strong> (${p.cantidadBulto} ${p.unidad})
-              </div>
-            </div>
-          </div>
-
-          <div class="bars-stack">
-            ${rowsHtml}
-          </div>
-
-          <div class="bar-card-footer">
-            ${badgeHtml}
-            <span style="font-weight:700; color:var(--text-muted);">
-              ${p.cotoMarkupVsFresco >= 0 ? `Coto +${Math.round(p.cotoMarkupVsFresco)}%` : `Coto -${Math.abs(Math.round(p.cotoMarkupVsFresco))}%`}
-            </span>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
 
   // --- RENDER TABLE VIEW ---
   function renderTable(list) {
@@ -302,7 +284,7 @@
           <td class="td-product">
             <div class="product-cell">
               <div>
-                <div class="product-title">${getFruitIcon(p.nombre)} ${p.nombre}</div>
+                <div class="product-title">${getFruitIcon(p.nombre)} ${p.nombre} ${p.esOfertaQuilmes ? '<span class="quilmes-badge">⚡ Quilmes</span>' : ''}</div>
                 <div class="product-sub">Bulto original: ${bultoLabel}</div>
               </div>
             </div>
@@ -341,44 +323,53 @@
     }).join('');
   }
 
-  function renderCurrentView() {
-    const list = getFilteredList();
-    render3BarGrid(list);
-    renderTable(list);
+  function render() {
+    const filtered = getFilteredList();
+    if (currentTab === 'barsView') {
+      if (barsGrid) barsGrid.style.display = 'grid';
+      if (tableBody && tableBody.closest('section')) tableBody.closest('section').style.display = 'none';
+      render3BarGrid(filtered);
+    } else {
+      if (barsGrid) barsGrid.style.display = 'none';
+      if (tableBody && tableBody.closest('section')) tableBody.closest('section').style.display = 'block';
+      renderTable(filtered);
+    }
+  }
+
+  // --- EVENT LISTENERS ---
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      render();
+    });
   }
 
   if (sortSelect) {
     sortSelect.addEventListener('change', (e) => {
       currentSort = e.target.value;
-      renderCurrentView();
+      render();
     });
   }
 
-  searchInput.addEventListener('input', (e) => {
-    searchQuery = e.target.value;
-    renderCurrentView();
-  });
-
   categoryPills.forEach(pill => {
-    pill.addEventListener('click', (e) => {
+    pill.addEventListener('click', () => {
       categoryPills.forEach(p => p.classList.remove('active'));
-      e.target.classList.add('active');
-      currentCategory = e.target.getAttribute('data-category');
-      renderCurrentView();
+      pill.classList.add('active');
+      currentCategory = pill.getAttribute('data-category');
+      render();
     });
   });
 
   tabBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       tabBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentTab = btn.getAttribute('data-tab');
-
-      document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
-      document.getElementById(currentTab).style.display = 'block';
+      render();
     });
   });
 
+  // INITIALIZE
   calculateSummary();
-  renderCurrentView();
+  render();
 })();
