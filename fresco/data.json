@@ -95,6 +95,61 @@
     "cotoSavingsVsFresco": 2067.24
   },
   {
+    "id": "cebollón",
+    "nombre": "Cebollón",
+    "unidad": "kg",
+    "cantidadBulto": 18,
+    "bultoSinIva": 18000,
+    "bultoConIva": 19890.0,
+    "precioUnidadSinIva": 1000.0,
+    "precioUnidadConIva": 1105.0,
+    "metaFresco": {
+      "fuente": "fresco_ba_pdf",
+      "fechaDato": "2026-08-24",
+      "urlOArchivo": "Fresco_BA_Listas 24_08_2026 - LISTADO DE PRECIOS 24_08_2026.pdf",
+      "varianteExacta": "Cebollón (18 kg)"
+    },
+    "esOfertaQuilmes": true,
+    "quilmesBulto": 15000,
+    "quilmesCantBulto": 17,
+    "quilmesPrecioUnidad": 882.35,
+    "metaQuilmes": {
+      "fuente": "oferta_distribuidor_quilmes",
+      "fechaDato": "2026-08-31",
+      "urlOArchivo": "Super Ofertas Mañana - Distribuidor Quilmes",
+      "varianteExacta": "Cebolla (17 kg) bulto de $15000"
+    },
+    "esVLopez": true,
+    "precioVLopez": 1750.0,
+    "metaVLopez": {
+      "fuente": "verduleria_vlopez",
+      "fechaDato": "2026-08-31",
+      "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
+      "varianteExacta": "Cebolla 2kg x $3.500 ($1.750/kg)"
+    },
+    "precioMercadoCentral": 1300.0,
+    "metaMercadoCentral": {
+      "fuente": "mercado_central",
+      "fechaDato": "2026-08-24",
+      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
+      "varianteExacta": "CEBOLLA ÓPTIMA - ÓPTIMA"
+    },
+    "sinDatoMC": false,
+    "precioCoto": 1190.0,
+    "metaCoto": {
+      "fuente": "coto",
+      "fechaDato": "2026-08-24",
+      "urlOArchivo": "cotodigital.com.ar",
+      "varianteExacta": "Cebolla Óptima X KG"
+    },
+    "sinDatoCoto": false,
+    "sinDato": false,
+    "gapVsMercadoCentral": -195.0,
+    "gapVsMercadoCentralPct": -15.0,
+    "cotoMarkupVsFresco": 7.7,
+    "cotoSavingsVsFresco": 85.0
+  },
+  {
     "id": "frutilla",
     "nombre": "Frutilla",
     "unidad": "kg",
@@ -198,6 +253,51 @@
     "gapVsMercadoCentralPct": 5.2,
     "cotoMarkupVsFresco": 171.8,
     "cotoSavingsVsFresco": 1005.0
+  },
+  {
+    "id": "manzana_r_chica_gaucho",
+    "nombre": "Manzana R Chica Gaucho",
+    "unidad": "kg",
+    "cantidadBulto": 18,
+    "bultoSinIva": 34000,
+    "bultoConIva": 37570.0,
+    "precioUnidadSinIva": 1888.89,
+    "precioUnidadConIva": 2087.22,
+    "metaFresco": {
+      "fuente": "fresco_ba_pdf",
+      "fechaDato": "2026-08-24",
+      "urlOArchivo": "Fresco_BA_Listas 24_08_2026 - LISTADO DE PRECIOS 24_08_2026.pdf",
+      "varianteExacta": "Manzana R Chica Gaucho (18 kg)"
+    },
+    "esOfertaQuilmes": true,
+    "quilmesBulto": 20000,
+    "quilmesCantBulto": 19,
+    "quilmesPrecioUnidad": 1052.63,
+    "metaQuilmes": {
+      "fuente": "oferta_distribuidor_quilmes",
+      "fechaDato": "2026-08-31",
+      "urlOArchivo": "Super Ofertas Mañana - Distribuidor Quilmes",
+      "varianteExacta": "Manzana (19 kg) bulto de $20000"
+    },
+    "esVLopez": true,
+    "precioVLopez": 4000.0,
+    "metaVLopez": {
+      "fuente": "verduleria_vlopez",
+      "fechaDato": "2026-08-31",
+      "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
+      "varianteExacta": "Manzana Roja Chica 2kg x $8.000 ($4.000/kg)"
+    },
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "naranja_jugo",
@@ -865,56 +965,6 @@
     "cotoSavingsVsFresco": 1078.06
   },
   {
-    "id": "cebollón",
-    "nombre": "Cebollón",
-    "unidad": "kg",
-    "cantidadBulto": 18,
-    "bultoSinIva": 18000,
-    "bultoConIva": 19890.0,
-    "precioUnidadSinIva": 1000.0,
-    "precioUnidadConIva": 1105.0,
-    "metaFresco": {
-      "fuente": "fresco_ba_pdf",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "Fresco_BA_Listas 24_08_2026 - LISTADO DE PRECIOS 24_08_2026.pdf",
-      "varianteExacta": "Cebollón (18 kg)"
-    },
-    "esOfertaQuilmes": false,
-    "quilmesBulto": null,
-    "quilmesCantBulto": null,
-    "quilmesPrecioUnidad": null,
-    "metaQuilmes": null,
-    "esVLopez": true,
-    "precioVLopez": 1750.0,
-    "metaVLopez": {
-      "fuente": "verduleria_vlopez",
-      "fechaDato": "2026-08-31",
-      "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
-      "varianteExacta": "Cebolla 2kg x $3.500 ($1.750/kg)"
-    },
-    "precioMercadoCentral": 1300.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "CEBOLLA ÓPTIMA - ÓPTIMA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1190.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Cebolla Óptima X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -195.0,
-    "gapVsMercadoCentralPct": -15.0,
-    "cotoMarkupVsFresco": 7.7,
-    "cotoSavingsVsFresco": 85.0
-  },
-  {
     "id": "choclo",
     "nombre": "Choclo",
     "unidad": "u",
@@ -1482,46 +1532,6 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": null,
-    "metaMercadoCentral": null,
-    "sinDatoMC": true,
-    "precioCoto": null,
-    "metaCoto": null,
-    "sinDatoCoto": true,
-    "sinDato": true,
-    "gapVsMercadoCentral": null,
-    "gapVsMercadoCentralPct": null,
-    "cotoMarkupVsFresco": null,
-    "cotoSavingsVsFresco": null
-  },
-  {
-    "id": "manzana_r_chica_gaucho",
-    "nombre": "Manzana R Chica Gaucho",
-    "unidad": "kg",
-    "cantidadBulto": 18,
-    "bultoSinIva": 34000,
-    "bultoConIva": 37570.0,
-    "precioUnidadSinIva": 1888.89,
-    "precioUnidadConIva": 2087.22,
-    "metaFresco": {
-      "fuente": "fresco_ba_pdf",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "Fresco_BA_Listas 24_08_2026 - LISTADO DE PRECIOS 24_08_2026.pdf",
-      "varianteExacta": "Manzana R Chica Gaucho (18 kg)"
-    },
-    "esOfertaQuilmes": false,
-    "quilmesBulto": null,
-    "quilmesCantBulto": null,
-    "quilmesPrecioUnidad": null,
-    "metaQuilmes": null,
-    "esVLopez": true,
-    "precioVLopez": 4000.0,
-    "metaVLopez": {
-      "fuente": "verduleria_vlopez",
-      "fechaDato": "2026-08-31",
-      "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
-      "varianteExacta": "Manzana Roja Chica 2kg x $8.000 ($4.000/kg)"
-    },
     "precioMercadoCentral": null,
     "metaMercadoCentral": null,
     "sinDatoMC": true,
