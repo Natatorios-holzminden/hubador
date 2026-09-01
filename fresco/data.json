@@ -72,27 +72,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Banana 2kg x $4.500 ($2.250/kg)"
     },
-    "precioMercadoCentral": 2407.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "BANANA CAVENDISH - CAVENDISH"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 5295.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Banana Cavendish X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 820.76,
-    "gapVsMercadoCentralPct": 34.1,
-    "cotoMarkupVsFresco": 64.0,
-    "cotoSavingsVsFresco": 2067.24
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "cebollón",
@@ -127,27 +117,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Cebolla 2kg x $3.500 ($1.750/kg)"
     },
-    "precioMercadoCentral": 1300.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "CEBOLLA ÓPTIMA - ÓPTIMA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1190.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Cebolla Óptima X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -195.0,
-    "gapVsMercadoCentralPct": -15.0,
-    "cotoMarkupVsFresco": 7.7,
-    "cotoSavingsVsFresco": 85.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "frutilla",
@@ -177,27 +157,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 8860.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "FRUTILLA - PRIMERA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 19492.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Frutilla X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 1085.0,
-    "gapVsMercadoCentralPct": 12.2,
-    "cotoMarkupVsFresco": 96.0,
-    "cotoSavingsVsFresco": 9547.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "mandarina_nova",
@@ -232,27 +202,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Mandarina Afourer 2kg x $3.500 ($1.750/kg)"
     },
-    "precioMercadoCentral": 556.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "MANDARINA AFOURER - AFOURER"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1590.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Mandarina Afourer X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 29.0,
-    "gapVsMercadoCentralPct": 5.2,
-    "cotoMarkupVsFresco": 171.8,
-    "cotoSavingsVsFresco": 1005.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "manzana_r_chica_gaucho",
@@ -327,27 +287,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 593.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "NARANJA SALUSTIANA JUGO - SALUSTIANA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1490.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Naranja Salustiana Jugo X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -40.5,
-    "gapVsMercadoCentralPct": -6.8,
-    "cotoMarkupVsFresco": 169.7,
-    "cotoSavingsVsFresco": 937.5
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "tomate_redondo",
@@ -382,27 +332,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Tomate Redondo ($5.800/kg)"
     },
-    "precioMercadoCentral": 1704.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "TOMATE REDONDO - REDONDO"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 4299.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Tomate Redondo X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 812.94,
-    "gapVsMercadoCentralPct": 47.7,
-    "cotoMarkupVsFresco": 70.8,
-    "cotoSavingsVsFresco": 1782.06
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "zanahoria_industrial",
@@ -432,27 +372,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 737.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "ZANAHORIA CHANTENAY - CHANTENAY"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1290.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Zanahoria Chantenay X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -61.72,
-    "gapVsMercadoCentralPct": -8.4,
-    "cotoMarkupVsFresco": 91.0,
-    "cotoSavingsVsFresco": 614.72
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "acelga",
@@ -477,27 +407,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 490.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "ACELGA - Criolla"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1890.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Acelga X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 62.5,
-    "gapVsMercadoCentralPct": 12.8,
-    "cotoMarkupVsFresco": 242.1,
-    "cotoSavingsVsFresco": 1337.5
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "ajo_mendocino",
@@ -767,27 +687,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1909.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "BATATA BEAUREGARD - BEAUREGARD"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1490.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Batata Beauregard X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -472.5,
-    "gapVsMercadoCentralPct": -24.8,
-    "cotoMarkupVsFresco": 3.7,
-    "cotoSavingsVsFresco": 53.5
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "berenjena",
@@ -847,27 +757,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1140.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "BATATA ARAPEY - ARAPEY"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1490.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Batata Arapey X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 149.17,
-    "gapVsMercadoCentralPct": 13.1,
-    "cotoMarkupVsFresco": 15.6,
-    "cotoSavingsVsFresco": 200.83
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "brócoli",
@@ -892,27 +792,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1583.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "BROCOLI - Primera"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 3483.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Brocoli X U"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 627.0,
-    "gapVsMercadoCentralPct": 39.6,
-    "cotoMarkupVsFresco": 57.6,
-    "cotoSavingsVsFresco": 1273.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "cebolla_roja",
@@ -942,27 +832,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Cebolla Colorada ($2.400/kg)"
     },
-    "precioMercadoCentral": 2350.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "CEBOLLA MORADA / COLORADA - COLORADA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 2490.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Cebolla Morada / Colorada X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -938.06,
-    "gapVsMercadoCentralPct": -39.9,
-    "cotoMarkupVsFresco": 76.4,
-    "cotoSavingsVsFresco": 1078.06
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "choclo",
@@ -1022,27 +902,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 800.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "COLIFLOR - Primera"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1760.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Coliflor X U"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 475.0,
-    "gapVsMercadoCentralPct": 59.4,
-    "cotoMarkupVsFresco": 38.0,
-    "cotoSavingsVsFresco": 485.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "espinaca",
@@ -1067,27 +937,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1030.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "ESPINACA - Fresca"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1990.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Espinaca X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -477.5,
-    "gapVsMercadoCentralPct": -46.4,
-    "cotoMarkupVsFresco": 260.2,
-    "cotoSavingsVsFresco": 1437.5
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "kale",
@@ -1147,27 +1007,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 3860.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "KIWI - Primera"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 8492.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Kiwi X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 2217.5,
-    "gapVsMercadoCentralPct": 57.4,
-    "cotoMarkupVsFresco": 39.7,
-    "cotoSavingsVsFresco": 2414.5
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "lechuga_capuchina",
@@ -1192,27 +1042,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 815.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "LECHUGA CAPUCHINA - CAPUCHINA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 3299.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Lechuga Capuchina X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 1868.57,
-    "gapVsMercadoCentralPct": 229.3,
-    "cotoMarkupVsFresco": 22.9,
-    "cotoSavingsVsFresco": 615.43
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "lechuga_criolla",
@@ -1237,27 +1077,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 864.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "LECHUGA CRIOLLA - CRIOLLA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 2590.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Lechuga Criolla X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 1125.0,
-    "gapVsMercadoCentralPct": 130.2,
-    "cotoMarkupVsFresco": 30.2,
-    "cotoSavingsVsFresco": 601.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "lechuga_francesa",
@@ -1282,27 +1112,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 875.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "LECHUGA FRANCESA - FRANCESA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 2999.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Lechuga Francesa X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 1114.0,
-    "gapVsMercadoCentralPct": 127.3,
-    "cotoMarkupVsFresco": 50.8,
-    "cotoSavingsVsFresco": 1010.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "lechuga_manteca",
@@ -1327,27 +1147,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1480.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "LECHUGA MANTECOSA - MANTECOSA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 5999.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Lechuga Mantecosa X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 509.0,
-    "gapVsMercadoCentralPct": 34.4,
-    "cotoMarkupVsFresco": 201.6,
-    "cotoSavingsVsFresco": 4010.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "lechuga_morada",
@@ -1407,27 +1217,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 634.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "LIMÓN EUREKA - EUREKA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1395.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Limón Eureka X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 164.06,
-    "gapVsMercadoCentralPct": 25.9,
-    "cotoMarkupVsFresco": 74.8,
-    "cotoSavingsVsFresco": 596.94
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "mandarina_elendale",
@@ -1452,27 +1252,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 667.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "MANDARINA DANCY - DANCY"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1590.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Mandarina Dancy X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -82.0,
-    "gapVsMercadoCentralPct": -12.3,
-    "cotoMarkupVsFresco": 171.8,
-    "cotoSavingsVsFresco": 1005.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "mango",
@@ -1607,27 +1397,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Manzana Verde Smith ($5.000/kg)"
     },
-    "precioMercadoCentral": 2521.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "MANZANA GRANNY SMITH - GRANNY SMITH"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 3290.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Manzana Granny Smith X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 241.5,
-    "gapVsMercadoCentralPct": 9.6,
-    "cotoMarkupVsFresco": 19.1,
-    "cotoSavingsVsFresco": 527.5
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "melón",
@@ -1692,27 +1472,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Naranja Ombligo 2kg x $3.000 ($1.500/kg)"
     },
-    "precioMercadoCentral": 833.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "NARANJA DE OMBLIGO NEWHALL - NEWHALL"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1490.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Naranja de Ombligo Newhall X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -219.11,
-    "gapVsMercadoCentralPct": -26.3,
-    "cotoMarkupVsFresco": 142.7,
-    "cotoSavingsVsFresco": 876.11
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "palta",
@@ -1737,27 +1507,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 5182.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "PALTA HASS - HASS"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 11400.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Palta Hass X U"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -4261.17,
-    "gapVsMercadoCentralPct": -82.2,
-    "cotoMarkupVsFresco": 1138.0,
-    "cotoSavingsVsFresco": 10479.17
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "papa_blanca",
@@ -1787,27 +1547,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Papa ($2.000/kg)"
     },
-    "precioMercadoCentral": 878.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "PAPA SPUNTA - SPUNTA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 2299.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Papa Spunta X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 349.78,
-    "gapVsMercadoCentralPct": 39.8,
-    "cotoMarkupVsFresco": 87.2,
-    "cotoSavingsVsFresco": 1071.22
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "papa_lavada_garlic",
@@ -1832,27 +1582,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1080.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "PAPA AGATA - AGATA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 2299.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Papa Agata X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 761.67,
-    "gapVsMercadoCentralPct": 70.5,
-    "cotoMarkupVsFresco": 24.8,
-    "cotoSavingsVsFresco": 457.33
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "papa_negra",
@@ -1912,27 +1652,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 722.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "PEPINO HOLANDÉS / ENSALADA - FRESCO"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 2190.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Pepino Holandés / Ensalada X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 604.0,
-    "gapVsMercadoCentralPct": 83.7,
-    "cotoMarkupVsFresco": 65.2,
-    "cotoSavingsVsFresco": 864.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "pera",
@@ -1957,27 +1687,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1056.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "PERA PACKHAM'S TRIUMPH - PACKHAM'S"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 2323.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Pera Packham's Triumph X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 569.0,
-    "gapVsMercadoCentralPct": 53.9,
-    "cotoMarkupVsFresco": 43.0,
-    "cotoSavingsVsFresco": 698.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "pomelo",
@@ -2002,27 +1722,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 861.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "POMELO STAR RUBY - STAR RUBY"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1890.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Pomelo Star Ruby X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -62.94,
-    "gapVsMercadoCentralPct": -7.3,
-    "cotoMarkupVsFresco": 136.8,
-    "cotoSavingsVsFresco": 1091.94
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "remolacha",
@@ -2047,27 +1757,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1500.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "REMOLACHA CON HOJAS - FRESCA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1590.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Remolacha con Hojas X ATADO"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 157.5,
-    "gapVsMercadoCentralPct": 10.5,
-    "cotoMarkupVsFresco": -4.1,
-    "cotoSavingsVsFresco": -67.5
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "repollo_blanco",
@@ -2162,27 +1862,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 2500.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "RÚCULA - FRESCA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 1200.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Rúcula X ATADO"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -2131.67,
-    "gapVsMercadoCentralPct": -85.3,
-    "cotoMarkupVsFresco": 225.8,
-    "cotoSavingsVsFresco": 831.67
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "tomate_cherry",
@@ -2207,27 +1897,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 3960.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "TOMATE CHERRY - CHERRY"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 3200.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Tomate Cherry X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 902.0,
-    "gapVsMercadoCentralPct": 22.8,
-    "cotoMarkupVsFresco": -34.2,
-    "cotoSavingsVsFresco": -1662.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "tomate_perita",
@@ -2257,27 +1937,17 @@
       "urlOArchivo": "Relevamiento Verduleria V. Lopez (Vicente Lopez)",
       "varianteExacta": "Tomate Perita ($5.500/kg)"
     },
-    "precioMercadoCentral": 1989.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "TOMATE PERITA - PERITA"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 5299.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Tomate Perita X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": -24.56,
-    "gapVsMercadoCentralPct": -1.2,
-    "cotoMarkupVsFresco": 169.7,
-    "cotoSavingsVsFresco": 3334.56
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "uva_blanca",
@@ -2372,27 +2042,17 @@
     "esVLopez": false,
     "precioVLopez": null,
     "metaVLopez": null,
-    "precioMercadoCentral": 1903.0,
-    "metaMercadoCentral": {
-      "fuente": "mercado_central",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "mercadocentral.gob.ar / boletin diario oficial",
-      "varianteExacta": "ZAPALLITO REDONDO - REDONDO"
-    },
-    "sinDatoMC": false,
-    "precioCoto": 2999.0,
-    "metaCoto": {
-      "fuente": "coto",
-      "fechaDato": "2026-08-24",
-      "urlOArchivo": "cotodigital.com.ar",
-      "varianteExacta": "Zapallito Redondo X KG"
-    },
-    "sinDatoCoto": false,
-    "sinDato": false,
-    "gapVsMercadoCentral": 567.0,
-    "gapVsMercadoCentralPct": 29.8,
-    "cotoMarkupVsFresco": 21.4,
-    "cotoSavingsVsFresco": 529.0
+    "precioMercadoCentral": null,
+    "metaMercadoCentral": null,
+    "sinDatoMC": true,
+    "precioCoto": null,
+    "metaCoto": null,
+    "sinDatoCoto": true,
+    "sinDato": true,
+    "gapVsMercadoCentral": null,
+    "gapVsMercadoCentralPct": null,
+    "cotoMarkupVsFresco": null,
+    "cotoSavingsVsFresco": null
   },
   {
     "id": "zucchini",
