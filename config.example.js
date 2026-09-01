@@ -6,3 +6,5 @@
 //
 // window.HUBADOR_SUPABASE_URL = 'https://xxxx.supabase.co';
 // window.HUBADOR_SUPABASE_ANON = 'sb_publishable_...';
+
+// window.HUBADOR_REPARTIDOR_URL = 'https://forms.gle/tu-formulario'; // o link de WhatsApp
