@@ -3017,17 +3017,18 @@ function MobileSignup() {
   const { login, showToast } = React.useContext(SelectionContext);
   const [step, setStep] = React.useState(1);
   const [busy, setBusy] = React.useState(false);
-  const [form, setForm] = React.useState({ nombre: '', email: '', pass: '', pass2: '', barrio: '', tel: '', acepto: false });
+  const [form, setForm] = React.useState({ nombre: '', email: '', pass: '', pass2: '', barrio: '', tel: '', rol: 'comprador', acepto: false });
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const finish = async () => {
     if (busy) return;
     setBusy(true);
     try {
+      const roleValue = form.rol === 'hubador' ? 'hubador' : 'user';
       if (sb) {
         const { data, error } = await sb.auth.signUp({
           email: form.email.trim(),
           password: form.pass,
-          options: { data: { nombre: form.nombre.trim(), barrio: form.barrio, tel: form.tel || '' } },
+          options: { data: { nombre: form.nombre.trim(), barrio: form.barrio, tel: form.tel || '', rol: roleValue } },
         });
         if (error) { showToast(formatAuthErrorEs(error), 5200); return; }
         const userId = data.user && data.user.id;
@@ -3037,11 +3038,12 @@ function MobileSignup() {
             nombre: form.nombre.trim(),
             barrio: form.barrio,
             tel: form.tel || null,
+            role: roleValue,
           });
         }
         if (data.session) {
           const u = await resolveUserFromSession(data.session);
-          login(u || { nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel });
+          login(u || { nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel, role: roleValue });
           showToast('Cuenta creada');
           navigate('home');
         } else {
@@ -3049,7 +3051,7 @@ function MobileSignup() {
           navigate('login');
         }
       } else {
-        login({ nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel });
+        login({ nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel, role: roleValue });
         showToast('Modo demo — configurá Supabase');
         navigate('home');
       }
@@ -3140,6 +3142,37 @@ function MobileSignup() {
                 <label style={lab}>Teléfono</label>
                 <input value={form.tel} onChange={(e) => upd('tel', e.target.value)} type="tel" placeholder="+54 9 11 ..." autoComplete="tel" style={inp} />
                 <div style={{ fontSize: 11.5, marginTop: 5, color: '#888' }}>Te avisamos cuando tu grupo se complete</div>
+              </div>
+
+              <div>
+                <label style={lab}>¿Qué querés hacer?</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    type="button"
+                    onClick={() => upd('rol', 'comprador')}
+                    style={{
+                      flex: 1, minHeight: 46, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: 9, padding: '8px 6px', fontFamily: 'inherit', cursor: 'pointer',
+                      border: form.rol === 'comprador' ? 'none' : '1.5px solid #e2e4e8',
+                      background: form.rol === 'comprador' ? primary : '#fff',
+                      color: form.rol === 'comprador' ? '#fff' : '#333',
+                    }}
+                  ><span style={{ fontSize: 13, fontWeight: 700 }}>Comprar en equipo</span></button>
+                  <button
+                    type="button"
+                    onClick={() => upd('rol', 'hubador')}
+                    style={{
+                      flex: 1, minHeight: 46, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
+                      borderRadius: 9, padding: '8px 6px', fontFamily: 'inherit', cursor: 'pointer',
+                      border: form.rol === 'hubador' ? 'none' : '1.5px solid #e2e4e8',
+                      background: form.rol === 'hubador' ? '#ea580c' : '#fff',
+                      color: form.rol === 'hubador' ? '#fff' : '#333',
+                    }}
+                  >
+                    <span style={{ fontSize: 13, fontWeight: 700 }}>Ser Hubador</span>
+                    <span style={{ fontSize: 10.5, fontWeight: 600, opacity: 0.85 }}>Repartir por comisión</span>
+                  </button>
+                </div>
               </div>
 
               <div style={{ background: 'oklch(0.97 0.02 165)', border: '1px solid oklch(0.88 0.06 165)', borderRadius: 12, padding: 14, marginTop: 6 }}>
@@ -5564,7 +5597,7 @@ function WebSignup() {
   const navigate = React.useContext(NavContext);
   const { login, showToast } = React.useContext(SelectionContext);
   const primary = 'oklch(0.55 0.15 165)';
-  const [form, setForm] = React.useState({ nombre: '', email: '', pass: '', pass2: '', barrio: '', tel: '', acepto: false });
+  const [form, setForm] = React.useState({ nombre: '', email: '', pass: '', pass2: '', barrio: '', tel: '', rol: 'comprador', acepto: false });
   const [busy, setBusy] = React.useState(false);
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const passOk = form.pass.length >= 6;
@@ -5575,11 +5608,12 @@ function WebSignup() {
     if (busy || !formOk) return;
     setBusy(true);
     try {
+      const roleValue = form.rol === 'hubador' ? 'hubador' : 'user';
       if (sb) {
         const { data, error } = await sb.auth.signUp({
           email: form.email.trim(),
           password: form.pass,
-          options: { data: { nombre: form.nombre.trim(), barrio: form.barrio, tel: form.tel || '' } },
+          options: { data: { nombre: form.nombre.trim(), barrio: form.barrio, tel: form.tel || '', rol: roleValue } },
         });
         if (error) { showToast(formatAuthErrorEs(error), 5200); return; }
         const userId = data.user && data.user.id;
@@ -5589,11 +5623,12 @@ function WebSignup() {
             nombre: form.nombre.trim(),
             barrio: form.barrio,
             tel: form.tel || null,
+            role: roleValue,
           });
         }
         if (data.session) {
           const u = await resolveUserFromSession(data.session);
-          login(u || { nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel });
+          login(u || { nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel, role: roleValue });
           showToast('Cuenta creada');
           navigate('home');
         } else {
@@ -5601,7 +5636,7 @@ function WebSignup() {
           navigate('login');
         }
       } else {
-        login({ nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel });
+        login({ nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel, role: roleValue });
         showToast('Modo demo — configurá Supabase');
         navigate('home');
       }
@@ -5639,6 +5674,36 @@ function WebSignup() {
           <input value={form.tel} onChange={(e) => upd('tel', e.target.value)} type="tel" placeholder="+54 9 11 ..." autoComplete="tel" />
           <span style={{ fontSize: 11.5, fontWeight: 500, color: '#888' }}>Te avisamos cuando tu grupo se complete</span>
         </label>
+        <div style={{ display: 'grid', gap: 6, fontSize: 13, fontWeight: 600, color: '#444' }}>
+          ¿Qué querés hacer?
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              type="button"
+              onClick={() => upd('rol', 'comprador')}
+              style={{
+                flex: 1, minHeight: 46, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 10, padding: '8px 6px', fontFamily: 'inherit', cursor: 'pointer',
+                border: form.rol === 'comprador' ? 'none' : '1px solid #dce0dc',
+                background: form.rol === 'comprador' ? primary : '#fff',
+                color: form.rol === 'comprador' ? '#fff' : '#333',
+              }}
+            ><span style={{ fontSize: 13, fontWeight: 700 }}>Comprar en equipo</span></button>
+            <button
+              type="button"
+              onClick={() => upd('rol', 'hubador')}
+              style={{
+                flex: 1, minHeight: 46, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
+                borderRadius: 10, padding: '8px 6px', fontFamily: 'inherit', cursor: 'pointer',
+                border: form.rol === 'hubador' ? 'none' : '1px solid #dce0dc',
+                background: form.rol === 'hubador' ? '#ea580c' : '#fff',
+                color: form.rol === 'hubador' ? '#fff' : '#333',
+              }}
+            >
+              <span style={{ fontSize: 13, fontWeight: 700 }}>Ser Hubador</span>
+              <span style={{ fontSize: 10.5, fontWeight: 600, opacity: 0.85 }}>Repartir por comisión</span>
+            </button>
+          </div>
+        </div>
         <div style={{ background: 'oklch(0.97 0.02 165)', border: '1px solid oklch(0.88 0.06 165)', borderRadius: 12, padding: 14 }}>
           <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>📍 ¿Por qué pedimos tu barrio?</div>
           <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5, fontWeight: 400 }}>HUBADOR funciona uniendo vecinos del mismo barrio en una compra grupal. Tu ubicación nunca se comparte con otros usuarios sin tu permiso.</div>

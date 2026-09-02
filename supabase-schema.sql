@@ -70,19 +70,21 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, nombre, barrio, tel)
+  insert into public.profiles (id, email, nombre, barrio, tel, role)
   values (
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data->>'nombre', split_part(coalesce(new.email, 'vecino'), '@', 1)),
     coalesce(new.raw_user_meta_data->>'barrio', ''),
-    nullif(coalesce(new.raw_user_meta_data->>'tel', ''), '')
+    nullif(coalesce(new.raw_user_meta_data->>'tel', ''), ''),
+    coalesce(nullif(new.raw_user_meta_data->>'rol', ''), 'user')
   )
   on conflict (id) do update set
     email = excluded.email,
     nombre = coalesce(nullif(excluded.nombre, ''), profiles.nombre),
     barrio = coalesce(nullif(excluded.barrio, ''), profiles.barrio),
     tel = coalesce(excluded.tel, profiles.tel),
+    role = coalesce(nullif(excluded.role, ''), profiles.role),
     updated_at = now();
   return new;
 end;
