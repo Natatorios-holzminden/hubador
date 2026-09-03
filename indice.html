@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Índice General de Comparadores y Margen CONLAT | HUBADOR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --card-hover: #1c2744;
+      --border: rgba(255, 255, 255, 0.08);
+      --ink: #f8fafc;
+      --muted: #94a3b8;
+      --conlat: #0d9488;
+      --conlat-bright: #14b8a6;
+      --fresco: #06b6d4;
+      --jorge: #f59e0b;
+      --quilmes: #3b82f6;
+      --coto: #ef4444;
+      --mc: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      padding-bottom: 4rem;
+    }
+
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    header.main-header {
+      background: rgba(19, 27, 46, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #0d9488, #0284c7);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+      max-width: 54rem;
+    }
+
+    .section-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin: 2.5rem 0 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      color: var(--ink);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.65rem;
+    }
+
+    .grid-tools {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 1.35rem;
+    }
+
+    .tool-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card:hover {
+      background: var(--card-hover);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .tool-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.85rem;
+    }
+
+    .tool-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+    }
+
+    .tool-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      text-transform: uppercase;
+    }
+
+    .tool-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .tool-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .formula-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.8rem;
+      font-family: monospace;
+      color: #38bdf8;
+      margin-bottom: 1.25rem;
+    }
+
+    .tool-actions {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: auto;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--conlat-bright);
+      color: #0b0f19;
+    }
+
+    .btn-primary:hover {
+      background: #2dd4bf;
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    footer {
+      margin-top: 3.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="header-top">
+        <h1 class="brand-title">
+          <i class="fa-solid fa-layer-group" style="color:var(--conlat-bright);"></i>
+          HUBADOR / CONLAT
+          <span class="brand-badge">Índice General</span>
+        </h1>
+        <a href="index.html" class="btn btn-outline" style="flex:none;"><i class="fa-solid fa-mobile-screen"></i> Abrir Portal Principal</a>
+      </div>
+      <p class="header-sub">
+        Acceso centralizado a todos los comparadores de margen sobre distribuidor, simuladores de escala para CONLAT y relevamientos en vivo de precios (FRESCO.BA, Mercado Central y Verdulería Jorge).
+      </p>
+    </header>
+
+    <!-- SECCIÓN 1: MARGEN Y REGLAS CONLAT EN BASE A DISTRIBUIDOR -->
+    <h2 class="section-title" style="color:var(--conlat-bright);">
+      <i class="fa-solid fa-calculator"></i> 1. Comparadores de Margen CONLAT sobre Distribuidor
+    </h2>
+
+    <div class="grid-tools">
+      <!-- 1. Regla Nueva -->
+      <div class="tool-card">
+        <div>
+          <div class="tool-header">
+            <div class="tool-icon" style="background:rgba(124, 58, 237, 0.2); color:#a78bfa;">
+              <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <span class="tool-tag" style="background:rgba(124, 58, 237, 0.2); color:#c4b5fd;">Regla Nueva</span>
+          </div>
+          <h3 class="tool-title">Regla Nueva de Precios & Escalas</h3>
+          <p class="tool-desc">
+            Calcula la comisión y margen de CONLAT a partir del precio de distribuidor (Quilmes/Fresco), sumando el +55% de Markup CONLAT y aplicando los descuentos por volumen grupal (1 nodo vs 3 nodos).
+          </p>
+          <div class="formula-box">
+            Fórmula: Precio Distribuidor + 55% Markup - Descuento Nodos vs Coto
+          </div>
+        </div>
+        <div class="tool-actions">
+          <a href="comparador-regla-nueva.html" class="btn btn-primary" target="_blank"><i class="fa-solid fa-up-right-from-square"></i> Abrir Simulación</a>
+        </div>
+      </div>
+
+      <!-- 2. Comparador Unificado Actualizado -->
+      <div class="tool-card">
+        <div>
+          <div class="tool-header">
+            <div class="tool-icon" style="background:rgba(13, 148, 136, 0.2); color:#2dd4bf;">
+              <i class="fa-solid fa-table-columns"></i>
+            </div>
+            <span class="tool-tag" style="background:rgba(13, 148, 136, 0.2); color:#5eead4;">Actualizado 29/07</span>
+          </div>
+          <h3 class="tool-title">Comparador Unificado (Quilmes → CONLAT → Coto)</h3>
+          <p class="tool-desc">
+            Tabla 3 vías con la comparativa del precio de compra mayorista (Quilmes), el precio final al vecino (CONLAT) y la brecha directa vs Coto Góndola.
+          </p>
+          <div class="formula-box">
+            Comparativa: Compra Quilmes → Precio Vecino CONLAT → Coto Góndola
+          </div>
+        </div>
+        <div class="tool-actions">
+          <a href="comparador-unificado.html" class="btn btn-primary" target="_blank"><i class="fa-solid fa-up-right-from-square"></i> Abrir Comparador</a>
+        </div>
+      </div>
+
+      <!-- 3. Comparador Unificado Archivo -->
+      <div class="tool-card">
+        <div>
+          <div class="tool-header">
+            <div class="tool-icon" style="background:rgba(148, 163, 184, 0.15); color:#cbd5e1;">
+              <i class="fa-solid fa-box-archive"></i>
+            </div>
+            <span class="tool-tag" style="background:rgba(148, 163, 184, 0.15); color:#cbd5e1;">Archivo Histórico</span>
+          </div>
+          <h3 class="tool-title">Comparador Histórico (Archivo completo)</h3>
+          <p class="tool-desc">
+            Registro histórico de precios base de origen, variaciones de margen y comparativa completa archivada para auditorías de precios.
+          </p>
+          <div class="formula-box">
+            Base Histórica: Registros archivados de precios y márgenes
+          </div>
+        </div>
+        <div class="tool-actions">
+          <a href="comparador-unificado-archivo.html" class="btn btn-outline" target="_blank"><i class="fa-solid fa-folder-open"></i> Abrir Archivo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: MÓDULOS DE DISTRIBUIDOR Y RELEVAMIENTOS DE MERCADO -->
+    <h2 class="section-title" style="color:#06b6d4;">
+      <i class="fa-solid fa-truck-field"></i> 2. Módulos de Distribuidor & Relevamientos Reales
+    </h2>
+
+    <div class="grid-tools">
+      <!-- 4. FRESCO.BA -->
+      <div class="tool-card">
+        <div>
+          <div class="tool-header">
+            <div class="tool-icon" style="background:rgba(6, 182, 212, 0.2); color:#22d3ee;">
+              <i class="fa-solid fa-leaf"></i>
+            </div>
+            <span class="tool-tag" style="background:rgba(6, 182, 212, 0.2); color:#67e8f9;">Bulto + IVA 10.5%</span>
+          </div>
+          <h3 class="tool-title">FRESCO.BA (+10.5% IVA Real)</h3>
+          <p class="tool-desc">
+            Comparador 3 Vías del listado oficial de FRESCO.BA (bulto cerrado + 10.5% IVA desglosado a $/kg) vs Mercado Central y Coto. <strong>Cero multiplicadores ficticios (23 datos "Sin dato" respetados estrictamente).</strong>
+          </p>
+          <div class="formula-box">
+            Bulto Sin IVA * 1.105 / Unidades → $/kg FRESCO.BA vs Central vs Coto
+          </div>
+        </div>
+        <div class="tool-actions">
+          <a href="fresco/" class="btn btn-primary" style="background:#06b6d4; color:#fff;" target="_blank"><i class="fa-solid fa-arrow-right-to-bracket"></i> Abrir FRESCO.BA</a>
+        </div>
+      </div>
+
+      <!-- 5. Verdulería Jorge -->
+      <div class="tool-card">
+        <div>
+          <div class="tool-header">
+            <div class="tool-icon" style="background:rgba(245, 158, 11, 0.2); color:#fbbf24;">
+              <i class="fa-solid fa-shop"></i>
+            </div>
+            <span class="tool-tag" style="background:rgba(245, 158, 11, 0.2); color:#fde047;">Verdulería Barrio</span>
+          </div>
+          <h3 class="tool-title">Verdulería Jorge (3 Barras)</h3>
+          <p class="tool-desc">
+            Relevamiento en vivo de precios minoristas de la Verdulería Jorge de barrio vs los precios del Mercado Central y Coto Góndola.
+          </p>
+          <div class="formula-box">
+            Relevamiento: Verdulería Jorge vs Mercado Central vs Coto
+          </div>
+        </div>
+        <div class="tool-actions">
+          <a href="jorge/" class="btn btn-primary" style="background:#f59e0b; color:#000;" target="_blank"><i class="fa-solid fa-arrow-right-to-bracket"></i> Abrir Jorge</a>
+        </div>
+      </div>
+
+      <!-- 6. Mercado Central -->
+      <div class="tool-card">
+        <div>
+          <div class="tool-header">
+            <div class="tool-icon" style="background:rgba(16, 185, 129, 0.2); color:#34d399;">
+              <i class="fa-solid fa-building-columns"></i>
+            </div>
+            <span class="tool-tag" style="background:rgba(16, 185, 129, 0.2); color:#6ee7b7;">Mayorista Oficial</span>
+          </div>
+          <h3 class="tool-title">Mercado Central vs Coto</h3>
+          <p class="tool-desc">
+            Monitor directo de sobreprecio del Mercado Central de Buenos Aires (boletín oficial diario) comparado contra la góndola digital de Coto.
+          </p>
+          <div class="formula-box">
+            Origen: Boletín Mayorista MCBA vs Coto Góndola
+          </div>
+        </div>
+        <div class="tool-actions">
+          <a href="central/" class="btn btn-primary" style="background:#10b981; color:#fff;" target="_blank"><i class="fa-solid fa-arrow-right-to-bracket"></i> Abrir Mercado Central</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: PORTAL Y APLICACIÓN PRINCIPAL -->
+    <h2 class="section-title" style="color:#a855f7;">
+      <i class="fa-solid fa-mobile-button"></i> 3. Aplicación y Prototipos Operativos
+    </h2>
+
+    <div class="grid-tools">
+      <!-- 7. Portal HUBADOR -->
+      <div class="tool-card">
+        <div>
+          <div class="tool-header">
+            <div class="tool-icon" style="background:rgba(168, 85, 247, 0.2); color:#c084fc;">
+              <i class="fa-solid fa-cubes"></i>
+            </div>
+            <span class="tool-tag" style="background:rgba(168, 85, 247, 0.2); color:#d8b4fe;">App Principal</span>
+          </div>
+          <h3 class="tool-title">Portal Principal HUBADOR (App Web)</h3>
+          <p class="tool-desc">
+            Plataforma interactiva con mapa de nodos de compras grupales por barrio, catálogo de productos y panel de administración.
+          </p>
+        </div>
+        <div class="tool-actions">
+          <a href="index.html" class="btn btn-primary" style="background:#a855f7; color:#fff;"><i class="fa-solid fa-play"></i> Abrir Portal</a>
+        </div>
+      </div>
+
+      <!-- 8. Mobile Preview -->
+      <div class="tool-card">
+        <div>
+          <div class="tool-header">
+            <div class="tool-icon" style="background:rgba(59, 130, 246, 0.2); color:#60a5fa;">
+              <i class="fa-solid fa-mobile"></i>
+            </div>
+            <span class="tool-tag" style="background:rgba(59, 130, 246, 0.2); color:#93c5fd;">Mobile UX</span>
+          </div>
+          <h3 class="tool-title">Conlat Mobile Preview</h3>
+          <p class="tool-desc">
+            Vista previa del prototipo de aplicación móvil optimizada para experiencia del vecino en celular.
+          </p>
+        </div>
+        <div class="tool-actions">
+          <a href="Conlat Mobile Preview.html" class="btn btn-outline" target="_blank"><i class="fa-solid fa-eye"></i> Ver Prototipo Mobile</a>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Plataforma Unificada HUBADOR / CONLAT • 2026 • Todos los datos verificados y trazables sin estimaciones fijas.
+    </footer>
+  </div>
+
+</body>
+</html>

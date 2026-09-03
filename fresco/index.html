@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparador 3 Barras: FRESCO.BA (+10.5% IVA) vs Mercado Central vs Coto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="fresco.css">
+</head>
+<body>
+
+  <!-- Top Ticker -->
+  <div class="top-ticker">
+    <div class="container ticker-content">
+      <span class="ticker-badge">🟢 FRESCO.BA + IVA 10.5% REAL</span>
+      <span id="tickerText">Comparativa trilateral con los precios reales del 24/08/2026 (+10.5% IVA) vs Mercado Central y Coto Digital.</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="main-header">
+    <div class="container header-container">
+      <div class="brand-area">
+        <div class="brand-logo">
+          <i class="fa-solid fa-leaf" style="color:#10b981;"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">FRESCO.BA <span style="background:#3b82f6; color:#fff; padding:0.15rem 0.5rem; border-radius:6px; font-size:0.75rem; font-weight:800;">+ IVA 10.5% REAL</span></h1>
+          <p class="brand-subtitle">Caballito, CABA • Envíos • Comparativa de 3 Vías con Precios Matemáticos Reales</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="../" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Volver al Monitor Principal</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- KPI Summary Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16, 185, 129, 0.15); color:#10b981;">
+          <i class="fa-solid fa-building-columns"></i>
+        </div>
+        <div>
+          <span style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Mercado Central (Mayorista)</span>
+          <div class="kpi-val text-success" id="kpiAvgMc">$ 0 / kg</div>
+          <span style="font-size:0.78rem; color:var(--text-muted);">Origen oficial</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(6, 182, 212, 0.15); color:#06b6d4;">
+          <i class="fa-solid fa-store"></i>
+        </div>
+        <div>
+          <span style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">FRESCO.BA (con IVA 10.5%)</span>
+          <div class="kpi-val" style="color:#06b6d4;" id="kpiAvgFresco">$ 0 / kg</div>
+          <span style="font-size:0.78rem; color:var(--text-muted);">Bulto original + IVA / Unidad</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(239, 68, 68, 0.15); color:#ef4444;">
+          <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <div>
+          <span style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Coto Góndola (Retail)</span>
+          <div class="kpi-val text-danger" id="kpiAvgCoto">$ 0 / kg</div>
+          <span style="font-size:0.78rem; color:var(--text-muted);">Supermercado minorista</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(59, 130, 246, 0.15); color:#3b82f6;">
+          <i class="fa-solid fa-piggy-bank"></i>
+        </div>
+        <div>
+          <span style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Ahorro vs Coto</span>
+          <div class="kpi-val" style="color:#60a5fa;" id="kpiAvgSavings">0%</div>
+          <span style="font-size:0.78rem; color:var(--text-muted);">Comprando en FRESCO.BA</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <section class="tabs-navigation">
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="barsView"><i class="fa-solid fa-chart-column"></i> 📊 Gráficos de 3 Barras</button>
+        <button class="tab-btn" data-tab="tableView"><i class="fa-solid fa-table"></i> 📋 Tabla Comparativa 3 Vías</button>
+      </div>
+    </section>
+
+    <!-- Filter Toolbar -->
+    <section class="controls-card glass-card mb-4" style="padding:1rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <div class="search-box" style="flex:1; min-width:280px;">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="searchInput" placeholder="Buscar en FRESCO.BA (ej: Papa, Lechuga, Naranja, Tomate)...">
+        </div>
+        <div class="category-pills">
+          <button class="pill active" data-category="todos">Todos (57)</button>
+          <button class="pill" data-category="quilmes" style="border: 1px solid rgba(249, 115, 22, 0.5); color: #fb923c;"><i class="fa-solid fa-fire"></i> Ofertas Quilmes (9)</button>
+          <button class="pill" data-category="vlopez" style="border: 1px solid rgba(192, 132, 252, 0.5); color: #c084fc;"><i class="fa-solid fa-shop"></i> V. López (10)</button>
+          <button class="pill" data-category="verduras">Verduras</button>
+          <button class="pill" data-category="frutas">Frutas</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--text-muted);">
+          <i class="fa-solid fa-arrow-down-short-wide"></i> <span>Ordenar:</span>
+          <select id="sortSelect" style="background:rgba(15,23,42,0.9); border:1px solid var(--border-card); color:var(--text-main); padding:0.45rem 0.8rem; border-radius:8px; outline:none; font-size:0.85rem;">
+            <option value="fresco-asc">FRESCO.BA más barato primero</option>
+            <option value="savings-desc">Mayor ahorro vs Coto</option>
+            <option value="name-asc">Nombre (A-Z)</option>
+            <option value="coto-desc">Coto más caro primero</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: 3-BAR COMPARATIVE GRID -->
+    <section class="tab-content active" id="barsView">
+      <div class="bars-grid" id="barsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- TAB 2: TABLE VIEW -->
+    <section class="tab-content" id="tableView" style="display:none;">
+      <div class="table-container glass-card">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Producto & Bulto</th>
+              <th>Bulto Sin IVA</th>
+              <th>Bulto + IVA (10.5%)</th>
+              <th>FRESCO.BA <small>(Final/unidad)</small></th>
+              <th>Mercado Central <small>(Mayorista)</small></th>
+              <th>Coto Góndola <small>(Retail)</small></th>
+              <th>Sobrecosto Coto vs Fresco</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="data.js?v=2"></script>
+  <script src="app.js?v=2"></script>
+</body>
+</html>

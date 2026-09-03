@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -746,6 +746,10 @@ html.app-mode .web-root { min-height: 100vh; }
   background: #fff; color: #14201c; border: 1px solid #d7ddd8; border-radius: 999px;
   padding: 10px 16px; font-weight: 650; font-size: 13.5px; font-family: inherit; cursor: pointer;
 }
+.web-btn-repartir {
+  background: #ea580c; color: #fff; border: none; border-radius: 999px;
+  padding: 11px 18px; font-weight: 700; font-size: 14px; font-family: inherit; cursor: pointer;
+}
 .web-hero {
   width: 100%;
   background:
@@ -767,12 +771,12 @@ html.app-mode .web-root { min-height: 100vh; }
   padding: 5px 11px; font-size: 12px; font-weight: 700; margin: 0;
 }
 .web-hero-copy {
-  display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 220px;
+  display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 296px;
 }
 .web-hero-panel {
   flex: 1; display: grid; grid-template-columns: minmax(120px, .85fr) minmax(200px, 1.25fr);
   align-items: stretch; gap: 0; padding: 0; overflow: hidden;
-  border-radius: 16px; min-height: 0; max-height: 210px; height: 210px;
+  border-radius: 16px; min-height: 0; max-height: 296px; height: 296px;
   background:
     linear-gradient(165deg, rgba(255,255,255,.92) 0%, rgba(236,253,245,.78) 55%, rgba(255,255,255,.88) 100%);
   border: 1px solid rgba(167, 198, 182, .55);
@@ -783,7 +787,7 @@ html.app-mode .web-root { min-height: 100vh; }
   -webkit-backdrop-filter: blur(8px);
 }
 .web-hero-panel-media {
-  position: relative; min-height: 0; height: 100%; max-height: 210px; background: #1a2e24;
+  position: relative; min-height: 0; height: 100%; max-height: 296px; background: #1a2e24;
 }
 .web-hero-panel-media img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -808,7 +812,7 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-hero-art { min-width: 0; }
 .web-hero-offer {
   position: relative; border-radius: 16px; overflow: hidden;
-  border: 1px solid #d7e5dc; min-height: 0; height: 210px; max-height: 210px;
+  border: 1px solid #d7e5dc; min-height: 0; height: 296px; max-height: 296px;
   background: #c5d5cc;
   box-shadow: 0 16px 36px rgba(20,32,28,.12);
 }
@@ -1582,6 +1586,10 @@ const SUPABASE_ANON = (typeof localStorage !== 'undefined' && localStorage.getIt
   || (typeof window !== 'undefined' && window.HUBADOR_SUPABASE_ANON)
   || 'sb_publishable_x6SHXYAsVf34EsknTs7rcQ_CoIc-5Mm';
 
+// Bifurcación hero — destino del botón "Quiero ganar repartiendo" (Google Form / WhatsApp; configurable en config.js)
+const HUBADOR_REPARTIDOR_URL = (typeof window !== 'undefined' && window.HUBADOR_REPARTIDOR_URL)
+  || 'https://forms.gle/PEGAR_TU_FORM_AQUI';
+
 function isSupabaseConfigured() {
   const u = String(SUPABASE_URL || '').trim();
   const k = String(SUPABASE_ANON || '').trim();
@@ -2222,30 +2230,29 @@ function MobileHome() {
             }}>
               Precios mayoristas, sin intermediarios y con retiro cerca tuyo.
             </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 2 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 2 }}>
               <button
                 type="button"
-                onClick={scrollToOfertas}
+                onClick={() => user ? scrollToOfertas() : navigate('signup')}
                 style={{
                   background: primary, color: '#fff', border: 'none', borderRadius: 999,
-                  padding: '11px 18px', minHeight: 42, fontWeight: 700, fontSize: 14,
+                  padding: '13px 18px', minHeight: 48, width: '100%', fontWeight: 800, fontSize: 14.5,
                   fontFamily: 'inherit', cursor: 'pointer',
                   boxShadow: '0 4px 14px rgba(13,148,136,0.35)',
                   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
                 }}
-              >Ver ofertas</button>
-              {!user && (
-                <button
-                  type="button"
-                  onClick={() => navigate('signup')}
-                  style={{
-                    background: 'transparent', color: '#fff', border: '1.5px solid rgba(255,255,255,0.92)',
-                    borderRadius: 999, padding: '11px 18px', minHeight: 42, fontWeight: 700, fontSize: 14,
-                    fontFamily: 'inherit', cursor: 'pointer',
-                    touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
-                  }}
-                >Crear cuenta</button>
-              )}
+              >Quiero comprar más barato</button>
+              <button
+                type="button"
+                onClick={() => window.open(HUBADOR_REPARTIDOR_URL, '_blank', 'noopener,noreferrer')}
+                style={{
+                  background: '#ea580c', color: '#fff', border: 'none', borderRadius: 999,
+                  padding: '13px 18px', minHeight: 48, width: '100%', fontWeight: 800, fontSize: 14.5,
+                  fontFamily: 'inherit', cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(234,88,12,0.35)',
+                  touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+                }}
+              >Quiero ganar repartiendo</button>
             </div>
           </div>
         </div>
@@ -3057,7 +3064,7 @@ function MobileSignup() {
   const passOk = form.pass.length >= 6;
   const passMatch = form.pass && form.pass === form.pass2;
   const step1Ok = form.nombre.trim() && /\S+@\S+\.\S+/.test(form.email) && passOk && passMatch;
-  const step2Ok = form.barrio && form.acepto;
+  const step2Ok = form.barrio && form.tel.trim() && form.acepto;
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', display: 'flex', flexDirection: 'column', WebkitFontSmoothing: 'antialiased' }}>
       <header style={{ flexShrink: 0, background: '#fff', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 52, display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -3130,8 +3137,8 @@ function MobileSignup() {
                 </select>
               </div>
               <div>
-                <label style={lab}>Teléfono <span style={{ color: '#aaa', fontWeight: 400 }}>(opcional)</span></label>
-                <input value={form.tel} onChange={(e) => upd('tel', e.target.value)} type="tel" placeholder="+54 9 11 ..." style={inp} />
+                <label style={lab}>Teléfono</label>
+                <input value={form.tel} onChange={(e) => upd('tel', e.target.value)} type="tel" placeholder="+54 9 11 ..." autoComplete="tel" style={inp} />
                 <div style={{ fontSize: 11.5, marginTop: 5, color: '#888' }}>Te avisamos cuando tu grupo se complete</div>
               </div>
 
@@ -4834,9 +4841,13 @@ function MobilePerfil() {
       </header>
       <div style={{ padding: 16 }}>
         {!user ? (
-          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 28, textAlign: 'center' }}>
-            <div style={{ fontSize: 14, color: '#555', marginBottom: 14 }}>No hay sesión activa.</div>
-            <button type="button" onClick={() => navigate('login')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '10px 22px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ingresar</button>
+          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: 24, textAlign: 'center' }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#111', marginBottom: 6 }}>Todavía no iniciaste sesión</div>
+            <div style={{ fontSize: 12.5, color: '#666', marginBottom: 16, lineHeight: 1.4 }}>Ingresá o creá tu cuenta para ver tus pedidos y grupos.</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button type="button" onClick={() => navigate('login')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '11px 22px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>Ingresar</button>
+              <button type="button" onClick={() => navigate('signup')} style={{ background: 'transparent', color: primary, border: '1.5px solid ' + primary, borderRadius: 9, padding: '11px 22px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}>Crear cuenta</button>
+            </div>
           </div>
         ) : (
           <>
@@ -4928,7 +4939,11 @@ function MobileComparador() {
             <div style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Coto · Mayoristas · HUBADOR</div>
           </div>
         </div>
-        <button onClick={openFull} style={{ flexShrink: 0, background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>Tabla →</button>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <button onClick={() => window.open('fresco/', '_blank')} style={{ background: '#06b6d4', color: '#fff', border: 'none', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>🟢 FRESCO.BA</button>
+          <button onClick={() => window.open('jorge/', '_blank')} style={{ background: '#f59e0b', color: '#000', border: 'none', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>🟡 Jorge</button>
+          <button onClick={openFull} style={{ flexShrink: 0, background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '7px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer' }}>Tabla →</button>
+        </div>
       </header>
 
       <div style={{ flexShrink: 0, padding: '10px 14px', background: '#fff', borderBottom: '1px solid #e8eaec' }}>
@@ -5275,8 +5290,8 @@ function WebHome() {
                   <p>Oferta grupal · precio de productor · retiro en el hub.</p>
                 </div>
                 <div className="web-hero-cta">
-                  <button className="web-btn" onClick={() => document.getElementById('web-ofertas')?.scrollIntoView({ behavior: 'smooth' })}>Ver ofertas →</button>
-                  <button className="web-btn-ghost" onClick={() => navigate('signup')}>Crear cuenta</button>
+                  <button className="web-btn" onClick={() => user ? document.getElementById('web-ofertas')?.scrollIntoView({ behavior: 'smooth' }) : navigate('signup')}>Quiero comprar más barato</button>
+                  <button className="web-btn-repartir" onClick={() => window.open(HUBADOR_REPARTIDOR_URL, '_blank', 'noopener,noreferrer')}>Quiero ganar repartiendo</button>
                 </div>
                 <div className="web-stats">
                   <div className="web-stat"><strong>50%</strong><span>vs Coto</span></div>
@@ -5554,7 +5569,7 @@ function WebSignup() {
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const passOk = form.pass.length >= 6;
   const passMatch = form.pass && form.pass === form.pass2;
-  const formOk = form.nombre.trim() && /\S+@\S+\.\S+/.test(form.email) && passOk && passMatch && form.barrio && form.acepto;
+  const formOk = form.nombre.trim() && /\S+@\S+\.\S+/.test(form.email) && passOk && passMatch && form.barrio && form.tel.trim() && form.acepto;
   const submit = async (e) => {
     e.preventDefault();
     if (busy || !formOk) return;
@@ -5620,7 +5635,7 @@ function WebSignup() {
             <option>Núñez</option><option>Colegiales</option><option>Chacarita</option>
           </select>
         </label>
-        <label>Teléfono <span style={{ color: '#aaa', fontWeight: 400 }}>(opcional)</span>
+        <label>Teléfono
           <input value={form.tel} onChange={(e) => upd('tel', e.target.value)} type="tel" placeholder="+54 9 11 ..." autoComplete="tel" />
           <span style={{ fontSize: 11.5, fontWeight: 500, color: '#888' }}>Te avisamos cuando tu grupo se complete</span>
         </label>
