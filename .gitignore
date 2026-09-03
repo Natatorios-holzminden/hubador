@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.turbo/
+
+# Env & secrets — NUNCA commitear
+.env
+.env.*
+!.env.example
+**/telegram-config.json
+services/*/config.json
+
+# OS / editor
+.DS_Store
+*.log

@@ -1,0 +1,29 @@
+# Postgres local para desarrollo. En producción se usa un Postgres gestionado
+# (Neon / Railway / RDS) — la migración de datos de Supabase se hace en ese momento.
+#
+#   docker compose up -d db      # levantar
+#   docker compose down          # parar (conserva los datos)
+#   docker compose down -v       # parar y BORRAR los datos
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hubador-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hubador
+      POSTGRES_PASSWORD: hubador
+      POSTGRES_DB: hubador
+    ports:
+      - "5432:5432"
+    volumes:
+      - hubador_pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hubador -d hubador"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  hubador_pgdata:
