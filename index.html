@@ -746,10 +746,6 @@ html.app-mode .web-root { min-height: 100vh; }
   background: #fff; color: #14201c; border: 1px solid #d7ddd8; border-radius: 999px;
   padding: 10px 16px; font-weight: 650; font-size: 13.5px; font-family: inherit; cursor: pointer;
 }
-.web-btn-repartir {
-  background: #ea580c; color: #fff; border: none; border-radius: 999px;
-  padding: 11px 18px; font-weight: 700; font-size: 14px; font-family: inherit; cursor: pointer;
-}
 .web-hero {
   width: 100%;
   background:
@@ -771,12 +767,12 @@ html.app-mode .web-root { min-height: 100vh; }
   padding: 5px 11px; font-size: 12px; font-weight: 700; margin: 0;
 }
 .web-hero-copy {
-  display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 296px;
+  display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 210px;
 }
 .web-hero-panel {
   flex: 1; display: grid; grid-template-columns: minmax(120px, .85fr) minmax(200px, 1.25fr);
   align-items: stretch; gap: 0; padding: 0; overflow: hidden;
-  border-radius: 16px; min-height: 0; max-height: 296px; height: 296px;
+  border-radius: 16px; min-height: 0; max-height: 210px; height: 210px;
   background:
     linear-gradient(165deg, rgba(255,255,255,.92) 0%, rgba(236,253,245,.78) 55%, rgba(255,255,255,.88) 100%);
   border: 1px solid rgba(167, 198, 182, .55);
@@ -787,7 +783,7 @@ html.app-mode .web-root { min-height: 100vh; }
   -webkit-backdrop-filter: blur(8px);
 }
 .web-hero-panel-media {
-  position: relative; min-height: 0; height: 100%; max-height: 296px; background: #1a2e24;
+  position: relative; min-height: 0; height: 100%; max-height: 210px; background: #1a2e24;
 }
 .web-hero-panel-media img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -812,7 +808,7 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-hero-art { min-width: 0; }
 .web-hero-offer {
   position: relative; border-radius: 16px; overflow: hidden;
-  border: 1px solid #d7e5dc; min-height: 0; height: 296px; max-height: 296px;
+  border: 1px solid #d7e5dc; min-height: 0; height: 210px; max-height: 210px;
   background: #c5d5cc;
   box-shadow: 0 16px 36px rgba(20,32,28,.12);
 }
@@ -1586,9 +1582,15 @@ const SUPABASE_ANON = (typeof localStorage !== 'undefined' && localStorage.getIt
   || (typeof window !== 'undefined' && window.HUBADOR_SUPABASE_ANON)
   || 'sb_publishable_x6SHXYAsVf34EsknTs7rcQ_CoIc-5Mm';
 
-// Bifurcación hero — destino del botón "Quiero ganar repartiendo" (Google Form / WhatsApp; configurable en config.js)
-const HUBADOR_REPARTIDOR_URL = (typeof window !== 'undefined' && window.HUBADOR_REPARTIDOR_URL)
-  || 'https://forms.gle/PEGAR_TU_FORM_AQUI';
+// Test de demanda — CTA único del hero y de las tarjetas de oferta: WhatsApp.
+// Cambiá el número acá (sin +, sin 0 ni 15; se arma el formato wa.me con 549 + este número).
+const WHATSAPP = '1157314429';
+function buildWhatsAppLink(message) {
+  return 'https://wa.me/549' + WHATSAPP + '?text=' + encodeURIComponent(message);
+}
+function buildOfertaWhatsAppLink(p) {
+  return buildWhatsAppLink(`Hola! Quiero sumarme a la compra de ${p.name} a ${p.price}${p.unit} que vi en HUBADOR.`);
+}
 
 function isSupabaseConfigured() {
   const u = String(SUPABASE_URL || '').trim();
@@ -2153,10 +2155,6 @@ function MobileHome() {
     });
     navigate('grupo-detalle');
   };
-  const scrollToOfertas = () => {
-    const el = document.getElementById('mobile-mejores-precios');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', fontSize: 14, WebkitFontSmoothing: 'antialiased' }}>
       {/* Header — fijo dentro del flex, nunca se mueve */}
@@ -2185,7 +2183,7 @@ function MobileHome() {
       <div style={{ padding: '10px 12px 6px' }}>
         <div style={{
           position: 'relative', borderRadius: 20, overflow: 'hidden',
-          minHeight: 248, maxHeight: 280, background: '#1a1f1c',
+          minHeight: 224, maxHeight: 252, background: '#1a1f1c',
           boxShadow: '0 8px 28px rgba(15, 23, 20, 0.14)',
         }}>
           <img
@@ -2198,7 +2196,7 @@ function MobileHome() {
             background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.15) 100%)',
           }} />
           <div style={{
-            position: 'relative', zIndex: 1, height: '100%', minHeight: 248,
+            position: 'relative', zIndex: 1, height: '100%', minHeight: 224,
             display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
             padding: '16px 16px 18px', gap: 10,
           }}>
@@ -2230,29 +2228,20 @@ function MobileHome() {
             }}>
               Precios mayoristas, sin intermediarios y con retiro cerca tuyo.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 2 }}>
-              <button
-                type="button"
-                onClick={() => user ? scrollToOfertas() : navigate('signup')}
+            <div style={{ marginTop: 2 }}>
+              <a
+                href={buildWhatsAppLink('Hola! Vi HUBADOR y quiero comprar verdura más barata ¿Cómo me sumo?')}
+                target="_blank"
+                rel="noopener"
                 style={{
                   background: primary, color: '#fff', border: 'none', borderRadius: 999,
                   padding: '13px 18px', minHeight: 48, width: '100%', fontWeight: 800, fontSize: 14.5,
-                  fontFamily: 'inherit', cursor: 'pointer',
+                  fontFamily: 'inherit', cursor: 'pointer', textDecoration: 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box',
                   boxShadow: '0 4px 14px rgba(13,148,136,0.35)',
                   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
                 }}
-              >Quiero comprar más barato</button>
-              <button
-                type="button"
-                onClick={() => window.open(HUBADOR_REPARTIDOR_URL, '_blank', 'noopener,noreferrer')}
-                style={{
-                  background: '#ea580c', color: '#fff', border: 'none', borderRadius: 999,
-                  padding: '13px 18px', minHeight: 48, width: '100%', fontWeight: 800, fontSize: 14.5,
-                  fontFamily: 'inherit', cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(234,88,12,0.35)',
-                  touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
-                }}
-              >Quiero ganar repartiendo</button>
+              >Quiero comprar más barato</a>
             </div>
           </div>
         </div>
@@ -2286,7 +2275,13 @@ function MobileHome() {
                 <div style={{ height: 4, background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${groupProgressView(p.name).pct}%`, background: groupProgressView(p.name).pct >= 85 ? 'oklch(0.62 0.18 35)' : primary, borderRadius: 999 }} />
                 </div>
-                <button type="button" onClick={(e) => {e.preventDefault(); e.stopPropagation(); openProduct(p);}} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '9px', minHeight: 40, fontWeight: 600, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', marginTop: 2, touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 2 }}>Unirme al grupo</button>
+                <a
+                  href={buildOfertaWhatsAppLink(p)}
+                  target="_blank"
+                  rel="noopener"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '9px', minHeight: 40, fontWeight: 600, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', marginTop: 2, touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 2, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxSizing: 'border-box' }}
+                >Quiero esta oferta</a>
               </div>
             </div>
             )}
@@ -5323,8 +5318,13 @@ function WebHome() {
                   <p>Oferta grupal · precio de productor · retiro en el hub.</p>
                 </div>
                 <div className="web-hero-cta">
-                  <button className="web-btn" onClick={() => user ? document.getElementById('web-ofertas')?.scrollIntoView({ behavior: 'smooth' }) : navigate('signup')}>Quiero comprar más barato</button>
-                  <button className="web-btn-repartir" onClick={() => window.open(HUBADOR_REPARTIDOR_URL, '_blank', 'noopener,noreferrer')}>Quiero ganar repartiendo</button>
+                  <a
+                    className="web-btn"
+                    href={buildWhatsAppLink('Hola! Vi HUBADOR y quiero comprar verdura más barata ¿Cómo me sumo?')}
+                    target="_blank"
+                    rel="noopener"
+                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                  >Quiero comprar más barato</a>
                 </div>
                 <div className="web-stats">
                   <div className="web-stat"><strong>50%</strong><span>vs Coto</span></div>
@@ -5411,12 +5411,14 @@ function WebHome() {
                       </span>
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
-                    <button
-                      type="button"
+                    <a
+                      href={buildOfertaWhatsAppLink(p)}
+                      target="_blank"
+                      rel="noopener"
                       className="web-join-card"
-                      onClick={(e) => { e.stopPropagation(); openProduct(p); }}
-                      style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
-                    >Unirme al grupo</button>
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
+                    >Quiero esta oferta</a>
                   </div>
                 </article>
               );
