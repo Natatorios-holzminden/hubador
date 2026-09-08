@@ -1837,7 +1837,7 @@ const SCREENS = [
 
 
 // ─── Catálogo HUBADOR (precios grupo vs Coto) ─────────────────
-const IDS_ACTUALIZADOS = new Set(['mandarina', 'naranja', 'tomate', 'manzana', 'morron']);
+const IDS_ACTUALIZADOS = new Set(['mandarina', 'naranja', 'tomate', 'manzana', 'morron', 'pera', 'banana']);
 const CHECK_AZUL = '#2563eb';
 const CHECK_ROJO = '#dc2626';
 // UI city under brand; future hub assign via IP geo (no GPS permission) + barrio confirm
@@ -2083,33 +2083,73 @@ function ActiveOrderExtras({ order }) {
 }
 const ActivoHubJourney = ActiveOrderExtras;
 
-const HUBADOR_CATALOG = [
-  { id: 'papa', name: 'Papa', cat: 'verduras', priceN: 1364, oldN: 2099, members: '9/12', time: '1d', deadlineHrs: 35, img: 'img/papa.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'tomate', name: 'Tomate Red', cat: 'verduras', priceN: 1750, oldN: 3499, members: '5/10', time: '3d', deadlineHrs: 48, img: 'img/tomate.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'morron', name: 'Morrón rojo', cat: 'verduras', priceN: 4224, oldN: 6499, members: '3/8', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg' },
-  { id: 'zapallo', name: 'Zapallo anco', cat: 'verduras', priceN: 1169, oldN: 1799, members: '5/12', time: '3d', deadlineHrs: 45, img: 'img/zapallo-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'cebolla', name: 'Cebolla', cat: 'verduras', priceN: 1105, oldN: 1700, members: '6/10', time: '2d', deadlineHrs: 40, img: 'img/cebolla-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'lechuga', name: 'Lechuga mantecosa', cat: 'verduras', priceN: 2730, oldN: 4200, members: '6/10', time: '2d', deadlineHrs: 41, img: 'img/lechuga.jpg', goal: GOAL_KG, unit: '/u' },
-  { id: 'batata', name: 'Batata', cat: 'verduras', priceN: 1104, oldN: 1699, members: '6/12', time: '2d', deadlineHrs: 43, img: 'img/batata.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'banana', name: 'Banana', cat: 'frutas', priceN: 1755, oldN: 2700, members: '7/10', time: '1d', deadlineHrs: 33, img: 'img/banana.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'limon', name: 'Limón', cat: 'frutas', priceN: 584, oldN: 899, members: '5/9', time: '3d', deadlineHrs: 37, img: 'img/limon.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'manzana', name: 'Manzana Red', cat: 'frutas', priceN: 2000, oldN: 3999, members: '6/10', time: '2d', deadlineHrs: 44, img: 'img/manzana.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'naranja', name: 'Naranja Jugo', cat: 'frutas', priceN: 599, oldN: 999, members: '7/10', time: '2d', deadlineHrs: 32, img: 'img/naranja.jpg', goal: GOAL_KG, unit: '/kg' },
-  { id: 'mandarina', name: 'Mandarina Nova', cat: 'frutas', priceN: 599, oldN: 999, members: '5/10', time: '2d', deadlineHrs: 36, img: 'img/naranja.jpg', goal: GOAL_KG, unit: '/kg' },
-].map((p) => {
-  const live = groupProgressView(p.name);
-  return {
-    ...p,
-    goal: GOAL_KG,
-    prog: live.pct,
-    price: fmtPrecioAR(p.priceN),
-    old: fmtPrecioAR(p.oldN),
-    disc: calcDisc(p.priceN, p.oldN),
-    precioActualizado: IDS_ACTUALIZADOS.has(p.id),
-  };
+const RAW_BASE_CATALOG = [
+  { id: 'papa', name: 'Papa', cat: 'verduras', priceN: 1364, oldN: 2099, distribuidorN: 800, members: '9/12', time: '1d', deadlineHrs: 35, img: 'img/papa.jpg', goal: GOAL_KG, unit: '/kg', stock: 210, oculto: false },
+  { id: 'tomate', name: 'Tomate Red', cat: 'verduras', priceN: 1750, oldN: 3499, distribuidorN: 1000, members: '5/10', time: '3d', deadlineHrs: 48, img: 'img/tomate.jpg', goal: GOAL_KG, unit: '/kg', stock: 120, oculto: false },
+  { id: 'morron', name: 'Morrón rojo', cat: 'verduras', priceN: 4224, oldN: 6499, distribuidorN: 2500, members: '3/8', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 60, oculto: false },
+  { id: 'zapallo', name: 'Zapallo anco', cat: 'verduras', priceN: 1169, oldN: 1799, distribuidorN: 700, members: '5/12', time: '3d', deadlineHrs: 45, img: 'img/zapallo-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg', stock: 130, oculto: false },
+  { id: 'cebolla', name: 'Cebolla', cat: 'verduras', priceN: 1105, oldN: 1700, distribuidorN: 650, members: '6/10', time: '2d', deadlineHrs: 40, img: 'img/cebolla-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg', stock: 175, oculto: false },
+  { id: 'lechuga', name: 'Lechuga mantecosa', cat: 'verduras', priceN: 2730, oldN: 4200, distribuidorN: 1500, members: '6/10', time: '2d', deadlineHrs: 41, img: 'img/lechuga.jpg', goal: GOAL_KG, unit: '/u', stock: 70, oculto: false },
+  { id: 'batata', name: 'Batata', cat: 'verduras', priceN: 1104, oldN: 1699, distribuidorN: 600, members: '6/12', time: '2d', deadlineHrs: 43, img: 'img/batata.jpg', goal: GOAL_KG, unit: '/kg', stock: 145, oculto: false },
+  { id: 'banana', name: 'Banana', cat: 'frutas', priceN: 1368, oldN: 1954, distribuidorN: 882, members: '7/10', time: '1d', deadlineHrs: 33, img: 'img/banana.jpg', goal: GOAL_KG, unit: '/kg', stock: 160, oculto: false },
+  { id: 'limon', name: 'Limón', cat: 'frutas', priceN: 584, oldN: 899, distribuidorN: 350, members: '5/9', time: '3d', deadlineHrs: 37, img: 'img/limon.jpg', goal: GOAL_KG, unit: '/kg', stock: 90, oculto: false },
+  { id: 'manzana', name: 'Manzana verde', cat: 'frutas', priceN: 2499, oldN: 4999, distribuidorN: 526, members: '6/10', time: '2d', deadlineHrs: 44, img: 'img/manzana.jpg', goal: GOAL_KG, unit: '/kg', stock: 95, oculto: false },
+  { id: 'naranja', name: 'Naranja Jugo', cat: 'frutas', priceN: 793, oldN: 1133, distribuidorN: 353, members: '7/10', time: '2d', deadlineHrs: 32, img: 'img/naranja.jpg', goal: GOAL_KG, unit: '/kg', stock: 185, oculto: false },
+  { id: 'mandarina', name: 'Mandarina Nova', cat: 'frutas', priceN: 699, oldN: 999, distribuidorN: 353, members: '5/10', time: '2d', deadlineHrs: 36, img: 'img/naranja.jpg', goal: GOAL_KG, unit: '/kg', stock: 140, oculto: false },
+  { id: 'pera', name: 'Pera', cat: 'frutas', priceN: 1487, oldN: 2124, distribuidorN: 500, members: '4/10', time: '2d', deadlineHrs: 38, img: 'https://images.unsplash.com/photo-1615484477778-ca3b77940c25?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 110, oculto: false },
+];
+
+function getRawCatalogStore() {
+  try {
+    const raw = localStorage.getItem('hubador_catalog_raw_v3');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return RAW_BASE_CATALOG;
+}
+
+function saveRawCatalogStore(list) {
+  try {
+    localStorage.setItem('hubador_catalog_raw_v3', JSON.stringify(list));
+    window.dispatchEvent(new CustomEvent('hubador_catalog_updated'));
+  } catch (e) {}
+}
+
+function getHubadorCatalogList(includeHidden = false) {
+  const raw = getRawCatalogStore();
+  const items = (raw && Array.isArray(raw) && raw.length > 0) ? raw : RAW_BASE_CATALOG;
+  const filtered = includeHidden ? items : items.filter((p) => !p.oculto);
+  return filtered.map((p) => {
+    const live = groupProgressView(p.name);
+    const oldVal = p.oldN != null ? Number(p.oldN) : 0;
+    const priceVal = p.priceN != null ? Number(p.priceN) : 0;
+    const distVal = p.distribuidorN != null ? Number(p.distribuidorN) : 0;
+    return {
+      ...p,
+      goal: p.goal || GOAL_KG,
+      members: p.members || '5/10',
+      time: p.time || '2d',
+      deadlineHrs: p.deadlineHrs || 40,
+      prog: live.pct,
+      price: fmtPrecioAR(priceVal),
+      old: fmtPrecioAR(oldVal),
+      distribuidorCost: fmtPrecioAR(distVal),
+      disc: oldVal > 0 ? calcDisc(priceVal, oldVal) : 0,
+      gananciaKg: priceVal - distVal,
+      precioActualizado: IDS_ACTUALIZADOS.has(p.id) || !!p.precioActualizado,
+    };
+  });
+}
+
+// Define HUBADOR_CATALOG as dynamic getter returning genuine Array
+Object.defineProperty(window, 'HUBADOR_CATALOG', {
+  get() {
+    return getHubadorCatalogList(false);
+  },
+  configurable: true
 });
+
 const HOME_OFERTAS_IDS = ['mandarina', 'naranja', 'tomate', 'manzana', 'morron', 'papa', 'cebolla', 'limon', 'banana', 'lechuga'];
-function hubadorById(id) { return HUBADOR_CATALOG.find((p) => p.id === id); }
+function hubadorById(id) { return getHubadorCatalogList(true).find((p) => p.id === id) || getHubadorCatalogList(true)[0]; }
 function hubadorCard(p) {
   const live = groupProgressView(p.name);
   return {
@@ -2183,7 +2223,7 @@ function MobileHome() {
       <div style={{ padding: '10px 12px 6px' }}>
         <div style={{
           position: 'relative', borderRadius: 20, overflow: 'hidden',
-          minHeight: 224, maxHeight: 252, background: '#1a1f1c',
+          minHeight: 220, background: '#1a1f1c',
           boxShadow: '0 8px 28px rgba(15, 23, 20, 0.14)',
         }}>
           <img
@@ -2193,20 +2233,20 @@ function MobileHome() {
           />
           <div aria-hidden="true" style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.15) 100%)',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.38) 50%, rgba(0,0,0,0.15) 100%)',
           }} />
           <div style={{
-            position: 'relative', zIndex: 1, height: '100%', minHeight: 224,
+            position: 'relative', zIndex: 1, height: '100%', minHeight: 220,
             display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-            padding: '16px 16px 18px', gap: 10,
+            padding: '14px 14px 16px', gap: 8,
           }}>
             <div style={{
               alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 7,
-              background: '#ea580c', color: '#fff', padding: '5px 11px', borderRadius: 999,
-              fontSize: 11.5, fontWeight: 700, letterSpacing: '-0.01em',
+              background: '#ea580c', color: '#fff', padding: '4px 10px', borderRadius: 999,
+              fontSize: 11, fontWeight: 700, letterSpacing: '-0.01em',
               boxShadow: '0 2px 10px rgba(234,88,12,0.35)',
             }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" aria-hidden="true">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -2215,33 +2255,44 @@ function MobileHome() {
               500+ vecinos activos ahora
             </div>
             <h1 style={{
-              margin: 0, color: '#fff', fontSize: 26, fontWeight: 900,
+              margin: 0, color: '#fff', fontSize: 24, fontWeight: 900,
               letterSpacing: '-0.035em', lineHeight: 1.12, textWrap: 'balance',
               textShadow: '0 2px 14px rgba(0,0,0,0.35)',
             }}>
               Comprá con tus vecinos · hasta 50% off
             </h1>
             <p style={{
-              margin: 0, color: 'rgba(255,255,255,0.92)', fontSize: 13.5, fontWeight: 500,
+              margin: 0, color: 'rgba(255,255,255,0.92)', fontSize: 13, fontWeight: 500,
               lineHeight: 1.35, maxWidth: 320,
               textShadow: '0 1px 8px rgba(0,0,0,0.35)',
             }}>
               Precios mayoristas, sin intermediarios y con retiro cerca tuyo.
             </p>
-            <div style={{ marginTop: 2 }}>
+            <div style={{ marginTop: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, width: '100%' }}>
               <a
-                href={buildWhatsAppLink('Hola! Vi HUBADOR y quiero comprar verdura más barata ¿Cómo me sumo?')}
+                href={buildWhatsAppLink('Hola! Vi HUBADOR y quiero recibir la lista de precios por WhatsApp')}
                 target="_blank"
                 rel="noopener"
                 style={{
-                  background: primary, color: '#fff', border: 'none', borderRadius: 999,
-                  padding: '13px 18px', minHeight: 48, width: '100%', fontWeight: 800, fontSize: 14.5,
+                  background: '#25D366', color: '#fff', border: 'none', borderRadius: 999,
+                  padding: '11px 18px', minHeight: 46, width: '100%', fontWeight: 800, fontSize: 15,
                   fontFamily: 'inherit', cursor: 'pointer', textDecoration: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box',
-                  boxShadow: '0 4px 14px rgba(13,148,136,0.35)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, boxSizing: 'border-box',
+                  boxShadow: '0 4px 14px rgba(37,211,102,0.38)',
                   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
                 }}
-              >Quiero comprar más barato</a>
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true" style={{ flexShrink: 0 }}>
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.572-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.99c-.002 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c-.001 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                <span>Recibir precios por WhatsApp</span>
+              </a>
+              <div style={{
+                color: 'rgba(255,255,255,0.88)', fontSize: 11, fontWeight: 500,
+                textAlign: 'center', textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+              }}>
+                🔒 Sin spam. Accedé a los precios de hoy en tu barrio.
+              </div>
             </div>
           </div>
         </div>
@@ -2264,7 +2315,7 @@ function MobileHome() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <span style={{ fontWeight: 800, fontSize: 17, color: primary }}>{p.price}</span>
                   <span style={{ fontSize: 12, color: '#888' }}>{p.unit}</span>
-                  <span style={{ fontSize: 13.5, color: '#9aa0a6', textDecoration: 'line-through', marginLeft: 3 }}>{p.old}</span>
+                  <span style={{ fontSize: 13.5, color: '#ef4444', fontWeight: 600, textDecoration: 'line-through', marginLeft: 3 }}>{p.old}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#888', gap: 6 }}>
                   {(() => {const live = groupProgressView(p.name);return <>
@@ -2275,13 +2326,10 @@ function MobileHome() {
                 <div style={{ height: 4, background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${groupProgressView(p.name).pct}%`, background: groupProgressView(p.name).pct >= 85 ? 'oklch(0.62 0.18 35)' : primary, borderRadius: 999 }} />
                 </div>
-                <a
-                  href={buildOfertaWhatsAppLink(p)}
-                  target="_blank"
-                  rel="noopener"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '9px', minHeight: 40, fontWeight: 600, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', marginTop: 2, touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 2, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxSizing: 'border-box' }}
-                >Quiero esta oferta</a>
+                <button
+                  onClick={(e) => { e.stopPropagation(); openProduct(p); }}
+                  style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '9px', minHeight: 40, fontWeight: 600, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', marginTop: 2, touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxSizing: 'border-box', width: '100%' }}
+                >Quiero esta oferta</button>
               </div>
             </div>
             )}
@@ -3194,10 +3242,93 @@ function MobileSignup() {
 function AdminShell({ active, children }) {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
+  const { user, login, showToast } = React.useContext(SelectionContext);
+  const [adminPass, setAdminPass] = React.useState('');
+  const [adminEmail, setAdminEmail] = React.useState('admin@hubador.app');
+  const [authError, setAuthError] = React.useState('');
+
+  const isAdmin = user && user.role === 'admin';
+
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+    if (adminPass === 'admin1234' || adminPass === 'admin') {
+      login({ nombre: 'Admin HUBADOR', email: adminEmail || 'admin@hubador.app', role: 'admin', barrio: 'CABA' });
+      if (showToast) showToast('🔓 Sesión de Administrador iniciada');
+      setAuthError('');
+    } else {
+      setAuthError('Contraseña incorrecta. (Prueba: admin1234)');
+    }
+  };
+
   const tabs = [
-  { id: 'admin', label: 'Dashboard' },
-  { id: 'admin-grupos', label: 'Grupos' },
-  { id: 'admin-productos', label: 'Productos' }];
+    { id: 'admin', label: 'Dashboard' },
+    { id: 'admin-grupos', label: 'Grupos' },
+    { id: 'admin-productos', label: 'Productos' }
+  ];
+
+  if (!isAdmin) {
+    return (
+      <div style={{ fontFamily: "'Inter', sans-serif", background: '#0f172a', minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 20, color: '#f8fafc', boxSizing: 'border-box' }}>
+        <div style={{ width: '100%', maxWidth: 380, background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24, boxShadow: '0 20px 48px rgba(0,0,0,0.5)' }}>
+          <div style={{ textAlign: 'center', marginBottom: 18 }}>
+            <div style={{ width: 48, height: 48, background: primary, borderRadius: 12, display: 'grid', placeItems: 'center', color: '#fff', fontSize: 24, fontWeight: 800, margin: '0 auto 12px' }}>🔒</div>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff' }}>Acceso Administrador</h2>
+            <p style={{ margin: '4px 0 0', fontSize: 12, color: '#94a3b8' }}>Ingresá tu contraseña de admin para gestionar productos y precios.</p>
+          </div>
+
+          <form onSubmit={handleAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#cbd5e1', marginBottom: 4 }}>Email de admin</label>
+              <input
+                type="email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                placeholder="admin@hubador.app"
+                style={{ width: '100%', height: 40, background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '0 12px', color: '#fff', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#cbd5e1', marginBottom: 4 }}>Contraseña de admin *</label>
+              <input
+                type="password"
+                required
+                value={adminPass}
+                onChange={(e) => setAdminPass(e.target.value)}
+                placeholder="admin1234"
+                style={{ width: '100%', height: 40, background: '#0f172a', border: '1px solid #334155', borderRadius: 8, padding: '0 12px', color: '#fff', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' }}
+              />
+            </div>
+
+            {authError && (
+              <div style={{ fontSize: 12, color: '#f87171', background: 'rgba(239,68,68,0.15)', padding: '6px 10px', borderRadius: 6 }}>
+                {authError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer', marginTop: 4 }}
+            >Entrar como Admin</button>
+
+            <button
+              type="button"
+              onClick={() => { setAdminEmail('admin@hubador.app'); setAdminPass('admin1234'); }}
+              style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 11.5, textDecoration: 'underline', cursor: 'pointer', padding: 4 }}
+            >⚡ Acceso rápido demo (admin1234)</button>
+          </form>
+
+          <div style={{ marginTop: 18, textAlign: 'center' }}>
+            <button
+              type="button"
+              onClick={() => navigate('home')}
+              style={{ background: 'none', border: 'none', color: '#64748b', fontSize: 12, cursor: 'pointer' }}
+            >← Volver a la tienda pública</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: '#f4f5f7', minHeight: '100%', WebkitFontSmoothing: 'antialiased' }}>
@@ -3207,8 +3338,8 @@ function AdminShell({ active, children }) {
           Admin
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
-          <div style={{ width: 30, height: 30, borderRadius: '50%', background: primary, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: 12 }}>AG</div>
+          <button onClick={() => navigate('home')} style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>👁️ Ver Tienda</button>
+          <div style={{ width: 30, height: 30, borderRadius: '50%', background: primary, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: 12 }}>AD</div>
         </div>
       </header>
       <div style={{ position: 'sticky', top: 52, zIndex: 4, background: '#fff', borderBottom: '1px solid #e8eaec', padding: '0 8px', display: 'flex', gap: 0 }}>
@@ -3220,7 +3351,6 @@ function AdminShell({ active, children }) {
       </div>
       {children}
     </div>);
-
 }
 
 function MobileAdmin() {
@@ -3352,56 +3482,414 @@ function MobileAdminGrupos() {
 
 function MobileAdminProductos() {
   const primary = 'oklch(0.55 0.15 165)';
+  const { showToast } = React.useContext(SelectionContext);
   const [search, setSearch] = React.useState('');
-  const productos = [
-  { id: 'P-21', name: 'Tomate Red', price: '$1.750/kg', stock: 120, groups: 3, img: 'img/tomate.jpg' },
-  { id: 'P-20', name: 'Manzana Red', price: '$2.000/kg', stock: 95, groups: 1, img: 'img/manzana.jpg' },
-  { id: 'P-19', name: 'Lechuga', price: '$2.730/u', stock: 70, groups: 2, img: 'img/lechuga.jpg' },
-  { id: 'P-18', name: 'Banana', price: '$1.755/kg', stock: 160, groups: 2, img: 'img/banana.jpg' },
-  { id: 'P-17', name: 'Naranja Jugo', price: '$599/kg', stock: 185, groups: 2, img: 'img/naranja.jpg' },
-  { id: 'P-22', name: 'Mandarina Nova', price: '$599/kg', stock: 140, groups: 1, img: 'img/naranja.jpg' },
-  { id: 'P-23', name: 'Morrón rojo', price: '$4.224/kg', stock: 60, groups: 1, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80' },
-  { id: 'P-16', name: 'Limón', price: '$584/kg', stock: 90, groups: 1, img: 'img/limon.jpg' },
-  { id: 'P-15', name: 'Papa', price: '$1.364/kg', stock: 210, groups: 3, img: 'img/papa.jpg' },
-  { id: 'P-14', name: 'Zapallo anco', price: '$1.169/kg', stock: 130, groups: 1, img: 'img/zapallo-ok-20260730c.jpg' },
-  { id: 'P-13', name: 'Batata', price: '$1.104/kg', stock: 145, groups: 1, img: 'img/batata.jpg' },
-  { id: 'P-12', name: 'Cebolla', price: '$1.105/kg', stock: 175, groups: 2, img: 'img/cebolla-ok-20260730c.jpg' }];
+  const [filterCat, setFilterCat] = React.useState('todos');
+  const [items, setItems] = React.useState(() => getHubadorCatalogList(true));
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [editingItem, setEditingItem] = React.useState(null);
 
-  const filtered = productos.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+  const [form, setForm] = React.useState({
+    id: '', name: '', cat: 'verduras', priceN: 1500, oldN: 2500, distribuidorN: 800,
+    unit: '/kg', stock: 100, img: 'img/papa.jpg', oculto: false
+  });
+
+  const reload = () => {
+    setItems(getHubadorCatalogList(true));
+  };
+
+  React.useEffect(() => {
+    const handleUpdate = () => reload();
+    window.addEventListener('hubador_catalog_updated', handleUpdate);
+    return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
+  }, []);
+
+  const handleToggleOculto = (item) => {
+    const rawList = getRawCatalogStore();
+    const updated = rawList.map((p) => p.id === item.id ? { ...p, oculto: !p.oculto } : p);
+    saveRawCatalogStore(updated);
+    reload();
+    if (showToast) showToast(item.oculto ? `🟢 "${item.name}" activado en la tienda` : `🙈 "${item.name}" ocultado del catálogo`);
+  };
+
+  const handleOpenCreate = () => {
+    setEditingItem(null);
+    setForm({
+      id: 'prod-' + Date.now(),
+      name: '',
+      cat: 'verduras',
+      priceN: 1200,
+      oldN: 2000,
+      distribuidorN: 600,
+      unit: '/kg',
+      stock: 100,
+      img: 'img/papa.jpg',
+      oculto: false
+    });
+    setModalOpen(true);
+  };
+
+  const handleOpenEdit = (item) => {
+    setEditingItem(item);
+    setForm({
+      id: item.id,
+      name: item.name || '',
+      cat: item.cat || 'verduras',
+      priceN: item.priceN != null ? item.priceN : 0,
+      oldN: item.oldN != null ? item.oldN : 0,
+      distribuidorN: item.distribuidorN != null ? item.distribuidorN : 0,
+      unit: item.unit || '/kg',
+      stock: item.stock != null ? item.stock : 100,
+      img: item.img || 'img/papa.jpg',
+      oculto: !!item.oculto
+    });
+    setModalOpen(true);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    const rawList = getRawCatalogStore();
+    let updated = [];
+    const itemData = {
+      ...form,
+      priceN: Number(form.priceN),
+      oldN: Number(form.oldN),
+      distribuidorN: Number(form.distribuidorN),
+      stock: Number(form.stock)
+    };
+
+    if (editingItem) {
+      updated = rawList.map((p) => p.id === editingItem.id ? { ...p, ...itemData } : p);
+    } else {
+      updated = [ ...rawList, itemData ];
+    }
+    saveRawCatalogStore(updated);
+    reload();
+    setModalOpen(false);
+    if (showToast) showToast(`✓ Producto "${form.name}" guardado`);
+  };
+
+  const handleDelete = (item) => {
+    if (!window.confirm(`¿Seguro que querés borrar "${item.name}"?`)) return;
+    const rawList = getRawCatalogStore();
+    const updated = rawList.filter((p) => p.id !== item.id);
+    saveRawCatalogStore(updated);
+    reload();
+    if (showToast) showToast(`🗑️ "${item.name}" eliminado`);
+  };
+
+  const filtered = items.filter((p) => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    if (!matchSearch) return false;
+    if (filterCat === 'ocultos') return p.oculto;
+    if (filterCat === 'verduras') return p.cat === 'verduras' && !p.oculto;
+    if (filterCat === 'frutas') return p.cat === 'frutas' && !p.oculto;
+    return true;
+  });
+
+  const countActivos = items.filter(p => !p.oculto).length;
+  const countOcultos = items.filter(p => p.oculto).length;
+
   return (
     <AdminShell active="admin-productos">
-      <div style={{ padding: 16 }}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e4e8', borderRadius: 9, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar producto..." style={{ flex: 1, border: 'none', outline: 'none', fontFamily: 'inherit', fontSize: 13, background: 'transparent' }} />
+      <div style={{ padding: 14, fontFamily: "'Inter', sans-serif" }}>
+        
+        {/* Header & Stat Summary */}
+        <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '12px 14px', marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>Control del Catálogo</div>
+              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Coto, distribuidor y visibilidad</div>
+            </div>
+            <button
+              onClick={handleOpenCreate}
+              style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+            >+ Nuevo</button>
           </div>
-          <button style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '0 14px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Nuevo</button>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, background: '#f1f5f9', color: '#334155', borderRadius: 999, padding: '3px 9px' }}>📦 Total: {items.length}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, background: '#dcfce7', color: '#15803d', borderRadius: 999, padding: '3px 9px' }}>🟢 Activos: {countActivos}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, background: '#fee2e2', color: '#b91c1c', borderRadius: 999, padding: '3px 9px' }}>🙈 Ocultos: {countOcultos}</span>
+          </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filtered.map((p) =>
-          <div key={p.id} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 54, height: 54, borderRadius: 9, overflow: 'hidden', flexShrink: 0 }}>
-                <img src={p.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+
+        {/* Search & Category Filter Tabs */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+          <div style={{ background: '#fff', border: '1px solid #e2e4e8', borderRadius: 9, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nombre..." style={{ flex: 1, border: 'none', outline: 'none', fontFamily: 'inherit', fontSize: 13, background: 'transparent' }} />
+          </div>
+
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+            {[
+              { id: 'todos', label: 'Todos' },
+              { id: 'verduras', label: '🥬 Verduras' },
+              { id: 'frutas', label: '🍎 Frutas' },
+              { id: 'ocultos', label: `🙈 Ocultos (${countOcultos})` },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setFilterCat(tab.id)}
+                style={{
+                  background: filterCat === tab.id ? primary : '#fff',
+                  color: filterCat === tab.id ? '#fff' : '#475569',
+                  border: filterCat === tab.id ? 'none' : '1px solid #e2e8f0',
+                  borderRadius: 999, padding: '5px 12px', fontSize: 11.5, fontWeight: 700,
+                  cursor: 'pointer', whiteSpace: 'nowrap'
+                }}
+              >{tab.label}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Product Cards List */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filtered.map((p) => {
+            const discPct = p.disc != null ? p.disc : (p.oldN > 0 ? calcDisc(p.priceN, p.oldN) : 0);
+            const ganancia = p.priceN - (p.distribuidorN || 0);
+
+            return (
+              <div key={p.id} style={{ background: p.oculto ? '#f8fafc' : '#fff', border: p.oculto ? '1px dashed #cbd5e1' : '1px solid #e2e8f0', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 10, opacity: p.oculto ? 0.78 : 1 }}>
+                
+                {/* Header info */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', flexShrink: 0, border: '1px solid #f1f5f9' }}>
+                    <img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>{p.name}</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, background: '#f1f5f9', color: '#475569', borderRadius: 4, padding: '1px 5px' }}>{p.cat}</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: '#64748b' }}>{p.unit}</span>
+                    </div>
+                    <div style={{ marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {p.oculto ? (
+                        <span style={{ fontSize: 10.5, fontWeight: 700, color: '#dc2626', background: '#fee2e2', padding: '1px 6px', borderRadius: 999 }}>🙈 OCULTO (No visible en tienda)</span>
+                      ) : (
+                        <span style={{ fontSize: 10.5, fontWeight: 700, color: '#16a34a', background: '#dcfce7', padding: '1px 6px', borderRadius: 999 }}>🟢 VISIBLE en tienda</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3 Prices Dashboard */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, background: '#f8fafc', padding: 8, borderRadius: 10, border: '1px solid #f1f5f9' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#ef4444', textTransform: 'uppercase' }}>Coto (Góndola)</div>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: '#ef4444' }}>{p.old || fmtPrecioAR(p.oldN)}</div>
+                  </div>
+                  <div style={{ textAlign: 'center', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Distribuidor</div>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: '#334155' }}>{fmtPrecioAR(p.distribuidorN || 0)}</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>HUBADOR</div>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: '#0d9488' }}>{p.price || fmtPrecioAR(p.priceN)}</div>
+                  </div>
+                </div>
+
+                {/* Financial Metrics */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#64748b', padding: '0 2px' }}>
+                  <span>Descuento Coto: <b style={{ color: '#2563eb' }}>-{discPct}%</b></span>
+                  <span>Ganancia/Margen: <b style={{ color: ganancia >= 0 ? '#16a34a' : '#dc2626' }}>{ganancia >= 0 ? '+' : ''}{fmtPrecioAR(ganancia)}{p.unit}</b></span>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: 6, paddingTop: 2 }}>
+                  <button
+                    onClick={() => handleToggleOculto(p)}
+                    style={{ flex: 1, background: p.oculto ? '#dcfce7' : '#f1f5f9', color: p.oculto ? '#15803d' : '#475569', border: '1px solid #e2e8f0', borderRadius: 7, padding: '7px', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    {p.oculto ? '🟢 Mostrar' : '🙈 Ocultar'}
+                  </button>
+                  <button
+                    onClick={() => handleOpenEdit(p)}
+                    style={{ flex: 1, background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 7, padding: '7px', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
+                  >✏️ Editar</button>
+                  <button
+                    onClick={() => handleDelete(p)}
+                    style={{ background: '#fff', border: '1px solid #fee2e2', color: '#dc2626', borderRadius: 7, padding: '7px 9px', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
+                  >🗑️</button>
+                </div>
+
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: 13.5 }}>{p.name}</div>
-                <div style={{ fontSize: 11.5, color: '#888', marginTop: 2 }}>{p.id} · Stock: <b style={{ color: p.stock < 50 ? '#dc2626' : '#15803d' }}>{p.stock}</b> · {p.groups} {p.groups === 1 ? 'grupo' : 'grupos'}</div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: primary, marginTop: 3 }}>{p.price}</div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <button style={{ background: '#f4f5f7', border: '1px solid #e2e4e8', borderRadius: 7, padding: '5px 9px', fontFamily: 'inherit', fontSize: 11, cursor: 'pointer' }}>Editar</button>
-                <button style={{ background: '#fff', border: '1px solid #fee2e2', color: '#dc2626', borderRadius: 7, padding: '5px 9px', fontFamily: 'inherit', fontSize: 11, cursor: 'pointer' }}>Pausar</button>
-              </div>
+            );
+          })}
+
+          {filtered.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '36px 16px', background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', color: '#64748b', fontSize: 13 }}>
+              No hay productos que coincidan con la búsqueda.
             </div>
           )}
-          {filtered.length === 0 &&
-          <div style={{ textAlign: 'center', padding: '30px 16px', color: '#888', fontSize: 13 }}>No hay productos que coincidan con "{search}"</div>
-          }
         </div>
-      </div>
-    </AdminShell>);
 
+        {/* Modal Dialog Form for Create / Edit */}
+        {modalOpen && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(3px)', display: 'grid', placeItems: 'center', padding: 16 }} onClick={() => setModalOpen(false)}>
+            <div role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 410, maxHeight: '90vh', overflowY: 'auto', background: '#fff', borderRadius: 18, padding: 20, boxShadow: '0 20px 48px rgba(0,0,0,0.3)', fontFamily: "'Inter', sans-serif" }}>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+                  {editingItem ? `Editar "${editingItem.name}"` : '➕ Nuevo Producto'}
+                </h3>
+                <button type="button" onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+              </div>
+
+              <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                
+                {/* Nombre */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Nombre del producto *</label>
+                  <input
+                    required
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="Ej: Acelga fresca"
+                    style={{ width: '100%', height: 40, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 10px', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Categoria & Unidad */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Categoría</label>
+                    <select
+                      value={form.cat}
+                      onChange={(e) => setForm({ ...form, cat: e.target.value })}
+                      style={{ width: '100%', height: 40, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 8px', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box' }}
+                    >
+                      <option value="verduras">Verduras</option>
+                      <option value="frutas">Frutas</option>
+                      <option value="almacen">Almacén</option>
+                      <option value="otros">Otros</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Unidad de venta</label>
+                    <select
+                      value={form.unit}
+                      onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                      style={{ width: '100%', height: 40, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 8px', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box' }}
+                    >
+                      <option value="/kg">/kg (Por kilo)</option>
+                      <option value="/u">/u (Por unidad)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Precios: Coto, Distribuidor, HUBADOR */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>Precios ($ / {form.unit === '/u' ? 'unidad' : 'kilo'})</div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#ef4444', marginBottom: 3 }}>Precio Coto (Supermercado / Referencia)</label>
+                    <input
+                      required
+                      type="number"
+                      value={form.oldN}
+                      onChange={(e) => setForm({ ...form, oldN: e.target.value })}
+                      placeholder="Ej: 4999"
+                      style={{ width: '100%', height: 38, border: '1px solid #fca5a5', borderRadius: 8, padding: '0 10px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, color: '#ef4444', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#475569', marginBottom: 3 }}>Costo Mayorista / Distribuidor (Tu costo)</label>
+                    <input
+                      required
+                      type="number"
+                      value={form.distribuidorN}
+                      onChange={(e) => setForm({ ...form, distribuidorN: e.target.value })}
+                      placeholder="Ej: 526"
+                      style={{ width: '100%', height: 38, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 10px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, color: '#334155', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#0d9488', marginBottom: 3 }}>Precio HUBADOR (Precio final en grupo)</label>
+                    <input
+                      required
+                      type="number"
+                      value={form.priceN}
+                      onChange={(e) => setForm({ ...form, priceN: e.target.value })}
+                      placeholder="Ej: 2499"
+                      style={{ width: '100%', height: 38, border: '1px solid #99f6e4', borderRadius: 8, padding: '0 10px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, color: '#0d9488', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  {/* Calculated metrics live preview */}
+                  <div style={{ fontSize: 11, color: '#64748b', background: '#fff', padding: '6px 8px', borderRadius: 6, border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Descuento: <b>-{form.oldN > 0 ? calcDisc(Number(form.priceN), Number(form.oldN)) : 0}%</b></span>
+                    <span>Margen: <b style={{ color: (Number(form.priceN) - Number(form.distribuidorN)) >= 0 ? '#16a34a' : '#dc2626' }}>+${Number(form.priceN) - Number(form.distribuidorN)}</b></span>
+                  </div>
+                </div>
+
+                {/* Imagen */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Imagen URL</label>
+                  <input
+                    type="text"
+                    value={form.img}
+                    onChange={(e) => setForm({ ...form, img: e.target.value })}
+                    placeholder="img/papa.jpg o URL web"
+                    style={{ width: '100%', height: 38, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 10px', fontFamily: 'inherit', fontSize: 12, boxSizing: 'border-box', marginBottom: 6 }}
+                  />
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {[
+                      { l: '🥔 Papa', u: 'img/papa.jpg' },
+                      { l: '🍅 Tomate', u: 'img/tomate.jpg' },
+                      { l: '🍏 Manzana', u: 'img/manzana.jpg' },
+                      { l: '🍌 Banana', u: 'img/banana.jpg' },
+                      { l: '🍊 Naranja', u: 'img/naranja.jpg' },
+                      { l: '🥬 Lechuga', u: 'img/lechuga.jpg' },
+                    ].map(preset => (
+                      <button
+                        key={preset.l}
+                        type="button"
+                        onClick={() => setForm({ ...form, img: preset.u })}
+                        style={{ background: '#f1f5f9', border: 'none', borderRadius: 4, padding: '2px 6px', fontSize: 10.5, cursor: 'pointer' }}
+                      >{preset.l}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Visibilidad Switch */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', padding: 10, borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                  <input
+                    id="chk-oculto"
+                    type="checkbox"
+                    checked={!form.oculto}
+                    onChange={(e) => setForm({ ...form, oculto: !e.target.checked })}
+                    style={{ width: 18, height: 18, cursor: 'pointer' }}
+                  />
+                  <label htmlFor="chk-oculto" style={{ fontSize: 12.5, fontWeight: 700, color: '#334155', cursor: 'pointer' }}>
+                    {!form.oculto ? '🟢 Producto Visible en Tienda' : '🙈 Producto Oculto'}
+                  </label>
+                </div>
+
+                {/* Form Buttons */}
+                <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                  <button
+                    type="submit"
+                    style={{ flex: 1, background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: 12, fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, cursor: 'pointer' }}
+                  >Guardar Producto</button>
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    style={{ background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 9, padding: '12px 16px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                  >Cancelar</button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </AdminShell>
+  );
 }
 
 // ─── Grupo Detalle ───────────────────────────────────────────
@@ -4935,11 +5423,21 @@ function MobilePerfil() {
             )}
 
             <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, overflow: 'hidden' }}>
-              <div onClick={() => { setMisGruposTab && setMisGruposTab('carrito'); navigate('mis-grupos'); }} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer' }}>
+              <div onClick={() => { setMisGruposTab && setMisGruposTab('carrito'); navigate('mis-grupos'); }} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer', borderBottom: user && user.role === 'admin' ? '1px solid #f1f5f9' : 'none' }}>
                 <span style={{ fontSize: 18 }}>👥</span>
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 500 }}>Mis grupos</span>
                 <span style={{ color: '#bbb', fontSize: 18 }}>›</span>
               </div>
+              {user && user.role === 'admin' && (
+                <div onClick={() => navigate('admin-productos')} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer', background: '#f0fdf4' }}>
+                  <span style={{ fontSize: 18 }}>🛠️</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#166534' }}>Panel de Administración</div>
+                    <div style={{ fontSize: 11, color: '#15803d' }}>Gestionar catálogo, precios Coto y productos</div>
+                  </div>
+                  <span style={{ color: '#166534', fontSize: 18, fontWeight: 800 }}>›</span>
+                </div>
+              )}
             </div>
             <button type="button" onClick={() => { logout(); navigate('login'); }} style={{ width: '100%', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 16 }}>Cerrar sesión</button>
           </>
@@ -4974,32 +5472,35 @@ function MobileComparador() {
         </div>
       </header>
 
-      <div style={{ flexShrink: 0, padding: '10px 14px', background: '#fff', borderBottom: '1px solid #e8eaec' }}>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {[
-            { c: '#ea580c', t: 'Coto' },
-            { c: '#4f46e5', t: 'Quilmes' },
-            { c: '#7c3aed', t: 'Nueva Luna' },
-            { c: '#2563eb', t: 'MC' },
-            { c: '#0d9488', t: 'HUBADOR' },
-          ].map((x) => (
-            <span key={x.t} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 600, color: '#555', background: '#f4f5f7', borderRadius: 999, padding: '3px 8px' }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: x.c }} />
-              {x.t}
-            </span>
-          ))}
-        </div>
-        <p style={{ margin: '8px 0 0', fontSize: 11.5, color: '#888', lineHeight: 1.35 }}>
-          Compará precio mayorista vs góndola y el precio HUBADOR (−30% vs Coto).
-        </p>
-      </div>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
 
-      <div style={{ flex: 1, minHeight: 0, background: '#fff' }}>
-        <iframe
-          title="Comparador unificado"
-          src="comparador-unificado.html"
-          style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-        />
+        <div style={{ flexShrink: 0, padding: '10px 14px', background: '#fff', borderBottom: '1px solid #e8eaec' }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {[
+              { c: '#ea580c', t: 'Coto' },
+              { c: '#4f46e5', t: 'Quilmes' },
+              { c: '#7c3aed', t: 'Nueva Luna' },
+              { c: '#2563eb', t: 'MC' },
+              { c: '#0d9488', t: 'HUBADOR' },
+            ].map((x) => (
+              <span key={x.t} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10.5, fontWeight: 600, color: '#555', background: '#f4f5f7', borderRadius: 999, padding: '3px 8px' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: x.c }} />
+                {x.t}
+              </span>
+            ))}
+          </div>
+          <p style={{ margin: '8px 0 0', fontSize: 11.5, color: '#888', lineHeight: 1.35 }}>
+            Compará precio mayorista vs góndola y el precio HUBADOR (−30% vs Coto).
+          </p>
+        </div>
+
+        <div style={{ height: 500, background: '#fff' }}>
+          <iframe
+            title="Comparador unificado"
+            src="comparador-unificado.html"
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -5317,14 +5818,27 @@ function WebHome() {
                   <h1>Comprá con tus <em>vecinos</em> · hasta <em>50%</em> off</h1>
                   <p>Oferta grupal · precio de productor · retiro en el hub.</p>
                 </div>
-                <div className="web-hero-cta">
+                <div className="web-hero-cta" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
                   <a
                     className="web-btn"
-                    href={buildWhatsAppLink('Hola! Vi HUBADOR y quiero comprar verdura más barata ¿Cómo me sumo?')}
+                    href={buildWhatsAppLink('Hola! Vi HUBADOR y quiero recibir la lista de precios por WhatsApp')}
                     target="_blank"
                     rel="noopener"
-                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                  >Quiero comprar más barato</a>
+                    style={{
+                      background: '#25D366', color: '#fff', border: 'none', borderRadius: 999,
+                      padding: '14px 24px', minHeight: 56, fontWeight: 900, fontSize: 15.5,
+                      textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                      boxShadow: '0 6px 20px rgba(37,211,102,0.45)',
+                    }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true" style={{ flexShrink: 0 }}>
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.572-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.99c-.002 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c-.001 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    <span>Recibir precios por WhatsApp</span>
+                  </a>
+                  <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: 500 }}>
+                    🔒 Sin spam. Accedé a los precios de hoy en tu barrio.
+                  </div>
                 </div>
                 <div className="web-stats">
                   <div className="web-stat"><strong>50%</strong><span>vs Coto</span></div>
@@ -5411,14 +5925,11 @@ function WebHome() {
                       </span>
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
-                    <a
-                      href={buildOfertaWhatsAppLink(p)}
-                      target="_blank"
-                      rel="noopener"
+                    <button
                       className="web-join-card"
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
-                    >Quiero esta oferta</a>
+                      onClick={(e) => { e.stopPropagation(); openProduct(p); }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
+                    >Quiero esta oferta</button>
                   </div>
                 </article>
               );
@@ -5490,8 +6001,14 @@ function WebHeader({ showSearch = true, authMode = null }) {
           <button type="button" onClick={() => navigate('mis-grupos')}>Mis grupos</button>
           <button type="button" onClick={() => navigate('mapa')}>Mapa</button>
           <button type="button" onClick={() => navigate('perfil')}>Perfil</button>
+          {user && user.role === 'admin' && (
+            <button type="button" onClick={() => navigate('admin-productos')} style={{ color: '#0d9488', fontWeight: 800, background: '#e6fffa', padding: '4px 10px', borderRadius: 6 }}>🛠️ Admin</button>
+          )}
         </nav>
         <div className="web-nav-actions">
+          {user && user.role === 'admin' && (
+            <button className="web-btn-ghost" type="button" onClick={() => navigate('admin-productos')} style={{ color: '#0d9488', border: '1px solid #0d9488', fontWeight: 700 }}>🛠️ Admin</button>
+          )}
           {user
             ? <button className="web-btn-ghost" type="button" onClick={() => navigate('perfil')}>👤 {user.nombre}</button>
             : authMode === 'login'
@@ -6126,6 +6643,21 @@ function WebPerfil() {
                 <p>{cart.length} en carrito · {list.length} pedido{list.length === 1 ? '' : 's'}</p>
               </div>
             </div>
+
+            {/* Admin Control Banner */}
+            {user && user.role === 'admin' && (
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: '16px', margin: '16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: '#166534' }}>🛠️ Panel de Administración</div>
+                  <div style={{ fontSize: 12, color: '#15803d', marginTop: 2 }}>Agregar, ocultar/mostrar productos, modificar precios Coto y distribuidor</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('admin-productos')}
+                  style={{ background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 16px', fontWeight: 700, fontSize: 13, cursor: 'pointer', flexShrink: 0 }}
+                >Ir al Admin →</button>
+              </div>
+            )}
 
             <h2 className="web-profile-section-title">Tus pedidos</h2>
             <p className="web-profile-section-sub">
