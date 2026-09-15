@@ -1045,6 +1045,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function getMercadoCentralDeepUrl(p) {
+    if (p.mcUrl) return p.mcUrl;
+    const nameUpper = (p.nombre || '').toUpperCase().trim();
+    const cult = (p.cultivo || nameUpper).split(' ')[0];
+    const varName = (p.variedad || '').toUpperCase().trim();
+
+    let cultClean = cult;
+    if (nameUpper.includes('ZAPALLITO')) cultClean = 'ZAPALLITO';
+    else if (nameUpper.includes('PAPA')) cultClean = 'PAPA';
+    else if (nameUpper.includes('TOMATE')) cultClean = 'TOMATE';
+    else if (nameUpper.includes('PIMIENTO') || nameUpper.includes('MORRON')) cultClean = 'PIMIENTO';
+    else if (nameUpper.includes('LECHUGA')) cultClean = 'LECHUGA';
+    else if (nameUpper.includes('CEBOLLA')) cultClean = 'CEBOLLA';
+    else if (nameUpper.includes('CHAUCHA')) cultClean = 'CHAUCHA';
+    else if (nameUpper.includes('AJO')) cultClean = 'AJO';
+    else if (nameUpper.includes('ALCAUCIL')) cultClean = 'ALCAUCIL';
+    else if (nameUpper.includes('REPOLLO')) cultClean = 'REPOLLO';
+    else if (nameUpper.includes('BATATA')) cultClean = 'BATATA';
+
+    let varClean = '';
+    if (varName.includes('REDONDO')) varClean = 'REDONDO';
+    else if (varName.includes('LARGO')) varClean = 'LARGO';
+    else if (varName.includes('PERITA')) varClean = 'PERITA';
+    else if (varName.includes('SPUNTA')) varClean = 'SPUNTA';
+    else if (varName.includes('AGATA')) varClean = 'AGATA';
+    else if (varName.includes('CHERRY')) varClean = 'CHERRY';
+    else if (varName.includes('MORRON')) varClean = 'MORRON';
+    else if (varName.includes('JALAPE')) varClean = 'JALAPEÑO';
+    else if (varName.includes('VINAGRE')) varClean = 'VINAGRE';
+    else if (varName.includes('CAPUCHINA')) varClean = 'CAPUCHINA';
+    else if (varName.includes('CRIOLLA')) varClean = 'CRIOLLA';
+    else if (varName.includes('MANTECOSA')) varClean = 'MANTECOSA';
+    else if (varName.includes('FRANCESA')) varClean = 'CAPUCHINA';
+    else if (varName.includes('COLORADO') || varName.includes('COLORADA')) varClean = 'COLORADO';
+    else if (varName.includes('ESMERALDA')) varClean = 'ESMERALDA';
+    else if (varName.includes('ROLLIZA')) varClean = 'ROLLIZA';
+    else if (varName.includes('ARAPEY')) varClean = 'ARAPEY';
+    else if (varName.includes('BEAUREGARD')) varClean = 'BEAUREGARD';
+    else if (varName.includes('VALENCIANI')) varClean = 'VALENCIANI';
+    else if (varName.includes('OPTIMA')) varClean = 'OPTIMA';
+    else if (varName.includes('TETSUKAB')) varClean = 'TETSUKAB.';
+
+    if (varClean) {
+      return `https://preciosdelcentral.com.ar/buenosaires/detalles45/${encodeURIComponent(cultClean)}/${encodeURIComponent(varClean)}`;
+    }
+    return `https://preciosdelcentral.com.ar/buenosaires/detalles45/${encodeURIComponent(cultClean)}/`;
+  }
+
+  function getCotoDeepUrl(p) {
+    if (p.cotoUrl && p.cotoUrl.includes('cotodigital3.com.ar')) return p.cotoUrl;
+
+    const cat = (p.categoria || '').toLowerCase();
+    if (cat.includes('fruta') || (p.nombre && (p.nombre.toLowerCase().includes('manzana') || p.nombre.toLowerCase().includes('banana') || p.nombre.toLowerCase().includes('naranja') || p.nombre.toLowerCase().includes('mandarina') || p.nombre.toLowerCase().includes('melon') || p.nombre.toLowerCase().includes('pera') || p.nombre.toLowerCase().includes('uva')))) {
+      return 'https://www.cotodigital3.com.ar/sitios/cd/catalogo/frescos/frutas-y-verduras/frutas/_/N-1823908';
+    }
+    return 'https://www.cotodigital3.com.ar/sitios/cd/catalogo/frescos/frutas-y-verduras/verduras/_/N-1100080';
+  }
+
   function renderTable(list) {
     if (list.length === 0) {
       tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">No se encontraron productos que coincidan con la búsqueda.</td></tr>`;
@@ -1060,6 +1118,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const rankBadge = p.topVerduraRank ? `<span class="top10-rank-badge"><i class="fa-solid fa-fire"></i> #${p.topVerduraRank} Verdura Arg</span>` :
                         p.topFrutaRank ? `<span class="top10-rank-badge"><i class="fa-solid fa-fire"></i> #${p.topFrutaRank} Fruta Arg</span>` : '';
       
+      const mcDeepUrl = getMercadoCentralDeepUrl(p);
+      const cotoDeepUrl = getCotoDeepUrl(p);
+
       const baseP = (hasComparison && baseMap) ? baseMap[p.id] : null;
 
       let mcDeltaBadge = '';
@@ -1143,7 +1204,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return `
         <tr class="product-row">
           <td class="td-product">
-            <div class="product-cell">
+            <div class="product-cell open-coto-card" data-coto-id="${p.id}" style="cursor:pointer;" title="Clic para ver recorte y comprobante de precio Coto">
               <img src="${iconUrl}" alt="${p.nombre}" class="product-img">
               <div>
                 <div class="product-title">${p.nombre} ${rankBadge}</div>
@@ -1158,7 +1219,9 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="price-mercado">$ ${formatNumber(p.precioMercadoCentral)} / ${unitStr}</div>
             </div>
             ${mcDeltaBadge}
-            <small class="desktop-subtext">${p.bultoMercadoCentral || 'Venta mayorista'}</small>
+            <a href="${mcDeepUrl}" target="_blank" rel="noopener" class="cert-link cert-link-mercado" title="Verificar cotización oficial en el Mercado Central de Buenos Aires">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Fuente: Mercado Central 🔗
+            </a>
           </td>
 
           <td class="td-coto">
@@ -1167,7 +1230,14 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="price-coto">$ ${formatNumber(p.precioCoto)} / ${unitStr}</div>
             </div>
             ${cotoDeltaBadge}
-            <small class="desktop-subtext">Coto Digital Góndola</small>
+            <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
+              <a href="${cotoDeepUrl}" target="_blank" rel="noopener" class="cert-link cert-link-coto" title="Verificar precio en Coto Digital">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Coto Web 🔗
+              </a>
+              <button type="button" data-coto-id="${p.id}" onclick="event.stopPropagation(); window.openCotoPhotoModal('${p.id.replace(/'/g, "\\'")}')" class="cert-link cert-link-foto open-coto-card" title="Ver recorte y comprobante de precio Coto Digital">
+                <i class="fa-solid fa-camera"></i> Ficha Coto 📷
+              </button>
+            </div>
           </td>
 
           <td class="td-markup">
@@ -1731,4 +1801,102 @@ document.addEventListener('DOMContentLoaded', () => {
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     return `${day}-${months[d.getMonth()]}`;
   }
+
+  // Coto Photo Reference Modal Logic
+  const cotoPhotoModalOverlay = document.getElementById('cotoPhotoModalOverlay');
+  const closeCotoPhotoModalBtn = document.getElementById('closeCotoPhotoModalBtn');
+  const modalCotoPhotoBody = document.getElementById('modalCotoPhotoBody');
+
+  if (closeCotoPhotoModalBtn && cotoPhotoModalOverlay) {
+    closeCotoPhotoModalBtn.addEventListener('click', () => {
+      cotoPhotoModalOverlay.classList.remove('active');
+    });
+    cotoPhotoModalOverlay.addEventListener('click', (e) => {
+      if (e.target === cotoPhotoModalOverlay) cotoPhotoModalOverlay.classList.remove('active');
+    });
+  }
+
+  // Event Delegation for Ficha Coto buttons & product cells
+  if (tableBody) {
+    tableBody.addEventListener('click', (e) => {
+      const targetEl = e.target.closest('[data-coto-id]');
+      if (targetEl) {
+        const pid = targetEl.getAttribute('data-coto-id');
+        if (pid) openCotoPhotoModal(pid);
+      }
+    });
+  }
+
+  window.openCotoPhotoModal = function(productId) {
+    const p = products.find(item => item.id === productId);
+    if (!p) return;
+
+    const fallbackSvg = getProduceSvg(p.nombre);
+    const photoUrl = p.cotoFoto || p.fotoReal || fallbackSvg;
+    const cotoDeepUrl = getCotoDeepUrl(p);
+    const unitStr = (p.unidad || 'Kg').toUpperCase();
+    const markupVal = Math.round(p.markup);
+
+    if (modalCotoPhotoBody && cotoPhotoModalOverlay) {
+      modalCotoPhotoBody.innerHTML = `
+        <div style="background:#ffffff; color:#1f2937; border-radius:14px; padding:18px; border:1px solid #e5e7eb; box-shadow:0 10px 25px rgba(0,0,0,0.25); max-width:340px; margin:0 auto; font-family:sans-serif; text-align:center; position:relative;">
+          
+          <!-- Coto Brand Header -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:2px solid #fee2e2; padding-bottom:8px;">
+            <span style="font-weight:900; font-style:italic; font-size:1.35rem; color:#dc2626; letter-spacing:-0.5px;">
+              COTO <span style="font-size:0.8rem; color:#6b7280; font-style:normal; font-weight:600;">Digital</span>
+            </span>
+            <span style="background:#fee2e2; color:#dc2626; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
+              RELEVAMIENTO OFICIAL
+            </span>
+          </div>
+
+          <!-- Product Image Box -->
+          <div style="height:150px; display:flex; align-items:center; justify-content:center; background:#f9fafb; border-radius:10px; padding:8px; margin-bottom:12px;">
+            <img src="${photoUrl}" alt="${p.nombre}" onerror="this.onerror=null; this.src='${fallbackSvg}';" style="max-height:135px; max-width:100%; object-fit:contain;">
+          </div>
+
+          <!-- Product Title -->
+          <div style="font-size:1.05rem; font-weight:800; color:#111827; margin-bottom:6px; line-height:1.2;">
+            ${p.nombre} X${unitStr}
+          </div>
+
+          <!-- Coto Offer Badges -->
+          <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+            <span style="background:#f3f4f6; color:#4b5563; font-size:10px; font-weight:600; padding:2px 8px; border-radius:12px; border:1px solid #e5e7eb;">No acumulable con otras promos</span>
+            <span style="background:#fef08a; color:#854d0e; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px; border:1px solid #fde047;">Oferta</span>
+          </div>
+
+          <!-- Coto Red Price -->
+          <div style="font-size:1.85rem; font-weight:900; color:#dc2626; margin-bottom:2px; letter-spacing:-0.5px;">
+            $ ${formatNumber(p.precioCoto)},00
+          </div>
+
+          <!-- Unit details -->
+          <div style="font-size:11px; color:#6b7280; margin-bottom:14px;">
+            1 ${unitStr} • Precio por 1 ${p.unidad || 'Kilogramo'}: $ ${formatNumber(p.precioCoto)},00
+          </div>
+
+          <!-- Direct Coto Web Button -->
+          <a href="${cotoDeepUrl}" target="_blank" rel="noopener" style="display:block; background:#dc2626; color:#ffffff; font-weight:700; font-size:0.88rem; padding:10px; border-radius:20px; text-decoration:none; margin-bottom:14px; box-shadow:0 3px 8px rgba(220,38,38,0.3);">
+            <i class="fa-solid fa-cart-shopping"></i> Abrir Enlace en Coto Digital 🔗
+          </a>
+
+          <!-- Comparison footer box vs Mercado Central -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; text-align:left; font-size:0.78rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <span style="color:#64748b;"><i class="fa-solid fa-building text-success"></i> Central (Mayorista):</span>
+              <strong style="color:#059669;">$ ${formatNumber(p.precioMercadoCentral)} / ${unitStr}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-top:1px dashed #cbd5e1; pt:3px; margin-top:3px;">
+              <span style="color:#0f172a; font-weight:700;">Brecha de Distribución:</span>
+              <strong style="color:#dc2626;">+${markupVal}% (+$${formatNumber(p.savings)}/${unitStr})</strong>
+            </div>
+          </div>
+
+        </div>
+      `;
+      cotoPhotoModalOverlay.classList.add('active');
+    }
+  };
 });

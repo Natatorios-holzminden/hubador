@@ -254,7 +254,7 @@ for block in cards_raw[1:]:
                 "origeneSeries": origins,
                 "fechasSeries": fechas
             },
-            "actualizado": "2026-08-10 (En vivo)"
+            "actualizado": "15/09/2026 (En vivo)"
         }
 
 dataset = list(products_map.values())
@@ -263,4 +263,7 @@ dataset.sort(key=lambda x: x["markup"], reverse=True)
 with open("data.json", "w", encoding="utf-8") as f:
     json.dump(dataset, f, ensure_ascii=False, indent=2)
 
-print(f"SUCCESSfully generated data.json with {len(dataset)} items including Official Mercado Central Line Series!")
+with open("data.js", "w", encoding="utf-8") as f:
+    f.write("window.INITIAL_DATA = " + json.dumps(dataset, ensure_ascii=False) + ";\n")
+
+print(f"SUCCESSfully generated data.json and data.js with {len(dataset)} items for 15/09/2026!")

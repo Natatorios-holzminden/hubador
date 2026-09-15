@@ -1971,5 +1971,108 @@ body {
   }
 }
 
+/* Verification link badges */
+.cert-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 5px 10px !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  margin-top: 6px !important;
+  transition: all 0.2s ease !important;
+}
+.cert-link-mercado {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+.cert-link-mercado:hover {
+  background: rgba(16, 185, 129, 0.35) !important;
+  color: #a7f3d0 !important;
+  transform: translateY(-1px);
+}
+.cert-link-coto {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+.cert-link-coto:hover {
+  background: rgba(239, 68, 68, 0.35) !important;
+  color: #fca5a5 !important;
+  transform: translateY(-1px);
+}
+
+.cert-link-foto {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  cursor: pointer !important;
+}
+.cert-link-foto:hover {
+  background: rgba(245, 158, 11, 0.35) !important;
+  color: #fef08a !important;
+  transform: translateY(-1px);
+}
+
+/* Coto Digital Reference Product Card Modal */
+.coto-card-modal {
+  max-width: 420px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  background: #111827 !important;
+}
+
+.coto-ref-card {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  text-align: center !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+.coto-ref-img {
+  max-height: 180px !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  margin-bottom: 1rem !important;
+  border-radius: 8px !important;
+}
+
+.coto-ref-title {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.coto-ref-price {
+  font-size: 1.6rem !important;
+  font-weight: 800 !important;
+  color: #dc2626 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.coto-ref-sub {
+  font-size: 0.85rem !important;
+  color: #6b7280 !important;
+  margin-bottom: 1rem !important;
+}
+
+.coto-badge-oferta {
+  display: inline-block !important;
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  border: 1px solid #fecaca !important;
+  margin-bottom: 1rem !important;
+}
+
 
 

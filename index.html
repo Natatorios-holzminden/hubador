@@ -767,12 +767,12 @@ html.app-mode .web-root { min-height: 100vh; }
   padding: 5px 11px; font-size: 12px; font-weight: 700; margin: 0;
 }
 .web-hero-copy {
-  display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 210px;
+  display: flex; flex-direction: column; min-width: 0; min-height: 0; max-height: 255px;
 }
 .web-hero-panel {
   flex: 1; display: grid; grid-template-columns: minmax(120px, .85fr) minmax(200px, 1.25fr);
   align-items: stretch; gap: 0; padding: 0; overflow: hidden;
-  border-radius: 16px; min-height: 0; max-height: 210px; height: 210px;
+  border-radius: 16px; min-height: 0; max-height: 255px; height: 255px;
   background:
     linear-gradient(165deg, rgba(255,255,255,.92) 0%, rgba(236,253,245,.78) 55%, rgba(255,255,255,.88) 100%);
   border: 1px solid rgba(167, 198, 182, .55);
@@ -783,7 +783,7 @@ html.app-mode .web-root { min-height: 100vh; }
   -webkit-backdrop-filter: blur(8px);
 }
 .web-hero-panel-media {
-  position: relative; min-height: 0; height: 100%; max-height: 210px; background: #1a2e24;
+  position: relative; min-height: 0; height: 100%; max-height: 255px; background: #1a2e24;
 }
 .web-hero-panel-media img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -794,8 +794,8 @@ html.app-mode .web-root { min-height: 100vh; }
   background: none;
 }
 .web-hero-panel-copy {
-  display: flex; flex-direction: column; justify-content: center;
-  gap: 8px; padding: 12px 16px 12px;
+  display: flex; flex-direction: column; justify-content: flex-start;
+  gap: 8px; padding: 14px 18px 14px;
   background: linear-gradient(165deg, rgba(255,255,255,.96) 0%, rgba(236,253,245,.92) 100%);
   overflow: hidden;
 }
@@ -940,7 +940,7 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-hero-card-price span { font-size: 14px; color: #6b736e; font-weight: 600; }
 .web-hero-card-price s { font-size: 15px; color: #9aa39c; margin-left: 6px; }
 .web-hero-card-meta { font-size: 13px; color: #6b736e; }
-.web-section { max-width: min(1440px, calc(100% - 64px)); margin: 0 auto; padding: 48px 32px; }
+.web-section { max-width: min(1680px, calc(100% - 48px)); margin: 0 auto; padding: 32px 28px; }
 .web-section-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 22px; }
 .web-section-head h2 { margin: 0; font-size: 28px; letter-spacing: -0.03em; font-weight: 900; }
 .web-section-head p { margin: 6px 0 0; color: #6b736e; }
@@ -956,8 +956,13 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-card-img { position: relative; aspect-ratio: 4/3; overflow: hidden; }
 .web-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .web-badge {
-  position: absolute; top: 10px; left: 10px; background: #16a34a; color: #fff;
-  border-radius: 999px; padding: 5px 11px; font-size: 13px; font-weight: 800;
+  position: absolute !important; top: 16px !important; left: -32px !important;
+  width: 120px !important; background: #ff0000 !important; color: #ffffff !important;
+  font-weight: 900 !important; font-size: 13px !important; letter-spacing: 0.02em !important;
+  text-align: center !important; transform: rotate(-45deg) !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35) !important; padding: 4px 0 !important;
+  border-radius: 0 !important; z-index: 10 !important; white-space: nowrap !important;
+  line-height: 1 !important;
 }
 .web-check {
   position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; border-radius: 50%;
@@ -1036,7 +1041,7 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-banner-copy h1 { margin: 8px 0 6px; font-size: 36px; letter-spacing: -0.03em; font-weight: 900; }
 .web-banner-copy p { margin: 0; font-size: 16px; opacity: 0.92; }
 .web-banner-copy strong { color: #bbf7d0; }
-.web-toolbar { max-width: min(1440px, calc(100% - 64px)); margin: 0 auto; padding: 10px 32px 0; }
+.web-toolbar { max-width: min(1680px, calc(100% - 48px)); margin: 0 auto; padding: 10px 28px 0; }
 .web-section-tight { padding-top: 12px; }
 .web-cats { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 0; }
 .web-cats button {
@@ -1088,9 +1093,9 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-price-now { display: flex; align-items: baseline; gap: 4px; }
 .web-price-now strong { font-size: 17px; color: oklch(0.48 0.12 165); font-weight: 900; }
 .web-price-now span { font-size: 12px; color: #888; }
-.web-price-coto { display: flex !important; flex-direction: column; line-height: 1; }
-.web-price-coto s { font-size: 13px; color: #e0524a; font-weight: 600; text-decoration-color: #e0524a; }
-.web-price-coto em { font-style: normal; font-size: 10px; color: #e0524a; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; }
+.web-price-coto { display: flex !important; flex-direction: column; line-height: 1.1; margin-left: 2px; }
+.web-price-coto s { font-size: 16px !important; color: #dc2626 !important; font-weight: 750 !important; text-decoration: line-through !important; text-decoration-thickness: 1.2px !important; text-decoration-color: rgba(220, 38, 38, 0.55) !important; }
+.web-price-coto em { font-style: normal; font-size: 11px !important; color: #dc2626 !important; font-weight: 800 !important; letter-spacing: .06em; text-transform: uppercase; margin-top: 1px; }
 .web-countdown-wrap { margin: 1px 0 2px; }
 .web-prod-meta { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 11.5px; color: #888; }
 .web-prod-meta .web-deadline-line { flex-shrink: 0; white-space: nowrap; }
@@ -1136,8 +1141,8 @@ html.app-mode .web-root { min-height: 100vh; }
   color: #445; padding: 8px 10px; border-radius: 8px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
 }
 .web-links button:hover { background: #eef6f3; color: oklch(0.45 0.12 165); }
-.web-main { max-width: min(1440px, calc(100% - 64px)); margin: 0 auto; padding: 24px 32px 48px; }
-.web-main-wide { max-width: min(1440px, calc(100% - 64px)); }
+.web-main { max-width: min(1680px, calc(100% - 48px)); margin: 0 auto; padding: 24px 28px 48px; }
+.web-main-wide { max-width: min(1680px, calc(100% - 48px)); }
 .web-auth-wrap { min-height: 70vh; display: grid; place-items: center; padding: 24px; }
 .web-auth-card {
   width: min(420px, 100%); background: #fff; border: 1px solid #e6e8e3; border-radius: 18px;
@@ -1460,9 +1465,10 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-comp-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
 .web-comp-head h1 { margin: 0; }
 .web-port { background: #fff; border: 1px solid #e6e8e3; border-radius: 16px; overflow: hidden; }
-.web-port-tall { min-height: 640px; height: calc(100vh - 240px); }
-.web-port-map { min-height: 680px; height: calc(100vh - 220px); }
-.web-port-map > div, .web-port-tall > div { height: 100% !important; }
+.web-port-tall { min-height: 640px; height: auto; overflow: visible; }
+.web-port-map { min-height: 680px; height: calc(100vh - 220px); overflow: hidden; }
+.web-port-map > div { height: 100% !important; }
+.web-port-tall > div { min-height: 100%; }
 .web-admin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
 .web-admin-tile {
   background: #fff; border: 1px solid #e6e8e3; border-radius: 12px; padding: 16px; font: inherit;
@@ -1483,8 +1489,13 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-prod-card .web-prod-meta { display: flex !important; justify-content: space-between; font-size: 11.5px; color: #888; margin-bottom: 2px; }
 .web-progress i { display: block; height: 100%; border-radius: 999px; }
 .web-badge {
-  position: absolute; top: 14px; left: 14px; background: oklch(0.65 0.2 145); color: #fff;
-  border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 800;
+  position: absolute !important; top: 16px !important; left: -32px !important;
+  width: 120px !important; background: #ff0000 !important; color: #ffffff !important;
+  font-weight: 900 !important; font-size: 13px !important; letter-spacing: 0.02em !important;
+  text-align: center !important; transform: rotate(-45deg) !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35) !important; padding: 4px 0 !important;
+  border-radius: 0 !important; z-index: 10 !important; white-space: nowrap !important;
+  line-height: 1 !important;
 }
 .web-check {
   position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 50%;
@@ -2175,7 +2186,7 @@ function grupoFromHubadorProduct(p, barrio) {
   return {
     product: p.name, location: barrio || 'Palermo', members: p.members, progress: live.pct,
     closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit,
-    disc: p.disc, img: p.img, cat: p.cat, totalKg: GOAL_KG,
+    disc: p.disc, img: p.img, cat: p.cat, desc: p.desc || p.descripcion, totalKg: GOAL_KG,
     precioActualizado: !!p.precioActualizado, status: 'abierto',
   };
 }
@@ -2987,7 +2998,14 @@ function MobileLogin() {
     if (!valid || busy) return;
     setBusy(true);
     try {
-      if (email.trim().toLowerCase() === 'demo@hubador.app' && pass === 'demo1234') {
+      const emLower = email.trim().toLowerCase();
+      if (emLower === 'admin@hubador.app' && (pass === 'admin1234' || pass === 'admin')) {
+        login({ nombre: 'Admin HUBADOR', email: 'admin@hubador.app', role: 'admin', barrio: 'Buenos Aires' });
+        showToast('🔓 Sesión de Admin iniciada');
+        navigate('admin-productos');
+        return;
+      }
+      if (emLower === 'demo@hubador.app' && pass === 'demo1234') {
         login({ nombre: 'Demo', email: 'demo@hubador.app', barrio: 'Buenos Aires', role: 'user' });
         showToast('Entraste en modo demo');
         navigate('home');
@@ -3490,8 +3508,8 @@ function MobileAdminProductos() {
   const [editingItem, setEditingItem] = React.useState(null);
 
   const [form, setForm] = React.useState({
-    id: '', name: '', cat: 'verduras', priceN: 1500, oldN: 2500, distribuidorN: 800,
-    unit: '/kg', stock: 100, img: 'img/papa.jpg', oculto: false
+    id: '', name: '', cat: 'verduras', priceN: 1500, oldN: 2500, distribuidorN: 0,
+    unit: '/kg', stock: 100, img: 'img/papa.jpg', desc: '', oculto: false
   });
 
   const reload = () => {
@@ -3520,10 +3538,11 @@ function MobileAdminProductos() {
       cat: 'verduras',
       priceN: 1200,
       oldN: 2000,
-      distribuidorN: 600,
+      distribuidorN: 0,
       unit: '/kg',
       stock: 100,
       img: 'img/papa.jpg',
+      desc: '',
       oculto: false
     });
     setModalOpen(true);
@@ -3541,6 +3560,7 @@ function MobileAdminProductos() {
       unit: item.unit || '/kg',
       stock: item.stock != null ? item.stock : 100,
       img: item.img || 'img/papa.jpg',
+      desc: item.desc || item.descripcion || '',
       oculto: !!item.oculto
     });
     setModalOpen(true);
@@ -3555,8 +3575,9 @@ function MobileAdminProductos() {
       ...form,
       priceN: Number(form.priceN),
       oldN: Number(form.oldN),
-      distribuidorN: Number(form.distribuidorN),
-      stock: Number(form.stock)
+      distribuidorN: Number(form.distribuidorN || 0),
+      stock: Number(form.stock),
+      desc: form.desc ? form.desc.trim() : ''
     };
 
     if (editingItem) {
@@ -3582,9 +3603,10 @@ function MobileAdminProductos() {
   const filtered = items.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     if (!matchSearch) return false;
+    if (filterCat === 'activos') return !p.oculto;
     if (filterCat === 'ocultos') return p.oculto;
-    if (filterCat === 'verduras') return p.cat === 'verduras' && !p.oculto;
-    if (filterCat === 'frutas') return p.cat === 'frutas' && !p.oculto;
+    if (filterCat === 'verduras') return p.cat === 'verduras';
+    if (filterCat === 'frutas') return p.cat === 'frutas';
     return true;
   });
 
@@ -3600,17 +3622,51 @@ function MobileAdminProductos() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>Control del Catálogo</div>
-              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Coto, distribuidor y visibilidad</div>
+              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Coto y visibilidad en tienda</div>
             </div>
             <button
               onClick={handleOpenCreate}
               style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
             >+ Nuevo</button>
           </div>
+
+          {/* Interactive Stat Filters */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, background: '#f1f5f9', color: '#334155', borderRadius: 999, padding: '3px 9px' }}>📦 Total: {items.length}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, background: '#dcfce7', color: '#15803d', borderRadius: 999, padding: '3px 9px' }}>🟢 Activos: {countActivos}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, background: '#fee2e2', color: '#b91c1c', borderRadius: 999, padding: '3px 9px' }}>🙈 Ocultos: {countOcultos}</span>
+            <button
+              type="button"
+              onClick={() => setFilterCat('todos')}
+              style={{
+                fontSize: 11.5, fontWeight: 800,
+                background: filterCat === 'todos' ? '#334155' : '#f1f5f9',
+                color: filterCat === 'todos' ? '#fff' : '#334155',
+                border: 'none', borderRadius: 999, padding: '5px 12px',
+                cursor: 'pointer', transition: 'all 0.15s ease'
+              }}
+            >📦 Total: {items.length}</button>
+
+            <button
+              type="button"
+              onClick={() => setFilterCat('activos')}
+              style={{
+                fontSize: 11.5, fontWeight: 800,
+                background: filterCat === 'activos' ? '#16a34a' : '#dcfce7',
+                color: filterCat === 'activos' ? '#fff' : '#15803d',
+                border: 'none', borderRadius: 999, padding: '5px 12px',
+                cursor: 'pointer', transition: 'all 0.15s ease'
+              }}
+            >🟢 Activos: {countActivos}</button>
+
+            <button
+              type="button"
+              onClick={() => setFilterCat('ocultos')}
+              style={{
+                fontSize: 11.5, fontWeight: 800,
+                background: filterCat === 'ocultos' ? '#dc2626' : '#fee2e2',
+                color: filterCat === 'ocultos' ? '#fff' : '#b91c1c',
+                border: 'none', borderRadius: 999, padding: '5px 12px',
+                cursor: 'pointer', transition: 'all 0.15s ease'
+              }}
+            >🙈 Ocultos: {countOcultos}</button>
           </div>
         </div>
 
@@ -3623,10 +3679,11 @@ function MobileAdminProductos() {
 
           <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
             {[
-              { id: 'todos', label: 'Todos' },
+              { id: 'todos', label: `Todos (${items.length})` },
+              { id: 'activos', label: `🟢 Activos (${countActivos})` },
+              { id: 'ocultos', label: `🙈 Ocultos (${countOcultos})` },
               { id: 'verduras', label: '🥬 Verduras' },
               { id: 'frutas', label: '🍎 Frutas' },
-              { id: 'ocultos', label: `🙈 Ocultos (${countOcultos})` },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -3643,74 +3700,125 @@ function MobileAdminProductos() {
           </div>
         </div>
 
-        {/* Product Cards List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Product Cards Grid (Catalog Style for Admin) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
           {filtered.map((p) => {
             const discPct = p.disc != null ? p.disc : (p.oldN > 0 ? calcDisc(p.priceN, p.oldN) : 0);
-            const ganancia = p.priceN - (p.distribuidorN || 0);
+            const ahorro = Math.max(0, (p.oldN || 0) - (p.priceN || 0));
 
             return (
-              <div key={p.id} style={{ background: p.oculto ? '#f8fafc' : '#fff', border: p.oculto ? '1px dashed #cbd5e1' : '1px solid #e2e8f0', borderRadius: 14, padding: 12, display: 'flex', flexDirection: 'column', gap: 10, opacity: p.oculto ? 0.78 : 1 }}>
-                
-                {/* Header info */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', flexShrink: 0, border: '1px solid #f1f5f9' }}>
-                    <img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 800, fontSize: 14, color: '#0f172a' }}>{p.name}</span>
-                      <span style={{ fontSize: 10, fontWeight: 700, background: '#f1f5f9', color: '#475569', borderRadius: 4, padding: '1px 5px' }}>{p.cat}</span>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: '#64748b' }}>{p.unit}</span>
+              <div
+                key={p.id}
+                style={{
+                  background: '#fff',
+                  border: p.oculto ? '1px dashed #cbd5e1' : '1px solid #e2e8f0',
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                  opacity: p.oculto ? 0.8 : 1,
+                  position: 'relative'
+                }}
+              >
+                {/* Large Product Image like Main Catalog */}
+                <div style={{ position: 'relative', height: 160, width: '100%', background: '#f8fafc', overflow: 'hidden' }}>
+                  <img
+                    src={p.img}
+                    alt={p.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+
+                  {/* Discount Badge */}
+                  {discPct > 0 && (
+                    <span style={{
+                      position: 'absolute', top: 10, left: 10,
+                      background: '#00be74', color: '#fff',
+                      fontSize: 11.5, fontWeight: 800,
+                      padding: '3px 8px', borderRadius: 999,
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                      zIndex: 2
+                    }}>
+                      ↓ {discPct}%
+                    </span>
+                  )}
+
+                  {/* Status Badge */}
+                  <span style={{
+                    position: 'absolute', top: 10, right: 10,
+                    background: p.oculto ? '#fee2e2' : '#dcfce7',
+                    color: p.oculto ? '#dc2626' : '#15803d',
+                    fontSize: 10.5, fontWeight: 800,
+                    padding: '3px 8px', borderRadius: 999,
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                    zIndex: 2
+                  }}>
+                    {p.oculto ? '🙈 Oculto' : '🟢 Visible'}
+                  </span>
+                </div>
+
+                {/* Card Body */}
+                <div style={{ padding: 12, display: 'flex', flexDirection: 'column', flex: 1, gap: 6 }}>
+                  
+                  {/* Name and category */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>{p.name}</h3>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', background: '#f1f5f9', padding: '2px 6px', borderRadius: 4 }}>{p.cat}</span>
                     </div>
-                    <div style={{ marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      {p.oculto ? (
-                        <span style={{ fontSize: 10.5, fontWeight: 700, color: '#dc2626', background: '#fee2e2', padding: '1px 6px', borderRadius: 999 }}>🙈 OCULTO (No visible en tienda)</span>
-                      ) : (
-                        <span style={{ fontSize: 10.5, fontWeight: 700, color: '#16a34a', background: '#dcfce7', padding: '1px 6px', borderRadius: 999 }}>🟢 VISIBLE en tienda</span>
-                      )}
+                    {p.desc && (
+                      <p style={{ margin: '4px 0 0', fontSize: 11.5, color: '#64748b', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {p.desc}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Prices: Coto vs HUBADOR */}
+                  <div style={{ marginTop: 'auto', paddingTop: 6, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 18, fontWeight: 900, color: '#0d9488' }}>
+                      {p.price || fmtPrecioAR(p.priceN)}
+                      <small style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{p.unit}</small>
+                    </span>
+                    {(p.oldN > 0 || p.old) && (
+                      <span style={{ fontSize: 12, color: '#ef4444', textDecoration: 'line-through', fontWeight: 700 }}>
+                        {p.old || fmtPrecioAR(p.oldN)} <small style={{ textDecoration: 'none', color: '#ef4444', fontSize: 10 }}>COTO</small>
+                      </span>
+                    )}
+                  </div>
+
+                  {ahorro > 0 && (
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', background: '#ecfdf5', padding: '3px 6px', borderRadius: 4, width: 'fit-content' }}>
+                      Ahorrás {fmtPrecioAR(ahorro)}{p.unit} vs Coto
                     </div>
-                  </div>
-                </div>
+                  )}
 
-                {/* 3 Prices Dashboard */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, background: '#f8fafc', padding: 8, borderRadius: 10, border: '1px solid #f1f5f9' }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#ef4444', textTransform: 'uppercase' }}>Coto (Góndola)</div>
-                    <div style={{ fontWeight: 800, fontSize: 13, color: '#ef4444' }}>{p.old || fmtPrecioAR(p.oldN)}</div>
+                  {/* Admin Actions Bar */}
+                  <div style={{ display: 'flex', gap: 6, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(p)}
+                      style={{ flex: 1, background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 10px', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleOculto(p)}
+                      style={{ background: p.oculto ? '#dcfce7' : '#f1f5f9', color: p.oculto ? '#15803d' : '#475569', border: '1px solid #cbd5e1', borderRadius: 8, padding: '8px 10px', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                      title={p.oculto ? 'Hacer visible' : 'Ocultar'}
+                    >
+                      {p.oculto ? '🟢 Mostrar' : '🙈 Ocultar'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(p)}
+                      style={{ background: '#fff', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 8, padding: '8px 10px', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                      title="Eliminar producto"
+                    >
+                      🗑️
+                    </button>
                   </div>
-                  <div style={{ textAlign: 'center', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Distribuidor</div>
-                    <div style={{ fontWeight: 800, fontSize: 13, color: '#334155' }}>{fmtPrecioAR(p.distribuidorN || 0)}</div>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>HUBADOR</div>
-                    <div style={{ fontWeight: 800, fontSize: 13, color: '#0d9488' }}>{p.price || fmtPrecioAR(p.priceN)}</div>
-                  </div>
-                </div>
 
-                {/* Financial Metrics */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#64748b', padding: '0 2px' }}>
-                  <span>Descuento Coto: <b style={{ color: '#2563eb' }}>-{discPct}%</b></span>
-                  <span>Ganancia/Margen: <b style={{ color: ganancia >= 0 ? '#16a34a' : '#dc2626' }}>{ganancia >= 0 ? '+' : ''}{fmtPrecioAR(ganancia)}{p.unit}</b></span>
-                </div>
-
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: 6, paddingTop: 2 }}>
-                  <button
-                    onClick={() => handleToggleOculto(p)}
-                    style={{ flex: 1, background: p.oculto ? '#dcfce7' : '#f1f5f9', color: p.oculto ? '#15803d' : '#475569', border: '1px solid #e2e8f0', borderRadius: 7, padding: '7px', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
-                  >
-                    {p.oculto ? '🟢 Mostrar' : '🙈 Ocultar'}
-                  </button>
-                  <button
-                    onClick={() => handleOpenEdit(p)}
-                    style={{ flex: 1, background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 7, padding: '7px', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
-                  >✏️ Editar</button>
-                  <button
-                    onClick={() => handleDelete(p)}
-                    style={{ background: '#fff', border: '1px solid #fee2e2', color: '#dc2626', borderRadius: 7, padding: '7px 9px', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
-                  >🗑️</button>
                 </div>
 
               </div>
@@ -3718,7 +3826,7 @@ function MobileAdminProductos() {
           })}
 
           {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '36px 16px', background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', color: '#64748b', fontSize: 13 }}>
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '36px 16px', background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', color: '#64748b', fontSize: 13 }}>
               No hay productos que coincidan con la búsqueda.
             </div>
           )}
@@ -3779,9 +3887,21 @@ function MobileAdminProductos() {
                   </div>
                 </div>
 
-                {/* Precios: Coto, Distribuidor, HUBADOR */}
+                {/* Descripción */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Descripción del producto</label>
+                  <textarea
+                    value={form.desc || ''}
+                    onChange={(e) => setForm({ ...form, desc: e.target.value })}
+                    placeholder="Ej: Directo de quinta. Selección fresca de primera calidad..."
+                    rows={2}
+                    style={{ width: '100%', border: '1px solid #cbd5e1', borderRadius: 8, padding: '8px 10px', fontFamily: 'inherit', fontSize: 12.5, boxSizing: 'border-box', resize: 'vertical' }}
+                  />
+                </div>
+
+                {/* Precios: Coto vs HUBADOR */}
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>Precios ($ / {form.unit === '/u' ? 'unidad' : 'kilo'})</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>Comparativa de Precios ($ / {form.unit === '/u' ? 'unidad' : 'kilo'})</div>
 
                   <div>
                     <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#ef4444', marginBottom: 3 }}>Precio Coto (Supermercado / Referencia)</label>
@@ -3796,19 +3916,7 @@ function MobileAdminProductos() {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#475569', marginBottom: 3 }}>Costo Mayorista / Distribuidor (Tu costo)</label>
-                    <input
-                      required
-                      type="number"
-                      value={form.distribuidorN}
-                      onChange={(e) => setForm({ ...form, distribuidorN: e.target.value })}
-                      placeholder="Ej: 526"
-                      style={{ width: '100%', height: 38, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 10px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, color: '#334155', boxSizing: 'border-box' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#0d9488', marginBottom: 3 }}>Precio HUBADOR (Precio final en grupo)</label>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#0d9488', marginBottom: 3 }}>Precio HUBADOR (Precio final de oferta)</label>
                     <input
                       required
                       type="number"
@@ -3820,22 +3928,50 @@ function MobileAdminProductos() {
                   </div>
 
                   {/* Calculated metrics live preview */}
-                  <div style={{ fontSize: 11, color: '#64748b', background: '#fff', padding: '6px 8px', borderRadius: 6, border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Descuento: <b>-{form.oldN > 0 ? calcDisc(Number(form.priceN), Number(form.oldN)) : 0}%</b></span>
-                    <span>Margen: <b style={{ color: (Number(form.priceN) - Number(form.distribuidorN)) >= 0 ? '#16a34a' : '#dc2626' }}>+${Number(form.priceN) - Number(form.distribuidorN)}</b></span>
+                  <div style={{ fontSize: 11.5, color: '#0f172a', background: '#ecfdf5', padding: '8px 10px', borderRadius: 8, border: '1px solid #a7f3d0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Descuento: <b style={{ color: '#047857' }}>-{form.oldN > 0 ? calcDisc(Number(form.priceN), Number(form.oldN)) : 0}% OFF</b></span>
+                    <span>Diferencia vs Coto: <b style={{ color: '#047857' }}>-${Math.max(0, Number(form.oldN) - Number(form.priceN))}</b></span>
                   </div>
                 </div>
 
                 {/* Imagen */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Imagen URL</label>
-                  <input
-                    type="text"
-                    value={form.img}
-                    onChange={(e) => setForm({ ...form, img: e.target.value })}
-                    placeholder="img/papa.jpg o URL web"
-                    style={{ width: '100%', height: 38, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 10px', fontFamily: 'inherit', fontSize: 12, boxSizing: 'border-box', marginBottom: 6 }}
-                  />
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Foto / Imagen del producto</label>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                    <input
+                      type="text"
+                      value={form.img}
+                      onChange={(e) => setForm({ ...form, img: e.target.value })}
+                      placeholder="img/papa.jpg o URL web"
+                      style={{ flex: 1, height: 38, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 10px', fontFamily: 'inherit', fontSize: 12, boxSizing: 'border-box' }}
+                    />
+                    <label style={{ background: '#0284c7', color: '#fff', padding: '0 12px', height: 38, borderRadius: 8, fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', cursor: 'pointer', whiteSpace: 'nowrap', gap: 4 }}>
+                      📷 Subir / Tomar foto
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files && e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              setForm(prev => ({ ...prev, img: ev.target.result }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {form.img && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f8fafc', padding: 6, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 8 }}>
+                      <img src={form.img} alt="Vista previa" style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 6, border: '1px solid #cbd5e1' }} />
+                      <span style={{ fontSize: 11, color: '#475569', fontWeight: 600 }}>Vista previa de foto asignada</span>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     {[
                       { l: '🥔 Papa', u: 'img/papa.jpg' },
@@ -5769,9 +5905,14 @@ function WebHome() {
   const setSearch = (v) => { if (typeof setWebSearch === 'function') setWebSearch(v); };
   const [cat, setCat] = React.useState('todos');
   const [sort, setSort] = React.useState('relevancia');
-  const [showFilters, setShowFilters] = React.useState(false);
+  const [catalogItems, setCatalogItems] = React.useState(() => HUBADOR_CATALOG.map(hubadorCard));
+  React.useEffect(() => {
+    const handleUpdate = () => setCatalogItems(HUBADOR_CATALOG.map(hubadorCard));
+    window.addEventListener('hubador_catalog_updated', handleUpdate);
+    return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
+  }, []);
 
-  const allProducts = HUBADOR_CATALOG.map(hubadorCard);
+  const allProducts = catalogItems;
 
   const categories = [
     { id: 'todos', label: 'Todos', emoji: '🌿' },
@@ -5836,7 +5977,7 @@ function WebHome() {
                     </svg>
                     <span>Recibir precios por WhatsApp</span>
                   </a>
-                  <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: 500 }}>
+                  <div style={{ color: '#4b564f', fontSize: 12, fontWeight: 500 }}>
                     🔒 Sin spam. Accedé a los precios de hoy en tu barrio.
                   </div>
                 </div>
@@ -5901,7 +6042,7 @@ function WebHome() {
                   <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative', width: '100%' }}>
                     <img src={p.img} alt={p.name} width={400} height={150}
                       style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
-                    <span className="web-badge">↓ {p.disc}%</span>
+                    <span className="web-badge">-{p.disc}%</span>
                     <span className={'web-check' + (p.precioActualizado ? '' : ' web-check-red')}>✓</span>
                   </div>
                   <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px', minHeight: 0 }}>
@@ -6006,9 +6147,6 @@ function WebHeader({ showSearch = true, authMode = null }) {
           )}
         </nav>
         <div className="web-nav-actions">
-          {user && user.role === 'admin' && (
-            <button className="web-btn-ghost" type="button" onClick={() => navigate('admin-productos')} style={{ color: '#0d9488', border: '1px solid #0d9488', fontWeight: 700 }}>🛠️ Admin</button>
-          )}
           {user
             ? <button className="web-btn-ghost" type="button" onClick={() => navigate('perfil')}>👤 {user.nombre}</button>
             : authMode === 'login'
@@ -6070,7 +6208,14 @@ function WebLogin() {
     if (busy) return;
     setBusy(true);
     try {
-      if (email.trim().toLowerCase() === 'demo@hubador.app' && pass === 'demo1234') {
+      const emLower = email.trim().toLowerCase();
+      if (emLower === 'admin@hubador.app' && (pass === 'admin1234' || pass === 'admin')) {
+        login({ nombre: 'Admin HUBADOR', email: 'admin@hubador.app', role: 'admin', barrio: 'Buenos Aires' });
+        showToast('🔓 Sesión de Admin iniciada');
+        navigate('admin-productos');
+        return;
+      }
+      if (emLower === 'demo@hubador.app' && pass === 'demo1234') {
         login({ nombre: 'Demo', email: 'demo@hubador.app', barrio: 'Buenos Aires', role: 'user' });
         showToast('Entraste en modo demo');
         navigate('home');
@@ -6106,7 +6251,7 @@ function WebLogin() {
         <button className="web-btn" type="submit" disabled={busy}>{busy ? 'Ingresando…' : 'Ingresar'}</button>
       </form>
       <button type="button" onClick={enterDemo} disabled={busy} className="web-btn" style={{ marginTop: 10, background: '#fff', color: 'oklch(0.55 0.15 165)', border: '1px solid oklch(0.55 0.15 165)' }}>Entrar como demo</button>
-      <p style={{ fontSize: 12, color: '#888', marginTop: 10, textAlign: 'center' }}>Demo: demo@hubador.app / demo1234</p>
+      <p style={{ fontSize: 12, color: '#888', marginTop: 10, textAlign: 'center' }}>Demo: demo@hubador.app / demo1234 · Admin: admin@hubador.app / admin1234</p>
       <p className="web-auth-switch">¿No tenés cuenta? <button type="button" onClick={() => navigate('signup')}>Registrate</button></p>
     </WebAuthCard>
   );
@@ -6267,7 +6412,7 @@ function WebGrupoDetalle() {
   const catFromCatalog = (catalog.find((p) => p.name === g.product) || {}).cat || g.cat || 'frescos';
   const catLabel = catFromCatalog === 'frutas' ? 'Fruta' : catFromCatalog === 'verduras' ? 'Verdura' : 'Fresco';
   const unitLong = g.unit === '/u' ? 'por unidad' : 'por kg';
-  const detailBlurb = `${catLabel} fresca · se vende ${unitLong}. Cosecha de la semana, sin intermediarios. Retirás en el hub de ${g.location || 'tu barrio'}.`;
+  const detailBlurb = g.desc || g.descripcion || (selected && (selected.desc || selected.descripcion)) || `${catLabel} fresca · se vende ${unitLong}. Cosecha de la semana, sin intermediarios. Retirás en el hub de ${g.location || 'tu barrio'}.`;
 
   React.useEffect(() => {
     setQty(2);
@@ -6320,7 +6465,7 @@ function WebGrupoDetalle() {
         <div className="web-detail-grid">
           <div className="web-detail-media">
             <img src={g.img} alt={g.product} />
-            {g.disc != null && <span className="web-badge">↓ {g.disc}%</span>}
+            {g.disc != null && <span className="web-badge">-{g.disc}%</span>}
             <span className={'web-check' + (g.precioActualizado ? '' : ' web-check-red')}>✓</span>
           </div>
           <div className="web-detail-body">
@@ -6398,7 +6543,7 @@ function WebGrupoDetalle() {
                   <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative', width: '100%' }}>
                     <img src={p.img} alt={p.name} width={400} height={150}
                       style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
-                    <span className="web-badge">↓ {p.disc}%</span>
+                    <span className="web-badge">-{p.disc}%</span>
                     <span className={'web-check' + (p.precioActualizado ? '' : ' web-check-red')}>✓</span>
                   </div>
                   <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px', minHeight: 0 }}>

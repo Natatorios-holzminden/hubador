@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -524,6 +524,19 @@
     </div>
   </div>
 
+  <!-- Modal de Ficha y Foto de Referencia de Coto -->
+  <div class="modal-overlay" id="cotoPhotoModalOverlay">
+    <div class="modal-content glass-card coto-card-modal">
+      <div class="modal-header">
+        <h3 style="font-size:1.05rem;"><i class="fa-solid fa-store text-danger"></i> Recorte y Comprobante Coto Digital</h3>
+        <button class="close-modal-btn" id="closeCotoPhotoModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" id="modalCotoPhotoBody" style="padding:1rem;">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
   <footer class="main-footer">
     <div class="container footer-content">
       <p>© 2026 Monitor de Sobreprecio - Mercado Central vs. Coto. Información con fines de transparencia de precios.</p>
@@ -532,9 +545,9 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="baseline_11aug.js?v=6"></script>
-  <script src="baseline_19aug.js?v=6"></script>
-  <script src="data.js?v=6"></script>
-  <script src="app.js?v=6"></script>
+  <script src="baseline_11aug.js?v=16"></script>
+  <script src="baseline_19aug.js?v=16"></script>
+  <script src="data.js?v=16"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>
