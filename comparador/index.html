@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=28">
 </head>
 <body>
 
@@ -39,8 +39,12 @@
       <div class="header-actions">
         <div class="live-status">
           <span class="status-dot"></span>
-          <span>Catalogo Vivo (79 Productos)</span>
+          <span>Catalogo Vivo (148 Productos)</span>
         </div>
+        <a href="verdulerias.html" class="btn btn-secondary" style="background:linear-gradient(135deg,#059669,#10b981); color:#ffffff; border:none; text-decoration:none; font-weight:700;" title="Ir al Monitor por Foto de Verdulerías de Barrio">
+          <i class="fa-solid fa-camera"></i>
+          <span>Verdulerías por Foto 🥑</span>
+        </a>
         <button class="btn btn-secondary" id="syncLiveBtn" title="Sincronizar datos reales del Mercado Central y Coto">
           <i class="fa-solid fa-arrows-rotate"></i>
           <span>Refrescar Vivo</span>
@@ -524,14 +528,41 @@
     </div>
   </div>
 
-  <!-- Modal de Ficha y Foto de Referencia de Coto -->
+  <!-- Modal de Recorte Web Auditado (Coto & Mercado Central) -->
+  <div class="modal-overlay" id="proofModalOverlay">
+    <div class="proof-modal-container glass-card" style="width:100%; max-width:920px; max-height:92vh; overflow-y:auto; padding:1.25rem; background:#0f172a; border:1px solid rgba(255,255,255,0.15); border-radius:20px; color:#ffffff;">
+      <div class="proof-modal-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding-bottom:0.75rem; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.1);">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <i class="fa-solid fa-desktop text-danger" style="font-size: 1.4rem;"></i>
+          <h3 style="margin:0; font-family:'Outfit',sans-serif; font-size:1.35rem; color:#ffffff;" id="proofModalTitleText">Recorte Web Auditado</h3>
+        </div>
+        
+        <div class="proof-tab-switcher" style="display:flex; gap:0.5rem; background:rgba(255,255,255,0.08); padding:4px; border-radius:12px;">
+          <button class="proof-tab-btn active" id="proofTabCotoBtn" data-proof-tab="coto" style="background:#1e293b; color:#ffffff; border:none; padding:0.5rem 1rem; border-radius:8px; font-size:0.88rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-cart-shopping text-danger"></i> Recorte Web Coto Digital
+          </button>
+          <button class="proof-tab-btn" id="proofTabMcBtn" data-proof-tab="mc" style="background:transparent; color:#94a3b8; border:none; padding:0.5rem 1rem; border-radius:8px; font-size:0.88rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fa-solid fa-building text-success"></i> Recorte Mercado Central
+          </button>
+        </div>
+
+        <button class="close-modal-btn" id="closeProofModalBtn" style="color:#9ca3af; font-size:1.8rem; cursor:pointer; background:none; border:none;">&times;</button>
+      </div>
+
+      <div class="proof-modal-body" id="proofModalBody" style="padding:0.5rem 0;">
+        <!-- Dynamic content rendered by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Legacy Compatibility Overlay ID -->
   <div class="modal-overlay" id="cotoPhotoModalOverlay">
     <div class="modal-content glass-card coto-card-modal">
-      <div class="modal-header">
-        <h3 style="font-size:1.05rem;"><i class="fa-solid fa-store text-danger"></i> Recorte y Comprobante Coto Digital</h3>
-        <button class="close-modal-btn" id="closeCotoPhotoModalBtn">&times;</button>
+      <div class="modal-header" style="padding:10px 16px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:1rem; font-weight:800; color:#ef4444;"><i class="fa-solid fa-desktop"></i> Recorte Web Coto Digital</span>
+        <button class="close-modal-btn" id="closeCotoPhotoModalBtn" style="color:#9ca3af; font-size:1.6rem; cursor:pointer; background:none; border:none;">&times;</button>
       </div>
-      <div class="modal-body" id="modalCotoPhotoBody" style="padding:1rem;">
+      <div class="modal-body" id="modalCotoPhotoBody" style="padding:12px;">
         <!-- Rendered dynamically -->
       </div>
     </div>
@@ -545,9 +576,9 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="baseline_11aug.js?v=16"></script>
-  <script src="baseline_19aug.js?v=16"></script>
-  <script src="data.js?v=16"></script>
-  <script src="app.js?v=16"></script>
+  <script src="baseline_11aug.js?v=28"></script>
+  <script src="baseline_19aug.js?v=28"></script>
+  <script src="data.js?v=34"></script>
+  <script src="app.js?v=34"></script>
 </body>
 </html>

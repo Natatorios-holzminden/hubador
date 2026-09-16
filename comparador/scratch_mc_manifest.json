@@ -1,0 +1,1192 @@
+{
+  "acelga": {
+    "title": "ACELGA",
+    "img": "evidencias/recorte_mc_acelga.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ACELGA",
+      "Semanal: +7.4%",
+      "Mensual: -39.6%",
+      "10Kg x $ 6200\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "achicoria": {
+    "title": "ACHICORIA",
+    "img": "evidencias/recorte_mc_achicoria.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ACHICORIA",
+      "Semanal: +4.4%",
+      "Mensual: +22.0%",
+      "10Kg x $ 9000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "ajo": {
+    "title": "AJO",
+    "img": "evidencias/recorte_mc_ajo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "AJO",
+      "MDO. CHINO",
+      "Semanal: -13.3%",
+      "Mensual: -13.1%"
+    ]
+  },
+  "akusay": {
+    "title": "AKUSAY",
+    "img": "evidencias/recorte_mc_akusay.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "AKUSAY",
+      "Semanal: +3.4%",
+      "Mensual: +1.4%",
+      "10Kg x $ 7500\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "albahaca": {
+    "title": "ALBAHACA",
+    "img": "evidencias/recorte_mc_albahaca.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ALBAHACA",
+      "Semanal: +0.3%",
+      "Mensual: +10.5%",
+      "( $750 /Kg)\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "alcaucil": {
+    "title": "ALCAUCIL",
+    "img": "evidencias/recorte_mc_alcaucil.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ALCAUCIL",
+      "VIOLETA",
+      "Semanal: -18.8%",
+      "Mensual: -15.3%"
+    ]
+  },
+  "anana": {
+    "title": "ANANA",
+    "img": "evidencias/recorte_mc_anana.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ANANA",
+      "PIÑA",
+      "Semanal: +12.1%",
+      "Mensual: -26.4%"
+    ]
+  },
+  "apio": {
+    "title": "APIO",
+    "img": "evidencias/recorte_mc_apio.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "APIO",
+      "Semanal: -4.3%",
+      "Mensual: -1.4%",
+      "6Kg x $ 8000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "arandano": {
+    "title": "ARANDANO",
+    "img": "evidencias/recorte_mc_arandano.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ARANDANO",
+      "Semanal: -12.4%",
+      "Mensual: -47.9%",
+      "2Kg x $ 23000\tElegido\tE. RIOS\t...\t+"
+    ]
+  },
+  "arveja": {
+    "title": "ARVEJA",
+    "img": "evidencias/recorte_mc_arveja.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ARVEJA",
+      "Semanal: +48.5%",
+      "Mensual: +57.4%",
+      "8Kg x $ 24000\tPrimera\tJUJUY\t...\t+"
+    ]
+  },
+  "banana": {
+    "title": "BANANA",
+    "img": "evidencias/recorte_mc_banana.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "BANANA",
+      "NANICA",
+      "Semanal: -1.6%",
+      "Mensual: -24.6%"
+    ]
+  },
+  "batata": {
+    "title": "BATATA",
+    "img": "evidencias/recorte_mc_batata.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "BATATA",
+      "BEAUREGARD",
+      "Semanal: 0.0%",
+      "Mensual: +6.6%"
+    ]
+  },
+  "berenjena": {
+    "title": "BERENJENA",
+    "img": "evidencias/recorte_mc_berenjena.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "BERENJENA",
+      "VTA.MED.LA",
+      "Semanal: -30.0%",
+      "Mensual: -44.4%"
+    ]
+  },
+  "berro": {
+    "title": "BERRO",
+    "img": "evidencias/recorte_mc_berro.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "BERRO",
+      "Semanal: +3.8%",
+      "Mensual: +3.8%",
+      "1Kg x $ 2700\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "brocoli": {
+    "title": "BROCOLI",
+    "img": "evidencias/recorte_mc_brocoli.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "BROCOLI",
+      "Semanal: +15.7%",
+      "Mensual: +46.9%",
+      "8Kg x $ 16000\t\tMENDOZA\t...\t+"
+    ]
+  },
+  "brote_alfa": {
+    "title": "BROTE ALFA",
+    "img": "evidencias/recorte_mc_brote_alfa.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "BROTE ALFA",
+      "Semanal: 0.0%",
+      "Mensual: -7.9%",
+      "1Kg x $ 9000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "brote_soja": {
+    "title": "BROTE SOJA",
+    "img": "evidencias/recorte_mc_brote_soja.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "BROTE SOJA",
+      "Semanal: 0.0%",
+      "Mensual: +15.4%",
+      "1Kg x $ 7500\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "cardo": {
+    "title": "CARDO",
+    "img": "evidencias/recorte_mc_cardo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CARDO",
+      "Semanal: +10.5%",
+      "Mensual: 0.0%",
+      "4Kg x $ 6500\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "ceb_verdeo": {
+    "title": "CEB.VERDEO",
+    "img": "evidencias/recorte_mc_ceb_verdeo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CEB.VERDEO",
+      "COLORADA",
+      "Semanal: +8.8%",
+      "Mensual: -55.9%"
+    ]
+  },
+  "cebolla": {
+    "title": "CEBOLLA",
+    "img": "evidencias/recorte_mc_cebolla.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CEBOLLA",
+      "VALENCIANI",
+      "Semanal: +25.3%",
+      "Mensual: +33.9%"
+    ]
+  },
+  "chaucha": {
+    "title": "CHAUCHA",
+    "img": "evidencias/recorte_mc_chaucha.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CHAUCHA",
+      "ROLLIZA",
+      "Semanal: +9.9%",
+      "Mensual: -17.6%"
+    ]
+  },
+  "choclo": {
+    "title": "CHOCLO",
+    "img": "evidencias/recorte_mc_choclo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CHOCLO",
+      "AMARILLO",
+      "Semanal: +37.1%",
+      "Mensual: +81.3%"
+    ]
+  },
+  "ciboulette": {
+    "title": "CIBOULETTE",
+    "img": "evidencias/recorte_mc_ciboulette.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CIBOULETTE",
+      "Semanal: 0.0%",
+      "Mensual: -9.1%",
+      "1Kg x $ 10000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "cilandro": {
+    "title": "CILANDRO",
+    "img": "evidencias/recorte_mc_cilandro.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CILANDRO",
+      "Semanal: 0.0%",
+      "Mensual: +10.0%",
+      "1Kg x $ 11000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "ciruela": {
+    "title": "CIRUELA",
+    "img": "evidencias/recorte_mc_ciruela.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CIRUELA",
+      "SUNGOLD",
+      "Semanal: -3.2%",
+      "9Kg x $ 55000\tElegido\tESPA¥A\t...\t+"
+    ]
+  },
+  "coco": {
+    "title": "COCO",
+    "img": "evidencias/recorte_mc_coco.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "COCO",
+      "Semanal: 0.0%",
+      "Mensual: +0.4%",
+      "10Kg x $ 24000\tElegido\tBRASIL\t...\t+"
+    ]
+  },
+  "coliflor": {
+    "title": "COLIFLOR",
+    "img": "evidencias/recorte_mc_coliflor.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "COLIFLOR",
+      "Semanal: +17.7%",
+      "Mensual: +28.8%",
+      "15Kg x $ 20000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "curcuma": {
+    "title": "CURCUMA",
+    "img": "evidencias/recorte_mc_curcuma.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "CURCUMA",
+      "Semanal: 0.0%",
+      "Mensual: -3.1%",
+      "1Kg x $ 4500\tPrimera\tBRASIL\t...\t+"
+    ]
+  },
+  "echalote": {
+    "title": "ECHALOTE",
+    "img": "evidencias/recorte_mc_echalote.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ECHALOTE",
+      "Semanal: -9.1%",
+      "Mensual: -20.0%",
+      "1Kg x $ 8000\tPrimera\tMENDOZA\t...\t+"
+    ]
+  },
+  "endivia": {
+    "title": "ENDIVIA",
+    "img": "evidencias/recorte_mc_endivia.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ENDIVIA",
+      "Semanal: -25.3%",
+      "Mensual: -35.2%",
+      "1Kg x $ 13000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "escarola": {
+    "title": "ESCAROLA",
+    "img": "evidencias/recorte_mc_escarola.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ESCAROLA",
+      "HOJA FINA",
+      "Semanal: +8.1%",
+      "Mensual: +3.4%"
+    ]
+  },
+  "esparrago": {
+    "title": "ESPARRAGO",
+    "img": "evidencias/recorte_mc_esparrago.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ESPARRAGO",
+      "VERDE",
+      "Semanal: +25.0%",
+      "Mensual: -57.0%"
+    ]
+  },
+  "espinaca": {
+    "title": "ESPINACA",
+    "img": "evidencias/recorte_mc_espinaca.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ESPINACA",
+      "Semanal: -0.2%",
+      "Mensual: -43.3%",
+      "5Kg x $ 3500\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "frutilla": {
+    "title": "FRUTILLA",
+    "img": "evidencias/recorte_mc_frutilla.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "FRUTILLA",
+      "Semanal: -15.5%",
+      "Mensual: -13.9%",
+      "5Kg x $ 27000\tElegido\tBS. AS.\t...\t+"
+    ]
+  },
+  "haba": {
+    "title": "HABA",
+    "img": "evidencias/recorte_mc_haba.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "HABA",
+      "Semanal: +2.3%",
+      "10Kg x $ 18000\tPrimera\tJUJUY\t...\t+",
+      "Precio promedio"
+    ]
+  },
+  "hinojo": {
+    "title": "HINOJO",
+    "img": "evidencias/recorte_mc_hinojo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "HINOJO",
+      "Semanal: -2.4%",
+      "Mensual: +15.0%",
+      "15Kg x $ 16000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "hongos": {
+    "title": "HONGOS",
+    "img": "evidencias/recorte_mc_hongos.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "HONGOS",
+      "SHIITAKE",
+      "Semanal: 0.0%",
+      "Mensual: +2.8%"
+    ]
+  },
+  "jengibre": {
+    "title": "JENGIBRE",
+    "img": "evidencias/recorte_mc_jengibre.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "JENGIBRE",
+      "Semanal: -3.5%",
+      "Mensual: -16.9%",
+      "1Kg x $ 3700\tPrimera\tBRASIL\t...\t+"
+    ]
+  },
+  "kaki": {
+    "title": "KAKI",
+    "img": "evidencias/recorte_mc_kaki.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "KAKI",
+      "Semanal: 0.0%",
+      "Mensual: +47.4%",
+      "8Kg x $ 47000\tElegido\tBRASIL\t...\t+"
+    ]
+  },
+  "kale": {
+    "title": "KALE",
+    "img": "evidencias/recorte_mc_kale.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "KALE",
+      "CRESPO",
+      "Semanal: +5.3%",
+      "Mensual: -23.8%"
+    ]
+  },
+  "kiwi": {
+    "title": "KIWI",
+    "img": "evidencias/recorte_mc_kiwi.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "KIWI",
+      "GOLD",
+      "Semanal: +4.8%",
+      "10Kg x $ 44000\tElegido\tBS. AS.\t...\t+"
+    ]
+  },
+  "lechuga": {
+    "title": "LECHUGA",
+    "img": "evidencias/recorte_mc_lechuga.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "LECHUGA",
+      "MANTECOSA",
+      "Semanal: -4.4%",
+      "Mensual: -14.5%"
+    ]
+  },
+  "lima": {
+    "title": "LIMA",
+    "img": "evidencias/recorte_mc_lima.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "LIMA",
+      "TAHITI",
+      "Semanal: 0.0%",
+      "Mensual: +21.5%"
+    ]
+  },
+  "limon": {
+    "title": "LIMON",
+    "img": "evidencias/recorte_mc_limon.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "LIMON",
+      "GENOVA",
+      "Semanal: +9.9%",
+      "Mensual: +27.0%"
+    ]
+  },
+  "mamon": {
+    "title": "MAMON",
+    "img": "evidencias/recorte_mc_mamon.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MAMON",
+      "Semanal: 0.0%",
+      "10Kg x $ 33000\tElegido\tBRASIL\t...\t+",
+      "Precio promedio"
+    ]
+  },
+  "mandarina": {
+    "title": "MANDARINA",
+    "img": "evidencias/recorte_mc_mandarina.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MANDARINA",
+      "MURCOT",
+      "Semanal: +0.8%",
+      "Mensual: 0.0%"
+    ]
+  },
+  "mandioca": {
+    "title": "MANDIOCA",
+    "img": "evidencias/recorte_mc_mandioca.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MANDIOCA",
+      "Semanal: -0.7%",
+      "Mensual: -0.4%",
+      "40Kg x $ 28000\tPrimera\tMISIONES\t...\t+"
+    ]
+  },
+  "mango": {
+    "title": "MANGO",
+    "img": "evidencias/recorte_mc_mango.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MANGO",
+      "Semanal: +11.4%",
+      "Mensual: -3.0%",
+      "18Kg x $ 38000\tElegido\tBRASIL\t...\t+"
+    ]
+  },
+  "mani": {
+    "title": "MANI",
+    "img": "evidencias/recorte_mc_mani.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MANI",
+      "Semanal: 0.0%",
+      "Mensual: +5.9%",
+      "5Kg x $ 18000\tElegido\tSALTA\t...\t+"
+    ]
+  },
+  "manzana": {
+    "title": "MANZANA",
+    "img": "evidencias/recorte_mc_manzana.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MANZANA",
+      "RED DELICI",
+      "Semanal: -2.5%",
+      "Mensual: -3.1%"
+    ]
+  },
+  "melon": {
+    "title": "MELON",
+    "img": "evidencias/recorte_mc_melon.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MELON",
+      "ORANGE",
+      "Semanal: -7.8%",
+      "Mensual: -13.2%"
+    ]
+  },
+  "membrillo": {
+    "title": "MEMBRILLO",
+    "img": "evidencias/recorte_mc_membrillo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MEMBRILLO",
+      "Semanal: +1.6%",
+      "Mensual: +11.3%",
+      "10Kg x $ 26000\tElegido\tR. NEGRO\t...\t+"
+    ]
+  },
+  "menta": {
+    "title": "MENTA",
+    "img": "evidencias/recorte_mc_menta.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "MENTA",
+      "Semanal: 0.0%",
+      "Mensual: -4.8%",
+      "1Kg x $ 9000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "nabo": {
+    "title": "NABO",
+    "img": "evidencias/recorte_mc_nabo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "NABO",
+      "BLANCO",
+      "Semanal: 0.0%",
+      "Mensual: -8.1%"
+    ]
+  },
+  "naranja": {
+    "title": "NARANJA",
+    "img": "evidencias/recorte_mc_naranja.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "NARANJA",
+      "W.NAVEL",
+      "Semanal: 0.0%",
+      "Mensual: +21.4%"
+    ]
+  },
+  "nuez": {
+    "title": "NUEZ",
+    "img": "evidencias/recorte_mc_nuez.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "NUEZ",
+      "Semanal: 0.0%",
+      "Mensual: 0.0%",
+      "5Kg x $ 39000\tElegido\tMENDOZA\t...\t+"
+    ]
+  },
+  "oregano": {
+    "title": "OREGANO",
+    "img": "evidencias/recorte_mc_oregano.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "OREGANO",
+      "Semanal: 0.0%",
+      "Mensual: +0.4%",
+      "1Kg x $ 9500\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "pack_choy": {
+    "title": "PACK CHOY",
+    "img": "evidencias/recorte_mc_pack_choy.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PACK CHOY",
+      "Semanal: +4.9%",
+      "Mensual: -6.1%",
+      "3Kg x $ 8500\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "palta": {
+    "title": "PALTA",
+    "img": "evidencias/recorte_mc_palta.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PALTA",
+      "HASS",
+      "Semanal: -2.1%",
+      "Mensual: -18.0%"
+    ]
+  },
+  "papa": {
+    "title": "PAPA",
+    "img": "evidencias/recorte_mc_papa.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PAPA",
+      "SPUNTA",
+      "Semanal: +9.8%",
+      "Mensual: -13.3%"
+    ]
+  },
+  "pelon": {
+    "title": "PELON",
+    "img": "evidencias/recorte_mc_pelon.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PELON",
+      "Semanal: 0.0%",
+      "Mensual: -33.9%",
+      "4Kg x $ 28000\tElegido\tESPA¥A\t...\t+"
+    ]
+  },
+  "pepino": {
+    "title": "PEPINO",
+    "img": "evidencias/recorte_mc_pepino.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PEPINO",
+      "Semanal: -11.4%",
+      "Mensual: -1.0%",
+      "18Kg x $ 19000\tPrimera\tSALTA\t...\t+"
+    ]
+  },
+  "pera": {
+    "title": "PERA",
+    "img": "evidencias/recorte_mc_pera.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PERA",
+      "PACKHAM'S",
+      "Semanal: -2.0%",
+      "Mensual: +7.3%"
+    ]
+  },
+  "perejil": {
+    "title": "PEREJIL",
+    "img": "evidencias/recorte_mc_perejil.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PEREJIL",
+      "Semanal: +11.7%",
+      "Mensual: -50.4%",
+      "10Kg x $ 10000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "pimiento": {
+    "title": "PIMIENTO",
+    "img": "evidencias/recorte_mc_pimiento.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PIMIENTO",
+      "VINAGRE",
+      "Semanal: +8.5%",
+      "Mensual: +62.5%"
+    ]
+  },
+  "pitahaya": {
+    "title": "PITAHAYA",
+    "img": "evidencias/recorte_mc_pitahaya.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PITAHAYA",
+      "Semanal: -5.7%",
+      "Mensual: +18.1%",
+      "2Kg x $ 56000\tElegido\tECUADOR\t...\t+"
+    ]
+  },
+  "platano": {
+    "title": "PLATANO",
+    "img": "evidencias/recorte_mc_platano.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PLATANO",
+      "Semanal: -0.8%",
+      "Mensual: -12.5%",
+      "22Kg x $ 52000\tElegido\tECUADOR\t...\t+"
+    ]
+  },
+  "pomelo": {
+    "title": "POMELO",
+    "img": "evidencias/recorte_mc_pomelo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "POMELO",
+      "STAR RUBY",
+      "Semanal: -2.3%",
+      "Mensual: -5.3%"
+    ]
+  },
+  "puerro": {
+    "title": "PUERRO",
+    "img": "evidencias/recorte_mc_puerro.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "PUERRO",
+      "Semanal: -1.2%",
+      "Mensual: -29.1%",
+      "10Kg x $ 15000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "rabanito": {
+    "title": "RABANITO",
+    "img": "evidencias/recorte_mc_rabanito.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "RABANITO",
+      "Semanal: +12.1%",
+      "Mensual: -1.5%",
+      "5Kg x $ 13000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "radicchio": {
+    "title": "RADICCHIO",
+    "img": "evidencias/recorte_mc_radicchio.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "RADICCHIO",
+      "Semanal: +1.8%",
+      "Mensual: +4.3%",
+      "5Kg x $ 23000\tPrimera\tMENDOZA\t...\t+"
+    ]
+  },
+  "radicheta": {
+    "title": "RADICHETA",
+    "img": "evidencias/recorte_mc_radicheta.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "RADICHETA",
+      "2DO.CORTE",
+      "Semanal: +9.7%",
+      "Mensual: +27.1%"
+    ]
+  },
+  "remolacha": {
+    "title": "REMOLACHA",
+    "img": "evidencias/recorte_mc_remolacha.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "REMOLACHA",
+      "Semanal: +2.1%",
+      "Mensual: -1.4%",
+      "15Kg x $ 14000\tPrimera\tSGO.EST.\t...\t+"
+    ]
+  },
+  "rep_brusel": {
+    "title": "REP.BRUSEL",
+    "img": "evidencias/recorte_mc_rep_brusel.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "REP.BRUSEL",
+      "Semanal: -3.7%",
+      "Mensual: +3.8%",
+      "1Kg x $ 2600\tPrimera\tM.D.PLAT\t...\t+"
+    ]
+  },
+  "repollo": {
+    "title": "REPOLLO",
+    "img": "evidencias/recorte_mc_repollo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "REPOLLO",
+      "COLORADO",
+      "Semanal: +22.9%",
+      "Mensual: +35.4%"
+    ]
+  },
+  "romero": {
+    "title": "ROMERO",
+    "img": "evidencias/recorte_mc_romero.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ROMERO",
+      "Semanal: 0.0%",
+      "Mensual: +3.0%",
+      "1Kg x $ 9500\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "rucula": {
+    "title": "RUCULA",
+    "img": "evidencias/recorte_mc_rucula.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "RUCULA",
+      "Semanal: -6.7%",
+      "Mensual: +13.0%",
+      "3Kg x $ 5000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "salvia": {
+    "title": "SALVIA",
+    "img": "evidencias/recorte_mc_salvia.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "SALVIA",
+      "Semanal: 0.0%",
+      "Mensual: -2.5%",
+      "1Kg x $ 9000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "sandia": {
+    "title": "SANDIA",
+    "img": "evidencias/recorte_mc_sandia.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "SANDIA",
+      "Semanal: 0.0%",
+      "Mensual: -8.4%",
+      "( $1400 /Kg)\tComercial\tBRASIL\t...\t+"
+    ]
+  },
+  "tomate": {
+    "title": "TOMATE",
+    "img": "evidencias/recorte_mc_tomate.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "TOMATE",
+      "REDONDO",
+      "Semanal: -18.7%",
+      "Mensual: +36.1%"
+    ]
+  },
+  "tomillo": {
+    "title": "TOMILLO",
+    "img": "evidencias/recorte_mc_tomillo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "TOMILLO",
+      "Semanal: 0.0%",
+      "Mensual: +9.1%",
+      "1Kg x $ 12000\tPrimera\tBS. AS.\t...\t+"
+    ]
+  },
+  "uva": {
+    "title": "UVA",
+    "img": "evidencias/recorte_mc_uva.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "UVA",
+      "VICTORIA",
+      "Semanal: 0.0%",
+      "Mensual: -4.3%"
+    ]
+  },
+  "zanahoria": {
+    "title": "ZANAHORIA",
+    "img": "evidencias/recorte_mc_zanahoria.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ZANAHORIA",
+      "CHANTENAY",
+      "Semanal: +31.4%",
+      "Mensual: +52.2%"
+    ]
+  },
+  "zapallito": {
+    "title": "ZAPALLITO",
+    "img": "evidencias/recorte_mc_zapallito.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ZAPALLITO",
+      "REDONDO",
+      "Semanal: -32.1%",
+      "Mensual: +45.8%"
+    ]
+  },
+  "zapallo": {
+    "title": "ZAPALLO",
+    "img": "evidencias/recorte_mc_zapallo.png",
+    "lines": [
+      "👍",
+      "👎",
+      "¿Encontraste estos precios en el mercado?",
+      "16 de septiembre",
+      "ZAPALLO",
+      "TETSUKAB.",
+      "Semanal: +4.2%",
+      "Mensual: +5.5%"
+    ]
+  }
+}

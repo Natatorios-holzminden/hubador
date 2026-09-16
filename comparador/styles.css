@@ -2019,10 +2019,14 @@ body {
 
 /* Coto Digital Reference Product Card Modal */
 .coto-card-modal {
-  max-width: 420px !important;
-  border-radius: 16px !important;
+  width: 95vw !important;
+  max-width: 920px !important;
+  max-height: 90vh !important;
+  border-radius: 14px !important;
   border: 1px solid rgba(239, 68, 68, 0.3) !important;
-  background: #111827 !important;
+  background: #0f172a !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
 }
 
 .coto-ref-card {

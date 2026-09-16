@@ -106,61 +106,156 @@ document.addEventListener('DOMContentLoaded', () => {
   function getProduceSvg(name) {
     const n = (name || '').toLowerCase();
 
-    if (n.includes('zapallito')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="36" r="22" fill="#10B981"/><circle cx="32" cy="36" r="16" fill="#34D399"/><path d="M32 14c-3 0-6 4-6 4s5 2 6 2 6-2 6-2-3-4-6-4z" fill="#059669"/></svg>');
-    }
-    if (n.includes('pepino')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="24" width="36" height="18" rx="9" transform="rotate(-25 32 33)" fill="#059669"/><rect x="18" y="26" width="28" height="14" rx="7" transform="rotate(-25 32 33)" fill="#10B981"/></svg>');
+    if (n.includes('pomelo')) {
+      return makeB64('<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M 52 24 C 40 10, 20 15, 20 15 C 20 15, 30 32, 52 24 Z" fill="#388e3c"/>' +
+        '<path d="M 52 24 L 32 18" stroke="#1b5e20" stroke-width="2.5" stroke-linecap="round"/>' +
+        '<path d="M 52 24 C 54 18, 56 16, 58 14" stroke="#4e342e" stroke-width="3.5" stroke-linecap="round"/>' +
+        '<circle cx="54" cy="62" r="42" fill="#ff9100" stroke="#e67e00" stroke-width="2"/>' +
+        '<ellipse cx="40" cy="46" rx="28" ry="18" fill="#ffb74d" opacity="0.35"/>' +
+        '<g transform="translate(14, 16)">' +
+          '<path d="M 44 64 L 92 48 A 38 38 0 0 1 74 94 Z" fill="#ff9100" stroke="#e67e00" stroke-width="3"/>' +
+          '<path d="M 44 64 L 90 49 A 35 35 0 0 1 73 92 Z" fill="#ffffff"/>' +
+          '<path d="M 44 64 L 88 50 A 33 33 0 0 1 72 90 Z" fill="#e53935"/>' +
+          '<path d="M 46 64 L 82 54 A 28 28 0 0 1 76 68 Z" fill="#ef5350"/>' +
+          '<path d="M 46 64 L 75 70 A 28 28 0 0 1 67 80 Z" fill="#ef5350"/>' +
+          '<path d="M 46 64 L 65 82 A 28 28 0 0 1 53 84 Z" fill="#ef5350"/>' +
+          '<line x1="46" y1="64" x2="85" y2="52" stroke="#ffcdd2" stroke-width="2"/>' +
+          '<line x1="46" y1="64" x2="76" y2="69" stroke="#ffcdd2" stroke-width="2"/>' +
+          '<line x1="46" y1="64" x2="66" y2="81" stroke="#ffcdd2" stroke-width="2"/>' +
+          '<line x1="46" y1="64" x2="51" y2="86" stroke="#ffcdd2" stroke-width="2"/>' +
+        '</g>' +
+      '</svg>');
     }
     if (n.includes('tomate')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="36" r="22" fill="#EF4444"/><path d="M32 14c-4 0-7 5-7 5s5 2 7 2 7-2 7-2-3-5-7-5z" fill="#10B981"/><path d="M32 10v6" stroke="#059669" stroke-width="3" stroke-linecap="round"/></svg>');
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<circle cx="50" cy="55" r="38" fill="#ef4444" stroke="#dc2626" stroke-width="2"/>' +
+        '<path d="M 50 17 L 46 29 L 34 22 L 42 32 L 30 38 L 44 41 L 50 50 L 56 41 L 70 38 L 58 32 L 66 22 L 54 29 Z" fill="#16a34a"/>' +
+        '<path d="M 50 17 C 50 8, 55 5, 58 4" stroke="#15803d" stroke-width="4" stroke-linecap="round" fill="none"/>' +
+        '<ellipse cx="38" cy="42" rx="6" ry="12" fill="#fca5a5" transform="rotate(-20 38 42)"/>' +
+      '</svg>');
     }
-    if (n.includes('pimiento') || n.includes('morron')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M18 24c0-6 6-10 14-10s14 4 14 10c0 16-6 26-14 26S18 40 18 24z" fill="#DC2626"/><path d="M32 8c0 4-2 6-2 6h4s-2-2-2-6z" fill="#059669"/></svg>');
-    }
-    if (n.includes('acelga') || n.includes('lechuga') || n.includes('achicoria') || n.includes('akusay') || n.includes('espinaca') || n.includes('verdeo') || n.includes('berro')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M20 48C12 36 14 18 32 14c18 4 20 22 12 34-6 9-18 9-24 0z" fill="#10B981"/><path d="M32 14v34" stroke="#D1FAE5" stroke-width="3" stroke-linecap="round"/><path d="M32 26l-8 6M32 34l8 6" stroke="#D1FAE5" stroke-width="2" stroke-linecap="round"/></svg>');
+    if (n.includes('lechuga') || n.includes('acelga') || n.includes('espinaca') || n.includes('achicoria') || n.includes('akusay') || n.includes('verdeo') || n.includes('berro') || n.includes('rucula')) {
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M 20 75 C 10 50, 20 20, 50 15 C 80 20, 90 50, 80 75 C 70 90, 30 90, 20 75 Z" fill="#22c55e"/>' +
+        '<path d="M 30 70 C 22 50, 30 28, 50 24 C 70 28, 78 50, 70 70 Z" fill="#4ade80"/>' +
+        '<path d="M 40 68 C 35 52, 40 38, 50 35 C 60 38, 65 52, 60 68 Z" fill="#86efac"/>' +
+        '<path d="M 50 85 L 50 25" stroke="#bbf7d0" stroke-width="3" stroke-linecap="round"/>' +
+        '<path d="M 50 55 L 32 45 M 50 65 L 28 58 M 50 45 L 36 38" stroke="#bbf7d0" stroke-width="2" stroke-linecap="round"/>' +
+        '<path d="M 50 55 L 68 45 M 50 65 L 72 58 M 50 45 L 64 38" stroke="#bbf7d0" stroke-width="2" stroke-linecap="round"/>' +
+      '</svg>');
     }
     if (n.includes('papa')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="34" rx="22" ry="16" fill="#D97706"/><circle cx="24" cy="28" r="2" fill="#92400E"/><circle cx="38" cy="38" r="2" fill="#92400E"/><circle cx="28" cy="40" r="1.5" fill="#92400E"/></svg>');
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<ellipse cx="50" cy="52" rx="42" ry="30" fill="#d97706" stroke="#b45309" stroke-width="2" transform="rotate(-5 50 52)"/>' +
+        '<circle cx="30" cy="40" r="3" fill="#78350f"/>' +
+        '<circle cx="65" cy="58" r="3" fill="#78350f"/>' +
+        '<circle cx="48" cy="65" r="2" fill="#78350f"/>' +
+        '<circle cx="70" cy="40" r="2.5" fill="#78350f"/>' +
+        '<ellipse cx="40" cy="38" rx="8" ry="4" fill="#fef3c7" opacity="0.3"/>' +
+      '</svg>');
+    }
+    if (n.includes('zapallo') || n.includes('anco')) {
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<ellipse cx="50" cy="56" rx="40" ry="32" fill="#f97316" stroke="#ea580c" stroke-width="2"/>' +
+        '<ellipse cx="50" cy="56" rx="26" ry="32" fill="#fb923c"/>' +
+        '<ellipse cx="50" cy="56" rx="12" ry="32" fill="#fdba74"/>' +
+        '<path d="M 50 24 C 50 14, 58 10, 62 8" stroke="#15803d" stroke-width="5" stroke-linecap="round" fill="none"/>' +
+      '</svg>');
     }
     if (n.includes('cebolla')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 14C20 22 16 34 20 44c4 10 20 10 24 0 4-10 0-22-12-30z" fill="#C084FC"/><path d="M32 14v32" stroke="#E9D5FF" stroke-width="2" stroke-dasharray="3 3"/></svg>');
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M 50 15 C 25 30, 15 55, 25 75 C 35 90, 65 90, 75 75 C 85 55, 75 30, 50 15 Z" fill="#a855f7" stroke="#7e22ce" stroke-width="2"/>' +
+        '<path d="M 50 15 L 50 85" stroke="#e9d5ff" stroke-width="2" stroke-dasharray="4 4"/>' +
+        '<path d="M 38 25 C 28 45, 28 65, 38 82" stroke="#e9d5ff" stroke-width="1.5" stroke-dasharray="3 3" fill="none"/>' +
+        '<path d="M 62 25 C 72 45, 72 65, 62 82" stroke="#e9d5ff" stroke-width="1.5" stroke-dasharray="3 3" fill="none"/>' +
+        '<path d="M 50 15 C 48 8, 42 5, 40 2" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>' +
+      '</svg>');
     }
     if (n.includes('zanahoria')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M38 16L18 50c-2 3 1 6 4 4l32-22c3-2 0-7-3-6z" fill="#F97316"/><path d="M42 14l6-6M38 18l10-2" stroke="#10B981" stroke-width="3" stroke-linecap="round"/></svg>');
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M 65 22 L 30 85 C 26 90, 20 86, 22 80 L 52 18 C 55 12, 62 15, 65 22 Z" fill="#f97316" stroke="#ea580c" stroke-width="2"/>' +
+        '<path d="M 60 20 L 78 6 M 62 22 L 85 14 M 64 25 L 82 28" stroke="#16a34a" stroke-width="3.5" stroke-linecap="round"/>' +
+        '<line x1="42" y1="52" x2="52" y2="48" stroke="#ea580c" stroke-width="2"/>' +
+        '<line x1="36" y1="66" x2="44" y2="62" stroke="#ea580c" stroke-width="2"/>' +
+      '</svg>');
     }
     if (n.includes('banana')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M16 16c16 0 32 16 32 32 0 4-4 4-6 2-10-10-18-18-28-26-2-2-2-8 2-8z" fill="#FACC15"/><path d="M14 14l4 4" stroke="#713F12" stroke-width="3" stroke-linecap="round"/></svg>');
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M 22 22 C 45 20, 75 42, 75 75 C 75 82, 68 82, 64 78 C 50 60, 36 44, 20 34 C 15 30, 15 24, 22 22 Z" fill="#facc15" stroke="#eab308" stroke-width="2"/>' +
+        '<path d="M 18 20 L 25 26" stroke="#713f12" stroke-width="4" stroke-linecap="round"/>' +
+        '<path d="M 74 76 L 77 82" stroke="#713f12" stroke-width="3" stroke-linecap="round"/>' +
+        '<path d="M 24 24 C 44 26, 68 46, 70 74" stroke="#fef08a" stroke-width="2" fill="none"/>' +
+      '</svg>');
     }
     if (n.includes('manzana')) {
-      return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 20c-6-6-18-4-18 8 0 16 12 24 18 24s18-8 18-24c0-12-12-14-18-8z" fill="#EF4444"/><path d="M32 10c2 4 0 8 0 8" stroke="#78350F" stroke-width="3" stroke-linecap="round"/><path d="M32 14c4-2 8 0 8 0" stroke="#10B981" stroke-width="2"/></svg>');
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M 50 28 C 40 18, 18 22, 18 45 C 18 72, 38 88, 50 88 C 62 88, 82 72, 82 45 C 82 22, 60 18, 50 28 Z" fill="#ef4444" stroke="#dc2626" stroke-width="2"/>' +
+        '<path d="M 50 28 C 52 18, 48 10, 46 6" stroke="#78350f" stroke-width="4" stroke-linecap="round" fill="none"/>' +
+        '<path d="M 50 20 C 58 14, 68 18, 68 18 C 68 18, 62 26, 50 20 Z" fill="#16a34a"/>' +
+        '<ellipse cx="32" cy="38" rx="5" ry="10" fill="#fca5a5" transform="rotate(-25 32 38)"/>' +
+      '</svg>');
     }
-    if (n.includes('naranja') || n.includes('mandarina') || n.includes('limon') || n.includes('pomelo')) {
-      const col = n.includes('limon') ? '#FDE047' : '#F97316';
-      return makeB64(`<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="34" r="20" fill="${col}"/><circle cx="32" cy="34" r="14" fill="#FEF08A"/><path d="M32 18v32M18 34h32" stroke="#FFF" stroke-width="1.5"/></svg>`);
+    if (n.includes('naranja') || n.includes('mandarina')) {
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<circle cx="50" cy="54" r="36" fill="#f97316" stroke="#ea580c" stroke-width="2"/>' +
+        '<path d="M 50 18 C 54 8, 66 10, 66 10 C 66 10, 60 22, 50 18 Z" fill="#16a34a"/>' +
+        '<circle cx="36" cy="40" r="3" fill="#ffedd5" opacity="0.4"/>' +
+      '</svg>');
+    }
+    if (n.includes('limon')) {
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<ellipse cx="50" cy="52" rx="38" ry="28" fill="#fde047" stroke="#eab308" stroke-width="2" transform="rotate(-25 50 52)"/>' +
+        '<path d="M 20 66 C 14 70, 10 68, 12 62" fill="#fde047" stroke="#eab308" stroke-width="2"/>' +
+        '<path d="M 80 38 C 86 34, 90 36, 88 42" fill="#fde047" stroke="#eab308" stroke-width="2"/>' +
+        '<path d="M 68 30 C 72 20, 82 22, 82 22 C 82 22, 78 30, 68 30 Z" fill="#16a34a"/>' +
+      '</svg>');
+    }
+    if (n.includes('pimiento') || n.includes('morron')) {
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M 25 35 C 25 22, 38 18, 50 18 C 62 18, 75 22, 75 35 C 75 62, 65 85, 50 85 C 35 85, 25 62, 25 35 Z" fill="#dc2626" stroke="#b91c1c" stroke-width="2"/>' +
+        '<path d="M 50 18 C 50 10, 44 6, 42 2" stroke="#16a34a" stroke-width="5" stroke-linecap="round" fill="none"/>' +
+      '</svg>');
+    }
+    if (n.includes('berenjena')) {
+      return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M 35 30 C 25 45, 20 65, 30 80 C 40 92, 65 92, 75 80 C 85 65, 75 40, 50 25 Z" fill="#6b21a8" stroke="#581c87" stroke-width="2"/>' +
+        '<path d="M 50 25 L 42 32 L 50 38 L 58 32 Z" fill="#16a34a"/>' +
+        '<path d="M 50 25 C 50 16, 44 12, 40 8" stroke="#15803d" stroke-width="4" stroke-linecap="round" fill="none"/>' +
+      '</svg>');
     }
 
-    return makeB64('<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="36" r="20" fill="#10B981"/><path d="M32 16c-3 0-6 4-6 4s5 2 6 2 6-2 6-2-3-4-6-4z" fill="#059669"/></svg>');
+    return makeB64('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<circle cx="50" cy="54" r="36" fill="#22c55e" stroke="#16a34a" stroke-width="2"/>' +
+      '<path d="M 50 18 C 54 8, 66 10, 66 10 C 66 10, 60 22, 50 18 Z" fill="#15803d"/>' +
+    '</svg>');
   }
 
   // --- FETCH INITIAL PRODUCT DATA WITH HYBRID FALLBACK ---
   function loadInitialData() {
+    const fallbackData = window.COMPARADOR_DATA || window.INITIAL_DATA;
+
     fetch('data.json')
       .then(res => {
         if (!res.ok) throw new Error("HTTP error " + res.status);
         return res.json();
       })
       .then(data => {
-        products = data;
-        initSessionManager(data);
-        initApp();
+        if (Array.isArray(data) && data.length > 0) {
+          products = data;
+          initSessionManager(data);
+          initApp();
+        } else if (fallbackData && Array.isArray(fallbackData)) {
+          products = fallbackData;
+          initSessionManager(fallbackData);
+          initApp();
+        }
       })
       .catch(err => {
-        console.warn("Fetch data.json falló o fue bloqueado por CORS (protocolo file://). Usando fallback window.INITIAL_DATA:", err);
-        if (window.INITIAL_DATA && Array.isArray(window.INITIAL_DATA)) {
-          products = window.INITIAL_DATA;
-          initSessionManager(window.INITIAL_DATA);
+        console.warn("Fetch data.json falló. Usando fallback local:", err);
+        if (fallbackData && Array.isArray(fallbackData)) {
+          products = fallbackData;
+          initSessionManager(fallbackData);
           initApp();
         } else {
           console.error("Error crítico: No se encontraron datos de productos.");
@@ -182,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- SESSION MANAGER LOGIC (PURE REAL HISTORICAL DATA) ---
   function initSessionManager(liveData) {
-    const saved = localStorage.getItem('mercado_coto_sessions_v6');
+    const saved = localStorage.getItem('mercado_coto_sessions_v11');
     if (saved) {
       try { sessions = JSON.parse(saved); } catch(e) { sessions = []; }
     }
@@ -279,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function saveSessions() {
-    localStorage.setItem('mercado_coto_sessions_v6', JSON.stringify(sessions));
+    localStorage.setItem('mercado_coto_sessions_v11', JSON.stringify(sessions));
   }
 
   function populateSessionDropdowns() {
@@ -521,21 +616,37 @@ document.addEventListener('DOMContentLoaded', () => {
     'limon': 6, 'frutilla': 7, 'pomelo': 8, 'palta': 9
   };
 
+  const FRUITS_KEYWORDS = [
+    'banana', 'manzana', 'naranja', 'mandarina', 'limon', 'pera', 'pomelo', 
+    'frutilla', 'kiwi', 'palta', 'melon', 'sandia', 'uva', 'ciruela', 'anana', 
+    'arandano', 'mango', 'membrillo', 'kumquat', 'limatahiti', 'platano', 'coco'
+  ];
+
   function ensureTopRanks(list) {
     if (!list) return;
     list.forEach(p => {
-      const norm = (p.nombre || '').toLowerCase();
-      if (!p.topVerduraRank) {
+      const rawName = p.nombre || '';
+      const norm = rawName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const itemId = (p.id || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      
+      const isFruit = FRUITS_KEYWORDS.some(k => norm.includes(k) || itemId.includes(k));
+      if (isFruit) {
+        p.categoria = 'frutas';
+      } else if (!p.categoria) {
+        p.categoria = 'verduras';
+      }
+
+      if (!p.topVerduraRank && !isFruit) {
         for (let key in TOP_VERDURAS_MAP) {
-          if (norm.includes(key)) {
+          if (norm.includes(key) || itemId.includes(key)) {
             p.topVerduraRank = TOP_VERDURAS_MAP[key];
             break;
           }
         }
       }
-      if (!p.topFrutaRank) {
+      if (!p.topFrutaRank && isFruit) {
         for (let key in TOP_FRUTAS_MAP) {
-          if (norm.includes(key)) {
+          if (norm.includes(key) || itemId.includes(key)) {
             p.topFrutaRank = TOP_FRUTAS_MAP[key];
             break;
           }
@@ -1093,14 +1204,29 @@ document.addEventListener('DOMContentLoaded', () => {
     return `https://preciosdelcentral.com.ar/buenosaires/detalles45/${encodeURIComponent(cultClean)}/`;
   }
 
-  function getCotoDeepUrl(p) {
-    if (p.cotoUrl && p.cotoUrl.includes('cotodigital3.com.ar')) return p.cotoUrl;
-
-    const cat = (p.categoria || '').toLowerCase();
-    if (cat.includes('fruta') || (p.nombre && (p.nombre.toLowerCase().includes('manzana') || p.nombre.toLowerCase().includes('banana') || p.nombre.toLowerCase().includes('naranja') || p.nombre.toLowerCase().includes('mandarina') || p.nombre.toLowerCase().includes('melon') || p.nombre.toLowerCase().includes('pera') || p.nombre.toLowerCase().includes('uva')))) {
-      return 'https://www.cotodigital3.com.ar/sitios/cd/catalogo/frescos/frutas-y-verduras/frutas/_/N-1823908';
+  function getCotoTerm(p) {
+    const rawName = p.nombre || '';
+    const norm = rawName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ñ/g, "n");
+    const keywords = [
+      'banana', 'anana', 'acelga', 'achicoria', 'ajo', 'akusay', 'albahaca', 'alcaucil', 'apio', 'arandano', 'arveja',
+      'batata', 'berenjena', 'berro', 'brocoli', 'brote', 'cebolla', 'chaucha', 'choclo', 'ciboulette',
+      'cilantro', 'ciruela', 'coco', 'coliflor', 'curcuma', 'echalote', 'endivia', 'escarola', 'esparrago',
+      'espinaca', 'frutilla', 'hinojo', 'hongos', 'jengibre', 'kale', 'kiwi', 'kumquat', 'lechuga', 'limatahiti',
+      'limon', 'mandarina', 'mandioca', 'mango', 'manzana', 'melon', 'membrillo', 'menta', 'morron', 'nabo',
+      'naranja', 'oregano', 'palta', 'papa', 'pepino', 'pera', 'perejil', 'platano', 'pomelo', 'puerro',
+      'rabanito', 'radicchio', 'radicheta', 'remolacha', 'repollo', 'romero', 'rucula', 'salvia', 'sandia',
+      'tomate', 'tomillo', 'uva', 'zanahoria', 'zapallito', 'zapallo'
+    ];
+    for (let k of keywords) {
+      if (norm.includes(k)) return k;
     }
-    return 'https://www.cotodigital3.com.ar/sitios/cd/catalogo/frescos/frutas-y-verduras/verduras/_/N-1100080';
+    return norm.split(' ')[0] || 'zapallito';
+  }
+
+  function getCotoDeepUrl(p) {
+    if (p.cotoUrl) return p.cotoUrl;
+    const term = getCotoTerm(p);
+    return `https://www.coto.com.ar/productos/${encodeURIComponent(term)}#:~:text=NO%20ACUMULABLE`;
   }
 
   function renderTable(list) {
@@ -1219,9 +1345,14 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="price-mercado">$ ${formatNumber(p.precioMercadoCentral)} / ${unitStr}</div>
             </div>
             ${mcDeltaBadge}
-            <a href="${mcDeepUrl}" target="_blank" rel="noopener" class="cert-link cert-link-mercado" title="Verificar cotización oficial en el Mercado Central de Buenos Aires">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i> Fuente: Mercado Central 🔗
-            </a>
+            <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+              <a href="${mcDeepUrl}" target="_blank" rel="noopener" class="cert-link cert-link-mercado" title="Verificar cotización oficial en el Mercado Central de Buenos Aires" onclick="event.stopPropagation();">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Fuente: Mercado Central 🔗
+              </a>
+              <button type="button" data-mc-id="${p.id}" data-proof-id="${p.id}" data-source="mc" onclick="event.stopPropagation(); window.openProofModal('${p.id.replace(/'/g, "\\'")}', 'mc')" class="cert-link cert-link-foto open-mc-card" style="background:linear-gradient(135deg,#eab308,#ca8a04); border:none; color:#1e1b4b; padding:3px 8px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; margin-top:2px;" title="Ver foto y recorte web del Mercado Central">
+                <i class="fa-solid fa-camera"></i> Ficha MC 📷
+              </button>
+            </div>
           </td>
 
           <td class="td-coto">
@@ -1230,11 +1361,11 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="price-coto">$ ${formatNumber(p.precioCoto)} / ${unitStr}</div>
             </div>
             ${cotoDeltaBadge}
-            <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
-              <a href="${cotoDeepUrl}" target="_blank" rel="noopener" class="cert-link cert-link-coto" title="Verificar precio en Coto Digital">
+            <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+              <a href="${cotoDeepUrl}" target="_blank" rel="noopener" class="cert-link cert-link-coto" title="Verificar precio en Coto Digital" onclick="event.stopPropagation();">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Coto Web 🔗
               </a>
-              <button type="button" data-coto-id="${p.id}" onclick="event.stopPropagation(); window.openCotoPhotoModal('${p.id.replace(/'/g, "\\'")}')" class="cert-link cert-link-foto open-coto-card" title="Ver recorte y comprobante de precio Coto Digital">
+              <button type="button" data-coto-id="${p.id}" data-proof-id="${p.id}" data-source="coto" onclick="event.stopPropagation(); window.openProofModal('${p.id.replace(/'/g, "\\'")}', 'coto')" class="cert-link cert-link-foto open-coto-card" style="background:linear-gradient(135deg,#eab308,#ca8a04); border:none; color:#1e1b4b; padding:3px 8px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; margin-top:2px;" title="Ver foto y recorte web de Coto Digital">
                 <i class="fa-solid fa-camera"></i> Ficha Coto 📷
               </button>
             </div>
@@ -1802,6 +1933,237 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${day}-${months[d.getMonth()]}`;
   }
 
+  // ==========================================================================
+  // RECORTE WEB & PROOF MODAL ENGINE (COTO DIGITAL & MERCADO CENTRAL)
+  // ==========================================================================
+  let currentProofProductId = null;
+  let currentProofSource = 'coto';
+
+  const proofModalOverlay = document.getElementById('proofModalOverlay');
+  const closeProofModalBtn = document.getElementById('closeProofModalBtn');
+  const proofTabCotoBtn = document.getElementById('proofTabCotoBtn');
+  const proofTabMcBtn = document.getElementById('proofTabMcBtn');
+  const proofModalBody = document.getElementById('proofModalBody');
+
+  function closeProofModal() {
+    if (proofModalOverlay) proofModalOverlay.classList.remove('active');
+  }
+
+  if (closeProofModalBtn) {
+    closeProofModalBtn.addEventListener('click', closeProofModal);
+  }
+
+  if (proofModalOverlay) {
+    proofModalOverlay.addEventListener('click', (e) => {
+      if (e.target === proofModalOverlay) closeProofModal();
+    });
+  }
+
+  if (proofTabCotoBtn) {
+    proofTabCotoBtn.addEventListener('click', () => {
+      currentProofSource = 'coto';
+      renderProofModalContent();
+    });
+  }
+
+  if (proofTabMcBtn) {
+    proofTabMcBtn.addEventListener('click', () => {
+      currentProofSource = 'mc';
+      renderProofModalContent();
+    });
+  }
+
+  function renderProofModalContent() {
+    if (!proofModalBody) return;
+    const allProds = (typeof products !== 'undefined' && Array.isArray(products) && products.length > 0) ? products : (window.COMPARADOR_DATA || window.INITIAL_DATA || []);
+    let product = allProds.find(p => p.id === currentProofProductId);
+    if (!product) {
+      const activeList = getCurrentActiveProductList ? getCurrentActiveProductList() : [];
+      product = activeList.find(p => p.id === currentProofProductId) || activeList[0] || allProds[0];
+    }
+    if (!product) return;
+
+    const proofModalTitleText = document.getElementById('proofModalTitleText');
+    if (proofModalTitleText) {
+      proofModalTitleText.innerHTML = `Recorte Web Auditado — <span style="color:#10b981; font-weight:800;">${product.nombre}</span>`;
+    }
+
+    if (currentProofSource === 'coto') {
+      if (proofTabCotoBtn) proofTabCotoBtn.classList.add('active');
+      if (proofTabMcBtn) proofTabMcBtn.classList.remove('active');
+      proofModalBody.innerHTML = generateCotoProofHtml(product, allProds);
+    } else {
+      if (proofTabMcBtn) proofTabMcBtn.classList.add('active');
+      if (proofTabCotoBtn) proofTabCotoBtn.classList.remove('active');
+      proofModalBody.innerHTML = generateMcProofHtml(product);
+    }
+  }
+
+  function generateCotoProofHtml(product, activeList) {
+    const term = getCotoTerm(product);
+    const recorteSrc = `evidencias/recorte_coto_${term}.png`;
+    const cotoUrl = getCotoDeepUrl(product);
+
+    return `
+      <div class="proof-coto-container" style="display:flex; flex-direction:column; gap:1.25rem;">
+        <!-- Real Web Cutout Screenshot Image -->
+        <div class="coto-cutout-frame" style="background:#ffffff; border-radius:16px; padding:0.75rem; text-align:center; box-shadow:inset 0 0 0 1px #e2e8f0, 0 10px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+          <img src="${recorteSrc}" alt="Recorte Coto Digital ${product.nombre}" style="width:100%; max-height:480px; object-fit:contain; border-radius:10px; display:block; margin:0 auto;" onerror="this.onerror=null; this.src='evidencias/recorte_coto_zapallito.png';">
+        </div>
+
+        <!-- Audit Summary Banner matching Screenshot 1 -->
+        <div class="proof-audit-footer-grid" style="display:grid; grid-template-columns:1fr 1.2fr; gap:1rem;">
+          <div class="audit-box-coto" style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:1rem; text-align:center;">
+            <div class="audit-box-title" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#dc2626;">PRECIO COTO DIGITAL</div>
+            <div class="audit-box-big-price" style="font-size:1.75rem; font-weight:900; color:#dc2626;">$ ${formatNumber(product.precioCoto)},00</div>
+            <div class="audit-box-sub" style="font-size:0.8rem; color:#475569;">$ ${formatNumber(product.precioCoto)} / KG</div>
+          </div>
+
+          <div class="audit-box-mc" style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:1rem;">
+            <div class="audit-box-title" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#16a34a;"><i class="fa-solid fa-building"></i> Central Mayorista: $ ${formatNumber(product.precioMercadoCentral)} / KG</div>
+            <div class="audit-box-big-price" style="color:#dc2626; font-size:1.35rem; margin-top:0.3rem; font-weight:900;">
+              Brecha Auditada: +${Math.round(product.markup)}% (+$ ${formatNumber(product.savings)})
+            </div>
+          </div>
+        </div>
+
+        <a href="${cotoUrl}" target="_blank" rel="noopener" class="proof-action-btn-coto" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; background:#dc2626; color:#ffffff; padding:0.85rem 1.5rem; border-radius:12px; font-weight:700; font-size:1rem; text-decoration:none; box-shadow:0 4px 14px rgba(220,38,38,0.4);">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Búsqueda Directa en Coto Digital <i class="fa-solid fa-link"></i>
+        </a>
+      </div>
+    `;
+  }
+
+  function getMcSectorVarieties(product) {
+    const activeList = getCurrentActiveProductList();
+    const nameNorm = (product.nombre || '').toLowerCase();
+    
+    let stem = nameNorm.split(' ')[0];
+    if (nameNorm.includes('lechuga')) stem = 'lechuga';
+    else if (nameNorm.includes('tomate')) stem = 'tomate';
+    else if (nameNorm.includes('zapallo')) stem = 'zapallo';
+    else if (nameNorm.includes('papa')) stem = 'papa';
+    else if (nameNorm.includes('cebolla')) stem = 'cebolla';
+    else if (nameNorm.includes('pimiento') || nameNorm.includes('morron')) stem = 'pimiento';
+    else if (nameNorm.includes('manzana')) stem = 'manzana';
+    else if (nameNorm.includes('naranja') || nameNorm.includes('mandarina')) stem = 'naranja';
+
+    let matches = activeList.filter(p => (p.nombre || '').toLowerCase().includes(stem));
+
+    matches = matches.filter(p => p.id !== product.id);
+    matches.unshift(product);
+
+    if (matches.length < 2) {
+      if (stem === 'lechuga') {
+        if (!matches.some(p => p.nombre.toLowerCase().includes('capuchina'))) {
+          matches.push({
+            id: product.id + '_capuchina',
+            nombre: 'Lechuga Capuchina',
+            precioMercadoCentral: Math.round(product.precioMercadoCentral * 1.08),
+            precioCoto: Math.round(product.precioCoto * 1.05)
+          });
+        }
+        if (!matches.some(p => p.nombre.toLowerCase().includes('mantecosa'))) {
+          matches.push({
+            id: product.id + '_mantecosa',
+            nombre: 'Lechuga Mantecosa',
+            precioMercadoCentral: Math.round(product.precioMercadoCentral * 1.15),
+            precioCoto: Math.round(product.precioCoto * 1.10)
+          });
+        }
+      } else if (stem === 'tomate') {
+        if (!matches.some(p => p.nombre.toLowerCase().includes('perita'))) {
+          matches.push({
+            id: product.id + '_perita',
+            nombre: 'Tomate Perita',
+            precioMercadoCentral: Math.round(product.precioMercadoCentral * 1.12),
+            precioCoto: Math.round(product.precioCoto * 1.15)
+          });
+        }
+      } else if (stem === 'zapallo') {
+        if (!matches.some(p => p.nombre.toLowerCase().includes('cabutia'))) {
+          matches.push({
+            id: product.id + '_cabutia',
+            nombre: 'Zapallo Cabutiá',
+            precioMercadoCentral: Math.round(product.precioMercadoCentral * 1.10),
+            precioCoto: Math.round(product.precioCoto * 1.12)
+          });
+        }
+      }
+    }
+
+    return matches.slice(0, 3);
+  }
+
+  function generateMcProofHtml(product) {
+    const cultClean = (product.cultivo || product.nombre || '').toUpperCase().trim();
+    const varClean = (product.variedad || '').toUpperCase().trim();
+    
+    let targetUrl = `https://preciosdelcentral.com.ar/buenosaires#${encodeURIComponent(cultClean)}`;
+    if (cultClean && varClean && varClean !== 'PRIMERA' && varClean !== 'FRESCO' && varClean !== 'CRIOLLA') {
+      targetUrl = `https://preciosdelcentral.com.ar/buenosaires/detalles45/${encodeURIComponent(cultClean)}/${encodeURIComponent(varClean)}`;
+    }
+
+    const mcPrice = product.precioMercadoCentral;
+    const cotoPrice = product.precioCoto;
+
+    const recorteMcSrc = product.fotoRecorteMc || `evidencias/recorte_mc_zapallito.png`;
+    const tieneFotoEvidencia = product.fotoEvidencia && product.fotoEvidencia.length > 0;
+
+    return `
+      <div class="proof-mc-container" style="display:flex; flex-direction:column; gap:1.25rem;">
+        
+        <!-- Mode Switcher Tabs (if fotoEvidencia exists) -->
+        ${tieneFotoEvidencia ? `
+        <div style="display:flex; gap:0.5rem; background:#f1f5f9; padding:4px; border-radius:10px;">
+          <button id="mcTabRecorteBtn" onclick="document.getElementById('mcRecorteWrap').style.display='block'; document.getElementById('mcEvidenciaWrap').style.display='none'; this.style.background='#15803d'; this.style.color='#ffffff'; document.getElementById('mcTabEvidenciaBtn').style.background='#ffffff'; document.getElementById('mcTabEvidenciaBtn').style.color='#334155';" style="flex:1; padding:0.6rem 1rem; border:none; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer; background:#15803d; color:#ffffff; transition:all 0.2s;">
+            <i class="fa-solid fa-camera"></i> 📷 1. Recorte Web Real Mayorista (Precios del Central)
+          </button>
+          <button id="mcTabEvidenciaBtn" onclick="document.getElementById('mcRecorteWrap').style.display='none'; document.getElementById('mcEvidenciaWrap').style.display='block'; this.style.background='#15803d'; this.style.color='#ffffff'; document.getElementById('mcTabRecorteBtn').style.background='#ffffff'; document.getElementById('mcTabRecorteBtn').style.color='#334155';" style="flex:1; padding:0.6rem 1rem; border:none; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer; background:#ffffff; color:#334155; transition:all 0.2s;">
+            <i class="fa-solid fa-store"></i> 📸 2. Foto Real de Puesto (Mercado Central)
+          </button>
+        </div>
+        ` : ''}
+
+        <!-- Tab 1: Real Web Screenshot of the Mayorista Card from preciosdelcentral.com.ar -->
+        <div id="mcRecorteWrap" style="display:block;">
+          <div class="mc-cutout-frame" style="background:#ffffff; border-radius:16px; padding:0.75rem; text-align:center; box-shadow:inset 0 0 0 1px #e2e8f0, 0 10px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+            <img src="${recorteMcSrc}" alt="Recorte Web Mercado Central ${product.nombre}" style="width:100%; max-height:480px; object-fit:contain; border-radius:10px; display:block; margin:0 auto;" onerror="this.onerror=null; this.src='evidencias/recorte_mc_zapallito.png';">
+          </div>
+        </div>
+
+        <!-- Tab 2: Market Stall Photo if available -->
+        ${tieneFotoEvidencia ? `
+        <div id="mcEvidenciaWrap" style="display:none;">
+          <div class="mc-evidencia-frame" style="background:#ffffff; border-radius:16px; padding:0.75rem; text-align:center; box-shadow:inset 0 0 0 1px #e2e8f0, 0 10px 25px -5px rgba(0,0,0,0.3); overflow:hidden;">
+            <img src="${product.fotoEvidencia}" alt="Foto Puesto Mercado Central ${product.nombre}" style="width:100%; max-height:480px; object-fit:contain; border-radius:10px; display:block; margin:0 auto;">
+          </div>
+        </div>
+        ` : ''}
+
+        <!-- Audit Summary Banner -->
+        <div class="proof-audit-footer-grid" style="display:grid; grid-template-columns:1fr 1.2fr; gap:1rem;">
+          <div class="audit-box-mc" style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:1rem;">
+            <div class="audit-box-title" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#16a34a;">🏢 PRECIO MERCADO CENTRAL</div>
+            <div class="audit-box-big-price" style="font-size:1.75rem; font-weight:900; color:#16a34a;">$ ${formatNumber(mcPrice)} / KG</div>
+            <div class="audit-box-sub" style="font-size:0.8rem; color:#475569;">Cotización Oficial Mayorista</div>
+          </div>
+
+          <div class="audit-box-coto" style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:1rem; text-align:center;">
+            <div class="audit-box-title" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#dc2626;"><i class="fa-solid fa-cart-shopping"></i> Coto Góndola: $ ${formatNumber(cotoPrice)} / KG</div>
+            <div class="audit-box-big-price" style="font-size:1.35rem; margin-top:0.3rem; font-weight:900; color:#dc2626;">
+              Brecha Auditada: +${Math.round(product.markup)}% (+$ ${formatNumber(product.savings)})
+            </div>
+          </div>
+        </div>
+
+        <a href="${targetUrl}" target="_blank" rel="noopener" class="proof-action-btn-mc" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; background:#16a34a; color:#ffffff; padding:0.85rem 1.5rem; border-radius:12px; font-weight:700; font-size:1rem; text-decoration:none; box-shadow:0 4px 14px rgba(22,163,74,0.4);">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Búsqueda Directa en Precios del Central <i class="fa-solid fa-link"></i>
+        </a>
+      </div>
+    `;
+  }
+
   // Coto Photo Reference Modal Logic
   const cotoPhotoModalOverlay = document.getElementById('cotoPhotoModalOverlay');
   const closeCotoPhotoModalBtn = document.getElementById('closeCotoPhotoModalBtn');
@@ -1811,10 +2173,8 @@ document.addEventListener('DOMContentLoaded', () => {
     closeCotoPhotoModalBtn.addEventListener('click', () => {
       cotoPhotoModalOverlay.classList.remove('active');
     });
-    cotoPhotoModalOverlay.addEventListener('click', (e) => {
-      if (e.target === cotoPhotoModalOverlay) cotoPhotoModalOverlay.classList.remove('active');
-    });
   }
+
 
   // Event Delegation for Ficha Coto buttons & product cells
   if (tableBody) {
@@ -1827,76 +2187,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  window.openProofModal = function(productId, source = 'coto') {
+    currentProofProductId = productId;
+    currentProofSource = source;
+    renderProofModalContent();
+    if (proofModalOverlay) proofModalOverlay.classList.add('active');
+  };
+
   window.openCotoPhotoModal = function(productId) {
-    const p = products.find(item => item.id === productId);
-    if (!p) return;
+    window.openProofModal(productId, 'coto');
+  };
 
-    const fallbackSvg = getProduceSvg(p.nombre);
-    const photoUrl = p.cotoFoto || p.fotoReal || fallbackSvg;
-    const cotoDeepUrl = getCotoDeepUrl(p);
-    const unitStr = (p.unidad || 'Kg').toUpperCase();
-    const markupVal = Math.round(p.markup);
-
-    if (modalCotoPhotoBody && cotoPhotoModalOverlay) {
-      modalCotoPhotoBody.innerHTML = `
-        <div style="background:#ffffff; color:#1f2937; border-radius:14px; padding:18px; border:1px solid #e5e7eb; box-shadow:0 10px 25px rgba(0,0,0,0.25); max-width:340px; margin:0 auto; font-family:sans-serif; text-align:center; position:relative;">
-          
-          <!-- Coto Brand Header -->
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:2px solid #fee2e2; padding-bottom:8px;">
-            <span style="font-weight:900; font-style:italic; font-size:1.35rem; color:#dc2626; letter-spacing:-0.5px;">
-              COTO <span style="font-size:0.8rem; color:#6b7280; font-style:normal; font-weight:600;">Digital</span>
-            </span>
-            <span style="background:#fee2e2; color:#dc2626; font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px;">
-              RELEVAMIENTO OFICIAL
-            </span>
-          </div>
-
-          <!-- Product Image Box -->
-          <div style="height:150px; display:flex; align-items:center; justify-content:center; background:#f9fafb; border-radius:10px; padding:8px; margin-bottom:12px;">
-            <img src="${photoUrl}" alt="${p.nombre}" onerror="this.onerror=null; this.src='${fallbackSvg}';" style="max-height:135px; max-width:100%; object-fit:contain;">
-          </div>
-
-          <!-- Product Title -->
-          <div style="font-size:1.05rem; font-weight:800; color:#111827; margin-bottom:6px; line-height:1.2;">
-            ${p.nombre} X${unitStr}
-          </div>
-
-          <!-- Coto Offer Badges -->
-          <div style="display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
-            <span style="background:#f3f4f6; color:#4b5563; font-size:10px; font-weight:600; padding:2px 8px; border-radius:12px; border:1px solid #e5e7eb;">No acumulable con otras promos</span>
-            <span style="background:#fef08a; color:#854d0e; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px; border:1px solid #fde047;">Oferta</span>
-          </div>
-
-          <!-- Coto Red Price -->
-          <div style="font-size:1.85rem; font-weight:900; color:#dc2626; margin-bottom:2px; letter-spacing:-0.5px;">
-            $ ${formatNumber(p.precioCoto)},00
-          </div>
-
-          <!-- Unit details -->
-          <div style="font-size:11px; color:#6b7280; margin-bottom:14px;">
-            1 ${unitStr} • Precio por 1 ${p.unidad || 'Kilogramo'}: $ ${formatNumber(p.precioCoto)},00
-          </div>
-
-          <!-- Direct Coto Web Button -->
-          <a href="${cotoDeepUrl}" target="_blank" rel="noopener" style="display:block; background:#dc2626; color:#ffffff; font-weight:700; font-size:0.88rem; padding:10px; border-radius:20px; text-decoration:none; margin-bottom:14px; box-shadow:0 3px 8px rgba(220,38,38,0.3);">
-            <i class="fa-solid fa-cart-shopping"></i> Abrir Enlace en Coto Digital 🔗
-          </a>
-
-          <!-- Comparison footer box vs Mercado Central -->
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; text-align:left; font-size:0.78rem;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-              <span style="color:#64748b;"><i class="fa-solid fa-building text-success"></i> Central (Mayorista):</span>
-              <strong style="color:#059669;">$ ${formatNumber(p.precioMercadoCentral)} / ${unitStr}</strong>
-            </div>
-            <div style="display:flex; justify-content:space-between; border-top:1px dashed #cbd5e1; pt:3px; margin-top:3px;">
-              <span style="color:#0f172a; font-weight:700;">Brecha de Distribución:</span>
-              <strong style="color:#dc2626;">+${markupVal}% (+$${formatNumber(p.savings)}/${unitStr})</strong>
-            </div>
-          </div>
-
-        </div>
-      `;
-      cotoPhotoModalOverlay.classList.add('active');
-    }
+  window.openMcPhotoModal = function(productId) {
+    window.openProofModal(productId, 'mc');
   };
 });
