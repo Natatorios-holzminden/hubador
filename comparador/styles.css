@@ -2084,182 +2084,189 @@ body {
 .visual-catalog-container {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1.25rem;
 }
 
 .vc-card {
   display: flex;
   align-items: stretch;
-  background: rgba(30, 41, 59, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
   overflow: hidden;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  min-height: 220px;
 }
 
 .vc-card:hover {
-  border-color: rgba(52, 211, 153, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border-color: rgba(52, 211, 153, 0.65);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
 
 .vc-card.vc-favorite {
-  border-color: rgba(245, 158, 11, 0.6);
-  background: rgba(30, 41, 59, 0.9);
+  border: 2px solid rgba(245, 158, 11, 0.8);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(45, 30, 15, 0.4));
 }
 
 .vc-mc-col {
-  width: 250px;
-  min-width: 250px;
-  max-width: 250px;
-  background: rgba(16, 185, 129, 0.06);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  width: 380px;
+  min-width: 380px;
+  max-width: 380px;
+  background: rgba(16, 185, 129, 0.07);
+  border-right: 1.5px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem;
+  padding: 1rem;
   cursor: pointer;
   position: relative;
 }
 
 .vc-mc-col:hover {
-  background: rgba(16, 185, 129, 0.12);
+  background: rgba(16, 185, 129, 0.14);
 }
 
 .vc-mc-col img {
   width: 100%;
   height: auto;
-  max-height: 110px;
+  max-height: 190px;
   object-fit: contain;
-  border-radius: 6px;
-  transition: transform 0.2s ease;
+  border-radius: 8px;
+  transition: transform 0.25s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .vc-mc-col:hover img {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .vc-info-col {
   flex: 1;
-  padding: 1rem 1.25rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
 
 .vc-title-row {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
 .vc-product-name {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.45rem;
+  font-weight: 800;
   color: var(--text-bright);
+  letter-spacing: -0.3px;
 }
 
 .vc-badge-fav {
   background: linear-gradient(135deg, #d97706, #f59e0b);
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 800;
-  padding: 0.2rem 0.6rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 20px;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4);
 }
 
 .vc-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
 }
 
 .vc-prices-row {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.85rem;
   align-items: center;
-  margin-top: 0.35rem;
+  margin-top: 0.4rem;
   flex-wrap: wrap;
 }
 
 .vc-price-mc {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.18);
   color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  padding: 0.35rem 0.8rem;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.95rem;
+  border: 1.5px solid rgba(52, 211, 153, 0.4);
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.2px;
 }
 
 .vc-price-coto {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.18);
   color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  padding: 0.35rem 0.8rem;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.95rem;
+  border: 1.5px solid rgba(248, 113, 113, 0.4);
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.2px;
 }
 
 .vc-markup-badge {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.18);
   color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  padding: 0.35rem 0.7rem;
-  border-radius: 6px;
+  border: 1.5px solid rgba(251, 191, 36, 0.4);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
 }
 
 .vc-savings-text {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #34d399;
-  font-weight: 600;
-  margin-top: 0.1rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
 }
 
 .vc-coto-col {
-  width: 210px;
-  min-width: 210px;
-  max-width: 210px;
-  background: rgba(239, 68, 68, 0.05);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  width: 340px;
+  min-width: 340px;
+  max-width: 340px;
+  background: rgba(239, 68, 68, 0.06);
+  border-left: 1.5px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem;
+  padding: 1rem;
   cursor: pointer;
   position: relative;
 }
 
 .vc-coto-col:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.12);
 }
 
 .vc-coto-col img {
   width: 100%;
   height: auto;
-  max-height: 110px;
+  max-height: 190px;
   object-fit: contain;
-  border-radius: 6px;
-  transition: transform 0.2s ease;
+  border-radius: 8px;
+  transition: transform 0.25s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .vc-coto-col:hover img {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .vc-no-img {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   text-align: center;
   font-style: italic;
-  padding: 1rem;
+  padding: 1.5rem;
 }
 
 @media (max-width: 860px) {

@@ -18294,12 +18294,12 @@
     "imagen": "",
     "unidad": "Kg",
     "precioMercadoCentral": 1300,
-    "precioCoto": 1190,
+    "precioCoto": 2999,
     "variedad": "VALENCIANITA",
     "origen": "Mercado Central de Buenos Aires",
     "bultoMercadoCentral": "Relevamiento oficial Mercado Central ($1067/Kg)",
-    "markup": -8.5,
-    "savings": -110,
+    "markup": 130.7,
+    "savings": 1699,
     "topVerduraRank": 3,
     "topFrutaRank": null,
     "estacionalidad": {
@@ -18317,8 +18317,8 @@
     "tieneEvidenciaReal": false,
     "fotoRecorte": "evidencias/recorte_coto_cebolla.png",
     "fotoRecorteMc": "evidencias/recorte_mc_cebolla.png",
-    "ahorroPorKg": -110,
-    "markupCalculado": -8.5
+    "ahorroPorKg": 1699,
+    "markupCalculado": 130.7
   },
   {
     "id": "chauchaesmeralda",

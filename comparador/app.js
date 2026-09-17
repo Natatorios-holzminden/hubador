@@ -2266,7 +2266,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let visualCatalogQuery = '';
 
   const TOP_VERDURAS_CANONICAL = [
-    'papa_spunta', 'tomate_redondo', 'cebolla_valenciana', 'zanahoria_chantenay',
+    'papa_spunta', 'tomate_redondo', 'cebolla_valenciani', 'zanahoria_chantenay',
     'zapallo_tetsukab.', 'zapallito_redondo', 'acelga', 'lechuga_criolla',
     'batata_arapey', 'pepino'
   ];
