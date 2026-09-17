@@ -118,19 +118,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const TOP_FRUTAS_IDS = TOP_10_FRUTAS.map(x => x.id);
 
   function getDefaultVerduleriasData() {
-    return [{
-      id: 'verduleria_plaza_italia',
-      nombre: 'Verdulería Plaza Italia',
-      barrio: 'Palermo',
-      direccion: 'Av. Santa Fe 3420, Palermo',
-      ultimaFoto: 'Hace 10 minutos',
-      fotosCount: 2,
-      fotos: [
-        { label: 'Foto #1 - Cartel Principal (16 Productos)', src: 'photos/cartel_foto1.jpg' },
-        { label: 'Foto #2 - Cartel Complementario (8 Productos)', src: 'photos/cartel_foto2.jpg' }
-      ],
-      productos: [...CHALKBORD_PHOTO1_ITEMS, ...CHALKBORD_PHOTO2_ITEMS]
-    }];
+    return [
+      {
+        id: 'verduleria_plaza_italia',
+        nombre: 'Verdulería Plaza Italia',
+        barrio: 'Palermo',
+        direccion: 'Av. Santa Fe 3420, Palermo',
+        ultimaFoto: 'Hace 10 minutos',
+        fotosCount: 2,
+        fotos: [
+          { label: 'Foto #1 - Cartel Principal (16 Productos)', src: 'photos/cartel_foto1.jpg' },
+          { label: 'Foto #2 - Cartel Complementario (8 Productos)', src: 'photos/cartel_foto2.jpg' }
+        ],
+        productos: [...CHALKBORD_PHOTO1_ITEMS, ...CHALKBORD_PHOTO2_ITEMS]
+      },
+      {
+        id: 'verduleria_abasto_quilmes',
+        nombre: 'Mercado Abasto de Quilmes - Puesto 21',
+        barrio: 'Quilmes',
+        direccion: 'Islas Malvinas 1860, Quilmes',
+        ultimaFoto: 'Hace 1 hora',
+        fotosCount: 1,
+        fotos: [
+          { label: 'Foto #1 - Abasto de Quilmes', src: 'photos/abasto_quilmes.jpg' }
+        ],
+        productos: QUILMES_PUESTO21_ITEMS
+      }
+    ];
   }
 
   function saveVerduleriasToStorage() {
@@ -141,6 +155,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const FALLBACK_MAIN_PRODUCTS = [
+    { id: 'papa_spunta', nombre: 'Papa Spunta', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 750, precioCoto: 1699 },
+    { id: 'tomate_perita', nombre: 'Tomate Perita', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 850, precioCoto: 2899 },
+    { id: 'cebolla_colorada', nombre: 'Cebolla Colorada', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 650, precioCoto: 1999 },
+    { id: 'zanahoria_chantenay', nombre: 'Zanahoria Chantenay', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 500, precioCoto: 1499 },
+    { id: 'zapallo_tetsukab.', nombre: 'Zapallo Cabutiá', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 800, precioCoto: 2499 },
+    { id: 'zapallito_redondo', nombre: 'Zapallito Redondo', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 933, precioCoto: 2999 },
+    { id: 'acelga', nombre: 'Acelga', categoria: 'verduras', unidad: 'Paquete', precioMercadoCentral: 400, precioCoto: 1299 },
+    { id: 'lechuga_francesa', nombre: 'Lechuga Francesa', categoria: 'verduras', unidad: 'Paquete', precioMercadoCentral: 600, precioCoto: 1899 },
+    { id: 'batata_arapey', nombre: 'Batata Arapey', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 900, precioCoto: 2499 },
+    { id: 'espinaca', nombre: 'Espinaca', categoria: 'verduras', unidad: 'Atado', precioMercadoCentral: 350, precioCoto: 1199 },
+    { id: 'banana_cavendish', nombre: 'Banana Cavendish', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 1100, precioCoto: 2999 },
+    { id: 'manzanacrippspin', nombre: 'Manzana Red Delicious', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 850, precioCoto: 2499 },
+    { id: 'naranja_newhall', nombre: 'Naranja de Ombligo', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 470, precioCoto: 1899 },
+    { id: 'mandarina_afourer', nombre: 'Mandarina Afourer', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 550, precioCoto: 1999 },
+    { id: 'peraasiatica', nombre: 'Pera Packham', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 700, precioCoto: 2199 },
+    { id: 'limon_eureka', nombre: 'Limón Eureka', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 450, precioCoto: 1499 },
+    { id: 'frutilla', nombre: 'Frutilla', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 3000, precioCoto: 7999 },
+    { id: 'pomeloblanco', nombre: 'Pomelo Rosado', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 600, precioCoto: 1799 },
+    { id: 'palta_hass', nombre: 'Palta Hass', categoria: 'frutas', unidad: 'Unidad', precioMercadoCentral: 600, precioCoto: 1500 },
+    { id: 'kiwi', nombre: 'Kiwi Hayward', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 2500, precioCoto: 5999 },
+    { id: 'maple_blanco', nombre: 'Maple Blanco', categoria: 'almacen', unidad: 'Maple', precioMercadoCentral: 1800, precioCoto: 3500 },
+    { id: 'maple_color', nombre: 'Maple Color', categoria: 'almacen', unidad: 'Maple', precioMercadoCentral: 3000, precioCoto: 6500 },
+    { id: 'papa_lavada', nombre: 'Papa Lavada', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 750, precioCoto: 1799 },
+    { id: 'manzana_verde', nombre: 'Manzana Verde', categoria: 'frutas', unidad: 'Kg', precioMercadoCentral: 850, precioCoto: 2499 },
+    { id: 'berenjena', nombre: 'Berenjena', categoria: 'verduras', unidad: 'Kg', precioMercadoCentral: 500, precioCoto: 1899 },
+    { id: 'arandanos', nombre: 'Arándanos', categoria: 'frutas', unidad: 'Cajita', precioMercadoCentral: 1500, precioCoto: 3500 }
+  ];
+
   // Load baseline data and verdulerías data (Priority: localStorage -> verdulerias_data.json -> default fallback)
   const localSavedStores = localStorage.getItem('VERDULERIAS_NETWORK_DATA');
 
@@ -148,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(`data.json?t=${Date.now()}`).then(r => r.json()).catch(() => window.INITIAL_DATA || []),
     fetch(`verdulerias_data.json?t=${Date.now()}`).then(r => r.json()).catch(() => [])
   ]).then(([mainData, verdData]) => {
-    mainProducts = mainData;
+    mainProducts = (mainData && mainData.length > 0) ? mainData : FALLBACK_MAIN_PRODUCTS;
 
     if (localSavedStores) {
       try {
@@ -172,6 +215,14 @@ document.addEventListener('DOMContentLoaded', () => {
     startProgressiveScan();
   }).catch(err => {
     console.error("Error cargando datos de verdulerías:", err);
+    mainProducts = FALLBACK_MAIN_PRODUCTS;
+    verduleriasData = getDefaultVerduleriasData();
+    setupCategoryPills();
+    setupToggleButtons();
+    setupDragAndDrop();
+    populateProductDropdown();
+    renderRanking();
+    renderVerduleriasGrid();
   });
 
   function setupDragAndDrop() {

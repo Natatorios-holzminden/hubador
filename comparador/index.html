@@ -130,8 +130,11 @@
           <span>Línea de Tiempo e Historial de Sesiones</span>
         </div>
         <div class="timeline-actions">
-          <button class="btn btn-sm btn-primary" id="downloadPdfBtn" title="Descargar reporte actual en PDF para guardar o imprimir">
-            <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+          <a href="Catalogo_Precios_16Sep2026.pdf" download="Catalogo_Precios_16Sep2026.pdf" class="btn btn-sm btn-primary" id="downloadFullCatalogPdfBtn" title="Descargar Catálogo Visual Completo en PDF con precios y fotos de evidencia a los costados">
+            <i class="fa-solid fa-book-open"></i> Catálogo con Fotos (PDF 16-Sep)
+          </a>
+          <button class="btn btn-sm btn-outline-success" id="downloadBackup16SepBtn" title="Descargar Backup Oficial del 16/09/2026 en JSON">
+            <i class="fa-solid fa-file-code"></i> Backup 16-Sep (JSON)
           </button>
           <button class="btn btn-sm btn-outline" id="exportDataBtn" title="Descargar datos de la sesión actual en formato CSV / Excel">
             <i class="fa-solid fa-file-csv"></i> Descargar CSV
@@ -215,6 +218,9 @@
       </button>
       <button class="tab-btn" data-tab="temporalComparisonView" id="tabBtnTemporalComp">
         <i class="fa-solid fa-clock-rotate-left"></i> Comparador 19-Ago vs 11-Ago
+      </button>
+      <button class="tab-btn" data-tab="catalogoVisualView" id="tabBtnCatalogoVisual">
+        <i class="fa-solid fa-camera text-success"></i> Catálogo con Fotos
       </button>
     </div>
 
@@ -510,6 +516,40 @@
       </div>
     </section>
 
+    <!-- Tab Content: Catálogo Visual con Fotos Auditadas -->
+    <section class="tab-content" id="catalogoVisualView">
+      <div class="glass-card" style="padding:1.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1rem;">
+          <div>
+            <h3 style="margin:0; font-family:'Outfit',sans-serif; color:var(--text-bright); font-size:1.4rem;">
+              <i class="fa-solid fa-camera-retro text-success"></i> Catálogo Visual Auditado: <span style="color:#34d399;">Fotos y Precios</span>
+            </h3>
+            <p style="margin:0.25rem 0 0 0; color:var(--text-muted); font-size:0.88rem;">
+              Recortes de evidencia oficiales del Mercado Central y Coto Digital con precios y markups calculados al 16-Sep.
+            </p>
+          </div>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;" id="visualCatalogFilterPills">
+            <button class="pill active" data-visual-filter="favoritos">⭐ Top 10 Favoritos (20)</button>
+            <button class="pill" data-visual-filter="todos">Todos (148)</button>
+            <button class="pill" data-visual-filter="verduras">🥬 Verduras (107)</button>
+            <button class="pill" data-visual-filter="frutas">🍎 Frutas (41)</button>
+          </div>
+        </div>
+        
+        <div style="margin-bottom:1.25rem; display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+          <input type="text" id="visualCatalogSearchInput" placeholder="🔍 Buscar producto en el catálogo visual..." 
+                 style="flex:1; min-width:240px; padding:0.65rem 1.1rem; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(15,23,42,0.6); color:#fff; font-size:0.92rem; outline:none;">
+          <a href="Catalogo_Precios_16Sep2026.pdf" download="Catalogo_Precios_16Sep2026.pdf" class="btn btn-sm btn-primary" style="white-space:nowrap; padding:0.65rem 1.1rem;">
+            <i class="fa-solid fa-file-pdf"></i> Descargar Catálogo Completo (PDF 20MB)
+          </a>
+        </div>
+
+        <div id="visualCatalogCardsContainer" class="visual-catalog-container">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Modal / Floating Calculator Drawer -->
@@ -578,6 +618,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="baseline_11aug.js?v=28"></script>
   <script src="baseline_19aug.js?v=28"></script>
+  <script src="baseline_16sep.js?v=35"></script>
   <script src="data.js?v=34"></script>
   <script src="app.js?v=34"></script>
 </body>

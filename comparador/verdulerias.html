@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VerduTracker AI: Monitor de Verdulerías de Barrio (Multi-Competencia por Foto)</title>
   <meta name="description" content="Comparador colaborativo de precios en verdulerías de barrio mediante fotos e Inteligencia Artificial Multimodal vs Mercado Central y Coto.">
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { font-family: 'Inter', sans-serif; }
+    .hidden { display: none !important; }
     .theme-verdura { border-color: rgba(16, 185, 129, 0.4) !important; }
     .theme-fruta { border-color: rgba(244, 63, 94, 0.4) !important; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -223,7 +224,6 @@
         <!-- Upload Form with Native Drag and Drop & Multi-Photo Accumulation -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl">
           <div class="flex justify-between items-start">
-            <div>
             <div>
               <h2 class="text-lg font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-camera text-emerald-400"></i> Cargar Foto de Verdulería

@@ -303,6 +303,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
+      // Ensure September 16 baseline session exists in history
+      const hasBase16 = sessions.some(s => s.id === 'session-16sep');
+      if (!hasBase16 && window.BASELINE_16SEP_DATA) {
+        sessions.push({
+          id: 'session-16sep',
+          timestamp: new Date('2026-09-16T23:59:59').getTime(),
+          dateStr: '16/09/2026',
+          label: '📅 Relevamiento Auditado 16-Sep (Backup Oficial Ayer)',
+          products: JSON.parse(JSON.stringify(window.BASELINE_16SEP_DATA))
+        });
+      }
+
       // Ensure August 19 session exists in history
       const hasBase19 = sessions.some(s => s.id === 'session-19aug');
       if (!hasBase19 && window.BASELINE_19AUG_DATA) {
@@ -331,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     activeSessionId = 'session-live';
     const base19Sess = sessions.find(s => s.id === 'session-19aug');
     const base11Sess = sessions.find(s => s.id === 'session-11aug');
-    baseSessionId = base19Sess ? 'session-19aug' : (base11Sess ? 'session-11aug' : (sessions.length > 1 ? sessions[1].id : 'none'));
+    const base16Sess = sessions.find(s => s.id === 'session-16sep'); baseSessionId = base16Sess ? 'session-16sep' : (base19Sess ? 'session-19aug' : (sessions.length > 1 ? sessions[1].id : 'none'));
 
     populateSessionDropdowns();
     setupSessionListeners();
@@ -370,7 +382,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // PURE REAL HISTORICAL SESSIONS ONLY (Live 21-Ago vs 19-Ago vs 11-Ago Baseline)!
-    return [sLive, s19Aug, s11Aug];
+    const base16Copy = window.BASELINE_16SEP_DATA ? JSON.parse(JSON.stringify(window.BASELINE_16SEP_DATA)) : liveCopy;
+    const s16Sep = {
+      id: 'session-16sep',
+      timestamp: new Date('2026-09-16T23:59:59').getTime(),
+      dateStr: '16/09/2026',
+      label: '📅 Relevamiento Auditado 16-Sep (Backup Oficial Ayer)',
+      products: base16Copy
+    };
+    return [sLive, s16Sep, s19Aug, s11Aug];
   }
 
   function saveSessions() {
@@ -441,6 +461,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (downloadPdfBtn) {
       downloadPdfBtn.addEventListener('click', () => {
         generateDirectPdfDownload();
+      });
+    }
+
+    const downloadBackup16SepBtn = document.getElementById('downloadBackup16SepBtn');
+    if (downloadBackup16SepBtn) {
+      downloadBackup16SepBtn.addEventListener('click', () => {
+        exportSessionToJson('session-16sep', 'backup_precios_16sep.json');
+        showNotification("📥 Backup del 16/09/2026 descargado correctamente");
       });
     }
 
@@ -794,6 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCalculatorSummary();
     renderTemporalComparisonTable();
     renderStackedCardsGrid();
+    renderVisualCatalog();
   }
 
   function renderStackedCardsGrid() {
@@ -1663,6 +1692,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.currentTarget.classList.add('active');
         const targetEl = document.getElementById(targetTab);
         if (targetEl) targetEl.classList.add('active');
+
+        if (targetTab === 'catalogoVisualView') {
+          renderVisualCatalog();
+        }
       });
     });
 
@@ -1803,19 +1836,29 @@ document.addEventListener('DOMContentLoaded', () => {
       { nombre: `Origen: CORDOBA | ${p.nombre}`, color: '#06b6d4', puntos: [950, 970, 1020, 1150, 1250, 1550, 1500, 1450] }
     ];
     const fechas = est.fechasSeries || ["26-06-26", "02-07-26", "08-07-26", "14-07-26", "20-07-26", "26-07-26", "01-08-26", "09-08-26"];
+    const cotoPrice = p.precioCoto || 0;
 
     const originsBadgesContainer = document.getElementById('originsBadgesContainer');
     if (originsBadgesContainer) {
-      originsBadgesContainer.innerHTML = origins.map(o => `
+      let badgesHtml = origins.map(o => `
         <span class="origin-badge" style="border-color: ${o.color};">
           <span style="width:10px; height:10px; border-radius:3px; background:${o.color};"></span> ${o.nombre}
         </span>
       `).join('');
+      if (cotoPrice > 0) {
+        badgesHtml += `
+          <span class="origin-badge" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.15); color: #ef4444; font-weight: 700;">
+            <span style="width:10px; height:10px; border-radius:3px; background:#ef4444;"></span> Techo Coto Góndola: $${formatNumber(cotoPrice)}/kg
+          </span>
+        `;
+      }
+      originsBadgesContainer.innerHTML = badgesHtml;
     }
 
     const svgLineChartContainer = document.getElementById('svgLineChartContainer');
     if (svgLineChartContainer) {
-      const allValues = origins.flatMap(o => o.puntos);
+      const allValues = origins.flatMap(o => (o.puntos || []).filter(v => v !== null && v !== undefined));
+      if (cotoPrice > 0) allValues.push(cotoPrice);
       const minVal = Math.floor(Math.min(...allValues, 500) / 100) * 100;
       const maxVal = Math.ceil(Math.max(...allValues, 1800) / 100) * 100;
       
@@ -1843,7 +1886,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let xAxisLabels = '';
       const pointCount = fechas.length;
-      const stepX = chartW / (pointCount - 1);
+      const stepX = pointCount > 1 ? chartW / (pointCount - 1) : chartW;
       fechas.forEach((f, idx) => {
         const x = paddingLeft + idx * stepX;
         xAxisLabels += `
@@ -1854,20 +1897,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let linesSvg = '';
       origins.forEach(o => {
-        const pts = o.puntos;
+        const pts = o.puntos || [];
         const coords = pts.map((val, idx) => {
-          const x = paddingLeft + idx * (chartW / (pts.length - 1));
-          const y = height - paddingBottom - ((val - minVal) / (maxVal - minVal)) * chartH;
+          if (val === null || val === undefined) return null;
+          const x = paddingLeft + idx * (chartW / (Math.max(pts.length - 1, 1)));
+          const y = height - paddingBottom - ((val - minVal) / (Math.max(maxVal - minVal, 1))) * chartH;
           return { x, y, val };
-        });
+        }).filter(c => c !== null);
 
-        const pointsStr = coords.map(c => `${c.x},${c.y}`).join(' ');
-        linesSvg += `<polyline fill="none" stroke="${o.color}" stroke-width="2.5" points="${pointsStr}" stroke-linejoin="round" stroke-linecap="round"/>`;
+        if (coords.length > 1) {
+          const pointsStr = coords.map(c => `${c.x},${c.y}`).join(' ');
+          linesSvg += `<polyline fill="none" stroke="${o.color}" stroke-width="2.5" points="${pointsStr}" stroke-linejoin="round" stroke-linecap="round"/>`;
+        }
 
         coords.forEach(c => {
           linesSvg += `<circle cx="${c.x}" cy="${c.y}" r="3.5" fill="${o.color}" stroke="#fff" stroke-width="1.5"><title>${o.nombre}: $${formatNumber(c.val)}/kg</title></circle>`;
         });
       });
+
+      let cotoLineSvg = '';
+      if (cotoPrice > 0 && maxVal > minVal) {
+        const cotoY = height - paddingBottom - ((cotoPrice - minVal) / (maxVal - minVal)) * chartH;
+        cotoLineSvg = `
+          <g class="coto-ceiling-group">
+            <line x1="${paddingLeft}" y1="${cotoY}" x2="${width - paddingRight}" y2="${cotoY}" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="6,4"/>
+            <rect x="${width - paddingRight - 165}" y="${Math.max(cotoY - 22, 6)}" width="165" height="20" rx="4" fill="#ef4444"/>
+            <text x="${width - paddingRight - 82}" y="${Math.max(cotoY - 8, 20)}" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">TECHO COTO: $${formatNumber(cotoPrice)}/kg</text>
+          </g>
+        `;
+      }
 
       svgLineChartContainer.innerHTML = `
         <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
@@ -1877,6 +1935,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="#cbd5e1" stroke-width="2"/>
           <line x1="${paddingLeft}" y1="${height - paddingBottom}" x2="${width - paddingRight}" y2="${height - paddingBottom}" stroke="#cbd5e1" stroke-width="2"/>
           ${linesSvg}
+          ${cotoLineSvg}
         </svg>
       `;
     }
@@ -2201,4 +2260,163 @@ document.addEventListener('DOMContentLoaded', () => {
   window.openMcPhotoModal = function(productId) {
     window.openProofModal(productId, 'mc');
   };
+
+  // --- INTERACTIVE VISUAL CATALOG WITH AUDITED EVIDENCE PHOTOS ---
+  let visualCatalogFilter = 'favoritos';
+  let visualCatalogQuery = '';
+
+  const TOP_VERDURAS_CANONICAL = [
+    'papa_spunta', 'tomate_redondo', 'cebolla_valenciana', 'zanahoria_chantenay',
+    'zapallo_tetsukab.', 'zapallito_redondo', 'acelga', 'lechuga_criolla',
+    'batata_arapey', 'pepino'
+  ];
+
+  const TOP_FRUTAS_CANONICAL = [
+    'banana_cavendish', 'manzana_red_delicious', 'naranja_salustiana', 'mandarinamurcot',
+    'pera_packhams', 'limon_eureka', 'frutilla', 'pomelo_starruby',
+    'palta_hass', 'kiwi'
+  ];
+
+  function initVisualCatalogTab() {
+    const filterPills = document.querySelectorAll('#visualCatalogFilterPills .pill');
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        filterPills.forEach(p => p.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        visualCatalogFilter = e.currentTarget.getAttribute('data-visual-filter');
+        renderVisualCatalog();
+      });
+    });
+
+    const searchInput = document.getElementById('visualCatalogSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        visualCatalogQuery = e.target.value.trim().toLowerCase();
+        renderVisualCatalog();
+      });
+    }
+
+    renderVisualCatalog();
+  }
+
+  function renderVisualCatalog() {
+    const container = document.getElementById('visualCatalogCardsContainer');
+    if (!container) return;
+
+    const allProds = (typeof getCurrentActiveProductList === 'function') 
+      ? getCurrentActiveProductList() 
+      : (window.COMPARADOR_DATA || []);
+
+    let prodsToDisplay = [];
+
+    if (visualCatalogFilter === 'favoritos') {
+      const topV = TOP_VERDURAS_CANONICAL.map((id, idx) => {
+        const p = allProds.find(x => x.id === id);
+        return p ? { ...p, favLabel: `#${idx + 1} Verdura Favorita` } : null;
+      }).filter(Boolean);
+
+      const topF = TOP_FRUTAS_CANONICAL.map((id, idx) => {
+        const p = allProds.find(x => x.id === id);
+        return p ? { ...p, favLabel: `#${idx + 1} Fruta Favorita` } : null;
+      }).filter(Boolean);
+
+      prodsToDisplay = [...topV, ...topF];
+    } else if (visualCatalogFilter === 'verduras') {
+      prodsToDisplay = allProds.filter(p => p.categoria === 'verduras')
+        .sort((a,b) => (b.markup||0) - (a.markup||0));
+    } else if (visualCatalogFilter === 'frutas') {
+      prodsToDisplay = allProds.filter(p => p.categoria === 'frutas')
+        .sort((a,b) => (b.markup||0) - (a.markup||0));
+    } else {
+      prodsToDisplay = [...allProds].sort((a,b) => (b.markup||0) - (a.markup||0));
+    }
+
+    if (visualCatalogQuery) {
+      prodsToDisplay = prodsToDisplay.filter(p => {
+        const nom = (p.nombre || '').toLowerCase();
+        const cat = (p.categoria || '').toLowerCase();
+        const id = (p.id || '').toLowerCase();
+        const varr = (p.variedad || '').toLowerCase();
+        return nom.includes(visualCatalogQuery) || cat.includes(visualCatalogQuery) || id.includes(visualCatalogQuery) || varr.includes(visualCatalogQuery);
+      });
+    }
+
+    if (prodsToDisplay.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:3rem; color:var(--text-muted);">
+          <i class="fa-solid fa-magnifying-glass" style="font-size:2rem; margin-bottom:1rem; opacity:0.5;"></i>
+          <p>No se encontraron productos coincidentes en el catálogo visual.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = prodsToDisplay.map(p => {
+      const mc = p.precioMercadoCentral || 0;
+      const coto = p.precioCoto || 0;
+      const markup = p.markup || 0;
+      const savings = p.savings || 0;
+      const unidad = p.unidad || 'Kg';
+
+      const mcImg = p.fotoRecorteMc 
+        ? `<img src="${p.fotoRecorteMc}" alt="MC ${p.nombre}" title="Clic para ver auditoría Mercado Central" onclick="window.openMcPhotoModal('${p.id}')">`
+        : `<div class="vc-no-img">Sin recorte MC</div>`;
+
+      const cotoImg = p.fotoRecorte 
+        ? `<img src="${p.fotoRecorte}" alt="Coto ${p.nombre}" title="Clic para ver auditoría Coto" onclick="window.openCotoPhotoModal('${p.id}')">`
+        : `<div class="vc-no-img">Sin recorte Coto</div>`;
+
+      const isFav = Boolean(p.favLabel);
+      const favBadge = isFav 
+        ? `<span class="vc-badge-fav"><i class="fa-solid fa-star"></i> ${p.favLabel}</span>`
+        : '';
+
+      return `
+        <div class="vc-card ${isFav ? 'vc-favorite' : ''}">
+          <div class="vc-mc-col" onclick="window.openMcPhotoModal('${p.id}')">
+            ${mcImg}
+          </div>
+          <div class="vc-info-col">
+            <div class="vc-title-row">
+              <span class="vc-product-name">${p.nombre}</span>
+              ${favBadge}
+            </div>
+            <div class="vc-subtitle">
+              ${p.variedad ? 'Variedad: ' + p.variedad : ''}
+              ${p.origen ? ' | ' + p.origen : ''}
+            </div>
+            <div class="vc-prices-row">
+              <span class="vc-price-mc">MC: $${formatNumber(mc)}/${unidad}</span>
+              <span class="vc-price-coto">Coto: $${formatNumber(coto)}/${unidad}</span>
+              <span class="vc-markup-badge">+${Math.round(markup)}%</span>
+            </div>
+            <div class="vc-savings-text">
+              <i class="fa-solid fa-piggy-bank"></i> Ahorro comprando en Central: $${formatNumber(savings)}/${unidad}
+            </div>
+          </div>
+          <div class="vc-coto-col" onclick="window.openCotoPhotoModal('${p.id}')">
+            ${cotoImg}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Initialize visual catalog tab
+  initVisualCatalogTab();
 });
+
+  window.exportSessionToJson = function(sessionId, filename) {
+    const sess = (typeof sessions !== 'undefined' && Array.isArray(sessions)) ? sessions.find(s => s.id === sessionId) : null;
+    const dataToExport = (sess && sess.products) ? sess.products : (window.BASELINE_16SEP_DATA || window.COMPARADOR_DATA || []);
+    const jsonStr = JSON.stringify(dataToExport, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename || `backup_precios_${sessionId}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
