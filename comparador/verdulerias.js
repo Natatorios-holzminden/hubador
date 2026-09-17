@@ -1260,6 +1260,49 @@ document.addEventListener('DOMContentLoaded', () => {
     dlAnchorElem.remove();
   };
 
+  function findBenchmarkPrices(p) {
+    const rawId = (p.id || '').toLowerCase();
+    const rawName = (p.nombre || '').toLowerCase();
+
+    let match = mainProducts.find(x => x.id === p.id);
+
+    if (!match) {
+      if (rawId.includes('manzana_verde') || rawName.includes('verde')) {
+        match = mainProducts.find(x => x.id === 'manzana_granny_smith');
+      } else if (rawId.includes('pera') || rawName.includes('pera')) {
+        match = mainProducts.find(x => x.id === 'pera_packhams') || mainProducts.find(x => x.id === 'peraasiatica');
+      } else if (rawId.includes('mandarina') || rawName.includes('mandarina')) {
+        match = mainProducts.find(x => x.id === 'mandarinamurcot') || mainProducts.find(x => x.id === 'mandarinaellendale') || mainProducts.find(x => x.id === 'mandarina_afourer');
+      } else if (rawId.includes('naranja') || rawName.includes('naranja')) {
+        match = mainProducts.find(x => x.id === 'naranja_salustiana') || mainProducts.find(x => x.id === 'naranja_newhall');
+      } else if (rawId.includes('zapallito') || rawName.includes('zapallito')) {
+        match = mainProducts.find(x => x.id === 'zapallito_redondo');
+      } else if (rawId.includes('berenjena') || rawName.includes('berenjena')) {
+        match = mainProducts.find(x => x.id.includes('berenjena'));
+      } else if (rawId.includes('tomate') || rawName.includes('tomate')) {
+        match = mainProducts.find(x => x.id === 'tomate_redondo') || mainProducts.find(x => x.id === 'tomate_perita');
+      } else if (rawId.includes('papa') || rawName.includes('papa')) {
+        match = mainProducts.find(x => x.id === 'papa_spunta');
+      } else if (rawId.includes('cebolla') || rawName.includes('cebolla')) {
+        match = mainProducts.find(x => x.id === 'cebolla_valenciani') || mainProducts.find(x => x.id === 'cebolla_colorada');
+      }
+    }
+
+    if (!match) {
+      match = mainProducts.find(x => rawName.includes(x.nombre.toLowerCase()) || x.nombre.toLowerCase().includes(rawName));
+    }
+
+    if (!match) {
+      match = getBaseProductInfo(p.id);
+    }
+
+    return {
+      mc: match ? (match.precioMercadoCentral || 0) : 0,
+      coto: match ? (match.precioCoto || 0) : 0,
+      matchedName: match ? match.nombre : p.nombre
+    };
+  }
+
   window.openStoreDetailsModal = function(storeId) {
     const store = verduleriasData.find(v => v.id === storeId) || verduleriasData[0];
     if (!store) return;
@@ -1294,7 +1337,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `).join('');
     }
 
-    // Render 24 Products Grid
+    // Render Products Grid with Comparative Bar Charts
     const prodGrid = document.getElementById('modalProductsGrid');
     if (prodGrid) {
       prodGrid.innerHTML = store.productos.map((p, idx) => {
@@ -1308,24 +1351,75 @@ document.addEventListener('DOMContentLoaded', () => {
         const priceVal = p.precioUnitario || p.precio;
         const offerStr = p.oferta || `${p.unidad || 'Kg'} x $${formatNumber(priceVal)}`;
 
+        // Benchmark prices
+        const b = findBenchmarkPrices(p);
+        const mcPrice = b.mc;
+        const cotoPrice = b.coto;
+
+        const maxPrice = Math.max(priceVal, mcPrice, cotoPrice, 1);
+        const verduPct = Math.max(Math.round((priceVal / maxPrice) * 100), 10);
+        const mcPct = mcPrice > 0 ? Math.max(Math.round((mcPrice / maxPrice) * 100), 10) : 0;
+        const cotoPct = cotoPrice > 0 ? Math.max(Math.round((cotoPrice / maxPrice) * 100), 10) : 0;
+
+        let savingBadge = '';
+        if (cotoPrice > priceVal) {
+          const saveVal = cotoPrice - priceVal;
+          savingBadge = `<span class="text-[10px] font-bold text-emerald-400 font-mono">Ahorro vs Coto: $${formatNumber(saveVal)}/Kg</span>`;
+        }
+
         return `
-          <div class="p-3 bg-slate-950 border border-slate-800/90 rounded-xl hover:border-emerald-500/40 transition-all flex justify-between items-center space-x-3 group">
-            <div class="flex items-center space-x-3">
-              <span class="text-xs font-mono text-slate-500 font-bold">#${idx + 1}</span>
-              <span class="text-2xl">${p.emoji || '🥦'}</span>
-              <div>
-                <div class="text-xs font-bold text-slate-100 group-hover:text-emerald-300 transition-colors flex items-center gap-1.5">
-                  ${p.nombre}
-                  ${catBadge}
+          <div class="p-3.5 bg-slate-950 border border-slate-800/90 rounded-xl hover:border-emerald-500/40 transition-all flex flex-col justify-between gap-2.5 group">
+            <div class="flex justify-between items-start space-x-2">
+              <div class="flex items-center space-x-2.5">
+                <span class="text-xs font-mono text-slate-500 font-bold">#${idx + 1}</span>
+                <span class="text-2xl">${p.emoji || '🥦'}</span>
+                <div>
+                  <div class="text-xs font-bold text-slate-100 group-hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+                    ${p.nombre}
+                    ${catBadge}
+                  </div>
+                  <div class="text-[11px] text-slate-400">Renglón: <span class="text-amber-300 font-mono font-bold">${offerStr}</span></div>
                 </div>
-                <div class="text-[11px] text-slate-400">Renglón: <span class="text-amber-300 font-mono font-bold">${offerStr}</span></div>
+              </div>
+              <div class="text-right flex flex-col items-end">
+                <span class="text-[9px] uppercase font-bold text-slate-500">Precio Verdulería</span>
+                <div class="text-sm font-black text-emerald-400">$ ${formatNumber(priceVal)} / ${p.unidad || 'Kg'}</div>
               </div>
             </div>
-            <div class="text-right flex flex-col items-end gap-1">
-              <div class="text-sm font-black text-emerald-400">$ ${formatNumber(priceVal)} / ${p.unidad || 'Kg'}</div>
-              <button onclick="selectProductFromModal('${p.id}')" class="text-[10px] font-bold text-sky-400 hover:text-sky-300 bg-sky-950/60 border border-sky-500/30 px-2 py-0.5 rounded-md transition-all flex items-center gap-1">
-                <i class="fa-solid fa-chart-simple"></i> Ver en Gráfico
-              </button>
+
+            <!-- Gráfico de barras comparativo: Verdulería vs Central vs Coto -->
+            <div class="bg-slate-900/90 rounded-lg p-2.5 border border-slate-800/80 space-y-1.5">
+              <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 pb-1 border-b border-slate-800/60">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-chart-simple text-sky-400"></i> Comparativa por ${p.unidad || 'Kg'}</span>
+                ${savingBadge}
+              </div>
+
+              <!-- Barra 1: Verdulería -->
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="w-16 text-[10px] font-bold text-emerald-400 truncate">Verdulería:</span>
+                <div class="flex-1 bg-slate-950 rounded-full h-2.5 overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: ${verduPct}%"></div>
+                </div>
+                <span class="w-16 text-right font-mono font-bold text-emerald-300">$ ${formatNumber(priceVal)}</span>
+              </div>
+
+              <!-- Barra 2: Mercado Central -->
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="w-16 text-[10px] font-bold text-sky-400 truncate">Central:</span>
+                <div class="flex-1 bg-slate-950 rounded-full h-2.5 overflow-hidden">
+                  <div class="bg-sky-500 h-full rounded-full transition-all duration-500" style="width: ${mcPct}%"></div>
+                </div>
+                <span class="w-16 text-right font-mono font-bold text-sky-300">$ ${formatNumber(mcPrice)}</span>
+              </div>
+
+              <!-- Barra 3: Coto Digital -->
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="w-16 text-[10px] font-bold text-rose-400 truncate">Coto:</span>
+                <div class="flex-1 bg-slate-950 rounded-full h-2.5 overflow-hidden">
+                  <div class="bg-rose-500 h-full rounded-full transition-all duration-500" style="width: ${cotoPct}%"></div>
+                </div>
+                <span class="w-16 text-right font-mono font-bold text-rose-300">$ ${formatNumber(cotoPrice)}</span>
+              </div>
             </div>
           </div>
         `;
