@@ -133,14 +133,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }];
   }
 
-  // Load baseline data and verdulerías data
+  function saveVerduleriasToStorage() {
+    try {
+      localStorage.setItem('VERDULERIAS_NETWORK_DATA', JSON.stringify(verduleriasData));
+    } catch(e) {
+      console.warn("Error guardando en localStorage:", e);
+    }
+  }
+
+  // Load baseline data and verdulerías data (Priority: localStorage -> verdulerias_data.json -> default fallback)
+  const localSavedStores = localStorage.getItem('VERDULERIAS_NETWORK_DATA');
+
   Promise.all([
     fetch(`data.json?t=${Date.now()}`).then(r => r.json()).catch(() => window.INITIAL_DATA || []),
     fetch(`verdulerias_data.json?t=${Date.now()}`).then(r => r.json()).catch(() => [])
   ]).then(([mainData, verdData]) => {
     mainProducts = mainData;
-    verduleriasData = (verdData && verdData.length > 0) ? verdData : getDefaultVerduleriasData();
 
+    if (localSavedStores) {
+      try {
+        verduleriasData = JSON.parse(localSavedStores);
+      } catch(e) {
+        verduleriasData = (verdData && verdData.length > 0) ? verdData : getDefaultVerduleriasData();
+      }
+    } else if (verdData && verdData.length > 0) {
+      verduleriasData = verdData;
+    } else {
+      verduleriasData = getDefaultVerduleriasData();
+    }
+
+    saveVerduleriasToStorage();
     setupCategoryPills();
     setupToggleButtons();
     setupDragAndDrop();
@@ -1158,11 +1180,33 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     verduleriasData.unshift(newVerduleria);
+    saveVerduleriasToStorage();
     renderRanking();
     renderVerduleriasGrid();
 
     alert(`✅ ¡Relevamiento de "${nameVal}" guardado con éxito!\nSe han publicado los ${accumulatedExtractedProducts.length} precios acumulados (${scannedPhotosCount} foto/s) en la red de competencia.`);
     window.switchTab('ranking');
+  };
+
+  window.resetStoredNetworkData = function() {
+    if (confirm("⚠️ ¿Estás seguro de restablecer toda la red de verdulerías a los datos por defecto?")) {
+      localStorage.removeItem('VERDULERIAS_NETWORK_DATA');
+      verduleriasData = getDefaultVerduleriasData();
+      saveVerduleriasToStorage();
+      renderRanking();
+      renderVerduleriasGrid();
+      alert("✅ Red de verdulerías restablecida.");
+    }
+  };
+
+  window.downloadJSONBackup = function() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(verduleriasData, null, 2));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "verdulerias_data.json");
+    document.body.appendChild(dlAnchorElem);
+    dlAnchorElem.click();
+    dlAnchorElem.remove();
   };
 
   window.openStoreDetailsModal = function(storeId) {

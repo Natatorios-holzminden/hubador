@@ -1,1 +1,60 @@
-[]
+[
+  {
+    "id": "verduleria_plaza_italia",
+    "nombre": "Verdulería Plaza Italia",
+    "barrio": "Palermo",
+    "direccion": "Av. Santa Fe 3420, Palermo",
+    "ultimaFoto": "Hace 10 minutos",
+    "fotosCount": 2,
+    "fotos": [
+      { "label": "Foto #1 - Cartel Principal (16 Productos)", "src": "photos/cartel_foto1.jpg" },
+      { "label": "Foto #2 - Cartel Complementario (8 Productos)", "src": "photos/cartel_foto2.jpg" }
+    ],
+    "productos": [
+      { "id": "pomeloblanco", "nombre": "Pomelo", "emoji": "🍊", "oferta": "2 UN x $2.000", "precio": 1000, "precioUnitario": 1000, "unidad": "Unidad", "confianza": 99, "cat": "frutas", "fotoOrigen": "Foto #1" },
+      { "id": "arandanos", "nombre": "Arándanos", "emoji": "🫐", "oferta": "2 UN x $5.000", "precio": 2500, "precioUnitario": 2500, "unidad": "Cajita", "confianza": 98, "cat": "frutas", "fotoOrigen": "Foto #1" },
+      { "id": "frutilla", "nombre": "Frutillas", "emoji": "🍓", "oferta": "1/2 Kg x $3.000", "precio": 6000, "precioUnitario": 6000, "unidad": "Kg", "confianza": 99, "cat": "frutas", "fotoOrigen": "Foto #1" },
+      { "id": "peraasiatica", "nombre": "Pera", "emoji": "🍐", "oferta": "2 Kg x $3.000", "precio": 1500, "precioUnitario": 1500, "unidad": "Kg", "confianza": 98, "cat": "frutas", "fotoOrigen": "Foto #1" },
+      { "id": "banana_cavendish", "nombre": "Banana", "emoji": "🍌", "oferta": "2 Kg x $4.000", "precio": 2000, "precioUnitario": 2000, "unidad": "Kg", "confianza": 99, "cat": "frutas", "fotoOrigen": "Foto #1" },
+      { "id": "maple_blanco", "nombre": "Maple Blanco", "emoji": "🥚", "oferta": "2 UN x $5.000", "precio": 2500, "precioUnitario": 2500, "unidad": "Maple", "confianza": 97, "cat": "almacen", "fotoOrigen": "Foto #1" },
+      { "id": "maple_color", "nombre": "Maple Color", "emoji": "🥚", "oferta": "2 UN x $10.000", "precio": 5000, "precioUnitario": 5000, "unidad": "Maple", "confianza": 97, "cat": "almacen", "fotoOrigen": "Foto #1" },
+      { "id": "papa_spunta", "nombre": "Papa Cepillada", "emoji": "🥔", "oferta": "2 Kg x $3.000", "precio": 1500, "precioUnitario": 1500, "unidad": "Kg", "confianza": 99, "cat": "verduras", "fotoOrigen": "Foto #1" },
+      { "id": "papa_lavada", "nombre": "Papa Lavada", "emoji": "🥔", "oferta": "2 Kg x $3.000", "precio": 1500, "precioUnitario": 1500, "unidad": "Kg", "confianza": 98, "cat": "verduras", "fotoOrigen": "Foto #1" },
+      { "id": "cebolla_colorada", "nombre": "Cebolla", "emoji": "🧅", "oferta": "2 Kg x $3.500", "precio": 1750, "precioUnitario": 1750, "unidad": "Kg", "confianza": 98, "cat": "verduras", "fotoOrigen": "Foto #1" },
+      { "id": "zanahoria_chantenay", "nombre": "Zanahoria", "emoji": "🥕", "oferta": "2 Kg x $2.500", "precio": 1250, "precioUnitario": 1250, "unidad": "Kg", "confianza": 99, "cat": "verduras", "fotoOrigen": "Foto #1" },
+      { "id": "batata_arapey", "nombre": "Batata", "emoji": "🍠", "oferta": "2 Kg x $4.000", "precio": 2000, "precioUnitario": 2000, "unidad": "Kg", "confianza": 98, "cat": "verduras", "fotoOrigen": "Foto #1" },
+      { "id": "acelga", "nombre": "Acelga", "emoji": "🥬", "oferta": "2 Paq x $1.800", "precio": 900, "precioUnitario": 900, "unidad": "Paquete", "confianza": 96, "cat": "verduras", "fotoOrigen": "Foto #1" },
+      { "id": "espinaca", "nombre": "Espinaca", "emoji": "🌿", "oferta": "3 UN x $2.000", "precio": 667, "precioUnitario": 667, "unidad": "Atado", "confianza": 97, "cat": "verduras", "fotoOrigen": "Foto #1" },
+      { "id": "limon_eureka", "nombre": "Limón", "emoji": "🍋", "oferta": "2 Kg x $1.800", "precio": 900, "precioUnitario": 900, "unidad": "Kg", "confianza": 99, "cat": "frutas", "fotoOrigen": "Foto #1" },
+      { "id": "coliflor", "nombre": "Coliflor", "emoji": "🥦", "oferta": "2 UN x $1.500", "precio": 750, "precioUnitario": 750, "unidad": "Unidad", "confianza": 96, "cat": "verduras", "fotoOrigen": "Foto #1" },
+      { "id": "tomate_perita", "nombre": "Tomate Perita", "emoji": "🍅", "oferta": "2 Kg x $3.500", "precio": 1750, "precioUnitario": 1750, "unidad": "Kg", "confianza": 98, "cat": "verduras", "fotoOrigen": "Foto #2" },
+      { "id": "zapallito_redondo", "nombre": "Zapallito Redondo", "emoji": "🥒", "oferta": "2 Kg x $3.000", "precio": 1500, "precioUnitario": 1500, "unidad": "Kg", "confianza": 97, "cat": "verduras", "fotoOrigen": "Foto #2" },
+      { "id": "zapallo_tetsukab.", "nombre": "Zapallo Cabutiá", "emoji": "🎃", "oferta": "1 UN x $2.000", "precio": 2000, "precioUnitario": 2000, "unidad": "Unidad", "confianza": 99, "cat": "verduras", "fotoOrigen": "Foto #2" },
+      { "id": "lechuga_francesa", "nombre": "Lechuga Francesa", "emoji": "🥗", "oferta": "2 Paq x $2.500", "precio": 1250, "precioUnitario": 1250, "unidad": "Paquete", "confianza": 96, "cat": "verduras", "fotoOrigen": "Foto #2" },
+      { "id": "naranja_newhall", "nombre": "Naranja de Ombligo", "emoji": "🍊", "oferta": "2 Kg x $2.000", "precio": 1000, "precioUnitario": 1000, "unidad": "Kg", "confianza": 98, "cat": "frutas", "fotoOrigen": "Foto #2" },
+      { "id": "mandarina_afourer", "nombre": "Mandarina", "emoji": "🍊", "oferta": "2 Kg x $2.500", "precio": 1250, "precioUnitario": 1250, "unidad": "Kg", "confianza": 97, "cat": "frutas", "fotoOrigen": "Foto #2" },
+      { "id": "palta_hass", "nombre": "Palta Hass", "emoji": "🥑", "oferta": "3 UN x $3.000", "precio": 1000, "precioUnitario": 1000, "unidad": "Unidad", "confianza": 99, "cat": "frutas", "fotoOrigen": "Foto #2" },
+      { "id": "kiwi", "nombre": "Kiwi Hayward", "emoji": "🥝", "oferta": "1 Kg x $4.500", "precio": 4500, "precioUnitario": 4500, "unidad": "Kg", "confianza": 98, "cat": "frutas", "fotoOrigen": "Foto #2" }
+    ]
+  },
+  {
+    "id": "verduleria_abasto_quilmes",
+    "nombre": "Mercado Abasto de Quilmes - Puesto 21",
+    "barrio": "Quilmes",
+    "direccion": "Islas Malvinas 1860, Quilmes",
+    "ultimaFoto": "Hace 1 hora",
+    "fotosCount": 1,
+    "fotos": [
+      { "label": "Foto #1 - Cartel Abasto Quilmes Puesto 21", "src": "photos/cartel_foto1.jpg" }
+    ],
+    "productos": [
+      { "id": "naranja_newhall", "nombre": "Naranja de Ombligo", "emoji": "🍊", "oferta": "Bulto 17 Kg x $8.000", "precio": 470, "precioUnitario": 470, "unidad": "Kg", "confianza": 99, "cat": "frutas", "fotoOrigen": "Foto Abasto Quilmes" },
+      { "id": "mandarina_afourer", "nombre": "Mandarina Ellendale", "emoji": "🍊", "oferta": "Bulto 17 Kg x $6.000", "precio": 353, "precioUnitario": 353, "unidad": "Kg", "confianza": 98, "cat": "frutas", "fotoOrigen": "Foto Abasto Quilmes" },
+      { "id": "berenjena", "nombre": "Berenjena", "emoji": "🍆", "oferta": "Cajón x $7.000", "precio": 700, "precioUnitario": 700, "unidad": "Kg", "confianza": 97, "cat": "verduras", "fotoOrigen": "Foto Abasto Quilmes" },
+      { "id": "zapallito_redondo", "nombre": "Zapallito Redondo", "emoji": "🥒", "oferta": "Bulto 15 Kg x $7.000", "precio": 467, "precioUnitario": 467, "unidad": "Kg", "confianza": 99, "cat": "verduras", "fotoOrigen": "Foto Abasto Quilmes" },
+      { "id": "manzanacrippspin", "nombre": "Manzana Red Delicious", "emoji": "🍎", "oferta": "Cajón 19 Kg x $20.000", "precio": 1052, "precioUnitario": 1052, "unidad": "Kg", "confianza": 99, "cat": "frutas", "fotoOrigen": "Foto Abasto Quilmes" },
+      { "id": "manzana_verde", "nombre": "Manzana Verde", "emoji": "🍏", "oferta": "Cajón 19 Kg x $20.000", "precio": 1052, "precioUnitario": 1052, "unidad": "Kg", "confianza": 98, "cat": "frutas", "fotoOrigen": "Foto Abasto Quilmes" },
+      { "id": "peraasiatica", "nombre": "Pera Packham", "emoji": "🍐", "oferta": "Cajón 20 Kg x $20.000", "precio": 1000, "precioUnitario": 1000, "unidad": "Kg", "confianza": 99, "cat": "frutas", "fotoOrigen": "Foto Abasto Quilmes" }
+    ]
+  }
+]
