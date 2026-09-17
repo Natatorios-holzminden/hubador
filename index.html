@@ -5905,6 +5905,7 @@ function WebHome() {
   const setSearch = (v) => { if (typeof setWebSearch === 'function') setWebSearch(v); };
   const [cat, setCat] = React.useState('todos');
   const [sort, setSort] = React.useState('relevancia');
+  const [showFilters, setShowFilters] = React.useState(false);
   const [catalogItems, setCatalogItems] = React.useState(() => HUBADOR_CATALOG.map(hubadorCard));
   React.useEffect(() => {
     const handleUpdate = () => setCatalogItems(HUBADOR_CATALOG.map(hubadorCard));
