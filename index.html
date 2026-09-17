@@ -3562,6 +3562,14 @@ function MobileAdminProductos() {
     setModalOpen(true);
   };
 
+  const applyDiscountPct = (pct) => {
+    const coto = Number(form.oldN) || 0;
+    if (coto > 0) {
+      const p = Math.max(1, Math.round(coto * (1 - pct / 100)));
+      setForm((prev) => ({ ...prev, priceN: p }));
+    }
+  };
+
   const handleSave = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
@@ -3923,9 +3931,79 @@ function MobileAdminProductos() {
                     />
                   </div>
 
-                  {/* Calculated metrics live preview */}
-                  <div style={{ fontSize: 11.5, color: '#0f172a', background: '#ecfdf5', padding: '8px 10px', borderRadius: 8, border: '1px solid #a7f3d0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Descuento: <b style={{ color: '#047857' }}>-{form.oldN > 0 ? calcDisc(Number(form.priceN), Number(form.oldN)) : 0}% OFF</b></span>
+                  {/* Selector rápido de descuento para auto-calcular precio HUBADOR */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <label style={{ fontSize: 11.5, fontWeight: 700, color: '#047857' }}>
+                        🎯 Auto-calcular por Descuento (% OFF)
+                      </label>
+                      <span style={{ fontSize: 11, color: '#64748b' }}>Tocá un % para calcular precio</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+                      {[20, 25, 30, 35, 40, 45, 50].map((pct) => {
+                        const currentPct = (form.oldN > 0 && form.priceN) ? calcDisc(Number(form.priceN), Number(form.oldN)) : 0;
+                        const isSelected = currentPct === pct;
+                        return (
+                          <button
+                            key={pct}
+                            type="button"
+                            onClick={() => applyDiscountPct(pct)}
+                            title={`Aplicar ${pct}% de descuento sobre Coto ($${form.oldN || 0})`}
+                            style={{
+                              border: isSelected ? '1.5px solid #047857' : '1px solid #a7f3d0',
+                              background: isSelected ? '#047857' : '#ffffff',
+                              color: isSelected ? '#ffffff' : '#047857',
+                              borderRadius: 7,
+                              padding: '5px 9px',
+                              fontSize: 12,
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              fontFamily: 'inherit',
+                              boxShadow: isSelected ? '0 2px 4px rgba(4,120,87,0.2)' : 'none',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            -{pct}%
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Calculated metrics live preview / Al tocar el descuento, se ingresa el % y se pone el precio */}
+                  <div
+                    onClick={() => {
+                      const cur = (form.oldN > 0 && form.priceN) ? calcDisc(Number(form.priceN), Number(form.oldN)) : 35;
+                      const ans = window.prompt(`Ingresá el % de descuento para ${form.name || 'este producto'}\n(Calculado sobre Precio Coto: $${form.oldN || 0}):`, cur > 0 ? cur : '35');
+                      if (ans !== null && ans.trim() !== '') {
+                        const val = parseFloat(ans.replace('%', '').trim());
+                        if (!isNaN(val) && val > 0 && val < 100) {
+                          applyDiscountPct(val);
+                        }
+                      }
+                    }}
+                    title="Tocá aquí para cambiar el porcentaje de descuento y auto-calcular el Precio HUBADOR"
+                    style={{
+                      fontSize: 12,
+                      color: '#0f172a',
+                      background: '#ecfdf5',
+                      padding: '9px 11px',
+                      borderRadius: 9,
+                      border: '1.5px solid #10b981',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      userSelect: 'none'
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>Descuento:</span>
+                      <b style={{ color: '#047857', fontSize: 13, background: '#d1fae5', padding: '2px 8px', borderRadius: 6 }}>
+                        -{form.oldN > 0 ? calcDisc(Number(form.priceN), Number(form.oldN)) : 0}% OFF ✏️
+                      </b>
+                      <span style={{ fontSize: 10.5, color: '#059669' }}>(tocá para editar)</span>
+                    </span>
                     <span>Diferencia vs Coto: <b style={{ color: '#047857' }}>-${Math.max(0, Number(form.oldN) - Number(form.priceN))}</b></span>
                   </div>
                 </div>
