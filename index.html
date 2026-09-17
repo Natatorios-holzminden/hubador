@@ -3036,7 +3036,6 @@ function MobileLogin() {
         <div style={{ width: 48, height: 48, background: primary, borderRadius: 12, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 22, margin: '0 auto 16px' }}>C</div>
         <div style={{ textAlign: 'center', fontWeight: 800, fontSize: 20, marginBottom: 4 }}>Bienvenido</div>
         <div style={{ textAlign: 'center', fontSize: 13.5, color: '#888', marginBottom: 24 }}>Ingresá a tu cuenta de HUBADOR</div>
-        {!sb && <div style={{ fontSize: 11.5, color: '#854d0e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 10px', marginBottom: 14 }}>Modo demo — configurá Supabase (ver LEEME / SUPABASE.md)</div>}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
             <label style={{ fontSize: 13, fontWeight: 500, display: 'block', marginBottom: 6 }}>Email</label>
@@ -3048,8 +3047,6 @@ function MobileLogin() {
           </div>
           <div style={{ textAlign: 'right', fontSize: 12, color: primary, fontWeight: 500, cursor: 'pointer', marginTop: -4 }}>¿Olvidaste tu contraseña?</div>
           <button onClick={doLogin} disabled={!valid || busy} style={{ width: '100%', background: valid && !busy ? primary : '#d4d6da', color: '#fff', border: 'none', borderRadius: 9, padding: '12px', fontWeight: 600, fontSize: 15, fontFamily: 'inherit', cursor: valid && !busy ? 'pointer' : 'not-allowed', marginTop: 4 }}>{busy ? 'Ingresando…' : 'Ingresar'}</button>
-          <button type="button" onClick={enterDemo} disabled={busy} style={{ width: '100%', background: '#fff', color: primary, border: '1px solid ' + primary, borderRadius: 9, padding: '11px', fontWeight: 600, fontSize: 14, fontFamily: 'inherit', cursor: busy ? 'not-allowed' : 'pointer' }}>Entrar como demo</button>
-          <div style={{ textAlign: 'center', fontSize: 12, color: '#888', marginTop: 2 }}>Demo: demo@hubador.app / demo1234</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 16px', color: '#bbb', fontSize: 11.5 }}>
           <div style={{ flex: 1, height: 1, background: '#eee' }} />O CONTINUAR CON<div style={{ flex: 1, height: 1, background: '#eee' }} />
@@ -3147,7 +3144,6 @@ function MobileSignup() {
         <>
             <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px' }}>Tus datos</h1>
             <p style={{ fontSize: 13.5, color: '#888', margin: '0 0 22px' }}>Vamos a crear tu cuenta de HUBADOR para que puedas sumarte a grupos de compra cerca tuyo.</p>
-            {!sb && <div style={{ fontSize: 11.5, color: '#854d0e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 10px', marginBottom: 14 }}>Modo demo — sin Supabase las cuentas no se guardan en la nube.</div>}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
@@ -6245,14 +6241,11 @@ function WebLogin() {
     <WebAuthCard title="Ingresar" authMode="login">
       <h1>Ingresá a HUBADOR</h1>
       <p>Comprá en grupo con tus vecinos. ¿Primera vez? Usá Registrate.</p>
-      {!sb && <p style={{ fontSize: 12, color: '#854d0e' }}>Modo demo — configurá Supabase</p>}
       <form onSubmit={submit} className="web-form">
         <label>Email<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" autoComplete="email" /></label>
         <label>Contraseña<input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="••••••••" autoComplete="current-password" /></label>
         <button className="web-btn" type="submit" disabled={busy}>{busy ? 'Ingresando…' : 'Ingresar'}</button>
       </form>
-      <button type="button" onClick={enterDemo} disabled={busy} className="web-btn" style={{ marginTop: 10, background: '#fff', color: 'oklch(0.55 0.15 165)', border: '1px solid oklch(0.55 0.15 165)' }}>Entrar como demo</button>
-      <p style={{ fontSize: 12, color: '#888', marginTop: 10, textAlign: 'center' }}>Demo: demo@hubador.app / demo1234 · Admin: admin@hubador.app / admin1234</p>
       <p className="web-auth-switch">¿No tenés cuenta? <button type="button" onClick={() => navigate('signup')}>Registrate</button></p>
     </WebAuthCard>
   );
@@ -6315,7 +6308,6 @@ function WebSignup() {
     <WebAuthCard title="Crear cuenta" authMode="signup">
       <h1>Creá tu cuenta</h1>
       <p>Empezá a sumarte a grupos de tu barrio.</p>
-      {!sb && <p style={{ fontSize: 12, color: '#854d0e' }}>Modo demo — configurá Supabase</p>}
       <form onSubmit={submit} className="web-form">
         <label>Nombre completo<input value={form.nombre} onChange={(e) => upd('nombre', e.target.value)} placeholder="María González" autoComplete="name" /></label>
         <label>Email<input value={form.email} onChange={(e) => upd('email', e.target.value)} type="email" placeholder="tu@email.com" autoComplete="email" /></label>
