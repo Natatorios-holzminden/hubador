@@ -4111,8 +4111,9 @@ function MobileAdminProductos() {
     if (showToast) showToast(`✓ Producto "${form.name}" guardado` + (sb && !published ? ' (solo en este dispositivo — iniciá sesión admin real para publicarlo)' : ''));
   };
 
-  const handleDelete = async (item) => {
-    if (!window.confirm(`¿Seguro que querés borrar "${item.name}"?`)) return;
+  const [confirmDeleteItem, setConfirmDeleteItem] = React.useState(null);
+  const doDelete = async (item) => {
+    setConfirmDeleteItem(null);
     const rawList = getRawCatalogStore();
     const updated = rawList.filter((p) => p.id !== item.id);
     saveRawCatalogStore(updated);
@@ -4417,7 +4418,7 @@ function MobileAdminProductos() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDelete(p)}
+                      onClick={() => setConfirmDeleteItem(p)}
                       style={{ background: '#fff', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 8, padding: '8px 10px', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
                       title="Eliminar producto"
                     >
@@ -4437,6 +4438,21 @@ function MobileAdminProductos() {
             </div>
           )}
         </div>
+
+        {/* Confirmación de borrado (propia de la página, no usa window.confirm — algunos
+            navegadores lo bloquean después de mostrar varios popups seguidos) */}
+        {confirmDeleteItem && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 310, background: 'rgba(15,23,42,0.65)', display: 'grid', placeItems: 'center', padding: 16 }} onClick={() => setConfirmDeleteItem(null)}>
+            <div role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 360, background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 20px 48px rgba(0,0,0,0.3)', fontFamily: "'Inter', sans-serif" }}>
+              <div style={{ fontWeight: 800, fontSize: 15.5, color: '#0f172a', marginBottom: 6 }}>¿Borrar "{confirmDeleteItem.name}"?</div>
+              <div style={{ fontSize: 12.5, color: '#64748b', marginBottom: 18, lineHeight: 1.4 }}>Se va a borrar para siempre, en este dispositivo y en Supabase (si tenés sesión admin real).</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setConfirmDeleteItem(null)} style={{ flex: 1, background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#334155', borderRadius: 8, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Cancelar</button>
+                <button type="button" onClick={() => doDelete(confirmDeleteItem)} style={{ flex: 1, background: '#dc2626', border: 'none', color: '#fff', borderRadius: 8, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Sí, borrar</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal Dialog Form for Create / Edit */}
         {modalOpen && (
