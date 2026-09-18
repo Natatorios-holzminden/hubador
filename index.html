@@ -3984,14 +3984,25 @@ function MobileAdminProductos() {
     return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
   }, []);
 
-  // null = todavía chequeando; false = sin sesión real de Supabase (los cambios NO se publican)
+  // null = todavía chequeando; false = no va a poder publicar (sin sesión real, o sesión real
+  // pero sin role='admin' en profiles — la causa más común de "no se guarda/borra de verdad")
   const [hasRealSession, setHasRealSession] = React.useState(null);
+  const [sessionEmail, setSessionEmail] = React.useState('');
   React.useEffect(() => {
     if (!sb) { setHasRealSession(false); return; }
     let cancelled = false;
-    sb.auth.getSession().then(({ data }) => {
-      if (!cancelled) setHasRealSession(!!(data && data.session));
-    }).catch(() => { if (!cancelled) setHasRealSession(false); });
+    (async () => {
+      try {
+        const { data } = await sb.auth.getSession();
+        const authUser = data && data.session && data.session.user;
+        if (!authUser) { if (!cancelled) setHasRealSession(false); return; }
+        if (!cancelled) setSessionEmail(authUser.email || '');
+        const profile = await fetchProfile(authUser.id);
+        if (!cancelled) setHasRealSession(!!(profile && profile.role === 'admin'));
+      } catch (e) {
+        if (!cancelled) setHasRealSession(false);
+      }
+    })();
     return () => { cancelled = true; };
   }, []);
 
@@ -4163,8 +4174,13 @@ function MobileAdminProductos() {
 
         {sb && hasRealSession === false && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 12.5, lineHeight: 1.4, fontWeight: 600 }}>
-            ⚠️ No estás en una sesión real de Supabase. Todo lo que edites, ocultes o borres acá va a quedar SOLO en este dispositivo — nadie más lo va a ver, y puede "revivir" solo cuando la página se sincronice de nuevo.
-            Cerrá sesión y volvé a entrar con tu email y contraseña reales (no el acceso rápido demo) para que se publique de verdad.
+            {sessionEmail ? (
+              <>⚠️ Tu sesión ({sessionEmail}) no tiene permiso de admin en Supabase. Todo lo que edites, ocultes o borres acá va a quedar SOLO en este dispositivo, y puede "revivir" solo cuando la página se sincronice de nuevo.
+              {' '}Corré en Supabase → SQL Editor: <code style={{ background: '#fee2e2', padding: '1px 4px', borderRadius: 4 }}>update public.profiles set role = 'admin' where email = '{sessionEmail}';</code></>
+            ) : (
+              <>⚠️ No estás en una sesión real de Supabase. Todo lo que edites, ocultes o borres acá va a quedar SOLO en este dispositivo — nadie más lo va a ver.
+              {' '}Cerrá sesión y volvé a entrar con tu email y contraseña reales (no el acceso rápido demo) para que se publique de verdad.</>
+            )}
           </div>
         )}
 
