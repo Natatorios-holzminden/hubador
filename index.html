@@ -1797,7 +1797,7 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
 // Compatibilidad con versión vieja subida: ?app=1 también fuerza modo app.
 const _qs = new URLSearchParams(location.search);
 const DEV_MODE = _qs.has('dev'); // menú + iPhone preview
-const BOTH_MODE = _qs.has('both') || _qs.has('compare'); // Web + Mobile lado a lado
+const BOTH_MODE = _qs.has('both') || _qs.has('compare') || _qs.has('simultaneo') || _qs.has('dual'); // Web + Mobile lado a lado
 const FORCE_MOBILE = _qs.has('mobile'); // forzar UI mobile en desktop
 const FORCE_WEB = _qs.has('web'); // forzar UI web
 const APP_MODE = !DEV_MODE && !BOTH_MODE; // modo público (sin menú dev / sin comparador)
@@ -6243,6 +6243,16 @@ function MobilePerfil() {
                 </div>
               )}
             </div>
+            {!BOTH_MODE && (
+              <a href="?both" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer', background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, textDecoration: 'none', color: 'inherit', marginTop: 10 }}>
+                <span style={{ fontSize: 18 }}>💻📱</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#334155' }}>Modo simultáneo</div>
+                  <div style={{ fontSize: 11, color: '#888' }}>Ver Web + Mobile lado a lado</div>
+                </div>
+                <span style={{ color: '#bbb', fontSize: 18 }}>›</span>
+              </a>
+            )}
             <button type="button" onClick={() => { logout(); navigate('login'); }} style={{ width: '100%', background: '#fff', color: '#dc2626', border: '1px solid #fee2e2', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 16 }}>Cerrar sesión</button>
           </>
         )}
@@ -6824,6 +6834,7 @@ function WebHeader({ showSearch = true, authMode = null }) {
               : authMode === 'signup'
                 ? <button className="web-btn-ghost" type="button" onClick={() => navigate('login')}>Ingresar</button>
                 : <button className="web-btn-ghost" type="button" onClick={() => navigate('login')}>Ingresar</button>}
+          {!BOTH_MODE && <a href="?both" className="web-btn-ghost" style={{ textDecoration: 'none', fontSize: 12, opacity: 0.7 }}>💻📱</a>}
           <button className="web-cart" type="button" onClick={() => navigate('mis-grupos')} aria-label="Carrito / Mis grupos">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
             <span>{cartTotals(cart).items}</span>
