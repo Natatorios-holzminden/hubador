@@ -7998,6 +7998,11 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
   const [progressTick, setProgressTick] = useState(0);
+  React.useEffect(() => {
+    const handleProgressUpdate = () => setProgressTick((t) => t + 1);
+    window.addEventListener('hubador_progress_updated', handleProgressUpdate);
+    return () => window.removeEventListener('hubador_progress_updated', handleProgressUpdate);
+  }, []);
   const persistCart = (next) => {setCart(next);localStorage.setItem('conlatCart', JSON.stringify(next));};
   const bumpFilled = (name, qty) => {
     bumpGroupFilled(name, qty);
