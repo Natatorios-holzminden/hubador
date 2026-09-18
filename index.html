@@ -2843,9 +2843,12 @@ function MobileProducto() {
   const navigate = React.useContext(NavContext);
   const { selected, showToast, addToCart, user, bumpFilled, progressTick, setMisGruposTab } = React.useContext(SelectionContext);
   void progressTick;
-  const [qty, setQty] = React.useState(2);
-  // Datos del producto seleccionado o fallback a Tomate
   const prod = selected || hubadorCard(hubadorById('tomate'));
+  const isUnit = prod.unit === '/u';
+  const step = isUnit ? 1 : 3;
+  const minQty = isUnit ? 1 : 3;
+  const [qty, setQty] = React.useState(minQty);
+  // Datos del producto seleccionado o fallback a Tomate
   const live = groupProgressView(prod.name);
   const membersCount = (() => {
     const raw = prod.members;
@@ -2861,7 +2864,7 @@ function MobileProducto() {
   const join = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
-    const q = Math.max(1, qty);
+    const q = Math.max(minQty, qty);
     addToCart({
       name: prod.name, price: prod.price, old: prod.old, priceN: priceNum, oldN: oldNum,
       unit: prod.unit || '/kg', img: prod.img, members: prod.members, progress: live.pct,
@@ -2901,13 +2904,13 @@ function MobileProducto() {
         <div style={{ fontSize: 11.5, color: '#15803d', fontWeight: 600, marginBottom: 6 }}>Ahorrás comprando en grupo</div>
         <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '8px 12px', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>Cantidad ({prod.unit === '/u' ? 'unidades' : 'kg'})</div>
-            <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>Total: <b style={{ color: primary }}>${totalPrice.toLocaleString('es-AR')}</b></div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>Cantidad ({unitLabel})</div>
+            <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>Total: <b style={{ color: primary }}>${totalPrice.toLocaleString('es-AR')}</b> <span style={{ color: '#888', fontSize: 11 }}>· mín. {minQty} {unitLabel}</span></div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {qtyBtn('−', () => setQty((q) => Math.max(1, q - 1)), false)}
-            <span style={{ fontWeight: 800, fontSize: 17, minWidth: 22, textAlign: 'center' }}>{qty}</span>
-            {qtyBtn('+', () => setQty((q) => q + 1), true)}
+            {qtyBtn('−', () => setQty((q) => Math.max(minQty, q - step)), false)}
+            <span style={{ fontWeight: 800, fontSize: 17, minWidth: 44, textAlign: 'center' }}>{qty} {unitLabel}</span>
+            {qtyBtn('+', () => setQty((q) => q + step), true)}
           </div>
         </div>
         <div style={{ background: 'oklch(0.97 0.02 165)', border: '1px solid oklch(0.88 0.06 165)', borderRadius: 12, padding: '8px 10px', marginBottom: 8 }}>
@@ -3252,7 +3255,7 @@ function MobileLogin() {
       } else {
         const nombre = email.split('@')[0].split(/[._]/)[0].replace(/^./, (c) => c.toUpperCase());
         login({ nombre, email, barrio: 'Palermo' });
-        showToast('Modo demo — configurá Supabase');
+        showToast('Sesión iniciada');
         navigate('home');
       }
     } catch (e) {
@@ -3341,7 +3344,7 @@ function MobileSignup() {
         }
       } else {
         login({ nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel, role: roleValue });
-        showToast('Modo demo — configurá Supabase');
+        showToast('Cuenta creada');
         navigate('home');
       }
     } catch (e) {
@@ -4469,12 +4472,14 @@ function MobileAdminProductos() {
 // ─── Grupo Detalle ───────────────────────────────────────────
 function MobileGrupoDetalle() {
   const primary = 'oklch(0.55 0.15 165)';
-  const STEP = 1;
-  const [qty, setQty] = React.useState(2);
   const navigate = React.useContext(NavContext);
   const { selectedGroup, showToast, addToCart, user, bumpFilled, progressTick, setMisGruposTab } = React.useContext(SelectionContext);
   void progressTick;
   const g = selectedGroup || (() => { const p = hubadorById('papa'); const live = groupProgressView(p.name); return { product: p.name, location: 'Palermo', members: p.members, progress: live.pct, closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, totalKg: GOAL_KG, precioActualizado: false }; })();
+  const isUnit = g.unit === '/u';
+  const STEP = isUnit ? 1 : 3;
+  const MIN_QTY = isUnit ? 1 : 3;
+  const [qty, setQty] = React.useState(MIN_QTY);
   const live = groupProgressView(g.product);
   const membersCount = (() => {
     const raw = g.members;
@@ -4489,7 +4494,7 @@ function MobileGrupoDetalle() {
   const join = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
-    const q = Math.max(1, qty);
+    const q = Math.max(MIN_QTY, qty);
     addToCart({
       name: g.product, price: g.price, old: g.old, priceN: priceNum, oldN: oldNum,
       unit: g.unit || '/kg', img: g.img, members: g.members, progress: live.pct, location: g.location,
@@ -4534,10 +4539,10 @@ function MobileGrupoDetalle() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '8px 12px', marginBottom: 6 }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 600 }}>Cantidad ({g.unit === '/u' ? 'unidades' : 'kg'})</div>
-              <div style={{ fontSize: 12, color: '#444', marginTop: 2 }}>Total: <b style={{ color: primary, fontSize: 14 }}>${totalPrice.toLocaleString('es-AR')}</b> <span style={{ color: '#888', fontSize: 11, fontWeight: 500 }}>· {qty} {g.unit === '/u' ? 'u' : 'kg'}</span></div>
+              <div style={{ fontSize: 12, color: '#444', marginTop: 2 }}>Total: <b style={{ color: primary, fontSize: 14 }}>${totalPrice.toLocaleString('es-AR')}</b> <span style={{ color: '#888', fontSize: 11, fontWeight: 500 }}>· mín. {MIN_QTY} {unitLabel}</span></div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {qtyBtn('−', () => setQty((q) => Math.max(STEP, q - STEP)), false)}
+              {qtyBtn('−', () => setQty((q) => Math.max(MIN_QTY, q - STEP)), false)}
               <span style={{ fontWeight: 800, fontSize: 17, minWidth: 48, textAlign: 'center', display: 'inline-flex', alignItems: 'baseline', justifyContent: 'center', gap: 3 }}>{qty}<span style={{ fontSize: 11, fontWeight: 600, color: '#888' }}>{g.unit === '/u' ? 'u' : 'kg'}</span></span>
               {qtyBtn('+', () => setQty((q) => q + STEP), true)}
             </div>
@@ -5676,43 +5681,156 @@ function HubadorProfileGateModal({ open, initialTel, initialDireccion, onSave, o
     <div style={{ position: 'fixed', inset: 0, zIndex: 220, background: 'rgba(15,23,30,0.48)', display: 'grid', placeItems: 'center', padding: 18 }} onClick={onCancel}>
       <div role="dialog" aria-modal="true" aria-label="Datos de entrega" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 390, background: '#fff', borderRadius: 16, padding: '22px 20px', boxShadow: '0 18px 48px rgba(0,0,0,.18)', fontFamily: "'Inter', sans-serif" }}>
         <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 4, color: '#0f172a' }}>Datos para el pedido</div>
-        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 16, lineHeight: 1.45 }}>Necesitamos teléfono y dirección antes del pago demo.</div>
+        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 16, lineHeight: 1.45 }}>Necesitamos tu teléfono y dirección para coordinar la entrega de tu pedido.</div>
         <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>Teléfono</label>
         <input value={tel} onChange={(e) => setTel(e.target.value)} type="tel" placeholder="+54 9 11 …" style={{ width: '100%', height: 42, border: '1px solid #e2e8f0', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, marginBottom: 12, boxSizing: 'border-box', outline: 'none' }} />
         <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>Dirección</label>
         <input value={direccion} onChange={(e) => setDireccion(e.target.value)} type="text" placeholder="Calle, número, barrio" style={{ width: '100%', height: 42, border: '1px solid #e2e8f0', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, marginBottom: 16, boxSizing: 'border-box', outline: 'none' }} />
-        <button type="button" disabled={!ok} onClick={() => onSave && onSave(String(tel).trim(), String(direccion).trim())} style={{ width: '100%', background: ok ? '#0d9488' : '#cbd5e1', color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: ok ? 'pointer' : 'not-allowed' }}>Continuar al pago</button>
+        <button type="button" disabled={!ok} onClick={() => onSave && onSave(String(tel).trim(), String(direccion).trim())} style={{ width: '100%', background: ok ? '#0d9488' : '#cbd5e1', color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: ok ? 'pointer' : 'not-allowed' }}>Continuar a la transferencia</button>
         <button type="button" onClick={onCancel} style={{ width: '100%', marginTop: 8, background: 'transparent', border: 'none', color: '#64748b', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 8 }}>Cancelar</button>
       </div>
     </div>
   );
 }
 
-function HubadorMpDemoModal({ open, totalLabel, onApprove, onCancel }) {
+function HubadorTransferenciaModal({ open, cart, user, totalLabel, onConfirmTransfer, onCancel }) {
+  const [copied, setCopied] = React.useState(false);
   if (!open) return null;
-  const mpBlue = '#009ee3';
+  const defaultAlias = 'HUBADOR.OFICIAL';
+  let alias = defaultAlias;
+  try {
+    alias = localStorage.getItem('hubador_alias') || defaultAlias;
+  } catch (e) {}
+
+  const handleCopy = () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(alias);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = alias;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+    } catch (e) {}
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handleWhatsApp = () => {
+    const lines = (cart || []).map((c) => {
+      const isU = c.unit === '/u';
+      const uStr = isU ? 'u' : 'kg';
+      const lineTot = cartLineTotals(c);
+      return `• ${c.qty} ${uStr} ${c.name} (${fmtPrecioAR(lineTot.grupo)})`;
+    }).join('\n');
+    const contact = resolveUserContact(user);
+    const tel = contact.tel || (user && user.tel) || '';
+    const dir = contact.direccion || (user && user.direccion) || (user && user.barrio) || '';
+    const text = [
+      '¡Hola! Quiero confirmar mi pedido en HUBADOR:',
+      '',
+      lines,
+      '',
+      `*Total a transferir: ${totalLabel}*`,
+      '',
+      `👤 *Nombre:* ${user?.nombre || 'Cliente'}`,
+      tel ? `📞 *Teléfono:* ${tel}` : '',
+      dir ? `📍 *Entrega:* ${dir}` : '',
+      '',
+      'Adjunto aquí el comprobante de la transferencia bancaria 👇'
+    ].filter(Boolean).join('\n');
+
+    const rawNum = typeof WHATSAPP !== 'undefined' ? WHATSAPP : '1157314429';
+    const cleanNum = String(rawNum).replace(/\D/g, '');
+    const intlNum = cleanNum.startsWith('54') ? cleanNum : ('549' + cleanNum);
+    const waUrl = 'https://wa.me/' + intlNum + '?text=' + encodeURIComponent(text);
+    try {
+      window.open(waUrl, '_blank');
+    } catch (e) {
+      window.location.href = waUrl;
+    }
+    if (onConfirmTransfer) onConfirmTransfer();
+  };
+
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 230, background: 'rgba(15,23,30,0.52)', display: 'grid', placeItems: 'center', padding: 18 }} onClick={onCancel}>
-      <div role="dialog" aria-modal="true" aria-label="Mercado Pago demo" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 390, background: '#fff', borderRadius: 16, padding: '22px 20px', boxShadow: '0 18px 48px rgba(0,0,0,.2)', fontFamily: "'Inter', sans-serif" }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a', letterSpacing: '-0.02em' }}>Mercado Pago</div>
-          <span style={{ fontSize: 10.5, fontWeight: 700, color: '#0369a1', background: '#e0f2fe', borderRadius: 999, padding: '3px 8px' }}>DEMO</span>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 230, background: 'rgba(15,23,30,0.58)', display: 'grid', placeItems: 'center', padding: 18 }} onClick={onCancel}>
+      <div role="dialog" aria-modal="true" aria-label="Transferencia Bancaria" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 410, background: '#fff', borderRadius: 20, padding: '24px 20px', boxShadow: '0 20px 50px rgba(0,0,0,.22)', fontFamily: "'Inter', sans-serif" }}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: '#ecfdf5', color: '#059669', display: 'grid', placeItems: 'center', fontSize: 18 }}>🏦</div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 16.5, color: '#0f172a', letterSpacing: '-0.01em' }}>Transferencia bancaria</div>
+              <div style={{ fontSize: 11.5, color: '#64748b' }}>Confirmá y envianos tu comprobante</div>
+            </div>
+          </div>
+          <button type="button" onClick={onCancel} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: 28, height: 28, display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#64748b', fontSize: 14 }}>✕</button>
         </div>
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 14px', marginBottom: 14 }}>
-          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Monto a pagar</div>
-          <div style={{ fontWeight: 800, fontSize: 26, color: '#0f172a' }}>{totalLabel}</div>
+
+        {/* Monto */}
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 14, padding: '14px 16px', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Total a transferir</div>
+            <div style={{ fontWeight: 800, fontSize: 24, color: '#0f172a' }}>{totalLabel}</div>
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#059669', background: '#dcfce7', borderRadius: 999, padding: '4px 10px' }}>Precio grupo</span>
         </div>
-        <div style={{ fontSize: 12.5, color: '#64748b', lineHeight: 1.45, marginBottom: 16 }}>
-          En producción el pago irá a MP; demo local. No se cobra plata real.
+
+        {/* Datos de transferencia / Alias */}
+        <div style={{ border: '1.5px dashed #cbd5e1', borderRadius: 14, padding: '14px 16px', marginBottom: 16, background: '#fcfcfd' }}>
+          <div style={{ fontSize: 11.5, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>Alias para transferir</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <code style={{ fontWeight: 800, fontSize: 16.5, color: '#0f172a', background: '#e2e8f0', padding: '5px 10px', borderRadius: 8, letterSpacing: '0.02em', fontFamily: 'monospace' }}>{alias}</code>
+            <button
+              type="button"
+              onClick={handleCopy}
+              style={{ background: copied ? '#059669' : '#0f172a', color: '#fff', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s ease' }}
+            >
+              {copied ? '¡Copiado! ✓' : 'Copiar Alias'}
+            </button>
+          </div>
+          <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>Titular: <strong>HUBADOR</strong></div>
         </div>
-        <button type="button" onClick={onApprove} style={{ width: '100%', background: mpBlue, color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14.5, fontWeight: 700, cursor: 'pointer', boxShadow: '0 6px 16px rgba(0,158,227,.28)' }}>
-          Simular pago aprobado
+
+        {/* Pasos */}
+        <div style={{ fontSize: 12.5, color: '#475569', lineHeight: 1.5, marginBottom: 18, background: '#f8fafc', padding: '10px 12px', borderRadius: 10 }}>
+          <div style={{ fontWeight: 600, color: '#334155', marginBottom: 4 }}>¿Cómo sigue?</div>
+          <div>1. Hacé la transferencia por <strong>{totalLabel}</strong> al Alias indicado.</div>
+          <div>2. Tocá el botón verde abajo: tu pedido quedará guardado y se abrirá WhatsApp con el detalle listo para que adjuntes tu comprobante.</div>
+        </div>
+
+        {/* Botón WhatsApp */}
+        <button
+          type="button"
+          onClick={handleWhatsApp}
+          style={{ width: '100%', background: '#25D366', color: '#fff', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontSize: 15, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 6px 20px rgba(37,211,102,.35)' }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          Enviar comprobante por WhatsApp
         </button>
-        <button type="button" onClick={onCancel} style={{ width: '100%', marginTop: 10, background: '#fff', border: '1px solid #e2e8f0', color: '#475569', borderRadius: 10, padding: '11px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
-          Cancelar
+
+        <button type="button" onClick={onCancel} style={{ width: '100%', marginTop: 10, background: 'transparent', border: 'none', color: '#64748b', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 8 }}>
+          Volver al carrito
         </button>
       </div>
     </div>
+  );
+}
+
+function HubadorMpDemoModal(props) {
+  return (
+    <HubadorTransferenciaModal
+      open={props.open}
+      cart={props.cart}
+      user={props.user}
+      totalLabel={props.totalLabel}
+      onConfirmTransfer={props.onApprove}
+      onCancel={props.onCancel}
+    />
   );
 }
 
@@ -5762,7 +5880,7 @@ function MobileMisGrupos() {
               <div style={{ background: '#fff', border: '1.5px dashed #d8dadc', borderRadius: 14, padding: '28px 16px', textAlign: 'center' }}>
                 <div style={{ fontSize: 36, marginBottom: 8 }}>🛒</div>
                 <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Carrito vacío</div>
-                <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Sumá productos y pagá con Mercado Pago (demo) para pasarlos a Grupos activos.</div>
+                <div style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>Sumá productos y confirmá tu pedido para pasarlos a Grupos activos.</div>
                 <button onClick={() => navigate('home')} style={{ background: primary, color: '#fff', border: 'none', borderRadius: 9, padding: '9px 18px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Explorar productos</button>
                 {activos.length > 0 && (
                   <button type="button" onClick={() => setTab('activos')} style={{ display: 'block', width: '100%', marginTop: 10, background: 'transparent', border: 'none', color: primary, fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>Ver Grupos activos →</button>
@@ -5774,6 +5892,7 @@ function MobileMisGrupos() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {cart.map((g) => {
                     const t = cartLineTotals(g);
+                    const step = g.unit === '/u' ? 1 : 3;
                     return (
                       <div key={g.id || g.name} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, display: 'flex', gap: 12 }}>
                         <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
@@ -5791,9 +5910,9 @@ function MobileMisGrupos() {
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 8 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f5f7', borderRadius: 999, padding: '4px 6px' }}>
-                              <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(1, t.qty - 1))} style={{ width: 28, height: 28, borderRadius: 999, border: '1px solid #ddd', background: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
+                              <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(step, t.qty - step))} style={{ width: 28, height: 28, borderRadius: 999, border: '1px solid #ddd', background: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
                               <span style={{ fontWeight: 800, fontSize: 13, minWidth: 36, textAlign: 'center' }}>{t.qty} {unitOf(g.unit)}</span>
-                              <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + 1)} style={{ width: 28, height: 28, borderRadius: 999, border: 'none', background: primary, color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
+                              <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + step)} style={{ width: 28, height: 28, borderRadius: 999, border: 'none', background: primary, color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
                             </div>
                             <div style={{ textAlign: 'right' }}>
                               <div style={{ fontWeight: 800, fontSize: 14, color: primary }}>{fmtPrecioAR(t.grupo)}</div>
@@ -5819,27 +5938,21 @@ function MobileMisGrupos() {
                     <span>Ahorrás</span>
                     <span style={{ fontWeight: 600 }}>{fmtPrecioAR(totals.ahorro)}</span>
                   </div>
-                  <div style={{ borderTop: '1px solid #e8eaec', paddingTop: 12, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <div style={{ borderTop: '1px solid #e8eaec', paddingTop: 12, marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <span style={{ fontWeight: 700, fontSize: 14 }}>Vas a pagar</span>
                     <strong style={{ fontSize: 18 }}>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
                   {!user ? (
-                    <button type="button" onClick={() => navigate('login')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ingresar para pagar</button>
+                    <button type="button" onClick={() => navigate('login')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ingresar para continuar</button>
                   ) : (
                     <button
                       type="button"
                       onClick={() => startMpDemoPay && startMpDemoPay()}
-                      style={{ width: '100%', background: '#009ee3', color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+                      style={{ width: '100%', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14.5, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(22,163,74,.32)' }}
                     >
-                      Pagar con Mercado Pago
+                      Confirmar pedido y transferir
                     </button>
                   )}
-                  <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 10, lineHeight: 1.4 }}>
-                    Demo · no se cobra plata real
-                  </div>
-                  <div style={{ textAlign: 'center', fontSize: 11, color: '#94a3b8', marginTop: 4, lineHeight: 1.4 }}>
-                    En producción el pago irá a MP; demo local.
-                  </div>
                   <button type="button" onClick={() => navigate('home')} style={{ width: '100%', marginTop: 10, background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Seguir sumando productos</button>
                 </div>
               </>
@@ -6651,7 +6764,7 @@ function WebLogin() {
         navigate('home');
       } else {
         login({ nombre: email.split('@')[0] || 'Vecino', email: email || 'hola@hubador.app', barrio: 'Palermo' });
-        showToast('Modo demo — configurá Supabase');
+        showToast('Sesión iniciada');
         navigate('home');
       }
     } catch (err) {
@@ -6718,7 +6831,7 @@ function WebSignup() {
         }
       } else {
         login({ nombre: form.nombre.split(' ')[0], email: form.email, barrio: form.barrio, tel: form.tel, role: roleValue });
-        showToast('Modo demo — configurá Supabase');
+        showToast('Cuenta creada');
         navigate('home');
       }
     } catch (err) {
@@ -6819,11 +6932,14 @@ function WebProductos() {
 
 function WebGrupoDetalle() {
   const primary = 'oklch(0.55 0.15 165)';
-  const [qty, setQty] = React.useState(2);
   const navigate = React.useContext(NavContext);
   const { selected, selectedGroup, setSelected, setSelectedGroup, showToast, addToCart, user, bumpFilled, progressTick, setMisGruposTab } = React.useContext(SelectionContext);
   void progressTick;
   const g = selectedGroup || { product: 'Papa', location: 'Palermo', members: '9/12', progress: groupProgressView('Papa').pct, closes: '2d', deadlineHrs: 35, price: '$1.364', old: '$2.099', unit: '/kg', disc: 35, img: 'img/papa.jpg', cat: 'verduras', totalKg: GOAL_KG };
+  const isUnit = g.unit === '/u';
+  const step = isUnit ? 1 : 3;
+  const minQty = isUnit ? 1 : 3;
+  const [qty, setQty] = React.useState(minQty);
   const catalog = HUBADOR_CATALOG.map(hubadorCard);
   const catFromCatalog = (catalog.find((p) => p.name === g.product) || {}).cat || g.cat || 'frescos';
   const catLabel = catFromCatalog === 'frutas' ? 'Fruta' : catFromCatalog === 'verduras' ? 'Verdura' : 'Fresco';
@@ -6831,7 +6947,7 @@ function WebGrupoDetalle() {
   const detailBlurb = g.desc || g.descripcion || (selected && (selected.desc || selected.descripcion)) || `${catLabel} fresca · se vende ${unitLong}. Cosecha de la semana, sin intermediarios. Retirás en el hub de ${g.location || 'tu barrio'}.`;
 
   React.useEffect(() => {
-    setQty(2);
+    setQty(minQty);
     const scrollTop = () => {
       window.scrollTo(0, 0);
       if (document.documentElement) document.documentElement.scrollTop = 0;
@@ -6852,8 +6968,11 @@ function WebGrupoDetalle() {
     return Number.isFinite(n) && n > 0 ? n : 6;
   })();
   const join = () => {
-    const q = Math.max(1, qty);
-    addToCart({ name: g.product, price: g.price, old: g.old, priceN: parsePrecioAR(g.price), oldN: parsePrecioAR(g.old), unit: g.unit || '/kg', img: g.img, members: g.members, progress: live.pct, location: g.location }, q);
+    const q = Math.max(minQty, qty);
+    addToCart({
+      name: g.product, price: g.price, old: g.old, priceN: priceNum, oldN: oldNum,
+      unit: g.unit || '/kg', img: g.img, members: g.members, progress: live.pct, location: g.location,
+    }, q);
     if (typeof bumpFilled === 'function') bumpFilled(g.product, q);
     if (typeof setMisGruposTab === 'function') setMisGruposTab('carrito');
     showToast(`Sumaste ${q} ${unitLabel} de ${g.product} al carrito`);
@@ -6929,11 +7048,11 @@ function WebGrupoDetalle() {
 
               <div className="web-detail-buy">
                 <div className="web-qty">
-                  <span>Cantidad ({unitLabel})</span>
+                  <span>Cantidad ({unitLabel}) · mín. {minQty} {unitLabel}</span>
                   <div>
-                    <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
-                    <b>{qty}</b>
-                    <button type="button" onClick={() => setQty((q) => q + 1)}>+</button>
+                    <button type="button" onClick={() => setQty((q) => Math.max(minQty, q - step))}>−</button>
+                    <b>{qty} {unitLabel}</b>
+                    <button type="button" onClick={() => setQty((q) => q + step)}>+</button>
                   </div>
                 </div>
                 <div className="web-breakdown">
@@ -7059,7 +7178,7 @@ function WebMisGrupos() {
             {cart.length === 0 ? (
               <div className="web-empty-panel">
                 <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>Carrito vacío</p>
-                <p style={{ margin: 0 }}>Sumá productos y pagá con Mercado Pago (demo) para pasarlos a Grupos activos.</p>
+                <p style={{ margin: 0 }}>Sumá productos y confirmá tu pedido para pasarlos a Grupos activos.</p>
                 <button type="button" className="web-btn" onClick={() => navigate('home')}>Explorar productos</button>
                 {activos.length > 0 && (
                   <button type="button" className="web-linkish" onClick={() => setTab('activos')}>Ver Grupos activos →</button>
@@ -7070,6 +7189,7 @@ function WebMisGrupos() {
                 <div className="web-cart-list">
                   {cart.map((g) => {
                     const t = cartLineTotals(g);
+                    const step = g.unit === '/u' ? 1 : 3;
                     return (
                       <article key={g.id || g.name} className="web-cart-item">
                         <img src={g.img} alt={g.name} />
@@ -7081,9 +7201,9 @@ function WebMisGrupos() {
                             {g.location ? <> · 📍 {g.location}</> : null}
                           </p>
                           <div className="web-cart-qty">
-                            <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(1, t.qty - 1))}>−</button>
+                            <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(step, t.qty - step))}>−</button>
                             <span>{t.qty} {unitOf(g.unit)}</span>
-                            <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + 1)}>+</button>
+                            <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + step)}>+</button>
                           </div>
                         </div>
                         <div className="web-cart-item-side">
@@ -7111,23 +7231,17 @@ function WebMisGrupos() {
                     <strong>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
                   {!user ? (
-                    <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar para pagar</button>
+                    <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar para continuar</button>
                   ) : (
                     <button
                       type="button"
                       className="web-btn"
                       onClick={() => startMpDemoPay && startMpDemoPay()}
-                      style={{ background: '#009ee3' }}
+                      style={{ background: '#16a34a', fontWeight: 700 }}
                     >
-                      Pagar con Mercado Pago
+                      Confirmar pedido y transferir
                     </button>
                   )}
-                  <p className="web-muted" style={{ margin: '8px 0 0', fontSize: 12, textAlign: 'center', lineHeight: 1.4 }}>
-                    Demo · no se cobra plata real
-                  </p>
-                  <p className="web-muted" style={{ margin: '4px 0 0', fontSize: 11, textAlign: 'center', lineHeight: 1.4, color: '#94a3b8' }}>
-                    En producción el pago irá a MP; demo local.
-                  </p>
                   <button type="button" className="web-linkish" onClick={() => navigate('home')}>+ Seguir sumando productos</button>
                 </aside>
               </>
@@ -7423,10 +7537,27 @@ function App() {
   const [selected, setSelected] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const raw = localStorage.getItem('conlatUser');
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [webSearch, setWebSearch] = useState('');
   const [toast, setToast] = useState(null);
-  const [user, setUser] = useState(() => {try {return JSON.parse(localStorage.getItem('conlatUser') || 'null');} catch (e) {return null;}});
-  const [cart, setCart] = useState(() => {try {return JSON.parse(localStorage.getItem('conlatCart') || '[]');} catch (e) {return [];}});
+  const [cart, setCart] = useState(() => {
+    try {
+      const arr = JSON.parse(localStorage.getItem('conlatCart') || '[]');
+      return Array.isArray(arr) ? arr.map((c) => {
+        const minQ = c.unit === '/u' ? 1 : 3;
+        return { ...c, qty: Math.max(minQ, c.qty || minQ) };
+      }) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [orders, setOrders] = useState(() => {
     const list = loadHubadorOrders();
     syncActiveGroupsFromOrders(list);
@@ -7442,39 +7573,26 @@ function App() {
       else localStorage.removeItem('conlatUser');
     } catch (e) {}
   };
-  const login = (u) => { applyUser(u); };
-  const logout = async () => {
-    if (sb) { try { await sb.auth.signOut(); } catch (e) {} }
-    applyUser(null);
-    try { localStorage.removeItem('conlatCart'); } catch (e) {}
-    setCart([]);
+  const login = (userData) => {
+    const full = Object.assign({}, userData, resolveUserContact(userData));
+    applyUser(full);
   };
+  const logout = () => {
+    if (sb) sb.auth.signOut().catch(() => {});
+    applyUser(null);
+  };
+
   React.useEffect(() => {
-    if (!sb) {
-      const t = setTimeout(() => {
-        try {
-          if (!sessionStorage.getItem('hubadorDemoAuthToast')) {
-            sessionStorage.setItem('hubadorDemoAuthToast', '1');
-            setToast('Modo demo — configurá Supabase');
-            setTimeout(() => setToast(null), 2400);
-          }
-        } catch (e) {
-          setToast('Modo demo — configurá Supabase');
-          setTimeout(() => setToast(null), 2400);
-        }
-      }, 700);
-      return () => clearTimeout(t);
-    }
-    let unsub = () => {};
     let alive = true;
+    let unsub = () => {};
     (async () => {
-      try {
-        const { data: { session } } = await sb.auth.getSession();
-        if (alive && session) {
-          const u = await resolveUserFromSession(session);
-          if (u) applyUser(u);
-        }
-      } catch (e) { console.warn('[HUBADOR] getSession', e); }
+      if (!sb) return;
+      const { data: { session } } = await sb.auth.getSession();
+      if (!alive) return;
+      if (session) {
+        const u = await resolveUserFromSession(session);
+        if (u) applyUser(u);
+      }
       const { data } = sb.auth.onAuthStateChange(async (event, session) => {
         if (!alive) return;
         if (session) {
@@ -7495,17 +7613,19 @@ function App() {
     setProgressTick((t) => t + 1);
   };
   const addToCart = (product, qty) => {
-    const q = Math.max(1, qty || 1);
+    const unit = product.unit || '/kg';
+    const isUnit = unit === '/u';
+    const minQ = isUnit ? 1 : 3;
+    const q = Math.max(minQ, qty != null ? Number(qty) : minQ);
     const priceN = product.priceN != null ? product.priceN : parsePrecioAR(product.price);
     const oldN = product.oldN != null ? product.oldN : parsePrecioAR(product.old);
-    const unit = product.unit || '/kg';
     const name = product.name || product.product;
     const existing = cart.find((c) => c.name === name);
     let next;
     if (existing) {
       next = cart.map((c) => c.name === name ? {
         ...c,
-        qty: (c.qty || 1) + q,
+        qty: (c.qty || minQ) + q,
         priceN: priceN || c.priceN,
         oldN: oldN || c.oldN,
         price: product.price || c.price || fmtPrecioAR(priceN || c.priceN || 0),
@@ -7531,8 +7651,13 @@ function App() {
     persistCart(next);
   };
   const updateCartQty = (id, qty) => {
-    const q = Math.max(1, qty || 1);
-    persistCart(cart.map((c) => c.id === id || c.name === id ? { ...c, qty: q } : c));
+    persistCart(cart.map((c) => {
+      if (c.id !== id && c.name !== id) return c;
+      const isUnit = c.unit === '/u';
+      const minQ = isUnit ? 1 : 3;
+      const q = Math.max(minQ, qty || minQ);
+      return { ...c, qty: q };
+    }));
   };
   const removeFromCart = (id) => persistCart(cart.filter((c) => c.id !== id && c.name !== id));
 
@@ -7564,7 +7689,7 @@ function App() {
     try { localStorage.setItem('mobileScreen', 'mis-grupos'); } catch (e) {}
     setToast(null);
     clearTimeout(showToast._t);
-    showToast((opts && opts.toast) || 'Pago demo aprobado · pedido en Grupos activos', 2800);
+    showToast((opts && opts.toast) || '¡Pedido confirmado! Enviá tu comprobante por WhatsApp', 3200);
   };
 
   const startMpDemoPay = () => {
@@ -7573,7 +7698,7 @@ function App() {
       return;
     }
     if (!user) {
-      showToast('Ingresá para pagar');
+      showToast('Ingresá para continuar');
       setScreen('login');
       return;
     }
@@ -7604,7 +7729,7 @@ function App() {
           tel: t,
           direccion: d,
         });
-      } catch (e) { /* localStorage alcanza para la demo */ }
+      } catch (e) { /* persistencia local fallback */ }
     }
     setProfileGateOpen(false);
     setMpDemoOpen(true);
@@ -7653,11 +7778,13 @@ function App() {
         onCancel={() => setProfileGateOpen(false)}
         onSave={saveContactAndContinuePay}
       />
-      <HubadorMpDemoModal
+      <HubadorTransferenciaModal
         open={mpDemoOpen}
+        cart={cart}
+        user={user}
         totalLabel={fmtPrecioAR(cartTotals(cart).grupo)}
         onCancel={() => setMpDemoOpen(false)}
-        onApprove={() => confirmCartAsOrders({ status: 'pagado', toast: 'Pago demo aprobado · pedido en Grupos activos' })}
+        onConfirmTransfer={() => confirmCartAsOrders({ status: 'pagado', toast: '¡Pedido confirmado! Enviá tu comprobante por WhatsApp.' })}
       />
     </>
   );
