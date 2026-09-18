@@ -2200,10 +2200,13 @@ function getRawCatalogStore() {
     if (raw) {
       const arr = JSON.parse(raw);
       if (Array.isArray(arr)) {
-        const existingIds = new Set(arr.map((p) => p.id));
-        const missingFromBase = RAW_BASE_CATALOG.filter((p) => !existingIds.has(p.id));
-        const cleanArr = arr.filter((p) => p.id !== 'papa' && p.name !== 'Papa');
-        return [...cleanArr, ...missingFromBase];
+        // OJO: antes acá se volvían a agregar los productos de RAW_BASE_CATALOG que
+        // faltaran en lo guardado — pensado para que catálogos viejos vieran productos
+        // nuevos del código. Efecto secundario: hacía IMPOSIBLE borrar de verdad
+        // cualquiera de esos 11 productos base (Banana, Morrón, etc.) — se "revivían"
+        // solitos en la siguiente lectura. Ahora un producto borrado queda borrado;
+        // productos nuevos llegan vía Supabase (syncCatalogFromSupabase), no desde acá.
+        return arr.filter((p) => p.id !== 'papa' && p.name !== 'Papa');
       }
     }
   } catch (e) {}
