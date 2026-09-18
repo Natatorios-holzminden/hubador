@@ -1848,7 +1848,7 @@ const SCREENS = [
 
 
 // ─── Catálogo HUBADOR (precios grupo vs Coto) ─────────────────
-const IDS_ACTUALIZADOS = new Set(['mandarina', 'naranja', 'tomate', 'manzana', 'morron', 'pera', 'banana']);
+const IDS_ACTUALIZADOS = new Set(['huevos', 'pan', 'jamon', 'queso', 'espinaca', 'tomate', 'mandarina', 'naranja', 'manzana', 'morron', 'pera', 'banana']);
 const CHECK_AZUL = '#2563eb';
 const CHECK_ROJO = '#dc2626';
 // UI city under brand; future hub assign via IP geo (no GPS permission) + barrio confirm
@@ -2121,7 +2121,12 @@ function ActiveOrderExtras({ order }) {
 const ActivoHubJourney = ActiveOrderExtras;
 
 const RAW_BASE_CATALOG = [
-  { id: 'tomate', name: 'Tomate Red', cat: 'verduras', priceN: 1750, oldN: 3499, distribuidorN: 1000, members: '5/10', time: '3d', deadlineHrs: 48, img: 'img/tomate.jpg', goal: GOAL_KG, unit: '/kg', stock: 120, oculto: false },
+  { id: 'huevos', name: 'Huevos de campo', cat: 'almacen', priceN: 4200, oldN: 6500, distribuidorN: 2800, members: '8/10', time: '2d', deadlineHrs: 36, img: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=400&q=80', goal: 30, unit: '/u', stock: 120, oculto: false, precioActualizado: true },
+  { id: 'pan', name: 'Pan de campo artesanal', cat: 'almacen', priceN: 1950, oldN: 3200, distribuidorN: 1100, members: '6/10', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 80, oculto: false, precioActualizado: true },
+  { id: 'jamon', name: 'Jamón cocido natural', cat: 'almacen', priceN: 7490, oldN: 12500, distribuidorN: 4900, members: '5/10', time: '2d', deadlineHrs: 38, img: 'https://images.unsplash.com/photo-1524438418049-ab2acb7aa48f?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 60, oculto: false, precioActualizado: true },
+  { id: 'queso', name: 'Queso Tybo feteado', cat: 'almacen', priceN: 5890, oldN: 9800, distribuidorN: 3900, members: '7/10', time: '2d', deadlineHrs: 38, img: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 75, oculto: false, precioActualizado: true },
+  { id: 'espinaca', name: 'Espinaca fresca', cat: 'verduras', priceN: 1450, oldN: 2900, distribuidorN: 850, members: '6/10', time: '2d', deadlineHrs: 36, img: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 85, oculto: false, precioActualizado: true },
+  { id: 'tomate', name: 'Tomate Red', cat: 'verduras', priceN: 1750, oldN: 3499, distribuidorN: 1000, members: '5/10', time: '3d', deadlineHrs: 48, img: 'img/tomate.jpg', goal: GOAL_KG, unit: '/kg', stock: 120, oculto: false, precioActualizado: true },
   { id: 'morron', name: 'Morrón rojo', cat: 'verduras', priceN: 4224, oldN: 6499, distribuidorN: 2500, members: '3/8', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 60, oculto: false },
   { id: 'zapallo', name: 'Zapallo anco', cat: 'verduras', priceN: 1169, oldN: 1799, distribuidorN: 700, members: '5/12', time: '3d', deadlineHrs: 45, img: 'img/zapallo-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg', stock: 130, oculto: false },
   { id: 'cebolla', name: 'Cebolla', cat: 'verduras', priceN: 1105, oldN: 1700, distribuidorN: 650, members: '6/10', time: '2d', deadlineHrs: 40, img: 'img/cebolla-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg', stock: 175, oculto: false },
@@ -2140,7 +2145,12 @@ function getRawCatalogStore() {
     const raw = localStorage.getItem('hubador_catalog_raw_v3');
     if (raw) {
       const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) return arr.filter((p) => p.id !== 'papa' && p.name !== 'Papa');
+      if (Array.isArray(arr)) {
+        const existingIds = new Set(arr.map((p) => p.id));
+        const missingFromBase = RAW_BASE_CATALOG.filter((p) => !existingIds.has(p.id));
+        const cleanArr = arr.filter((p) => p.id !== 'papa' && p.name !== 'Papa');
+        return [...cleanArr, ...missingFromBase];
+      }
     }
   } catch (e) {}
   return RAW_BASE_CATALOG;
@@ -2198,7 +2208,7 @@ Object.defineProperty(window, 'HUBADOR_CATALOG', {
   configurable: true
 });
 
-const HOME_OFERTAS_IDS = ['mandarina', 'naranja', 'tomate', 'manzana', 'morron', 'cebolla', 'limon', 'banana', 'lechuga'];
+const HOME_OFERTAS_IDS = ['huevos', 'pan', 'jamon', 'queso', 'espinaca', 'tomate', 'mandarina', 'naranja', 'banana', 'manzana'];
 function hubadorById(id) { return getHubadorCatalogList(true).find((p) => p.id === id) || getHubadorCatalogList(true)[0]; }
 function hubadorCard(p) {
   const live = groupProgressView(p.name);
@@ -2389,6 +2399,7 @@ function MobileHome() {
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 12, WebkitOverflowScrolling: 'touch' }}>
           {[
             { id: 'todos', label: 'Todos', emoji: '🌿' },
+            { id: 'almacen', label: 'Frescos & Almacén', emoji: '🥪' },
             { id: 'verduras', label: 'Verduras', emoji: '🥦' },
             { id: 'frutas', label: 'Frutas', emoji: '🍎' },
           ].map((c) => (
@@ -2772,6 +2783,7 @@ function MobileProductos() {
       <div style={{ padding: '10px 16px 4px', background: '#fff', borderBottom: '1px solid #e8eaec', display: 'flex', gap: 8, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         {[
           { id: 'todos', label: 'Todos', emoji: '🌿' },
+          { id: 'almacen', label: 'Frescos & Almacén', emoji: '🥪' },
           { id: 'verduras', label: 'Verduras', emoji: '🥦' },
           { id: 'frutas', label: 'Frutas', emoji: '🍎' },
         ].map((c) => (
@@ -2804,7 +2816,7 @@ function MobileProductos() {
       <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <div style={{ fontWeight: 800, fontSize: 15, color: '#1a1f1c' }}>
-            {cat === 'todos' ? 'Todos los productos' : cat === 'verduras' ? 'Verduras' : 'Frutas'}
+            {cat === 'todos' ? 'Todos los productos' : cat === 'almacen' ? 'Frescos & Almacén' : cat === 'verduras' ? 'Verduras' : 'Frutas'}
           </div>
           <span style={{ fontSize: 12, color: '#888' }}>{filtered.length} disponibles</span>
         </div>
@@ -3913,6 +3925,7 @@ function MobileAdminProductos() {
     if (!matchSearch) return false;
     if (filterCat === 'activos') return !p.oculto;
     if (filterCat === 'ocultos') return p.oculto;
+    if (filterCat === 'almacen') return p.cat === 'almacen';
     if (filterCat === 'verduras') return p.cat === 'verduras';
     if (filterCat === 'frutas') return p.cat === 'frutas';
     return true;
@@ -4016,6 +4029,7 @@ function MobileAdminProductos() {
               { id: 'todos', label: `Todos (${items.length})` },
               { id: 'activos', label: `🟢 Activos (${countActivos})` },
               { id: 'ocultos', label: `🙈 Ocultos (${countOcultos})` },
+              { id: 'almacen', label: '🥪 Frescos / Almacén' },
               { id: 'verduras', label: '🥬 Verduras' },
               { id: 'frutas', label: '🍎 Frutas' },
             ].map(tab => (
@@ -6571,6 +6585,7 @@ function WebHome() {
 
   const categories = [
     { id: 'todos', label: 'Todos', emoji: '🌿' },
+    { id: 'almacen', label: 'Frescos & Almacén', emoji: '🥪' },
     { id: 'verduras', label: 'Verduras', emoji: '🥦' },
     { id: 'frutas', label: 'Frutas', emoji: '🍎' },
   ];
