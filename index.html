@@ -2290,12 +2290,15 @@ async function syncCatalogFromSupabase() {
   }
 }
 
-/** Publica un producto creado/editado en Admin para que lo vean todos (requiere sesión admin real por RLS). */
+/** Publica un producto creado/editado en Admin para que lo vean todos (requiere sesión admin real por RLS).
+ *  OJO: si RLS bloquea la escritura, Supabase puede devolver "sin error" pero 0 filas afectadas
+ *  (la fila queda invisible para ese rol, no cuenta como error) — por eso chequeamos .select().length. */
 async function upsertProductoRemoto(item) {
   if (!sb) return false;
   try {
-    const { error } = await sb.from(PRODUCTOS_TABLE).upsert(rawItemToProductoRow(item));
+    const { data, error } = await sb.from(PRODUCTOS_TABLE).upsert(rawItemToProductoRow(item)).select();
     if (error) { console.warn('[HUBADOR] No se pudo publicar el producto en Supabase', error); return false; }
+    if (!data || data.length === 0) { console.warn('[HUBADOR] Publicar producto: 0 filas afectadas (¿RLS / no sos admin?) id=', item.id); return false; }
     return true;
   } catch (e) {
     console.warn('[HUBADOR] No se pudo publicar el producto en Supabase', e);
@@ -2306,8 +2309,9 @@ async function upsertProductoRemoto(item) {
 async function deleteProductoRemoto(id) {
   if (!sb) return false;
   try {
-    const { error } = await sb.from(PRODUCTOS_TABLE).delete().eq('id', id);
+    const { data, error } = await sb.from(PRODUCTOS_TABLE).delete().eq('id', id).select();
     if (error) { console.warn('[HUBADOR] No se pudo borrar el producto en Supabase', error); return false; }
+    if (!data || data.length === 0) { console.warn('[HUBADOR] Borrar producto: 0 filas afectadas (¿RLS / no sos admin?) id=', id); return false; }
     return true;
   } catch (e) {
     console.warn('[HUBADOR] No se pudo borrar el producto en Supabase', e);
