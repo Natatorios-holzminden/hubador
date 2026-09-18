@@ -1860,9 +1860,16 @@ function checkBg(ok) { return ok ? CHECK_AZUL : CHECK_ROJO; }
 function checkShadow(ok) { return ok ? '0 1px 4px rgba(37,99,235,.45)' : '0 1px 4px rgba(220,38,38,.45)'; }
 function sortActualizadoPrimero(arr, secondary) {
   return arr.sort((a, b) => {
-    const d = (b.precioActualizado ? 1 : 0) - (a.precioActualizado ? 1 : 0);
-    if (d !== 0) return d;
-    return secondary ? secondary(a, b) : 0;
+    if (secondary) {
+      const s = secondary(a, b);
+      if (s !== 0) return s;
+    }
+    const da = a.disc != null ? Number(a.disc) : (a.oldN && a.priceN ? calcDisc(a.priceN, a.oldN) : 0);
+    const db = b.disc != null ? Number(b.disc) : (b.oldN && b.priceN ? calcDisc(b.priceN, b.oldN) : 0);
+    if (db !== da) return db - da;
+    const pa = (b.precioActualizado ? 1 : 0) - (a.precioActualizado ? 1 : 0);
+    if (pa !== 0) return pa;
+    return String(a.name || '').localeCompare(String(b.name || ''), 'es');
   });
 }
 function fmtPrecioAR(n) {
@@ -2129,7 +2136,7 @@ function getHubadorCatalogList(includeHidden = false) {
   const raw = getRawCatalogStore();
   const items = (raw && Array.isArray(raw) && raw.length > 0) ? raw : RAW_BASE_CATALOG;
   const filtered = includeHidden ? items : items.filter((p) => !p.oculto);
-  return filtered.map((p) => {
+  const mapped = filtered.map((p) => {
     const live = groupProgressView(p.name);
     const oldVal = p.oldN != null ? Number(p.oldN) : 0;
     const priceVal = p.priceN != null ? Number(p.priceN) : 0;
@@ -2149,6 +2156,17 @@ function getHubadorCatalogList(includeHidden = false) {
       precioActualizado: IDS_ACTUALIZADOS.has(p.id) || !!p.precioActualizado,
     };
   });
+  if (!includeHidden) {
+    mapped.sort((a, b) => {
+      const da = Number(a.disc || 0);
+      const db = Number(b.disc || 0);
+      if (db !== da) return db - da;
+      const pa = (b.precioActualizado ? 1 : 0) - (a.precioActualizado ? 1 : 0);
+      if (pa !== 0) return pa;
+      return String(a.name || '').localeCompare(String(b.name || ''), 'es');
+    });
+  }
+  return mapped;
 }
 
 // Define HUBADOR_CATALOG as dynamic getter returning genuine Array
@@ -6327,7 +6345,7 @@ function WebHome() {
   const search = webSearch || '';
   const setSearch = (v) => { if (typeof setWebSearch === 'function') setWebSearch(v); };
   const [cat, setCat] = React.useState('todos');
-  const [sort, setSort] = React.useState('relevancia');
+  const [sort, setSort] = React.useState('descuento');
   const [showFilters, setShowFilters] = React.useState(false);
   const [catalogItems, setCatalogItems] = React.useState(() => HUBADOR_CATALOG.map(hubadorCard));
   React.useEffect(() => {
@@ -6351,7 +6369,7 @@ function WebHome() {
   let secondary = null;
   if (sort === 'precio-asc') secondary = (a, b) => parseInt(a.price.replace(/[^\d]/g, '')) - parseInt(b.price.replace(/[^\d]/g, ''));
   if (sort === 'precio-desc') secondary = (a, b) => parseInt(b.price.replace(/[^\d]/g, '')) - parseInt(a.price.replace(/[^\d]/g, ''));
-  if (sort === 'descuento') secondary = (a, b) => b.disc - a.disc;
+  if (sort === 'descuento' || sort === 'relevancia') secondary = (a, b) => (b.disc || 0) - (a.disc || 0);
   if (sort === 'cierre') secondary = (a, b) => (a.deadlineHrs || 99) - (b.deadlineHrs || 99);
   sortActualizadoPrimero(filtered, secondary);
 
@@ -6430,10 +6448,10 @@ function WebHome() {
               Filtrar{cat !== 'todos' ? ` · ${categories.find((c) => c.id === cat)?.label || ''}` : ''}
             </button>
             <select value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="descuento">Mayor descuento</option>
               <option value="relevancia">Más relevantes</option>
               <option value="precio-asc">Menor precio</option>
               <option value="precio-desc">Mayor precio</option>
-              <option value="descuento">Más descuento</option>
               <option value="cierre">Cierran antes</option>
             </select>
           </div>
