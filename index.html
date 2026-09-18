@@ -2281,21 +2281,32 @@ function rawItemToProductoRow(item) {
   };
 }
 
+const HUBADOR_CATALOG_DIRTY_KEY = 'hubador_catalog_dirty_v1';
+/** Marcá "dirty" cuando una edición de Admin NO se pudo publicar en Supabase (quedó solo local) —
+ *  es la ÚNICA situación real que syncCatalogFromSupabase() necesita proteger de un sobre-escritura. */
+function setCatalogDirty(isDirty) {
+  try {
+    if (isDirty) localStorage.setItem(HUBADOR_CATALOG_DIRTY_KEY, '1');
+    else localStorage.removeItem(HUBADOR_CATALOG_DIRTY_KEY);
+  } catch (e) {}
+}
+
 /** Trae el catálogo de Supabase.
- *  - Si este navegador NUNCA guardó nada propio (no existe la key en localStorage):
- *    es un visitante nuevo → Supabase manda 100%, así ve lo último que publicó Admin.
- *  - Si este navegador YA tiene su propio catálogo (p. ej. Admin con ediciones sin publicar):
- *    nunca lo pisa ni borra — solo agrega productos remotos que todavía no tenga,
- *    para no repetir el incidente de perder ediciones no publicadas al recargar. */
+ *  - Caso normal (sin ediciones locales pendientes de publicar): Supabase manda 100%,
+ *    así cualquier pestaña ve el último precio/producto al instante (no hace falta
+ *    "visitante totalmente nuevo" para esto — simplemente no hay nada que proteger).
+ *  - Si HAY una edición de Admin que falló al publicar (ver setCatalogDirty): no se pisa
+ *    ni se borra nada local, solo se agregan productos remotos que todavía no tenga,
+ *    para no repetir el incidente de perder esa edición sin publicar al recargar. */
 async function syncCatalogFromSupabase() {
   if (!sb) return;
   try {
     const { data, error } = await sb.from(PRODUCTOS_TABLE).select('*');
     if (error || !Array.isArray(data) || data.length === 0) return;
     const remoteList = data.map(productoRowToRaw);
-    let hasLocalCatalog = false;
-    try { hasLocalCatalog = !!localStorage.getItem('hubador_catalog_raw_v3'); } catch (e) {}
-    if (!hasLocalCatalog) {
+    let isDirty = false;
+    try { isDirty = localStorage.getItem(HUBADOR_CATALOG_DIRTY_KEY) === '1'; } catch (e) {}
+    if (!isDirty) {
       saveRawCatalogStore(remoteList);
       return;
     }
@@ -4035,6 +4046,7 @@ function MobileAdminProductos() {
     reload();
     const changed = updated.find((p) => p.id === item.id);
     const published = changed ? await upsertProductoRemoto(changed) : false;
+    if (sb) setCatalogDirty(!published);
     if (showToast) showToast((item.oculto ? `🟢 "${item.name}" activado en la tienda` : `🙈 "${item.name}" ocultado del catálogo`) + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
@@ -4099,6 +4111,7 @@ function MobileAdminProductos() {
     reload();
     const changed = updated.find((item) => item.id === p.id);
     const published = changed ? await upsertProductoRemoto(changed) : false;
+    if (sb) setCatalogDirty(!published);
     if (showToast) showToast(`📸 Portada de "${p.name}" actualizada` + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
@@ -4136,6 +4149,7 @@ function MobileAdminProductos() {
     reload();
     setModalOpen(false);
     const published = await upsertProductoRemoto(itemData);
+    if (sb) setCatalogDirty(!published);
     if (showToast) showToast(`✓ Producto "${form.name}" guardado` + (sb && !published ? ' (solo en este dispositivo — iniciá sesión admin real para publicarlo)' : ''));
   };
 
@@ -4147,6 +4161,7 @@ function MobileAdminProductos() {
     saveRawCatalogStore(updated);
     reload();
     const published = await deleteProductoRemoto(item.id);
+    if (sb) setCatalogDirty(!published);
     if (showToast) showToast(`🗑️ "${item.name}" eliminado` + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
@@ -4187,6 +4202,7 @@ function MobileAdminProductos() {
       if (published) ok++; else fail++;
     }
     setPublishing(false);
+    setCatalogDirty(fail > 0);
     if (fail === 0) {
       if (showToast) showToast(`☁️ ${ok} producto(s) publicados en Supabase — ya se ven en todos lados`);
     } else {
