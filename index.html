@@ -1805,6 +1805,12 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
 // Comparador Web + Mobile: agregá ?both (o ?compare)
 // Compatibilidad con versión vieja subida: ?app=1 también fuerza modo app.
 const _qs = new URLSearchParams(location.search);
+// Link de un solo uso para limpiar el catálogo viejo guardado en este navegador
+// sin tener que usar la consola: hubador.com/?actualizar
+if (_qs.has('actualizar')) {
+  try { localStorage.removeItem('hubador_catalog_raw_v3'); } catch (e) {}
+  location.replace(location.pathname + '#home');
+}
 const DEV_MODE = _qs.has('dev'); // menú + iPhone preview
 const BOTH_MODE = _qs.has('both') || _qs.has('compare') || _qs.has('simultaneo') || _qs.has('dual'); // Web + Mobile lado a lado
 const FORCE_MOBILE = _qs.has('mobile'); // forzar UI mobile en desktop
