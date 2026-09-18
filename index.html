@@ -3984,6 +3984,17 @@ function MobileAdminProductos() {
     return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
   }, []);
 
+  // null = todavía chequeando; false = sin sesión real de Supabase (los cambios NO se publican)
+  const [hasRealSession, setHasRealSession] = React.useState(null);
+  React.useEffect(() => {
+    if (!sb) { setHasRealSession(false); return; }
+    let cancelled = false;
+    sb.auth.getSession().then(({ data }) => {
+      if (!cancelled) setHasRealSession(!!(data && data.session));
+    }).catch(() => { if (!cancelled) setHasRealSession(false); });
+    return () => { cancelled = true; };
+  }, []);
+
   const handleToggleOculto = async (item) => {
     const rawList = getRawCatalogStore();
     const updated = rawList.map((p) => p.id === item.id ? { ...p, oculto: !p.oculto } : p);
@@ -4149,7 +4160,14 @@ function MobileAdminProductos() {
   return (
     <AdminShell active="admin-productos">
       <div style={{ padding: 14, fontFamily: "'Inter', sans-serif" }}>
-        
+
+        {sb && hasRealSession === false && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 12.5, lineHeight: 1.4, fontWeight: 600 }}>
+            ⚠️ No estás en una sesión real de Supabase. Todo lo que edites, ocultes o borres acá va a quedar SOLO en este dispositivo — nadie más lo va a ver, y puede "revivir" solo cuando la página se sincronice de nuevo.
+            Cerrá sesión y volvé a entrar con tu email y contraseña reales (no el acceso rápido demo) para que se publique de verdad.
+          </div>
+        )}
+
         {/* Header & Stat Summary */}
         <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '12px 14px', marginBottom: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
