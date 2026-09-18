@@ -1625,6 +1625,15 @@ if (SUPABASE_OK && typeof window !== 'undefined' && window.supabase && typeof wi
   }
 }
 
+/** Si además existe una cuenta real de Supabase Auth con ese email/clave, logueala en paralelo
+ *  (sin bloquear el acceso admin local) para que las publicaciones de catálogo pasen las políticas RLS. */
+function hubadorTrySilentAdminSupabaseLogin(email, pass) {
+  if (!sb) return;
+  try {
+    sb.auth.signInWithPassword({ email, password: pass }).catch(() => {});
+  } catch (e) {}
+}
+
 function hubadorConnectSupabaseDev() {
   const url = window.prompt('Supabase Project URL', localStorage.getItem('hubadorSupabaseUrl') || String(SUPABASE_URL || '').replace(/PEGAR_.*/, '') || 'https://xxxx.supabase.co');
   if (url == null) return;
@@ -1848,7 +1857,7 @@ const SCREENS = [
 
 
 // ─── Catálogo HUBADOR (precios grupo vs Coto) ─────────────────
-const IDS_ACTUALIZADOS = new Set(['huevos', 'pan', 'jamon', 'queso', 'espinaca', 'tomate', 'mandarina', 'naranja', 'manzana', 'morron', 'pera', 'banana']);
+const IDS_ACTUALIZADOS = new Set(['mandarina', 'naranja', 'manzana', 'morron', 'pera', 'banana']);
 const CHECK_AZUL = '#2563eb';
 const CHECK_ROJO = '#dc2626';
 // UI city under brand; future hub assign via IP geo (no GPS permission) + barrio confirm
@@ -2121,12 +2130,6 @@ function ActiveOrderExtras({ order }) {
 const ActivoHubJourney = ActiveOrderExtras;
 
 const RAW_BASE_CATALOG = [
-  { id: 'huevos', name: 'Huevos de campo', cat: 'almacen', priceN: 4200, oldN: 6500, distribuidorN: 2800, members: '8/10', time: '2d', deadlineHrs: 36, img: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=400&q=80', goal: 30, unit: '/u', stock: 120, oculto: false, precioActualizado: true },
-  { id: 'pan', name: 'Pan de campo artesanal', cat: 'almacen', priceN: 1950, oldN: 3200, distribuidorN: 1100, members: '6/10', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 80, oculto: false, precioActualizado: true },
-  { id: 'jamon', name: 'Jamón cocido natural', cat: 'almacen', priceN: 7490, oldN: 12500, distribuidorN: 4900, members: '5/10', time: '2d', deadlineHrs: 38, img: 'https://images.unsplash.com/photo-1524438418049-ab2acb7aa48f?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 60, oculto: false, precioActualizado: true },
-  { id: 'queso', name: 'Queso Tybo feteado', cat: 'almacen', priceN: 5890, oldN: 9800, distribuidorN: 3900, members: '7/10', time: '2d', deadlineHrs: 38, img: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 75, oculto: false, precioActualizado: true },
-  { id: 'espinaca', name: 'Espinaca fresca', cat: 'verduras', priceN: 1450, oldN: 2900, distribuidorN: 850, members: '6/10', time: '2d', deadlineHrs: 36, img: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 85, oculto: false, precioActualizado: true },
-  { id: 'tomate', name: 'Tomate Red', cat: 'verduras', priceN: 1750, oldN: 3499, distribuidorN: 1000, members: '5/10', time: '3d', deadlineHrs: 48, img: 'img/tomate.jpg', goal: GOAL_KG, unit: '/kg', stock: 120, oculto: false, precioActualizado: true },
   { id: 'morron', name: 'Morrón rojo', cat: 'verduras', priceN: 4224, oldN: 6499, distribuidorN: 2500, members: '3/8', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 60, oculto: false },
   { id: 'zapallo', name: 'Zapallo anco', cat: 'verduras', priceN: 1169, oldN: 1799, distribuidorN: 700, members: '5/12', time: '3d', deadlineHrs: 45, img: 'img/zapallo-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg', stock: 130, oculto: false },
   { id: 'cebolla', name: 'Cebolla', cat: 'verduras', priceN: 1105, oldN: 1700, distribuidorN: 650, members: '6/10', time: '2d', deadlineHrs: 40, img: 'img/cebolla-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg', stock: 175, oculto: false },
@@ -2161,6 +2164,108 @@ function saveRawCatalogStore(list) {
     localStorage.setItem('hubador_catalog_raw_v3', JSON.stringify(list));
     window.dispatchEvent(new CustomEvent('hubador_catalog_updated'));
   } catch (e) {}
+}
+
+// ─── Catálogo remoto (Supabase) — así lo que edita Admin se ve en todos los dispositivos ──
+const PRODUCTOS_TABLE = 'productos';
+
+function productoRowToRaw(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    cat: row.cat || 'verduras',
+    priceN: Number(row.price_n) || 0,
+    oldN: Number(row.old_n) || 0,
+    distribuidorN: Number(row.distribuidor_n) || 0,
+    members: row.members || undefined,
+    time: row.time || undefined,
+    deadlineHrs: row.deadline_hrs || undefined,
+    img: row.img || 'img/papa.jpg',
+    goal: row.goal || undefined,
+    unit: row.unit || '/kg',
+    stock: row.stock != null ? row.stock : 100,
+    oculto: !!row.oculto,
+    precioActualizado: !!row.precio_actualizado,
+    desc: row.descripcion || '',
+  };
+}
+
+function rawItemToProductoRow(item) {
+  return {
+    id: item.id,
+    name: item.name,
+    cat: item.cat || 'verduras',
+    price_n: Number(item.priceN) || 0,
+    old_n: Number(item.oldN) || 0,
+    distribuidor_n: Number(item.distribuidorN) || 0,
+    members: item.members || null,
+    time: item.time || null,
+    deadline_hrs: item.deadlineHrs || null,
+    img: item.img || null,
+    goal: item.goal || null,
+    unit: item.unit || '/kg',
+    stock: item.stock != null ? item.stock : 100,
+    oculto: !!item.oculto,
+    precio_actualizado: !!item.precioActualizado,
+    descripcion: item.desc || item.descripcion || null,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+/** Trae el catálogo real desde Supabase y pisa la copia local (localStorage + evento). */
+async function syncCatalogFromSupabase() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from(PRODUCTOS_TABLE).select('*');
+    if (error || !Array.isArray(data) || data.length === 0) return;
+    saveRawCatalogStore(data.map(productoRowToRaw));
+  } catch (e) {
+    console.warn('[HUBADOR] No se pudo sincronizar el catálogo remoto', e);
+  }
+}
+
+/** Publica un producto creado/editado en Admin para que lo vean todos (requiere sesión admin real por RLS). */
+async function upsertProductoRemoto(item) {
+  if (!sb) return false;
+  try {
+    const { error } = await sb.from(PRODUCTOS_TABLE).upsert(rawItemToProductoRow(item));
+    if (error) { console.warn('[HUBADOR] No se pudo publicar el producto en Supabase', error); return false; }
+    return true;
+  } catch (e) {
+    console.warn('[HUBADOR] No se pudo publicar el producto en Supabase', e);
+    return false;
+  }
+}
+
+async function deleteProductoRemoto(id) {
+  if (!sb) return false;
+  try {
+    const { error } = await sb.from(PRODUCTOS_TABLE).delete().eq('id', id);
+    if (error) { console.warn('[HUBADOR] No se pudo borrar el producto en Supabase', error); return false; }
+    return true;
+  } catch (e) {
+    console.warn('[HUBADOR] No se pudo borrar el producto en Supabase', e);
+    return false;
+  }
+}
+
+let hubadorProductosChannel = null;
+/** Suscripción realtime: si otro dispositivo/admin cambia el catálogo, se refleja acá al instante. */
+function subscribeCatalogRealtime() {
+  if (!sb || hubadorProductosChannel) return;
+  try {
+    hubadorProductosChannel = sb
+      .channel('hubador-productos-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: PRODUCTOS_TABLE }, () => { syncCatalogFromSupabase(); })
+      .subscribe();
+  } catch (e) {
+    console.warn('[HUBADOR] Realtime de catálogo no disponible', e);
+  }
+}
+
+if (sb) {
+  syncCatalogFromSupabase();
+  subscribeCatalogRealtime();
 }
 
 function getHubadorCatalogList(includeHidden = false) {
@@ -2208,7 +2313,7 @@ Object.defineProperty(window, 'HUBADOR_CATALOG', {
   configurable: true
 });
 
-const HOME_OFERTAS_IDS = ['huevos', 'pan', 'jamon', 'queso', 'espinaca', 'tomate', 'mandarina', 'naranja', 'banana', 'manzana'];
+const HOME_OFERTAS_IDS = ['mandarina', 'naranja', 'banana', 'manzana'];
 function hubadorById(id) { return getHubadorCatalogList(true).find((p) => p.id === id) || getHubadorCatalogList(true)[0]; }
 function hubadorCard(p) {
   const live = groupProgressView(p.name);
@@ -2233,7 +2338,7 @@ function hubadorBestGancho() {
 function grupoFromHubadorProduct(p, barrio) {
   const live = groupProgressView(p.name);
   return {
-    product: p.name, location: barrio || 'Palermo', members: p.members, progress: live.pct,
+    product: p.name, location: barrio || 'Buenos Aires', members: p.members, progress: live.pct,
     closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit,
     disc: p.disc, img: p.img, cat: p.cat, desc: p.desc || p.descripcion, totalKg: GOAL_KG,
     precioActualizado: !!p.precioActualizado, status: 'abierto',
@@ -2260,7 +2365,7 @@ function MobileHome() {
     const live = groupProgressView(p.name);
     setSelected(p);
     setSelectedGroup({
-      product: p.name, location: user?.barrio || 'Palermo', members: p.members, progress: live.pct,
+      product: p.name, location: user?.barrio || 'Buenos Aires', members: p.members, progress: live.pct,
       closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, totalKg: GOAL_KG, precioActualizado: !!p.precioActualizado, status: 'abierto'
     });
     navigate('grupo-detalle');
@@ -2666,7 +2771,7 @@ function MobileHome() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#888', fontWeight: 500 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block', animation: 'pulse 1.6s infinite' }} />
-            3 lugares en {user?.barrio || 'Palermo'}
+            3 lugares en {user?.barrio || 'Buenos Aires'}
           </div>
         </div>
 
@@ -2739,7 +2844,7 @@ function MobileProductos() {
     const live = groupProgressView(p.name);
     setSelected(p);
     setSelectedGroup({
-      product: p.name, location: user?.barrio || 'Palermo', members: p.members, progress: live.pct,
+      product: p.name, location: user?.barrio || 'Buenos Aires', members: p.members, progress: live.pct,
       closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, totalKg: GOAL_KG, precioActualizado: !!p.precioActualizado, status: 'abierto'
     });
     navigate('grupo-detalle');
@@ -2978,7 +3083,7 @@ function MobileProducto() {
 
 }
 
-function MasOfertas({ excludeName, barrio = 'Palermo' }) {
+function MasOfertas({ excludeName, barrio = 'Buenos Aires' }) {
   const primary = 'oklch(0.55 0.15 165)';
   const danger = 'oklch(0.62 0.18 35)';
   const navigate = React.useContext(NavContext);
@@ -3274,6 +3379,7 @@ function MobileLogin() {
     try {
       const emLower = email.trim().toLowerCase();
       if (emLower === 'admin@hubador.app' && (pass === 'admin1234' || pass === 'admin')) {
+        hubadorTrySilentAdminSupabaseLogin('admin@hubador.app', pass);
         login({ nombre: 'Admin HUBADOR', email: 'admin@hubador.app', role: 'admin', barrio: 'Buenos Aires' });
         showToast('🔓 Sesión de Admin iniciada');
         navigate('admin-productos');
@@ -3294,7 +3400,7 @@ function MobileLogin() {
         navigate('home');
       } else {
         const nombre = email.split('@')[0].split(/[._]/)[0].replace(/^./, (c) => c.toUpperCase());
-        login({ nombre, email, barrio: 'Palermo' });
+        login({ nombre, email, barrio: 'Buenos Aires' });
         showToast('Sesión iniciada');
         navigate('home');
       }
@@ -3559,6 +3665,7 @@ function AdminShell({ active, children }) {
   const handleAdminLogin = (e) => {
     e.preventDefault();
     if (adminPass === 'admin1234' || adminPass === 'admin') {
+      hubadorTrySilentAdminSupabaseLogin(adminEmail || 'admin@hubador.app', adminPass);
       login({ nombre: 'Admin HUBADOR', email: adminEmail || 'admin@hubador.app', role: 'admin', barrio: 'CABA' });
       if (showToast) showToast('🔓 Sesión de Administrador iniciada');
       setAuthError('');
@@ -3811,12 +3918,14 @@ function MobileAdminProductos() {
     return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
   }, []);
 
-  const handleToggleOculto = (item) => {
+  const handleToggleOculto = async (item) => {
     const rawList = getRawCatalogStore();
     const updated = rawList.map((p) => p.id === item.id ? { ...p, oculto: !p.oculto } : p);
     saveRawCatalogStore(updated);
     reload();
-    if (showToast) showToast(item.oculto ? `🟢 "${item.name}" activado en la tienda` : `🙈 "${item.name}" ocultado del catálogo`);
+    const changed = updated.find((p) => p.id === item.id);
+    const published = changed ? await upsertProductoRemoto(changed) : false;
+    if (showToast) showToast((item.oculto ? `🟢 "${item.name}" activado en la tienda` : `🙈 "${item.name}" ocultado del catálogo`) + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
   const handleOpenCreate = () => {
@@ -3869,12 +3978,14 @@ function MobileAdminProductos() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [modalOpen]);
 
-  const handleQuickUpdateImage = (p, newImg) => {
+  const handleQuickUpdateImage = async (p, newImg) => {
     const rawList = getRawCatalogStore();
     const updated = rawList.map(item => item.id === p.id ? { ...item, img: newImg, precioActualizado: true } : item);
     saveRawCatalogStore(updated);
     reload();
-    if (showToast) showToast(`📸 Portada de "${p.name}" actualizada`);
+    const changed = updated.find((item) => item.id === p.id);
+    const published = changed ? await upsertProductoRemoto(changed) : false;
+    if (showToast) showToast(`📸 Portada de "${p.name}" actualizada` + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
   const applyDiscountPct = (pct) => {
@@ -3885,7 +3996,7 @@ function MobileAdminProductos() {
     }
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
     const rawList = getRawCatalogStore();
@@ -3908,16 +4019,18 @@ function MobileAdminProductos() {
     saveRawCatalogStore(updated);
     reload();
     setModalOpen(false);
-    if (showToast) showToast(`✓ Producto "${form.name}" guardado`);
+    const published = await upsertProductoRemoto(itemData);
+    if (showToast) showToast(`✓ Producto "${form.name}" guardado` + (sb && !published ? ' (solo en este dispositivo — iniciá sesión admin real para publicarlo)' : ''));
   };
 
-  const handleDelete = (item) => {
+  const handleDelete = async (item) => {
     if (!window.confirm(`¿Seguro que querés borrar "${item.name}"?`)) return;
     const rawList = getRawCatalogStore();
     const updated = rawList.filter((p) => p.id !== item.id);
     saveRawCatalogStore(updated);
     reload();
-    if (showToast) showToast(`🗑️ "${item.name}" eliminado`);
+    const published = await deleteProductoRemoto(item.id);
+    if (showToast) showToast(`🗑️ "${item.name}" eliminado` + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
   const filtered = items.filter((p) => {
@@ -3946,6 +4059,24 @@ function MobileAdminProductos() {
     }
   };
 
+  const [publishing, setPublishing] = React.useState(false);
+  const handlePublishAllToSupabase = async () => {
+    if (!sb) { if (showToast) showToast('⚠️ Supabase no está conectado en este sitio'); return; }
+    setPublishing(true);
+    const currentList = getRawCatalogStore();
+    let ok = 0, fail = 0;
+    for (const item of currentList) {
+      const published = await upsertProductoRemoto(item);
+      if (published) ok++; else fail++;
+    }
+    setPublishing(false);
+    if (fail === 0) {
+      if (showToast) showToast(`☁️ ${ok} producto(s) publicados en Supabase — ya se ven en todos lados`);
+    } else {
+      if (showToast) showToast(`⚠️ ${ok} publicados, ${fail} fallaron — ¿estás logueado con tu cuenta admin real?`, 5200);
+    }
+  };
+
   const countActivos = items.filter(p => !p.oculto).length;
   const countOcultos = items.filter(p => p.oculto).length;
 
@@ -3961,11 +4092,20 @@ function MobileAdminProductos() {
               <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Coto y visibilidad en tienda</div>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              {sb && (
+                <button
+                  type="button"
+                  onClick={handlePublishAllToSupabase}
+                  disabled={publishing}
+                  style={{ background: publishing ? '#94a3b8' : '#0e9c82', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: publishing ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                  title="Publica TODO el catálogo local en Supabase para que se vea igual en cualquier dispositivo"
+                >{publishing ? '⏳ Publicando...' : '☁️ Publicar todo en Supabase'}</button>
+              )}
               <button
                 type="button"
                 onClick={handleExportJson}
                 style={{ background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-                title="Copia el catálogo para sincronizar la web pública en GitHub"
+                title="Copia el catálogo para pegarlo como respaldo/código"
               >📋 Exportar JSON</button>
               <button
                 onClick={handleOpenCreate}
@@ -3974,7 +4114,9 @@ function MobileAdminProductos() {
             </div>
           </div>
           <div style={{ fontSize: 11, color: '#0369a1', background: '#e0f2fe', padding: '6px 10px', borderRadius: 8, marginBottom: 10, lineHeight: 1.35 }}>
-            ℹ️ <strong>Sincronización pública:</strong> Los cambios guardados acá se guardan en tu navegador. Para que visitantes externos (ej. desde otros países o celulares) los vean en hubador.com, tocá "Exportar JSON" y actualizá el código del sitio.
+            {sb
+              ? <>ℹ️ <strong>Sincronización pública:</strong> cada guardado se publica en Supabase automáticamente (necesita sesión admin real, no el acceso rápido demo). Si tenías cambios de antes de activar esto, tocá "☁️ Publicar todo en Supabase" una vez para subirlos todos juntos.</>
+              : <>ℹ️ <strong>Sincronización pública:</strong> Supabase no está conectado en este sitio — los cambios solo se guardan en este navegador.</>}
           </div>
 
           {/* Interactive Stat Filters */}
@@ -4665,19 +4807,7 @@ function MobileGrupoDetalle() {
             <button type="button" onClick={join} style={{ width: '100%', minHeight: 44, background: primary, color: '#fff', border: 'none', borderRadius: 12, padding: '12px', fontWeight: 700, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', position: 'relative', zIndex: 9, pointerEvents: 'auto' }}>Unirme al grupo</button>
             <div style={{ textAlign: 'center', fontSize: 11, color: '#888', marginTop: 6 }}>Se suma a Mis grupos. Otros vecinos pueden seguir uniéndose.</div>
           </div>
-          <MasOfertas excludeName={g.product} barrio={g.location || 'Palermo'} />
-          <div style={{ height: 8 }} />
-          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>Cómo funciona</div>
-          {[
-          ['1', 'Unite a un grupo', 'Compartí la compra con vecinos de tu barrio.'],
-          ['2', 'Alcanzá el mínimo', 'El grupo debe completarse para obtener el descuento.'],
-          ['3', 'Disfrutá el ahorro', 'Recibís tu producto a precio de grupo cuando esté listo.']].
-          map(([n, t, d]) =>
-          <div key={n} style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-              <div style={{ width: 26, height: 26, borderRadius: 999, background: primary, color: '#fff', fontWeight: 700, fontSize: 12, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{n}</div>
-              <div><div style={{ fontWeight: 600, fontSize: 12.5 }}>{t}</div><div style={{ fontSize: 11.5, color: '#888', marginTop: 1 }}>{d}</div></div>
-            </div>
-          )}
+          <MasOfertas excludeName={g.product} barrio={g.location || 'Buenos Aires'} />
         </div>
       </div>
     </div>);
@@ -4692,7 +4822,7 @@ function MobileGrupoParticipantes() {
   void progressTick;
   const ctxProd = selectedGroup || selected || (cart && cart[0]) || null;
   const productName = ctxProd?.product || ctxProd?.name || hubadorById('papa')?.name || 'Papa';
-  const barrio = selectedGroup?.location || ctxProd?.location || user?.barrio || 'Palermo';
+  const barrio = selectedGroup?.location || ctxProd?.location || user?.barrio || 'Buenos Aires';
   const cartItem = (cart || []).find((c) => c.name === productName);
   const yourQty = cartItem ? Math.max(1, cartItem.qty || 1) : 0;
   const youJoined = yourQty > 0;
@@ -5409,7 +5539,7 @@ function MobileMapa({ compact }) {
         ? { ...base, price: sel.price || base.price, old: sel.old || base.old, priceN: sel.priceN, oldN: sel.oldN != null ? sel.oldN : base.oldN, disc: sel.disc != null ? sel.disc : base.disc }
         : base;
       setCtxSelected(p);
-      setSelectedGroup(grupoFromHubadorProduct(p, sel.zona || user?.barrio || 'Palermo'));
+      setSelectedGroup(grupoFromHubadorProduct(p, sel.zona || user?.barrio || 'Buenos Aires'));
       navigate('grupo-detalle');
       return;
     }
@@ -5418,7 +5548,7 @@ function MobileMapa({ compact }) {
     if (raw) {
       const p = hubadorCard(raw);
       setCtxSelected(p);
-      setSelectedGroup(grupoFromHubadorProduct(p, sel.zona || user?.barrio || 'Palermo'));
+      setSelectedGroup(grupoFromHubadorProduct(p, sel.zona || user?.barrio || 'Buenos Aires'));
       navigate('grupo-detalle');
     }
   };
@@ -6615,7 +6745,7 @@ function WebHome() {
     const live = groupProgressView(p.name);
     setSelected(p);
     setSelectedGroup({
-      product: p.name, location: user?.barrio || 'Palermo', members: p.members, progress: live.pct,
+      product: p.name, location: user?.barrio || 'Buenos Aires', members: p.members, progress: live.pct,
       closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, cat: p.cat, totalKg: GOAL_KG, precioActualizado: !!p.precioActualizado, status: 'abierto'
     });
     navigate('grupo-detalle');
@@ -6891,6 +7021,7 @@ function WebLogin() {
     try {
       const emLower = email.trim().toLowerCase();
       if (emLower === 'admin@hubador.app' && (pass === 'admin1234' || pass === 'admin')) {
+        hubadorTrySilentAdminSupabaseLogin('admin@hubador.app', pass);
         login({ nombre: 'Admin HUBADOR', email: 'admin@hubador.app', role: 'admin', barrio: 'Buenos Aires' });
         showToast('🔓 Sesión de Admin iniciada');
         navigate('admin-productos');
