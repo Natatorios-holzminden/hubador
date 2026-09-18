@@ -1853,9 +1853,28 @@ const CHECK_AZUL = '#2563eb';
 const CHECK_ROJO = '#dc2626';
 // UI city under brand; future hub assign via IP geo (no GPS permission) + barrio confirm
 const DEFAULT_CITY = 'Buenos Aires';
-/** Hub de retiro demo — dirección visible en seguimiento */
-const DEFAULT_HUB = { name: 'Hub Palermo', address: 'Av. Santa Fe 3200', barrio: 'Palermo' };
+/** Nodos barriales de retiro HUBADOR */
+const NODOS_HUBADOR = [
+  { id: 'palermo', nombre: 'Nodo Palermo', address: 'Av. Santa Fe 3200', barrio: 'Palermo' },
+  { id: 'belgrano', nombre: 'Nodo Belgrano', address: 'Av. Cabildo 2200', barrio: 'Belgrano' },
+  { id: 'caballito', nombre: 'Nodo Caballito', address: 'Av. Rivadavia 5100', barrio: 'Caballito' },
+  { id: 'recoleta', nombre: 'Nodo Recoleta', address: 'Av. Pueyrredón y Las Heras', barrio: 'Recoleta' },
+  { id: 'villa-crespo', nombre: 'Nodo Villa Crespo', address: 'Av. Corrientes 4800', barrio: 'Villa Crespo' },
+  { id: 'almagro', nombre: 'Nodo Almagro', address: 'Av. Medrano 450', barrio: 'Almagro' },
+  { id: 'colegiales', nombre: 'Nodo Colegiales', address: 'Av. Federico Lacroze 2400', barrio: 'Colegiales' },
+  { id: 'nunez', nombre: 'Nodo Núñez', address: 'Av. del Libertador 7200', barrio: 'Núñez' },
+  { id: 'chacarita', nombre: 'Nodo Chacarita', address: 'Av. Dorrego 1100', barrio: 'Chacarita' },
+];
+const DEFAULT_HUB = { name: 'Nodo Palermo', address: 'Av. Santa Fe 3200', barrio: 'Palermo' };
 const HUB_ADDRESS = DEFAULT_HUB.address + ', ' + DEFAULT_HUB.barrio;
+function formatNodoLabel(nodoOrBarrio) {
+  if (!nodoOrBarrio) return `${NODOS_HUBADOR[0].nombre} · ${NODOS_HUBADOR[0].address}`;
+  const str = String(nodoOrBarrio).trim();
+  if (str.includes('·')) return str;
+  const match = NODOS_HUBADOR.find(n => n.barrio.toLowerCase() === str.toLowerCase() || n.nombre.toLowerCase().includes(str.toLowerCase()) || n.id === str.toLowerCase());
+  if (match) return `${match.nombre} · ${match.address}`;
+  return str;
+}
 function checkBg(ok) { return ok ? CHECK_AZUL : CHECK_ROJO; }
 function checkShadow(ok) { return ok ? '0 1px 4px rgba(37,99,235,.45)' : '0 1px 4px rgba(220,38,38,.45)'; }
 function sortActualizadoPrimero(arr, secondary) {
@@ -3093,9 +3112,11 @@ function saveHubadorProfileExtra(extra) {
 }
 function resolveUserContact(user) {
   const extra = loadHubadorProfileExtra();
+  const rawNodo = (user && user.nodo) || extra.nodo || (user && user.barrio ? formatNodoLabel(user.barrio) : '');
   return {
     tel: String((user && user.tel) || extra.tel || '').trim(),
     direccion: String((user && user.direccion) || extra.direccion || '').trim(),
+    nodo: String(rawNodo || '').trim(),
   };
 }
 function isActivoPedidoStatus(status) {
@@ -3138,6 +3159,8 @@ function orderFromCartLine(item, user, stamp, status) {
   const createdAt = stamp || Date.now();
   const email = user && user.email ? user.email : null;
   const livePct = item.name ? groupProgressView(item.name).pct : demoHubProgressSeed({ name: item.name, id: String(createdAt) });
+  const contact = resolveUserContact(user);
+  const nodoStr = contact.nodo || (user && user.nodo) || formatNodoLabel(user && user.barrio);
   return {
     id: 'ord-' + createdAt + '-' + Math.random().toString(36).slice(2, 7),
     name: item.name,
@@ -3159,6 +3182,9 @@ function orderFromCartLine(item, user, stamp, status) {
     cartId: item.id || item.name,
     payDemo: (status || 'en_formacion') === 'pagado',
     hubProgress: livePct >= 40 ? livePct : demoHubProgressSeed({ name: item.name, id: String(createdAt) }),
+    nodo: nodoStr,
+    direccion: contact.direccion || (user && user.direccion) || '',
+    tel: contact.tel || (user && user.tel) || '',
   };
 }
 function mergeCartIntoOrders(existing, cart, user, opts) {
@@ -3892,6 +3918,21 @@ function MobileAdminProductos() {
     return true;
   });
 
+  const handleExportJson = () => {
+    const currentList = getRawCatalogStore();
+    const jsonStr = JSON.stringify(currentList, null, 2);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jsonStr);
+        if (showToast) showToast('📋 ¡JSON del catálogo copiado! Listo para sincronizar.');
+      } else {
+        window.prompt('Copiá el JSON del catálogo actualizado:', jsonStr);
+      }
+    } catch (err) {
+      window.prompt('Copiá el JSON del catálogo actualizado:', jsonStr);
+    }
+  };
+
   const countActivos = items.filter(p => !p.oculto).length;
   const countOcultos = items.filter(p => p.oculto).length;
 
@@ -3906,10 +3947,21 @@ function MobileAdminProductos() {
               <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>Control del Catálogo</div>
               <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Coto y visibilidad en tienda</div>
             </div>
-            <button
-              onClick={handleOpenCreate}
-              style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-            >+ Nuevo</button>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={handleExportJson}
+                style={{ background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                title="Copia el catálogo para sincronizar la web pública en GitHub"
+              >📋 Exportar JSON</button>
+              <button
+                onClick={handleOpenCreate}
+                style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+              >+ Nuevo</button>
+            </div>
+          </div>
+          <div style={{ fontSize: 11, color: '#0369a1', background: '#e0f2fe', padding: '6px 10px', borderRadius: 8, marginBottom: 10, lineHeight: 1.35 }}>
+            ℹ️ <strong>Sincronización pública:</strong> Los cambios guardados acá se guardan en tu navegador. Para que visitantes externos (ej. desde otros países o celulares) los vean en hubador.com, tocá "Exportar JSON" y actualizá el código del sitio.
           </div>
 
           {/* Interactive Stat Filters */}
@@ -4531,7 +4583,7 @@ function MobileGrupoDetalle() {
   return (
     <div style={{ fontFamily: "'Inter',sans-serif", background: '#f4f5f7', height: '100%', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', WebkitFontSmoothing: 'antialiased', touchAction: 'manipulation' }}>
       <header style={{ flexShrink: 0, background: 'rgba(255,255,255,0.97)', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 48, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button type="button" onClick={() => navigate('home')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center', minWidth: 44, minHeight: 44, touchAction: 'manipulation' }}>
+        <button type="button" onClick={() => window.history.length > 1 ? window.history.back() : navigate('home')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center', minWidth: 44, minHeight: 44, touchAction: 'manipulation' }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
         </button>
         <span style={{ fontWeight: 700, fontSize: 15, flex: 1 }}>Detalle del grupo</span>
@@ -4866,16 +4918,17 @@ function MobileSeguimiento() {
   const deadline = order ? getOrderArrivalDeadline(order) : null;
   /* Ruta 3 nodos: Mayorista → Hub (~50%) → Casa; caja/camion avanza según estado */
   const truckPct = showReparto ? 82 : groupOpen ? Math.min(42, 16 + pct * 0.26) : 52;
-  const casaSub = (() => {
-    const d = resolveUserContact(user).direccion;
-    return d || 'Tu domicilio';
-  })();
-  const hubSub = DEFAULT_HUB.address;
+  const userContact = resolveUserContact(user);
+  const casaSub = (order && order.direccion) || userContact.direccion || 'Tu domicilio';
+  const nodoStr = (order && order.nodo) || userContact.nodo || formatNodoLabel(user && user.barrio);
+  const hubParts = String(nodoStr || '').split('·');
+  const hubName = hubParts[0] ? hubParts[0].trim() : DEFAULT_HUB.name;
+  const hubSub = hubParts[1] ? hubParts[1].trim() : DEFAULT_HUB.address;
 
   return (
     <div style={{ fontFamily: "'Inter',sans-serif", background: '#f4f5f7', height: '100%', display: 'flex', flexDirection: 'column', WebkitFontSmoothing: 'antialiased' }}>
       <header style={{ flexShrink: 0, background: 'rgba(255,255,255,0.97)', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 52, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button type="button" onClick={() => { if (setMisGruposTab) setMisGruposTab('activos'); navigate('mis-grupos'); }} aria-label="Volver" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
+        <button type="button" onClick={() => { if (setMisGruposTab) setMisGruposTab('activos'); window.history.length > 1 ? window.history.back() : navigate('mis-grupos'); }} aria-label="Volver" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
         </button>
         <span style={{ fontWeight: 700, fontSize: 15, flex: 1 }}>Seguimiento de tu pedido</span>
@@ -4928,10 +4981,11 @@ function MobileSeguimiento() {
                 <div style={{ textAlign: 'center', width: 72, flexShrink: 0 }}>
                   <div style={{ fontSize: 24, lineHeight: 1.2, filter: 'drop-shadow(0 1px 0 #e8f4f0)' }}>🏭</div>
                   <div style={{ fontSize: 10, color: '#333', fontWeight: 700, marginTop: 4 }}>Mayorista</div>
+                  <div style={{ fontSize: 9.5, color: '#666', marginTop: 2 }}>Mercado Central</div>
                 </div>
-                <div style={{ textAlign: 'center', width: 88, flexShrink: 0 }}>
+                <div style={{ textAlign: 'center', width: 84, flexShrink: 0 }}>
                   <div style={{ fontSize: 24, lineHeight: 1.2, filter: 'drop-shadow(0 1px 0 #e8f4f0)' }}>📍</div>
-                  <div style={{ fontSize: 10, color: '#333', fontWeight: 700, marginTop: 4 }}>Hub</div>
+                  <div style={{ fontSize: 10, color: '#333', fontWeight: 700, marginTop: 4 }}>{hubName}</div>
                   <div style={{ fontSize: 9.5, color: '#2d6a5a', fontWeight: 600, marginTop: 2, lineHeight: 1.25 }}>{hubSub}</div>
                 </div>
                 <div style={{ textAlign: 'center', width: 72, flexShrink: 0 }}>
@@ -4942,10 +4996,10 @@ function MobileSeguimiento() {
               </div>
             </div>
             <div style={{ fontSize: 11, color: '#2d6a5a', fontWeight: 600, marginTop: 12, textAlign: 'center', lineHeight: 1.35 }}>
-              📍 Retiro en hub: {HUB_ADDRESS}
+              📍 Retiro en nodo: {hubName} ({hubSub})
             </div>
             <div style={{ fontSize: 10, color: '#6b7c76', textAlign: 'center', marginTop: 2 }}>
-              {DEFAULT_HUB.name} · retiro
+              {hubName} · punto de retiro
             </div>
           </div>
           <button
@@ -5687,27 +5741,60 @@ function BottomNav({ active }) {
 const NavContext = React.createContext(() => {});
 const SelectionContext = React.createContext({ selected: null, setSelected: () => {}, selectedOrder: null, setSelectedOrder: () => {}, selectedGroup: null, setSelectedGroup: () => {}, showToast: () => {}, webSearch: '', setWebSearch: () => {} });
 
-function HubadorProfileGateModal({ open, initialTel, initialDireccion, onSave, onCancel }) {
+function HubadorProfileGateModal({ open, initialTel, initialDireccion, initialNodo, userBarrio, onSave, onCancel }) {
   const [tel, setTel] = React.useState(initialTel || '');
   const [direccion, setDireccion] = React.useState(initialDireccion || '');
+  const defaultNodoVal = () => {
+    if (initialNodo) return formatNodoLabel(initialNodo);
+    if (userBarrio) return formatNodoLabel(userBarrio);
+    return `${NODOS_HUBADOR[0].nombre} · ${NODOS_HUBADOR[0].address}`;
+  };
+  const [nodo, setNodo] = React.useState(defaultNodoVal);
+
   React.useEffect(() => {
     if (open) {
       setTel(initialTel || '');
       setDireccion(initialDireccion || '');
+      setNodo(defaultNodoVal());
     }
-  }, [open, initialTel, initialDireccion]);
+  }, [open, initialTel, initialDireccion, initialNodo, userBarrio]);
+
   if (!open) return null;
-  const ok = String(tel).trim() && String(direccion).trim();
+  const ok = String(tel).trim() && String(direccion).trim() && String(nodo).trim();
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 220, background: 'rgba(15,23,30,0.48)', display: 'grid', placeItems: 'center', padding: 18 }} onClick={onCancel}>
-      <div role="dialog" aria-modal="true" aria-label="Datos de entrega" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 390, background: '#fff', borderRadius: 16, padding: '22px 20px', boxShadow: '0 18px 48px rgba(0,0,0,.18)', fontFamily: "'Inter', sans-serif" }}>
-        <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 4, color: '#0f172a' }}>Datos para el pedido</div>
-        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 16, lineHeight: 1.45 }}>Necesitamos tu teléfono y dirección para coordinar la entrega de tu pedido.</div>
-        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>Teléfono</label>
-        <input value={tel} onChange={(e) => setTel(e.target.value)} type="tel" placeholder="+54 9 11 …" style={{ width: '100%', height: 42, border: '1px solid #e2e8f0', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, marginBottom: 12, boxSizing: 'border-box', outline: 'none' }} />
-        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>Dirección</label>
-        <input value={direccion} onChange={(e) => setDireccion(e.target.value)} type="text" placeholder="Calle, número, barrio" style={{ width: '100%', height: 42, border: '1px solid #e2e8f0', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, marginBottom: 16, boxSizing: 'border-box', outline: 'none' }} />
-        <button type="button" disabled={!ok} onClick={() => onSave && onSave(String(tel).trim(), String(direccion).trim())} style={{ width: '100%', background: ok ? '#0d9488' : '#cbd5e1', color: '#fff', border: 'none', borderRadius: 10, padding: '12px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: ok ? 'pointer' : 'not-allowed' }}>Continuar a la transferencia</button>
+      <div role="dialog" aria-modal="true" aria-label="Datos de entrega y retiro" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 410, background: '#fff', borderRadius: 18, padding: '22px 20px', boxShadow: '0 18px 48px rgba(0,0,0,.18)', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ fontWeight: 800, fontSize: 17.5, marginBottom: 4, color: '#0f172a' }}>Punto de retiro y tus datos</div>
+        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 14, lineHeight: 1.45 }}>Elegí el nodo donde retirarás tu pedido y completá tus datos de contacto.</div>
+
+        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>📍 Punto / Nodo de retiro</label>
+        <div style={{ position: 'relative', marginBottom: 6 }}>
+          <select
+            value={nodo}
+            onChange={(e) => setNodo(e.target.value)}
+            style={{ width: '100%', height: 44, border: '1.5px solid #0d9488', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, color: '#0f172a', background: '#f0fdfa', boxSizing: 'border-box', outline: 'none', cursor: 'pointer' }}
+          >
+            {NODOS_HUBADOR.map((n) => {
+              const val = `${n.nombre} · ${n.address}`;
+              return (
+                <option key={n.id} value={val}>
+                  {n.nombre} — {n.address} ({n.barrio})
+                </option>
+              );
+            })}
+          </select>
+        </div>
+        <div style={{ fontSize: 11.5, color: '#0f766e', background: '#ecfdf5', border: '1px solid #ccfbf1', padding: '7px 10px', borderRadius: 8, marginBottom: 14, lineHeight: 1.35 }}>
+          📦 Retirás tu pedido fresco en este nodo barrial sin costo de flete individual.
+        </div>
+
+        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>📞 Teléfono de contacto (WhatsApp)</label>
+        <input value={tel} onChange={(e) => setTel(e.target.value)} type="tel" placeholder="+54 9 11 1234 5678" style={{ width: '100%', height: 42, border: '1px solid #e2e8f0', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, marginBottom: 12, boxSizing: 'border-box', outline: 'none' }} />
+
+        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>🏠 Dirección o Domicilio del cliente</label>
+        <input value={direccion} onChange={(e) => setDireccion(e.target.value)} type="text" placeholder="Calle, número, depto (barrio)" style={{ width: '100%', height: 42, border: '1px solid #e2e8f0', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, marginBottom: 16, boxSizing: 'border-box', outline: 'none' }} />
+
+        <button type="button" disabled={!ok} onClick={() => onSave && onSave(String(tel).trim(), String(direccion).trim(), String(nodo).trim())} style={{ width: '100%', background: ok ? '#0d9488' : '#cbd5e1', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: ok ? 'pointer' : 'not-allowed', transition: 'background 0.15s ease' }}>Continuar a la transferencia</button>
         <button type="button" onClick={onCancel} style={{ width: '100%', marginTop: 8, background: 'transparent', border: 'none', color: '#64748b', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 8 }}>Cancelar</button>
       </div>
     </div>
@@ -5722,6 +5809,9 @@ function HubadorTransferenciaModal({ open, cart, user, totalLabel, onConfirmTran
   try {
     alias = localStorage.getItem('hubador_alias') || defaultAlias;
   } catch (e) {}
+
+  const contact = resolveUserContact(user);
+  const selectedNodo = contact.nodo || (user && user.nodo) || formatNodoLabel(user && user.barrio);
 
   const handleCopy = () => {
     try {
@@ -5747,9 +5837,9 @@ function HubadorTransferenciaModal({ open, cart, user, totalLabel, onConfirmTran
       const lineTot = cartLineTotals(c);
       return `• ${c.qty} ${uStr} ${c.name} (${fmtPrecioAR(lineTot.grupo)})`;
     }).join('\n');
-    const contact = resolveUserContact(user);
     const tel = contact.tel || (user && user.tel) || '';
     const dir = contact.direccion || (user && user.direccion) || (user && user.barrio) || '';
+    const nodoStr = selectedNodo;
     const text = [
       '¡Hola! Quiero confirmar mi pedido en HUBADOR:',
       '',
@@ -5759,7 +5849,8 @@ function HubadorTransferenciaModal({ open, cart, user, totalLabel, onConfirmTran
       '',
       `👤 *Nombre:* ${user?.nombre || 'Cliente'}`,
       tel ? `📞 *Teléfono:* ${tel}` : '',
-      dir ? `📍 *Entrega:* ${dir}` : '',
+      `📍 *Punto / Nodo de retiro:* ${nodoStr}`,
+      dir ? `🏠 *Dirección:* ${dir}` : '',
       '',
       'Adjunto aquí el comprobante de la transferencia bancaria 👇'
     ].filter(Boolean).join('\n');
@@ -5799,6 +5890,16 @@ function HubadorTransferenciaModal({ open, cart, user, totalLabel, onConfirmTran
             <div style={{ fontWeight: 800, fontSize: 24, color: '#0f172a' }}>{totalLabel}</div>
           </div>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#059669', background: '#dcfce7', borderRadius: 999, padding: '4px 10px' }}>Precio grupo</span>
+        </div>
+
+        {/* Punto de retiro asignado */}
+        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 12, padding: '10px 14px', marginBottom: 14, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <span style={{ fontSize: 18, lineHeight: 1.2 }}>📍</span>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: 11, color: '#166534', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Punto de retiro asignado</div>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#14532d', marginTop: 1 }}>{selectedNodo}</div>
+            <div style={{ fontSize: 11.5, color: '#15803d', marginTop: 2 }}>Retiro conjunto sin costo individual una vez cerrado el grupo.</div>
+          </div>
         </div>
 
         {/* Datos de transferencia / Alias */}
@@ -7545,7 +7646,12 @@ function App() {
   const [active, setActive] = useState(() => {
     let s = 'home';
     try {
-      s = localStorage.getItem('mobileScreen') || 'home';
+      const hash = (window.location.hash || '').replace(/^#\/?/, '').trim();
+      if (hash && (SCREEN_COMPONENTS[hash] || WEB_SCREEN_COMPONENTS[hash])) {
+        s = hash;
+      } else {
+        s = localStorage.getItem('mobileScreen') || 'home';
+      }
     } catch (e) {}
     // Precios/Comparador y Grupo en vivo (legacy) ocultos en app pública
     if (APP_MODE && s === 'comparador') {
@@ -7636,7 +7742,37 @@ function App() {
       });
       unsub = () => { try { data.subscription.unsubscribe(); } catch (e) {} };
     })();
-    return () => { alive = false; unsub(); };
+  }, []);
+
+  React.useEffect(() => {
+    const normalizeScreen = (s) => {
+      let target = s || 'home';
+      if (APP_MODE && target === 'comparador') target = 'home';
+      if (APP_MODE && target === 'grupo-participantes') target = 'mis-grupos';
+      if (target === 'historial' || target === 'pedidos') target = 'perfil';
+      if (!SCREEN_COMPONENTS[target] && !WEB_SCREEN_COMPONENTS[target]) target = 'home';
+      return target;
+    };
+
+    const handlePopState = (e) => {
+      let targetScreen = e.state && e.state.screen;
+      if (!targetScreen) {
+        targetScreen = (window.location.hash || '').replace(/^#\/?/, '').trim();
+      }
+      targetScreen = normalizeScreen(targetScreen);
+      setActive(targetScreen);
+      try { window.__hubadorActive = targetScreen; } catch (err) {}
+      try { localStorage.setItem('mobileScreen', targetScreen); } catch (err) {}
+    };
+
+    try {
+      if (!window.history.state || !window.history.state.screen) {
+        window.history.replaceState({ screen: active }, '', '#' + active);
+      }
+    } catch (e) {}
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
   const [progressTick, setProgressTick] = useState(0);
   const persistCart = (next) => {setCart(next);localStorage.setItem('conlatCart', JSON.stringify(next));};
@@ -7716,9 +7852,7 @@ function App() {
     setMpDemoOpen(false);
     setProfileGateOpen(false);
     setMisGruposTab('activos');
-    setActive('mis-grupos');
-    try { window.__hubadorActive = 'mis-grupos'; } catch (e) {}
-    try { localStorage.setItem('mobileScreen', 'mis-grupos'); } catch (e) {}
+    setScreen('mis-grupos', true);
     setToast(null);
     clearTimeout(showToast._t);
     showToast((opts && opts.toast) || '¡Pedido confirmado! Enviá tu comprobante por WhatsApp', 3200);
@@ -7735,22 +7869,23 @@ function App() {
       return;
     }
     const contact = resolveUserContact(user);
-    if (!contact.tel || !contact.direccion) {
+    if (!contact.tel || !contact.direccion || !contact.nodo) {
       setProfileGateOpen(true);
       return;
     }
     setMpDemoOpen(true);
   };
 
-  const saveContactAndContinuePay = async (tel, direccion) => {
+  const saveContactAndContinuePay = async (tel, direccion, nodo) => {
     const t = String(tel || '').trim();
     const d = String(direccion || '').trim();
-    if (!t || !d) {
-      showToast('Completá teléfono y dirección');
+    const n = String(nodo || formatNodoLabel(user && user.barrio)).trim();
+    if (!t || !d || !n) {
+      showToast('Completá teléfono, dirección y punto de retiro');
       return;
     }
-    saveHubadorProfileExtra({ tel: t, direccion: d });
-    const nextUser = Object.assign({}, user || {}, { tel: t, direccion: d });
+    saveHubadorProfileExtra({ tel: t, direccion: d, nodo: n });
+    const nextUser = Object.assign({}, user || {}, { tel: t, direccion: d, nodo: n });
     applyUser(nextUser);
     if (sb && nextUser.id) {
       try {
@@ -7767,15 +7902,24 @@ function App() {
     setMpDemoOpen(true);
   };
 
-  const setScreen = (id) => {
+  const setScreen = (id, replace = false) => {
     // En app pública no abrir Comparador/Precios ni Grupo en vivo legacy (solo ?dev / ?both)
     if (APP_MODE && id === 'comparador') id = 'home';
     if (APP_MODE && id === 'grupo-participantes') id = 'mis-grupos';
     // Historial / pedidos → Perfil (lista de estados embebida ahí)
     if (id === 'historial' || id === 'pedidos') id = 'perfil';
+    if (id === active) return;
     setActive(id);
     try { window.__hubadorActive = id; } catch (e) {}
-    localStorage.setItem('mobileScreen', id);
+    try { localStorage.setItem('mobileScreen', id); } catch (e) {}
+    try {
+      const hash = '#' + id;
+      if (replace) {
+        window.history.replaceState({ screen: id }, '', hash);
+      } else {
+        window.history.pushState({ screen: id }, '', hash);
+      }
+    } catch (e) {}
   };
 
   const ScreenComp = SCREEN_COMPONENTS[active] || MobileHome;
@@ -7807,6 +7951,8 @@ function App() {
         open={profileGateOpen}
         initialTel={gateContact.tel}
         initialDireccion={gateContact.direccion}
+        initialNodo={gateContact.nodo}
+        userBarrio={user?.barrio}
         onCancel={() => setProfileGateOpen(false)}
         onSave={saveContactAndContinuePay}
       />
