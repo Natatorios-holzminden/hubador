@@ -130,12 +130,24 @@
           <span>Línea de Tiempo e Historial de Sesiones</span>
         </div>
         <div class="timeline-actions">
-          <a href="Catalogo_Precios_16Sep2026.pdf" download="Catalogo_Precios_16Sep2026.pdf" class="btn btn-sm btn-primary" id="downloadFullCatalogPdfBtn" title="Descargar Catálogo Visual Completo en PDF con precios y fotos de evidencia a los costados">
-            <i class="fa-solid fa-book-open"></i> Catálogo con Fotos (PDF 16-Sep)
+          <a href="Catalogo_Precios_17Sep2026.pdf" download="Catalogo_Precios_17Sep2026.pdf" class="btn btn-sm btn-primary" id="downloadFullCatalog17PdfBtn" title="Descargar Catálogo Visual Completo en PDF con precios actualizados al 17/09/2026">
+            <i class="fa-solid fa-book-open"></i> Catálogo con Fotos (PDF 17-Sep)
+          </a>
+          <button class="btn btn-sm btn-success" id="downloadBackup17SepBtn" title="Descargar Backup Oficial del 17/09/2026 en JSON">
+            <i class="fa-solid fa-file-code"></i> Backup 17-Sep (JSON)
+          </button>
+          <a href="Catalogo_Precios_16Sep2026.pdf" download="Catalogo_Precios_16Sep2026.pdf" class="btn btn-sm btn-outline-primary" id="downloadFullCatalogPdfBtn" title="Descargar Catálogo Visual en PDF del 16/09/2026">
+            <i class="fa-solid fa-book"></i> Catálogo (PDF 16-Sep)
           </a>
           <button class="btn btn-sm btn-outline-success" id="downloadBackup16SepBtn" title="Descargar Backup Oficial del 16/09/2026 en JSON">
             <i class="fa-solid fa-file-code"></i> Backup 16-Sep (JSON)
           </button>
+          <button class="btn btn-sm btn-outline-info" id="openFluctuationsModalBtn" title="Ver cuadro comparativo de alternancia de precios 16-Sep vs 17-Sep">
+            <i class="fa-solid fa-arrow-trend-up"></i> Alternancia 16/9 vs 17/9
+          </button>
+          <a href="coto_top20_galeria.html" class="btn btn-sm btn-outline-danger" title="Ver galería de capturas del scraper oficial de Coto Digital">
+            <i class="fa-solid fa-camera"></i> Fotos Coto Scraper (Top 20)
+          </a>
           <button class="btn btn-sm btn-outline" id="exportDataBtn" title="Descargar datos de la sesión actual en formato CSV / Excel">
             <i class="fa-solid fa-file-csv"></i> Descargar CSV
           </button>
@@ -539,8 +551,11 @@
         <div style="margin-bottom:1.25rem; display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
           <input type="text" id="visualCatalogSearchInput" placeholder="🔍 Buscar producto en el catálogo visual..." 
                  style="flex:1; min-width:240px; padding:0.65rem 1.1rem; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(15,23,42,0.6); color:#fff; font-size:0.92rem; outline:none;">
-          <a href="Catalogo_Precios_16Sep2026.pdf" download="Catalogo_Precios_16Sep2026.pdf" class="btn btn-sm btn-primary" style="white-space:nowrap; padding:0.65rem 1.1rem;">
-            <i class="fa-solid fa-file-pdf"></i> Descargar Catálogo Completo (PDF 20MB)
+          <a href="Catalogo_Precios_17Sep2026.pdf" download="Catalogo_Precios_17Sep2026.pdf" class="btn btn-sm btn-primary" style="white-space:nowrap; padding:0.65rem 1.1rem;">
+            <i class="fa-solid fa-file-pdf"></i> Catálogo 17-Sep con Fotos (PDF)
+          </a>
+          <a href="Catalogo_Precios_16Sep2026.pdf" download="Catalogo_Precios_16Sep2026.pdf" class="btn btn-sm btn-outline-primary" style="white-space:nowrap; padding:0.65rem 1.1rem;">
+            <i class="fa-solid fa-book"></i> Catálogo 16-Sep (PDF)
           </a>
         </div>
 
@@ -604,6 +619,82 @@
       </div>
       <div class="modal-body" id="modalCotoPhotoBody" style="padding:12px;">
         <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Alternancia y Fluctuaciones Top 20 (16-Sep vs 17-Sep) -->
+  <div class="modal-overlay" id="fluctuationsModalOverlay">
+    <div class="modal-content glass-card" style="max-width:1100px; width:95%; max-height:90vh; overflow-y:auto; padding:1.5rem; background:#0f172a; border:1px solid rgba(255,255,255,0.15); border-radius:18px; color:#ffffff;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1rem;">
+        <div>
+          <h2 style="font-size:1.4rem; font-weight:800; color:#38bdf8; margin:0 0 4px 0; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-arrow-trend-up text-primary"></i> Alternancia de Precios: 16-Sep (Ayer) vs. 17-Sep (Hoy)
+          </h2>
+          <p style="margin:0; font-size:0.88rem; color:#94a3b8;">
+            Comportamiento comparativo de los 10 productos de verdulería y 10 de frutería relevados en vivo en Mercado Central y Coto Digital.
+          </p>
+        </div>
+        <button class="close-modal-btn" id="closeFluctuationsModalBtn" style="color:#9ca3af; font-size:1.8rem; background:none; border:none; cursor:pointer;">&times;</button>
+      </div>
+
+      <!-- Quick stats cards -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-bottom:1.2rem;">
+        <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:10px 14px;">
+          <div style="font-size:0.75rem; text-transform:uppercase; color:#6ee7b7; font-weight:700;">🥬 Verduras Central</div>
+          <div style="font-size:1.2rem; font-weight:800; color:#10b981;">Suba Promedio +5.5%</div>
+          <div style="font-size:0.78rem; color:#a7f3d0;">Impulsado por Cebolla (+28.8%) y Zapallo (+18.5%)</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:10px 14px;">
+          <div style="font-size:0.75rem; text-transform:uppercase; color:#fca5a5; font-weight:700;">🥬 Verduras Coto</div>
+          <div style="font-size:1.2rem; font-weight:800; color:#ef4444;">Baja Promedio -8.2%</div>
+          <div style="font-size:0.78rem; color:#fecaca;">Rebajas en Zapallo (-32%), Zapallito (-15%) y Acelga (-15%)</div>
+        </div>
+        <div style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); border-radius:10px; padding:10px 14px;">
+          <div style="font-size:0.75rem; text-transform:uppercase; color:#7dd3fc; font-weight:700;">🍎 Frutas Central</div>
+          <div style="font-size:1.2rem; font-weight:800; color:#38bdf8;">Baja Promedio -11.3%</div>
+          <div style="font-size:0.78rem; color:#bae6fd;">Caída en Frutilla (-55%), Pera (-25%) y Manzana (-19%)</div>
+        </div>
+        <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:10px 14px;">
+          <div style="font-size:0.75rem; text-transform:uppercase; color:#fde68a; font-weight:700;">🍎 Frutas Coto</div>
+          <div style="font-size:1.2rem; font-weight:800; color:#f59e0b;">Desplome Frutilla & Alza Mandarina</div>
+          <div style="font-size:0.78rem; color:#fef3c7;">Frutilla cayó -75% por oferta; Mandarina subió +30%</div>
+        </div>
+      </div>
+
+      <!-- Filter buttons -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem;">
+        <div style="display:flex; gap:6px;" id="flucFilterBtns">
+          <button class="pill active" data-fluc-filter="todos" style="padding:6px 14px; font-size:0.85rem; font-weight:700; border-radius:8px; cursor:pointer;">Todos (20)</button>
+          <button class="pill" data-fluc-filter="verduras" style="padding:6px 14px; font-size:0.85rem; font-weight:700; border-radius:8px; cursor:pointer;">🥬 Verduras (10)</button>
+          <button class="pill" data-fluc-filter="frutas" style="padding:6px 14px; font-size:0.85rem; font-weight:700; border-radius:8px; cursor:pointer;">🍎 Frutas (10)</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <a href="Catalogo_Precios_17Sep2026.pdf" download="Catalogo_Precios_17Sep2026.pdf" class="btn btn-sm btn-primary" style="font-size:0.82rem; padding:6px 12px;">
+            <i class="fa-solid fa-file-pdf"></i> Catálogo PDF 17-Sep
+          </a>
+          <a href="backup_precios_17sep.json" download="backup_precios_17sep.json" class="btn btn-sm btn-success" style="font-size:0.82rem; padding:6px 12px;">
+            <i class="fa-solid fa-file-code"></i> Backup JSON 17-Sep
+          </a>
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
+      <div style="overflow-x:auto; border-radius:10px; border:1px solid rgba(255,255,255,0.1);">
+        <table style="width:100%; border-collapse:collapse; font-size:0.88rem; text-align:left;">
+          <thead>
+            <tr style="background:rgba(30,41,59,0.9); color:#94a3b8; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid rgba(255,255,255,0.15);">
+              <th style="padding:10px 14px;">Producto</th>
+              <th style="padding:10px 12px;">Mercado Central (16/9 → Hoy)</th>
+              <th style="padding:10px 12px;">Coto Digital (16/9 → Hoy)</th>
+              <th style="padding:10px 12px;">Markup (16/9 → Hoy)</th>
+              <th style="padding:10px 14px;">Dinámica de Precios</th>
+            </tr>
+          </thead>
+          <tbody id="fluctuationsTableBody">
+            <!-- Dynamic rows rendered by app.js -->
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

@@ -464,11 +464,28 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    const downloadBackup17SepBtn = document.getElementById('downloadBackup17SepBtn');
+    if (downloadBackup17SepBtn) {
+      downloadBackup17SepBtn.addEventListener('click', () => {
+        exportSessionToJson('session-live', 'backup_precios_17sep.json');
+        showNotification("📥 Backup del 17/09/2026 descargado correctamente con precios en vivo");
+      });
+    }
+
     const downloadBackup16SepBtn = document.getElementById('downloadBackup16SepBtn');
     if (downloadBackup16SepBtn) {
       downloadBackup16SepBtn.addEventListener('click', () => {
         exportSessionToJson('session-16sep', 'backup_precios_16sep.json');
         showNotification("📥 Backup del 16/09/2026 descargado correctamente");
+      });
+    }
+
+    const openFluctuationsModalBtn = document.getElementById('openFluctuationsModalBtn');
+    if (openFluctuationsModalBtn) {
+      openFluctuationsModalBtn.addEventListener('click', () => {
+        if (typeof window.openFluctuationsModal === 'function') {
+          window.openFluctuationsModal();
+        }
       });
     }
 
@@ -2404,11 +2421,167 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize visual catalog tab
   initVisualCatalogTab();
+
+  // Initialize Top 20 fluctuations comparison modal
+  initFluctuationsModal();
 });
 
+  // --- TOP 20 FLUCTUATIONS & ALTERNATIONS MODAL (16-Sep vs 17-Sep) ---
+  const TOP20_DYNAMICS = {
+    'papa_spunta': { desc: 'Mercado Central subió levemente (+0.6%), Coto congeló precio (-0.2%). Brecha se mantiene en ~104%.' },
+    'tomate_redondo': { desc: 'Central aumentó +$117 (+8.3%). Coto mantuvo $3.299; la brecha se comprimió de 134% a 116%.' },
+    'cebolla_valenciani': { desc: 'Alza generalizada: Central saltó +28.8% (+$375) y Coto trasladó suba de +10% (+$300 a $3.299).' },
+    'zanahoria_chantenay': { desc: 'Central estable (+0.5%), Coto subió $100 (+5.3% a $1.999). Markup subió a 73%.' },
+    'zapallo_tetsukab.': { desc: '⚡ Alternancia inversa: Central subió +18.5%, pero Coto lanzó fuerte oferta (-32.2% / -$900 a $1.899). El markup cayó de 209% a 77%.' },
+    'zapallito_redondo': { desc: 'Baja en ambos canales: Central -2.8% y Coto aplicó descuento de 15% (-$450 a $2.549).' },
+    'acelga': { desc: '⚡ Central subió +8.5% (a $510), mientras Coto rebajó -$200 (-15.4% a $1.099). Markup bajó a 115%.' },
+    'lechuga_criolla': { desc: 'Central bajó levemente (-2.8% a $729), Coto congeló precio en $2.699. Markup en 270%.' },
+    'batata_arapey': { desc: 'Central subió +2.0%, Coto rebajó 15% (-$360 a $2.039). Markup bajó de 88% a 57%.' },
+    'pepino': { desc: 'Central sin cambios ($944), Coto aplicó oferta de 15% (-$375 a $2.124). Markup bajó a 125%.' },
+    'banana_cavendish': { desc: 'Central idéntico en $1.781; Coto bajó fuerte -21.8% (-$545 a $1.954). Markup cayó a sólo 9.7%.' },
+    'manzana_red_delicious': { desc: '⚡ Central bajó -19.4% (-$411), mientras Coto mantuvo precio ($2.899). Markup subió a 70%.' },
+    'naranja_salustiana': { desc: 'Sin cambios en ningún canal: Central $694 / Coto $899. Markup constante en 29.5%.' },
+    'mandarinamurcot': { desc: '⚡ Central congelado en $722, pero Coto aumentó +30% (+$300 a $1.299). Markup trepó a 80%.' },
+    'pera_packhams': { desc: '⚡ Central se desplomó -24.9% (-$443 a $1.333), pero Coto aumentó +10.9% (+$250 a $2.549). Markup se triplicó a 91%.' },
+    'limon_eureka': { desc: 'Baja en ambos canales: Central cayó -17.6% (a $571) y Coto rebajó -13.3% (a $1.299).' },
+    'frutilla': { desc: '⚡ Derrumbe de primavera: Mayor oferta desplomó Central (-55% a $5.770) y Coto remató a $3.199 (-75%).' },
+    'pomelo_starruby': { desc: 'Comportamiento idéntico y estable: Central $861 / Coto $999. Markup fijo en 16%.' },
+    'palta_hass': { desc: 'Central bajó levemente -2.1% (a $4.811), Coto sin cambios en $7.999. Markup en 66%.' },
+    'kiwi': { desc: 'Central subió +5.8% (+$300 a $5.475), Coto se mantuvo en $7.999. Markup bajó a 46%.' }
+  };
+
+  function initFluctuationsModal() {
+    const modal = document.getElementById('fluctuationsModalOverlay');
+    const closeBtn = document.getElementById('closeFluctuationsModalBtn');
+    const tableBody = document.getElementById('fluctuationsTableBody');
+    const filterBtns = document.querySelectorAll('#flucFilterBtns .pill');
+    if (!modal || !tableBody) return;
+
+    let currentFilter = 'todos';
+
+    function fmtNum(n) {
+      if (n === null || n === undefined) return '0';
+      return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function renderTable() {
+      const base16Map = {};
+      if (window.BASELINE_16SEP_DATA) {
+        window.BASELINE_16SEP_DATA.forEach(p => base16Map[p.id] = p);
+      }
+      const liveList = window.PRODUCTS_DATA || window.COMPARADOR_DATA || [];
+
+      const topIds = [
+        'papa_spunta', 'tomate_redondo', 'cebolla_valenciani', 'zanahoria_chantenay',
+        'zapallo_tetsukab.', 'zapallito_redondo', 'acelga', 'lechuga_criolla',
+        'batata_arapey', 'pepino',
+        'banana_cavendish', 'manzana_red_delicious', 'naranja_salustiana', 'mandarinamurcot',
+        'pera_packhams', 'limon_eureka', 'frutilla', 'pomelo_starruby',
+        'palta_hass', 'kiwi'
+      ];
+
+      const rows = topIds.map((id, index) => {
+        const liveP = liveList.find(p => p.id === id);
+        const baseP = base16Map[id];
+        if (!liveP) return null;
+
+        const isVerdura = index < 10;
+        const cat = isVerdura ? 'verduras' : 'frutas';
+        if (currentFilter !== 'todos' && currentFilter !== cat) return null;
+
+        const mcBase = baseP ? baseP.precioMercadoCentral : liveP.precioMercadoCentral;
+        const mcToday = liveP.precioMercadoCentral;
+        const deltaMC = mcToday - mcBase;
+        const pctMC = mcBase ? ((deltaMC / mcBase) * 100).toFixed(1) : '0.0';
+
+        const cotoBase = baseP ? baseP.precioCoto : liveP.precioCoto;
+        const cotoToday = liveP.precioCoto;
+        const deltaCoto = cotoToday - cotoBase;
+        const pctCoto = cotoBase ? ((deltaCoto / cotoBase) * 100).toFixed(1) : '0.0';
+
+        const mkBase = mcBase ? (((cotoBase - mcBase) / mcBase) * 100).toFixed(0) : '0';
+        const mkToday = mcToday ? (((cotoToday - mcToday) / mcToday) * 100).toFixed(0) : '0';
+
+        const mcBadge = deltaMC > 0 
+          ? `<span style="background:rgba(239,68,68,0.2); color:#fca5a5; padding:3px 7px; border-radius:6px; font-weight:700; font-size:0.8rem;">🔴 +$${deltaMC} (+${pctMC}%)</span>`
+          : (deltaMC < 0 
+              ? `<span style="background:rgba(16,185,129,0.2); color:#6ee7b7; padding:3px 7px; border-radius:6px; font-weight:700; font-size:0.8rem;">🟢 -$${Math.abs(deltaMC)} (${pctMC}%)</span>`
+              : `<span style="background:rgba(148,163,184,0.2); color:#cbd5e1; padding:3px 7px; border-radius:6px; font-size:0.8rem;">⚪ $0 (0.0%)</span>`);
+
+        const cotoBadge = deltaCoto > 0 
+          ? `<span style="background:rgba(239,68,68,0.2); color:#fca5a5; padding:3px 7px; border-radius:6px; font-weight:700; font-size:0.8rem;">🔴 +$${deltaCoto} (+${pctCoto}%)</span>`
+          : (deltaCoto < 0 
+              ? `<span style="background:rgba(16,185,129,0.2); color:#6ee7b7; padding:3px 7px; border-radius:6px; font-weight:700; font-size:0.8rem;">🟢 -$${Math.abs(deltaCoto)} (${pctCoto}%)</span>`
+              : `<span style="background:rgba(148,163,184,0.2); color:#cbd5e1; padding:3px 7px; border-radius:6px; font-size:0.8rem;">⚪ $0 (0.0%)</span>`);
+
+        const dyn = TOP20_DYNAMICS[id] ? TOP20_DYNAMICS[id].desc : 'Sin variación significativa.';
+        const rankLabel = isVerdura ? `🥬 #${index + 1}` : `🍎 #${index - 9}`;
+
+        return `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.06); background:${index % 2 === 0 ? 'rgba(15,23,42,0.5)' : 'rgba(30,41,59,0.3)'};">
+            <td style="padding:10px 14px;">
+              <div style="font-weight:800; color:#ffffff; display:flex; align-items:center; gap:6px;">
+                <span style="font-size:0.75rem; background:rgba(255,255,255,0.1); padding:2px 5px; border-radius:4px;">${rankLabel}</span>
+                ${liveP.nombre}
+              </div>
+            </td>
+            <td style="padding:10px 12px;">
+              <div style="font-weight:700; color:#10b981; font-size:0.95rem;">$${fmtNum(mcBase)} → $${fmtNum(mcToday)}</div>
+              <div style="margin-top:3px;">${mcBadge}</div>
+            </td>
+            <td style="padding:10px 12px;">
+              <div style="font-weight:700; color:#f87171; font-size:0.95rem;">$${fmtNum(cotoBase)} → $${fmtNum(cotoToday)}</div>
+              <div style="margin-top:3px;">${cotoBadge}</div>
+            </td>
+            <td style="padding:10px 12px;">
+              <div style="font-weight:800; color:#fbbf24;">+${mkBase}% → +${mkToday}%</div>
+              <div style="font-size:0.75rem; color:#94a3b8;">Ahorro: $${fmtNum(cotoToday - mcToday)}/Kg</div>
+            </td>
+            <td style="padding:10px 14px; font-size:0.82rem; color:#e2e8f0; line-height:1.35; max-width:320px;">
+              ${dyn}
+            </td>
+          </tr>
+        `;
+      }).filter(Boolean).join('');
+
+      tableBody.innerHTML = rows;
+    }
+
+    if (filterBtns && filterBtns.length > 0) {
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.getAttribute('data-fluc-filter');
+          renderTable();
+        });
+      });
+    }
+
+    window.openFluctuationsModal = function() {
+      renderTable();
+      modal.classList.add('active');
+    };
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+      });
+    }
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+  }
+
   window.exportSessionToJson = function(sessionId, filename) {
-    const sess = (typeof sessions !== 'undefined' && Array.isArray(sessions)) ? sessions.find(s => s.id === sessionId) : null;
-    const dataToExport = (sess && sess.products) ? sess.products : (window.BASELINE_16SEP_DATA || window.COMPARADOR_DATA || []);
+    let dataToExport = null;
+    if (sessionId === 'session-16sep') {
+      dataToExport = window.BASELINE_16SEP_DATA;
+    } else {
+      const sess = (typeof sessions !== 'undefined' && Array.isArray(sessions)) ? sessions.find(s => s.id === sessionId) : null;
+      dataToExport = (sess && sess.products) ? sess.products : (window.PRODUCTS_DATA || window.BASELINE_16SEP_DATA || window.COMPARADOR_DATA || []);
+    }
     const jsonStr = JSON.stringify(dataToExport, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

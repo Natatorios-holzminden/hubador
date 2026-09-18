@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Catálogo Oficial Auditado — Monitor de Sobreprecio 17/09/2026</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @page {
+      size: A4 portrait;
+      margin: 10mm 8mm 10mm 8mm;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #fff;
+      color: #1e293b;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .cover {
+      page-break-after: always;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 98vh;
+      text-align: center;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #eff6ff 100%);
+      border: 3px solid #10b981;
+      border-radius: 12px;
+      padding: 30px;
+    }
+
+    .cover h1 {
+      font-size: 34px;
+      color: #064e3b;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .cover h2 {
+      font-size: 20px;
+      color: #047857;
+      font-weight: 500;
+      margin-bottom: 25px;
+    }
+
+    .cover .date-box {
+      background: #10b981;
+      color: white;
+      padding: 12px 34px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .cover .stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .cover .stat-card {
+      background: white;
+      padding: 14px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+      min-width: 130px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .cover .stat-card .num {
+      font-size: 24px;
+      font-weight: 800;
+      color: #059669;
+    }
+
+    .cover .stat-card .label {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .section-header {
+      background: linear-gradient(90deg, #059669, #10b981);
+      color: white;
+      padding: 10px 16px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 14px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      page-break-before: always;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-header.fav-header {
+      background: linear-gradient(90deg, #b45309, #f59e0b);
+    }
+
+    .section-header span {
+      font-size: 12px;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    .page-summary {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-around;
+      font-size: 10.5px;
+    }
+
+    .page-summary .item {
+      text-align: center;
+    }
+
+    .page-summary .val {
+      font-weight: 800;
+      color: #0f172a;
+      font-size: 13px;
+    }
+
+    .page-summary .lbl {
+      color: #64748b;
+      font-size: 9.5px;
+      text-transform: uppercase;
+    }
+
+    .col-header {
+      display: flex;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px 6px 0 0;
+      font-weight: 700;
+      font-size: 9.5px;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .col-header > div {
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    .product-card {
+      display: flex;
+      border: 1px solid #e2e8f0;
+      border-top: none;
+      background: #fff;
+      page-break-inside: avoid;
+      min-height: 155px;
+    }
+
+    .product-card:nth-child(even) {
+      background: #fafafa;
+    }
+
+    .product-card.card-favorite {
+      border-left: 3px solid #f59e0b;
+    }
+
+    .mc-photo-col {
+      width: 270px;
+      min-width: 270px;
+      max-width: 270px;
+      background: #f0fdf4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border-right: 1.5px solid #cbd5e1;
+    }
+
+    .mc-photo-col img {
+      width: 100%;
+      height: auto;
+      max-height: 145px;
+      object-fit: contain;
+      border-radius: 6px;
+      display: block;
+    }
+
+    .product-info {
+      flex: 1;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .product-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .badge-rank {
+      background: #f59e0b;
+      color: #78350f;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .product-detail {
+      font-size: 10px;
+      color: #64748b;
+    }
+
+    .price-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .price-mc {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-weight: 800;
+      font-size: 12.5px;
+    }
+
+    .price-coto {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-weight: 800;
+      font-size: 12.5px;
+    }
+
+    .markup-badge {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-weight: 800;
+      font-size: 11.5px;
+    }
+
+    .delta-badge {
+      font-size: 9.5px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .delta-up { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .delta-down { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .delta-eq { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+    .savings-text {
+      font-size: 10.5px;
+      color: #059669;
+      font-weight: 700;
+    }
+
+    .coto-photo-col {
+      width: 270px;
+      min-width: 270px;
+      max-width: 270px;
+      background: #fef2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border-left: 1.5px solid #cbd5e1;
+    }
+
+    .coto-photo-col img {
+      width: 100%;
+      height: auto;
+      max-height: 145px;
+      object-fit: contain;
+      border-radius: 6px;
+      display: block;
+    }
+
+    .no-photo {
+      font-size: 9.5px;
+      color: #94a3b8;
+      text-align: center;
+      padding: 10px;
+      font-style: italic;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 9px;
+      color: #94a3b8;
+      padding: 12px 0;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cover page -->
+  <div class="cover">
+    <h1>🛒 Monitor de Sobreprecio</h1>
+    <h2>Mercado Central de Buenos Aires vs. Coto Digital</h2>
+    <div class="date-box">📅 Relevamiento Oficial Auditado — 17 de Septiembre de 2026</div>
+    <p style="color:#475569; font-size:13px; max-width:560px; margin-bottom:15px; line-height:1.5;">
+      Auditoría integral con relevamiento actualizado en vivo para los 20 productos clave de la canasta fruti-hortícola.
+      Incluye comparativa de fluctuaciones día a día y evidencia fotográfica oficial.
+    </p>
+    <div class="stats" id="coverStats"></div>
+  </div>
+
+  <!-- Main Catalog Content -->
+  <div id="catalog"></div>
+
+  <div class="footer">
+    Monitor de Sobreprecio — Mercado Central de BSAS vs. Coto Digital — Documento Oficial Auditado al 17/09/2026
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    const products = window.PRODUCTS_DATA || window.COMPARADOR_DATA || window.INITIAL_DATA || [];
+
+    function fmtNum(n) {
+      if (n === null || n === undefined) return '0';
+      return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    const TOP_VERDURAS_IDS = [
+      'papa_spunta', 'tomate_redondo', 'cebolla_valenciani', 'zanahoria_chantenay',
+      'zapallo_tetsukab.', 'zapallito_redondo', 'acelga', 'lechuga_criolla',
+      'batata_arapey', 'pepino'
+    ];
+
+    const TOP_FRUTAS_IDS = [
+      'banana_cavendish', 'manzana_red_delicious', 'naranja_salustiana', 'mandarinamurcot',
+      'pera_packhams', 'limon_eureka', 'frutilla', 'pomelo_starruby',
+      'palta_hass', 'kiwi'
+    ];
+
+    const topVerduras = TOP_VERDURAS_IDS.map((id, idx) => {
+      const p = products.find(x => x.id === id);
+      return p ? { ...p, favRank: idx + 1 } : null;
+    }).filter(Boolean);
+
+    const topFrutas = TOP_FRUTAS_IDS.map((id, idx) => {
+      const p = products.find(x => x.id === id);
+      return p ? { ...p, favRank: idx + 1 } : null;
+    }).filter(Boolean);
+
+    const verduras = products.filter(p => p.categoria === 'verduras')
+      .sort((a, b) => (b.markup || 0) - (a.markup || 0));
+    const frutas = products.filter(p => p.categoria === 'frutas')
+      .sort((a, b) => (b.markup || 0) - (a.markup || 0));
+
+    const avgMarkup = products.reduce((s, p) => s + (p.markup || 0), 0) / products.length;
+
+    document.getElementById('coverStats').innerHTML = `
+      <div class="stat-card">
+        <div class="num">${products.length}</div>
+        <div class="label">Total Productos</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">10 + 10</div>
+        <div class="label">Top Favoritos Auditados</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">${verduras.length}</div>
+        <div class="label">Verduras Relevadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">${frutas.length}</div>
+        <div class="label">Frutas Relevadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">+${avgMarkup.toFixed(0)}%</div>
+        <div class="label">Markup Promedio Global</div>
+      </div>
+    `;
+
+    function renderCard(p, isFav = false) {
+      const mcImg = p.fotoRecorteMc
+        ? `<img src="${p.fotoRecorteMc}" alt="MC ${p.nombre}">`
+        : '<div class="no-photo">Sin recorte MC</div>';
+
+      const cotoImg = p.fotoRecorte
+        ? `<img src="${p.fotoRecorte}" alt="Coto ${p.nombre}">`
+        : '<div class="no-photo">Sin recorte Coto</div>';
+
+      const mc = p.precioMercadoCentral || 0;
+      const coto = p.precioCoto || 0;
+      const markup = p.markup || 0;
+      const savings = p.savings || 0;
+      const unidad = p.unidad || 'Kg';
+
+      const favBadge = isFav && p.favRank
+        ? `<span class="badge-rank">⭐ #${p.favRank} Top Favorito</span>`
+        : '';
+
+      let deltaHtml = '';
+      if (p.historia16Sep) {
+        const dMC = p.historia16Sep.delta_mc;
+        const dCoto = p.historia16Sep.delta_coto;
+        const mcCls = dMC > 0 ? 'delta-up' : (dMC < 0 ? 'delta-down' : 'delta-eq');
+        const cotoCls = dCoto > 0 ? 'delta-up' : (dCoto < 0 ? 'delta-down' : 'delta-eq');
+        const mcSym = dMC > 0 ? '▲' : (dMC < 0 ? '▼' : '━');
+        const cotoSym = dCoto > 0 ? '▲' : (dCoto < 0 ? '▼' : '━');
+        deltaHtml = `
+          <div style="font-size:9.5px; margin-top:2px; display:flex; gap:6px;">
+            <span class="delta-badge ${mcCls}">MC vs 16/9: ${mcSym} ${p.historia16Sep.pct_mc}%</span>
+            <span class="delta-badge ${cotoCls}">Coto vs 16/9: ${cotoSym} ${p.historia16Sep.pct_coto}%</span>
+          </div>
+        `;
+      }
+
+      const cardClass = isFav ? 'product-card card-favorite' : 'product-card';
+
+      return `
+        <div class="${cardClass}">
+          <div class="mc-photo-col">${mcImg}</div>
+          <div class="product-info">
+            <div class="name-row">
+              <span class="product-name">${p.nombre}</span>
+              ${favBadge}
+            </div>
+            <div class="product-detail">
+              ${p.variedad ? 'Variedad: ' + p.variedad : ''}
+              ${p.origen ? ' | ' + p.origen : ''}
+            </div>
+            <div class="price-row">
+              <span class="price-mc">MC: $${fmtNum(mc)}/${unidad}</span>
+              <span class="price-coto">Coto: $${fmtNum(coto)}/${unidad}</span>
+              <span class="markup-badge">+${markup.toFixed(0)}%</span>
+            </div>
+            ${deltaHtml}
+            <div class="savings-text">Ahorro en Central: $${fmtNum(savings)} por ${unidad}</div>
+          </div>
+          <div class="coto-photo-col">${cotoImg}</div>
+        </div>
+      `;
+    }
+
+    function renderSection(title, subtitle, prods, isFav = false, headerClass = '') {
+      const avgMk = prods.reduce((s, p) => s + (p.markup || 0), 0) / (prods.length || 1);
+      const maxMk = Math.max(...prods.map(p => p.markup || 0));
+      const avgSav = prods.reduce((s, p) => s + (p.savings || 0), 0) / (prods.length || 1);
+
+      let html = `
+        <div class="section-header ${headerClass}">${title} <span>— ${subtitle}</span></div>
+        <div class="page-summary">
+          <div class="item"><div class="val">+${avgMk.toFixed(0)}%</div><div class="lbl">Markup Promedio</div></div>
+          <div class="item"><div class="val">+${maxMk.toFixed(0)}%</div><div class="lbl">Mayor Sobreprecio</div></div>
+          <div class="item"><div class="val">$${fmtNum(avgSav)}</div><div class="lbl">Ahorro Promedio/Kg</div></div>
+        </div>
+        <div class="col-header">
+          <div class="mc-photo-col">📸 Recorte Evidencia Mercado Central</div>
+          <div class="product-info">Información del Producto & Precios</div>
+          <div class="coto-photo-col">📸 Recorte Evidencia Coto Digital</div>
+        </div>
+      `;
+
+      for (const p of prods) {
+        html += renderCard(p, isFav);
+      }
+      return html;
+    }
+
+    const catalog = document.getElementById('catalog');
+    catalog.innerHTML =
+      renderSection('⭐ TOP 10 FAVORITOS: VERDURAS AUDITADAS (17-SEP)', 'Relevamiento en vivo y fluctuación vs ayer', topVerduras, true, 'fav-header') +
+      renderSection('⭐ TOP 10 FAVORITOS: FRUTAS AUDITADAS (17-SEP)', 'Relevamiento en vivo y fluctuación vs ayer', topFrutas, true, 'fav-header') +
+      renderSection('🥬 CATÁLOGO GENERAL: TODAS LAS VERDURAS', '107 variedades relevadas', verduras, false) +
+      renderSection('🍎 CATÁLOGO GENERAL: TODAS LAS FRUTAS', '41 variedades relevadas', frutas, false);
+  </script>
+</body>
+</html>
