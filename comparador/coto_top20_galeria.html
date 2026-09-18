@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📸 Evidencia Digital Coto — Top 20 Productos Auditados</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card-bg: #1e293b;
+      --border: rgba(255, 255, 255, 0.1);
+      --primary: #38bdf8;
+      --accent-coto: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 1.5rem; }
+    .header { max-width: 1300px; margin: 0 auto 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .title-box h1 { font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .title-box p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+    .nav-btns { display: flex; gap: 0.6rem; }
+    .btn { padding: 0.55rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; }
+    .btn-back { background: #1e293b; color: #fff; }
+    .btn-back:hover { background: #334155; }
+    .btn-pdf { background: #2563eb; color: #fff; border-color: #3b82f6; }
+    
+    .filters { max-width: 1300px; margin: 0 auto 1.5rem; display: flex; gap: 0.5rem; }
+    .filter-btn { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); padding: 0.5rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+    .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+
+    .grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.25rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s; }
+    .card:hover { transform: translateY(-3px); border-color: rgba(56, 189, 248, 0.4); }
+    .card-header { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+    .card-title { font-size: 1.1rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .rank-badge { font-size: 0.72rem; padding: 2px 7px; border-radius: 5px; font-weight: 800; text-transform: uppercase; }
+    .badge-verdura { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-fruta { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .card-price-row { display: flex; gap: 0.75rem; align-items: center; padding: 0.6rem 1.25rem; background: rgba(239, 68, 68, 0.1); border-bottom: 1px solid rgba(239, 68, 68, 0.2); }
+    .price-coto { font-size: 1.15rem; font-weight: 800; color: #f87171; }
+    .price-mc { font-size: 0.85rem; color: #6ee7b7; font-weight: 600; }
+    
+    .card-img-container { padding: 0.75rem; background: #0f172a; text-align: center; border-bottom: 1px solid var(--border); }
+    .card-img-container img { width: 100%; height: auto; max-height: 240px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; }
+    
+    .card-footer { padding: 0.75rem 1.25rem; margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+    .coto-link { color: #38bdf8; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .coto-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-box">
+      <h1><i class="fa-solid fa-camera text-danger"></i> Evidencia Directa de Coto Digital — Top 20</h1>
+      <p>Capturas directas de pantalla tomadas del sitio oficial de Coto Digital para los 10 productos de verdulería y 10 de frutería.</p>
+    </div>
+    <div class="nav-btns">
+      <a href="index.html" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Comparador</a>
+      <a href="Catalogo_Precios_17Sep2026.pdf" download="Catalogo_Precios_17Sep2026.pdf" class="btn btn-pdf"><i class="fa-solid fa-file-pdf"></i> Catálogo PDF 17-Sep</a>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterGallery('todos', this)">Todos (20)</button>
+    <button class="filter-btn" onclick="filterGallery('verduras', this)">🥬 Verduras (10)</button>
+    <button class="filter-btn" onclick="filterGallery('frutas', this)">🍎 Frutas (10)</button>
+  </div>
+
+  <div class="grid" id="galleryGrid"></div>
+
+  <script>
+    const ITEMS = [
+      // Verduras
+      { id:'papa_spunta', cat:'verduras', rank:1, name:'Papa Spunta / Negra', coto:'$2.294 / $2.299', mc:'$1.125', img:'evidencias/recorte_coto_papa.png', url:'https://www.coto.com.ar/productos/papa' },
+      { id:'tomate_redondo', cat:'verduras', rank:2, name:'Tomate Redondo', coto:'$3.299', mc:'$1.528', img:'evidencias/recorte_coto_tomate.png', url:'https://www.coto.com.ar/productos/tomate' },
+      { id:'cebolla_valenciani', cat:'verduras', rank:3, name:'Cebolla Valenciani', coto:'$3.299', mc:'$1.675', img:'evidencias/recorte_coto_cebolla.png', url:'https://www.coto.com.ar/productos/cebolla' },
+      { id:'zanahoria_chantenay', cat:'verduras', rank:4, name:'Zanahoria Selección', coto:'$1.999', mc:'$1.154', img:'evidencias/recorte_coto_zanahoria.png', url:'https://www.coto.com.ar/productos/zanahoria' },
+      { id:'zapallo_tetsukab.', cat:'verduras', rank:5, name:'Zapallo Cabutiá / Japonés', coto:'$1.899 (Oferta)', mc:'$1.074', img:'evidencias/recorte_coto_zapallo.png', url:'https://www.coto.com.ar/productos/zapallo' },
+      { id:'zapallito_redondo', cat:'verduras', rank:6, name:'Zapallito Redondo', coto:'$2.549 (15% Dto)', mc:'$907', img:'evidencias/recorte_coto_zapallito.png', url:'https://www.coto.com.ar/productos/zapallito' },
+      { id:'acelga', cat:'verduras', rank:7, name:'Acelga Selección', coto:'$1.099', mc:'$510', img:'evidencias/recorte_coto_acelga.png', url:'https://www.coto.com.ar/productos/acelga' },
+      { id:'lechuga_criolla', cat:'verduras', rank:8, name:'Lechuga Criolla', coto:'$2.699', mc:'$729', img:'evidencias/recorte_coto_lechuga.png', url:'https://www.coto.com.ar/productos/lechuga' },
+      { id:'batata_arapey', cat:'verduras', rank:9, name:'Batata Selección', coto:'$2.039 (15% Dto)', mc:'$1.302', img:'evidencias/recorte_coto_batata.png', url:'https://www.coto.com.ar/productos/batata' },
+      { id:'pepino', cat:'verduras', rank:10, name:'Pepino Selección', coto:'$2.124 (15% Dto)', mc:'$944', img:'evidencias/recorte_coto_pepino.png', url:'https://www.coto.com.ar/productos/pepino' },
+      // Frutas
+      { id:'banana_cavendish', cat:'frutas', rank:1, name:'Banana Cavendish', coto:'$1.954 (Oferta)', mc:'$1.781', img:'evidencias/recorte_coto_banana.png', url:'https://www.coto.com.ar/productos/banana' },
+      { id:'manzana_red_delicious', cat:'frutas', rank:2, name:'Manzana Red Delicious', coto:'$2.899', mc:'$1.708', img:'evidencias/recorte_coto_manzana.png', url:'https://www.coto.com.ar/productos/manzana' },
+      { id:'naranja_salustiana', cat:'frutas', rank:3, name:'Naranja Salustiana Jugo', coto:'$899', mc:'$694', img:'evidencias/recorte_coto_naranja.png', url:'https://www.coto.com.ar/productos/naranja' },
+      { id:'mandarinamurcot', cat:'frutas', rank:4, name:'Mandarina Murcot', coto:'$1.299', mc:'$722', img:'evidencias/recorte_coto_mandarina.png', url:'https://www.coto.com.ar/productos/mandarinamurcot' },
+      { id:'pera_packhams', cat:'frutas', rank:5, name:'Pera Packham\'s', coto:'$2.549 (10% Dto)', mc:'$1.333', img:'evidencias/recorte_coto_pera.png', url:'https://www.coto.com.ar/productos/pera' },
+      { id:'limon_eureka', cat:'frutas', rank:6, name:'Limón Eureka', coto:'$1.299', mc:'$571', img:'evidencias/recorte_coto_limon.png', url:'https://www.coto.com.ar/productos/limon' },
+      { id:'frutilla', cat:'frutas', rank:7, name:'Frutilla Selección', coto:'$3.199 (Oferta 250g)', mc:'$5.770', img:'evidencias/recorte_coto_frutilla.png', url:'https://www.coto.com.ar/productos/frutilla' },
+      { id:'pomelo_starruby', cat:'frutas', rank:8, name:'Pomelo Star Ruby', coto:'$999', mc:'$861', img:'evidencias/recorte_coto_pomelo.png', url:'https://www.coto.com.ar/productos/pomelo' },
+      { id:'palta_hass', cat:'frutas', rank:9, name:'Palta Hass', coto:'$7.999', mc:'$4.811', img:'evidencias/recorte_coto_palta.png', url:'https://www.coto.com.ar/productos/palta' },
+      { id:'kiwi', cat:'frutas', rank:10, name:'Kiwi Selección', coto:'$7.999', mc:'$5.475', img:'evidencias/recorte_coto_kiwi.png', url:'https://www.coto.com.ar/productos/kiwi' }
+    ];
+
+    function render(filter) {
+      const grid = document.getElementById('galleryGrid');
+      grid.innerHTML = ITEMS
+        .filter(item => filter === 'todos' || item.cat === filter)
+        .map(item => `
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">${item.name}</div>
+              <span class="rank-badge ${item.cat === 'verduras' ? 'badge-verdura' : 'badge-fruta'}">
+                ${item.cat === 'verduras' ? '🥬' : '🍎'} #${item.rank}
+              </span>
+            </div>
+            <div class="card-price-row">
+              <span class="price-coto"><i class="fa-solid fa-cart-shopping"></i> Coto: ${item.coto}</span>
+              <span class="price-mc">vs Central: ${item.mc}</span>
+            </div>
+            <div class="card-img-container" onclick="window.open('${item.img}', '_blank')">
+              <img src="${item.img}" alt="Evidencia ${item.name}" title="Click para ver en tamaño completo">
+            </div>
+            <div class="card-footer">
+              <span style="color:#64748b;">📸 Captura Scraper Oficial</span>
+              <a href="${item.url}" target="_blank" class="coto-link">Ver en Coto Digital <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            </div>
+          </div>
+        `).join('');
+    }
+
+    function filterGallery(filter, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render(filter);
+    }
+
+    render('todos');
+  </script>
+</body>
+</html>
