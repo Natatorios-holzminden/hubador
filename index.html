@@ -2212,13 +2212,28 @@ function rawItemToProductoRow(item) {
   };
 }
 
-/** Trae el catálogo real desde Supabase y pisa la copia local (localStorage + evento). */
+/** Trae el catálogo de Supabase.
+ *  - Si este navegador NUNCA guardó nada propio (no existe la key en localStorage):
+ *    es un visitante nuevo → Supabase manda 100%, así ve lo último que publicó Admin.
+ *  - Si este navegador YA tiene su propio catálogo (p. ej. Admin con ediciones sin publicar):
+ *    nunca lo pisa ni borra — solo agrega productos remotos que todavía no tenga,
+ *    para no repetir el incidente de perder ediciones no publicadas al recargar. */
 async function syncCatalogFromSupabase() {
   if (!sb) return;
   try {
     const { data, error } = await sb.from(PRODUCTOS_TABLE).select('*');
     if (error || !Array.isArray(data) || data.length === 0) return;
-    saveRawCatalogStore(data.map(productoRowToRaw));
+    const remoteList = data.map(productoRowToRaw);
+    let hasLocalCatalog = false;
+    try { hasLocalCatalog = !!localStorage.getItem('hubador_catalog_raw_v3'); } catch (e) {}
+    if (!hasLocalCatalog) {
+      saveRawCatalogStore(remoteList);
+      return;
+    }
+    const localList = getRawCatalogStore();
+    const localIds = new Set(localList.map((p) => p.id));
+    const remoteOnly = remoteList.filter((p) => !localIds.has(p.id));
+    if (remoteOnly.length > 0) saveRawCatalogStore([...localList, ...remoteOnly]);
   } catch (e) {
     console.warn('[HUBADOR] No se pudo sincronizar el catálogo remoto', e);
   }
