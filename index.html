@@ -1990,10 +1990,13 @@ function loadHubadorProgress() {
   try { localStorage.setItem(HUBADOR_PROGRESS_KEY, JSON.stringify(seed)); } catch (e) {}
   return seed;
 }
-/** Meta de kg de ESTE producto puntual (editable en Admin); si no tiene, cae al global GOAL_KG. */
+/** Meta de kg de ESTE producto puntual (editable en Admin); si no tiene, cae al global GOAL_KG.
+ *  OJO: usa getRawCatalogStore() (datos crudos), NUNCA getHubadorCatalogList() — esa función
+ *  llama a groupProgressView() por cada producto, que a su vez llama a esta función:
+ *  usar getHubadorCatalogList() acá crea una recursión infinita que cuelga el navegador. */
 function resolveGoalForProduct(name) {
   try {
-    const p = getHubadorCatalogList(true).find((x) => x.name === name);
+    const p = getRawCatalogStore().find((x) => x.name === name);
     const g = p && Number(p.goal);
     return (g && g > 0) ? g : GOAL_KG;
   } catch (e) { return GOAL_KG; }
