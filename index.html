@@ -1716,13 +1716,22 @@ function formatAuthErrorEs(error) {
 // ⏱ Cronómetro de urgencia — deadline persistente por producto (48–72h)
 function getDeadline(key, hours) {
   const storeKey = 'conlat_deadline_' + key;
-  let v = null;
-  try { v = localStorage.getItem(storeKey); } catch (e) {}
+  const hoursKey = storeKey + '_hrs';
+  let v = null, storedHours = null;
+  try {
+    v = localStorage.getItem(storeKey);
+    storedHours = localStorage.getItem(hoursKey);
+  } catch (e) {}
   let ts = v ? parseInt(v, 10) : NaN;
-  // Reiniciar si no existe, ya venció, o quedó por encima del máximo configurado (p. ej. caché vieja)
-  if (!ts || isNaN(ts) || ts < Date.now() || ts > Date.now() + hours * 3600 * 1000 + 1000) {
+  // Reiniciar si no existe, ya venció, o si Admin cambió las horas configuradas (para cualquier lado,
+  // no solo hacia abajo — antes un valor MÁS ALTO que el cacheado no disparaba el reinicio).
+  const hoursChanged = storedHours != null && Number(storedHours) !== Number(hours);
+  if (!ts || isNaN(ts) || ts < Date.now() || hoursChanged) {
     ts = Date.now() + hours * 3600 * 1000;
-    try { localStorage.setItem(storeKey, String(ts)); } catch (e) {}
+    try {
+      localStorage.setItem(storeKey, String(ts));
+      localStorage.setItem(hoursKey, String(hours));
+    } catch (e) {}
   }
   return ts;
 }
@@ -4724,6 +4733,9 @@ function MobileAdminProductos() {
                       placeholder="Ej: 40"
                       style={{ width: '100%', height: 38, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 8px', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box' }}
                     />
+                    <div style={{ fontSize: 10.5, color: '#94a3b8', marginTop: 3 }}>
+                      ≈ {(Number(form.deadlineHrs) / 24 || 0).toFixed(1)} día{Number(form.deadlineHrs) === 24 ? '' : 's'} (72 hs = 3 días)
+                    </div>
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: '#64748b', marginTop: -4, lineHeight: 1.35 }}>
