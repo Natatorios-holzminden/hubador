@@ -7529,39 +7529,26 @@ function WebGrupoDetalle() {
             <div className="web-muted">Compra en conjunto · 📍 {g.location || 'CABA'}</div>
             <h1>{g.product}</h1>
 
-            <div className="web-detail-prices">
-              <div className="web-price-block web-price-individual">
-                <span className="web-price-label">Individual</span>
-                <strong>{g.old}{g.unit}</strong>
-              </div>
-              <div className="web-price-block web-price-equipo">
-                <span className="web-price-label">En equipo</span>
-                <strong>{g.price}{g.unit}</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 0 4px' }}>
+              <span style={{ fontSize: 13, color: '#666' }}>Precio Coto</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <s style={{ fontSize: 15, fontWeight: 750, color: '#dc2626' }}>{g.old}{g.unit}</s>
+                <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase' }}>COTO</em>
               </div>
             </div>
-
-            <p className="web-detail-blurb">{detailBlurb}</p>
-
-            <div className="web-como">
-              <h3>Cómo funciona</h3>
-              <ol>
-                <li><b>Unite</b> con vecinos</li>
-                <li><b>Se completa</b> el mínimo</li>
-                <li><b>Retirá</b> en el hub</li>
-              </ol>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <span style={{ fontSize: 14, fontWeight: 700 }}>Precio en grupo</span>
+              <span style={{ fontSize: 24, fontWeight: 900, color: primary }}>{g.price}{g.unit}</span>
             </div>
 
             <div className="web-detail-cta">
               <div className="web-detail-status">
-                {g.deadlineHrs != null && typeof Countdown !== 'undefined' && (
-                  <div className="web-countdown-row">
-                    <div className="web-countdown-wrap"><Countdown deadline={getDeadline(g.product, g.deadlineHrs)} card /></div>
-                    <span className="web-close-date">Cierra sábado 12:00</span>
-                  </div>
-                )}
                 <div className="web-progress"><i style={{ width: pct + '%', background: primary }} /></div>
                 <div className="web-muted">Faltan {missingKg} kg · {filledKg}/{totalKg} kg</div>
-                <div className="web-vecinos-chip">
+                {g.deadlineHrs != null && typeof Countdown !== 'undefined' && (
+                  <div style={{ marginTop: 6 }}><Countdown deadline={getDeadline(g.product, g.deadlineHrs)} compact /></div>
+                )}
+                <div className="web-vecinos-chip" style={{ marginTop: 6 }}>
                   <span>📍 {g.location || 'Buenos Aires'}</span>
                   <span className="sep">·</span>
                   <span>👥 {membersCount} vecinos sumados</span>
