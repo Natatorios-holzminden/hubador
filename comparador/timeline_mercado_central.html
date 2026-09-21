@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏛️ Línea de Tiempo Mercado Central — Fotos Antes vs Hoy</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card-bg: #1e293b;
+      --border: rgba(255, 255, 255, 0.1);
+      --primary: #38bdf8;
+      --accent-mc: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 1.5rem; }
+    .header { max-width: 1400px; margin: 0 auto 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .title-box h1 { font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .title-box p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+    .nav-btns { display: flex; gap: 0.6rem; }
+    .btn { padding: 0.55rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; }
+    .btn-back { background: #1e293b; color: #fff; }
+    .btn-back:hover { background: #334155; }
+    .btn-coto { background: #e11d48; color: #fff; border-color: #f43f5e; font-weight:800; }
+    
+    .toolbar-section { max-width: 1400px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: space-between; background: #151f32; padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border); flex-wrap: wrap; gap: 1rem; }
+    .filter-btn { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); padding: 0.5rem 1.1rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+    .filter-btn.active { background: #10b981; color: #064e3b; border-color: #34d399; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+
+    .grid { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 1.25rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s; }
+    .card:hover { transform: translateY(-3px); border-color: rgba(16, 185, 129, 0.4); }
+    .card-header { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+    .card-title { font-size: 1.15rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .rank-badge { font-size: 0.72rem; padding: 2px 7px; border-radius: 5px; font-weight: 800; text-transform: uppercase; }
+    .badge-verdura { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-fruta { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .price-compare-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; align-items: center; padding: 0.75rem; background: rgba(16, 185, 129, 0.08); border-bottom: 1px solid rgba(16, 185, 129, 0.2); text-align: center; }
+    .price-box { padding: 6px 4px; border-radius: 6px; background: rgba(255,255,255,0.03); }
+    .price-lbl { font-size: 0.68rem; color: #94a3b8; font-weight: 700; }
+    .price-val { font-size: 1.05rem; font-weight: 800; color: #6ee7b7; }
+
+    /* Dual photos comparison layout */
+    .photos-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0.75rem; background: #0f172a; border-bottom: 1px solid var(--border); }
+    .photo-col { display: flex; flex-direction: column; align-items: center; background: #1e293b; padding: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); cursor: zoom-in; transition: border-color 0.2s; }
+    .photo-col:hover { border-color: #34d399; }
+    .photo-tag { font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; text-align: center; width: 100%; }
+    .tag-old { background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+    .tag-new { background: rgba(52, 211, 153, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .photo-col img { width: 100%; height: 180px; object-fit: contain; border-radius: 6px; background: #000; }
+
+    /* Lightbox */
+    #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.94); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 94vw; max-height: 84vh; border-radius: 10px; border: 2px solid rgba(16,185,129,.5); box-shadow: 0 0 50px rgba(0,0,0,.9); }
+    #lightbox .lb-title { color: #f8fafc; font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; text-align: center; }
+    #lightbox .lb-close { position: fixed; top: 18px; right: 22px; font-size: 2rem; color: #fff; cursor: pointer; background: rgba(255,255,255,.1); border: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background .2s; }
+    #lightbox .lb-close:hover { background: rgba(255,255,255,.25); }
+  </style>
+</head>
+<body>
+
+  <!-- Lightbox overlay -->
+  <div id="lightbox" onclick="closeLightbox(event)">
+    <button class="lb-close" onclick="closeLightbox()" title="Cerrar">✕</button>
+    <div class="lb-title" id="lbTitle"></div>
+    <img id="lbImg" src="" alt="">
+  </div>
+
+  <div class="header">
+    <div class="title-box">
+      <h1><i class="fa-solid fa-building-columns text-success"></i> Comparación Fotográfica Mercado Central (Antes vs Hoy)</h1>
+      <p>Evidencia fotográfica comparativa lado a lado: Tarjeta 16/17-Sep (Antes) vs Tarjeta en Vivo 21-Sep (Hoy).</p>
+    </div>
+    <div class="nav-btns">
+      <a href="index.html" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Comparador</a>
+      <a href="timeline_coto_3fechas.html" class="btn btn-coto"><i class="fa-solid fa-timeline"></i> Ver Línea de Tiempo Coto (3 Fechas)</a>
+    </div>
+  </div>
+
+  <div class="toolbar-section">
+    <div style="display:flex; align-items:center; gap:0.6rem;">
+      <span style="font-weight:700; color:var(--text-muted); font-size:0.9rem;"><i class="fa-solid fa-filter"></i> Categoría:</span>
+      <button class="filter-btn active" onclick="filterCat('todos', this)">Todos (27)</button>
+      <button class="filter-btn" onclick="filterCat('verduras', this)">🥬 Top 15 Verduras</button>
+      <button class="filter-btn" onclick="filterCat('frutas', this)">🍎 Top 12 Frutas</button>
+    </div>
+  </div>
+
+  <div class="grid" id="mcGrid"></div>
+
+  <script>
+    const DATASET = [{"id": "papa_spunta", "name": "Papa Spunta", "cat": "verduras", "rank": 1, "p_card16": 1118, "p_pdf17": 1125, "p_today": 1125, "diff": 7, "pct": 0.6, "img_old": "evidencias/recorte_mc_papa.png", "img_new": "evidencias/mc_21sep/mc_papa_spunta.png"}, {"id": "cebolla_valenciani", "name": "Cebolla Valenciani", "cat": "verduras", "rank": 2, "p_card16": 1300, "p_pdf17": 1675, "p_today": 1675, "diff": 375, "pct": 28.8, "img_old": "evidencias/recorte_mc_cebolla.png", "img_new": "evidencias/mc_21sep/mc_cebolla_valenciani.png"}, {"id": "tomate_redondo", "name": "Tomate Redondo", "cat": "verduras", "rank": 3, "p_card16": 1411, "p_pdf17": 1528, "p_today": 1528, "diff": 117, "pct": 8.3, "img_old": "evidencias/recorte_mc_tomate.png", "img_new": "evidencias/mc_21sep/mc_tomate_redondo.png"}, {"id": "zapallo_tetsukab.", "name": "Zapallo Tetsukabuto", "cat": "verduras", "rank": 4, "p_card16": 906, "p_pdf17": 1074, "p_today": 1074, "diff": 168, "pct": 18.5, "img_old": "evidencias/recorte_mc_zapallo.png", "img_new": "evidencias/mc_21sep/mc_zapallo_tetsukab..png"}, {"id": "zapallito_redondo", "name": "Zapallito Redondo", "cat": "verduras", "rank": 5, "p_card16": 933, "p_pdf17": 907, "p_today": 907, "diff": -26, "pct": -2.8, "img_old": "evidencias/recorte_mc_zapallito.png", "img_new": "evidencias/mc_21sep/mc_zapallito_redondo.png"}, {"id": "zanahoria_chantenay", "name": "Zanahoria Chantenay", "cat": "verduras", "rank": 6, "p_card16": 1148, "p_pdf17": 1154, "p_today": 1154, "diff": 6, "pct": 0.5, "img_old": "evidencias/recorte_mc_zanahoria.png", "img_new": "evidencias/mc_21sep/mc_zanahoria_chantenay.png"}, {"id": "pimiento_morron", "name": "Pimiento Morron", "cat": "verduras", "rank": 7, "p_card16": 4444, "p_pdf17": 4444, "p_today": 4444, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_pimiento.png", "img_new": "evidencias/mc_21sep/mc_pimiento_morron.png"}, {"id": "choclo_amarillo", "name": "Choclo Amarillo", "cat": "verduras", "rank": 8, "p_card16": 3333, "p_pdf17": 3333, "p_today": 3333, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_choclo.png", "img_new": "evidencias/mc_21sep/mc_choclo_amarillo.png"}, {"id": "berenjena_vta.med.la", "name": "Berenjena", "cat": "verduras", "rank": 9, "p_card16": 833, "p_pdf17": 833, "p_today": 833, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_berenjena.png", "img_new": "evidencias/mc_21sep/mc_berenjena_vta.med.la.png"}, {"id": "lechuga_criolla", "name": "Lechuga Criolla", "cat": "verduras", "rank": 10, "p_card16": 750, "p_pdf17": 729, "p_today": 729, "diff": -21, "pct": -2.8, "img_old": "evidencias/recorte_mc_lechuga.png", "img_new": "evidencias/mc_21sep/mc_lechuga_criolla.png"}, {"id": "mandioca", "name": "Mandioca", "cat": "verduras", "rank": 11, "p_card16": 700, "p_pdf17": 700, "p_today": 700, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_mandioca.png", "img_new": "evidencias/mc_21sep/mc_mandioca.png"}, {"id": "batata_arapey", "name": "Batata Arapey", "cat": "verduras", "rank": 12, "p_card16": 1277, "p_pdf17": 1302, "p_today": 1302, "diff": 25, "pct": 2.0, "img_old": "evidencias/recorte_mc_batata.png", "img_new": "evidencias/mc_21sep/mc_batata_arapey.png"}, {"id": "acelga", "name": "Acelga Selección", "cat": "verduras", "rank": 13, "p_card16": 470, "p_pdf17": 510, "p_today": 510, "diff": 40, "pct": 8.5, "img_old": "evidencias/recorte_mc_acelga.png", "img_new": "evidencias/mc_21sep/mc_acelga.png"}, {"id": "espinaca", "name": "Espinaca", "cat": "verduras", "rank": 14, "p_card16": 860, "p_pdf17": 860, "p_today": 860, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_espinaca.png", "img_new": "evidencias/mc_21sep/mc_espinaca.png"}, {"id": "repollo_blanco", "name": "Repollo Blanco", "cat": "verduras", "rank": 15, "p_card16": 633, "p_pdf17": 633, "p_today": 633, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_repollo.png", "img_new": "evidencias/mc_21sep/mc_repollo_blanco.png"}, {"id": "mandarinamurcot", "name": "Mandarina Murcot", "cat": "frutas", "rank": 1, "p_card16": 722, "p_pdf17": 722, "p_today": 722, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_naranja.png", "img_new": "evidencias/mc_21sep/mc_mandarinamurcot.png"}, {"id": "naranja_salustiana", "name": "Naranja Salustiana Jugo", "cat": "frutas", "rank": 2, "p_card16": 694, "p_pdf17": 694, "p_today": 694, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_naranja.png", "img_new": "evidencias/mc_21sep/mc_naranja_salustiana.png"}, {"id": "manzana_red_delicious", "name": "Manzana Red Delicious", "cat": "frutas", "rank": 3, "p_card16": 2119, "p_pdf17": 1708, "p_today": 1708, "diff": -411, "pct": -19.4, "img_old": "evidencias/recorte_mc_manzana.png", "img_new": "evidencias/mc_21sep/mc_manzana_red_delicious.png"}, {"id": "banana_cavendish", "name": "Banana Cavendish", "cat": "frutas", "rank": 4, "p_card16": 1781, "p_pdf17": 1781, "p_today": 1781, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_banana.png", "img_new": "evidencias/mc_21sep/mc_banana_cavendish.png"}, {"id": "pera_packhams", "name": "Pera Packham's", "cat": "frutas", "rank": 5, "p_card16": 1776, "p_pdf17": 1333, "p_today": 1333, "diff": -443, "pct": -24.9, "img_old": "evidencias/recorte_mc_pera.png", "img_new": "evidencias/mc_21sep/mc_pera_packhams.png"}, {"id": "limon_eureka", "name": "Limón Eureka", "cat": "frutas", "rank": 6, "p_card16": 693, "p_pdf17": 571, "p_today": 571, "diff": -122, "pct": -17.6, "img_old": "evidencias/recorte_mc_limon.png", "img_new": "evidencias/mc_21sep/mc_limon_eureka.png"}, {"id": "uvaredglobe", "name": "Uva Red Globe", "cat": "frutas", "rank": 7, "p_card16": 6875, "p_pdf17": 6875, "p_today": 6875, "diff": 0, "pct": 0.0, "img_old": "evidencias/mc_21sep/mc_uvaredglobe.png", "img_new": "evidencias/mc_21sep/mc_uvaredglobe.png"}, {"id": "ciruelafortune", "name": "Ciruela Fortune", "cat": "frutas", "rank": 8, "p_card16": 6000, "p_pdf17": 6000, "p_today": 6000, "diff": 0, "pct": 0.0, "img_old": "evidencias/mc_21sep/mc_ciruelafortune.png", "img_new": "evidencias/mc_21sep/mc_ciruelafortune.png"}, {"id": "pomelo_starruby", "name": "Pomelo Star Ruby", "cat": "frutas", "rank": 9, "p_card16": 861, "p_pdf17": 861, "p_today": 861, "diff": 0, "pct": 0.0, "img_old": "evidencias/recorte_mc_pomelo.png", "img_new": "evidencias/mc_21sep/mc_pomelo_starruby.png"}, {"id": "palta_hass", "name": "Palta Hass", "cat": "frutas", "rank": 10, "p_card16": 4913, "p_pdf17": 4811, "p_today": 4811, "diff": -102, "pct": -2.1, "img_old": "evidencias/recorte_mc_palta.png", "img_new": "evidencias/mc_21sep/mc_palta_hass.png"}, {"id": "kiwi", "name": "Kiwi Selección", "cat": "frutas", "rank": 11, "p_card16": 5175, "p_pdf17": 5475, "p_today": 5475, "diff": 300, "pct": 5.8, "img_old": "evidencias/recorte_mc_kiwi.png", "img_new": "evidencias/mc_21sep/mc_kiwi.png"}, {"id": "frutilla", "name": "Frutilla Selección", "cat": "frutas", "rank": 12, "p_card16": 12796, "p_pdf17": 5770, "p_today": 5770, "diff": -7026, "pct": -54.9, "img_old": "evidencias/recorte_mc_frutilla.png", "img_new": "evidencias/mc_21sep/mc_frutilla.png"}];
+    let currentCat = 'todos';
+
+    function openLB(title, img) {
+      document.getElementById('lbTitle').textContent = title;
+      document.getElementById('lbImg').src = img;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lb-close')) return;
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; } });
+
+    function render() {
+      const grid = document.getElementById('mcGrid');
+      const filtered = DATASET.filter(item => currentCat === 'todos' || item.cat === currentCat);
+      
+      grid.innerHTML = filtered.map(item => {
+        return `
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">${item.name}</div>
+              <span class="rank-badge ${item.cat === 'verduras' ? 'badge-verdura' : 'badge-fruta'}">
+                ${item.cat === 'verduras' ? '🥬' : '🍎'} #${item.rank}
+              </span>
+            </div>
+
+            <div class="price-compare-row">
+              <div class="price-box">
+                <div class="price-lbl">FOTO (16-SEP)</div>
+                <div class="price-val" style="color:#f87171;">$${item.p_card16.toLocaleString('es-AR')}</div>
+              </div>
+              <div class="price-box">
+                <div class="price-lbl">17-SEP (PDF)</div>
+                <div class="price-val" style="color:#cbd5e1;">$${item.p_pdf17.toLocaleString('es-AR')}</div>
+              </div>
+              <div class="price-box">
+                <div class="price-lbl">21-SEP (HOY)</div>
+                <div class="price-val" style="color:#34d399;">$${item.p_today.toLocaleString('es-AR')}</div>
+              </div>
+            </div>
+
+            <div class="photos-row">
+              <div class="photo-col" onclick="openLB('Foto Antes (16/17-Sep) — ${item.name}', '${item.img_old}')" title="Click para ver foto de antes completa">
+                <div class="photo-tag tag-old">📷 FOTO ANTES (16/17-SEP)</div>
+                <img src="${item.img_old}" alt="Foto Antes ${item.name}">
+              </div>
+              <div class="photo-col" onclick="openLB('Foto Ahora (21-Sep Hoy) — ${item.name}', '${item.img_new}')" title="Click para ver foto de hoy completa">
+                <div class="photo-tag tag-new">📸 FOTO AHORA (21-SEP HOY)</div>
+                <img src="${item.img_new}" alt="Foto Ahora ${item.name}">
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterCat(cat, btn) {
+      currentCat = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
