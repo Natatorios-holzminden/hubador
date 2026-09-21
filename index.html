@@ -1759,6 +1759,11 @@ function formatAuthErrorEs(error) {
 
 // ⏱ Cronómetro de urgencia — deadline persistente por producto (48–72h)
 function getDeadline(key, hours) {
+  // Cierre REAL (guardado en Supabase por Admin): igual para todos los visitantes.
+  try {
+    const p = getRawCatalogStore().find((x) => x.name === key);
+    if (p && p.deadlineAt && Number(p.deadlineAt) > 0) return Number(p.deadlineAt);
+  } catch (e) {}
   const storeKey = 'conlat_deadline_' + key;
   const hoursKey = storeKey + '_hrs';
   let v = null, storedHours = null;
@@ -1908,6 +1913,7 @@ const SCREENS = [
 // 🛠️ Admin
 { id: 'admin', label: 'Dashboard', group: 'admin' },
 { id: 'admin-grupos', label: 'Grupos', group: 'admin' },
+{ id: 'admin-pedidos', label: 'Pedidos', group: 'admin' },
 { id: 'admin-productos', label: 'Productos', group: 'admin' },
 { id: 'mapa', label: '🗺 Mapa', group: 'admin' }];
 
@@ -1962,6 +1968,12 @@ function sortActualizadoPrimero(arr, secondary) {
 function fmtPrecioAR(n) {
   return '$' + Number(n).toLocaleString('es-AR');
 }
+/** "5 vecinos" / "1 vecino" / "Sé el primero" (cuando todavía no hay nadie). */
+function vecinosLabel(n, sumados) {
+  const c = Number(n) || 0;
+  if (c <= 0) return sumados ? 'Sé el primero en sumarte' : 'Sé el primero';
+  return `${c} ${c === 1 ? 'vecino' : 'vecinos'}${sumados ? (c === 1 ? ' sumado' : ' sumados') : ''}`;
+}
 function parsePrecioAR(s) {
   return parseInt(String(s == null ? '0' : s).replace(/[^\d]/g, ''), 10) || 0;
 }
@@ -1992,14 +2004,20 @@ const HUBADOR_PROGRESS_KEY = 'hubadorProgress'; // fallback: solo si Supabase no
 /** Progreso REAL: kg confirmados por producto, sumados en Supabase (vista product_progress)
  *  a partir de la tabla orders — compartido para todos, no por navegador. */
 let HUBADOR_REAL_PROGRESS = {};
+let HUBADOR_REAL_MEMBERS = {};
 async function syncProductProgressFromSupabase() {
   if (!sb) return;
   try {
     const { data, error } = await sb.from('product_progress').select('*');
     if (error || !Array.isArray(data)) return;
     const map = {};
-    data.forEach((row) => { map[row.product_name] = Number(row.filled_kg) || 0; });
+    const membersMap = {};
+    data.forEach((row) => {
+      map[row.product_name] = Number(row.filled_kg) || 0;
+      membersMap[row.product_name] = Number(row.members) || 0;
+    });
     HUBADOR_REAL_PROGRESS = map;
+    HUBADOR_REAL_MEMBERS = membersMap;
     window.dispatchEvent(new CustomEvent('hubador_progress_updated'));
   } catch (e) {
     console.warn('[HUBADOR] No se pudo sincronizar el progreso real', e);
@@ -2087,7 +2105,9 @@ function groupProgressView(name) {
   const missing = Math.max(0, goal - filled);
   const pct = Math.min(100, Math.round(filled / goal * 100));
   const almost = missing > 0 && missing <= Math.max(1, Math.round(goal * 0.15));
-  return { filled, missing, pct, almost, goal };
+  // Vecinos reales (personas distintas con pedido). Sin Supabase (demo local) se estima por kg.
+  const members = sb ? (HUBADOR_REAL_MEMBERS[name] || 0) : Math.max(1, Math.round(filled / 10));
+  return { filled, missing, pct, almost, goal, members };
 }
 
 function demoHubProgressSeed(order) {
@@ -2302,6 +2322,7 @@ function productoRowToRaw(row) {
     members: row.members || undefined,
     time: row.time || undefined,
     deadlineHrs: row.deadline_hrs || undefined,
+    deadlineAt: row.deadline_at ? new Date(row.deadline_at).getTime() : undefined,
     img: row.img || 'img/papa.jpg',
     goal: row.goal || undefined,
     unit: row.unit || '/kg',
@@ -2323,6 +2344,7 @@ function rawItemToProductoRow(item) {
     members: item.members || null,
     time: item.time || null,
     deadline_hrs: item.deadlineHrs || null,
+    deadline_at: item.deadlineAt ? new Date(item.deadlineAt).toISOString() : null,
     img: item.img || null,
     goal: item.goal || null,
     unit: item.unit || '/kg',
@@ -2711,7 +2733,7 @@ function MobileHome() {
                     {p.old && (
                       <div className="web-price-coto" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05, marginLeft: 2 }}>
                         <s style={{ fontSize: 14, color: '#dc2626', fontWeight: 750, textDecoration: 'line-through', textDecorationColor: 'rgba(220,38,38,0.55)' }}>{p.old}</s>
-                        <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 1 }}>SOLO</em>
+                        <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 1 }}>INDIVIDUAL</em>
                       </div>
                     )}
                   </div>
@@ -3101,7 +3123,7 @@ function MobileProductos() {
                     {p.old && (
                       <div className="web-price-coto" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05, marginLeft: 2 }}>
                         <s style={{ fontSize: 14, color: '#dc2626', fontWeight: 750, textDecoration: 'line-through', textDecorationColor: 'rgba(220,38,38,0.55)' }}>{p.old}</s>
-                        <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 1 }}>SOLO</em>
+                        <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 1 }}>INDIVIDUAL</em>
                       </div>
                     )}
                   </div>
@@ -3140,12 +3162,7 @@ function MobileProducto() {
   const [qty, setQty] = React.useState(minQty);
   // Datos del producto seleccionado o fallback a Tomate
   const live = groupProgressView(prod.name);
-  const membersCount = (() => {
-    const raw = prod.members;
-    if (typeof raw === 'number' && raw > 0) return raw;
-    const n = parseInt(String(raw || '').split('/')[0], 10);
-    return Number.isFinite(n) && n > 0 ? n : 6;
-  })();
+  const membersCount = live.members;
   const barrio = user?.barrio || prod.location || 'Buenos Aires';
   const priceNum = prod.priceN != null ? prod.priceN : (parseInt((prod.price || '$0').replace(/[^\d]/g, ''), 10) || 0);
   const oldNum = prod.oldN != null ? prod.oldN : parsePrecioAR(prod.old);
@@ -3215,7 +3232,7 @@ function MobileProducto() {
           <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'rgba(255,255,255,0.72)', border: '1px solid oklch(0.88 0.06 165)', borderRadius: 8, padding: '5px 8px', fontSize: 11, fontWeight: 600, color: '#3d5248' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>📍 {barrio}</span>
             <span style={{ opacity: 0.35 }}>·</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>👥 {membersCount} vecinos</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>👥 {vecinosLabel(membersCount)}</span>
           </div>
         </div>
         <div style={{ marginBottom: 10, position: 'relative', zIndex: 9, pointerEvents: 'auto' }}>
@@ -3829,6 +3846,7 @@ function AdminShell({ active, children }) {
   const tabs = [
     { id: 'admin', label: 'Dashboard' },
     { id: 'admin-grupos', label: 'Grupos' },
+    { id: 'admin-pedidos', label: 'Pedidos' },
     { id: 'admin-productos', label: 'Productos' }
   ];
 
@@ -4181,14 +4199,23 @@ function MobileAdminProductos() {
     if (!form.name.trim()) return;
     const rawList = getRawCatalogStore();
     let updated = [];
+    // Ventana de tiempo REAL: se reinicia (cierre = ahora + horas) si es producto nuevo, si cambiaron
+    // las horas, o si Admin tildó "Reiniciar"; si no, se conserva el cierre que ya tenía.
+    const newHrs = Math.max(1, Number(form.deadlineHrs) || 40);
+    const prevDeadlineAt = editingItem && editingItem.deadlineAt ? Number(editingItem.deadlineAt) : null;
+    const hrsChanged = !editingItem || Number(editingItem.deadlineHrs) !== newHrs;
+    const restartWindow = !!form.resetWindow || hrsChanged || !prevDeadlineAt;
+    const deadlineAt = restartWindow ? Date.now() + newHrs * 3600 * 1000 : prevDeadlineAt;
+    const { resetWindow: _omitReset, ...formRest } = form;
     const itemData = {
-      ...form,
+      ...formRest,
       priceN: Number(form.priceN),
       oldN: Number(form.oldN),
       distribuidorN: Number(form.distribuidorN || 0),
       stock: Number(form.stock),
       goal: Math.max(1, Number(form.goal) || GOAL_KG),
-      deadlineHrs: Math.max(1, Number(form.deadlineHrs) || 40),
+      deadlineHrs: newHrs,
+      deadlineAt,
       desc: form.desc ? form.desc.trim() : '',
       precioActualizado: true
     };
@@ -4287,7 +4314,7 @@ function MobileAdminProductos() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>Control del Catálogo</div>
-              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Solo y visibilidad en tienda</div>
+              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Individual y visibilidad en tienda</div>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               {sb && (
@@ -4485,14 +4512,14 @@ function MobileAdminProductos() {
                     </span>
                     {(p.oldN > 0 || p.old) && (
                       <span style={{ fontSize: 12, color: '#ef4444', textDecoration: 'line-through', fontWeight: 700 }}>
-                        {p.old || fmtPrecioAR(p.oldN)} <small style={{ textDecoration: 'none', color: '#ef4444', fontSize: 10 }}>SOLO</small>
+                        {p.old || fmtPrecioAR(p.oldN)} <small style={{ textDecoration: 'none', color: '#ef4444', fontSize: 10 }}>INDIVIDUAL</small>
                       </span>
                     )}
                   </div>
 
                   {ahorro > 0 && (
                     <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', background: '#ecfdf5', padding: '3px 6px', borderRadius: 4, width: 'fit-content' }}>
-                      Ahorrás {fmtPrecioAR(ahorro)}{p.unit} vs Solo
+                      Ahorrás {fmtPrecioAR(ahorro)}{p.unit} vs Individual
                     </div>
                   )}
 
@@ -4643,7 +4670,7 @@ function MobileAdminProductos() {
                   <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>Comparativa de Precios ($ / {form.unit === '/u' ? 'unidad' : 'kilo'})</div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#ef4444', marginBottom: 3 }}>Precio Solo (Supermercado / Referencia)</label>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#ef4444', marginBottom: 3 }}>Precio Individual (el más caro, de referencia)</label>
                     <input
                       required
                       type="number"
@@ -4683,7 +4710,7 @@ function MobileAdminProductos() {
                             key={pct}
                             type="button"
                             onClick={() => applyDiscountPct(pct)}
-                            title={`Aplicar ${pct}% de descuento sobre Solo ($${form.oldN || 0})`}
+                            title={`Aplicar ${pct}% de descuento sobre Individual ($${form.oldN || 0})`}
                             style={{
                               border: isSelected ? '1.5px solid #047857' : '1px solid #a7f3d0',
                               background: isSelected ? '#047857' : '#ffffff',
@@ -4709,7 +4736,7 @@ function MobileAdminProductos() {
                   <div
                     onClick={() => {
                       const cur = (form.oldN > 0 && form.priceN) ? calcDisc(Number(form.priceN), Number(form.oldN)) : 35;
-                      const ans = window.prompt(`Ingresá el % de descuento para ${form.name || 'este producto'}\n(Calculado sobre Precio Solo: $${form.oldN || 0}):`, cur > 0 ? cur : '35');
+                      const ans = window.prompt(`Ingresá el % de descuento para ${form.name || 'este producto'}\n(Calculado sobre Precio Individual: $${form.oldN || 0}):`, cur > 0 ? cur : '35');
                       if (ans !== null && ans.trim() !== '') {
                         const val = parseFloat(ans.replace('%', '').trim());
                         if (!isNaN(val) && val > 0 && val < 100) {
@@ -4739,7 +4766,7 @@ function MobileAdminProductos() {
                       </b>
                       <span style={{ fontSize: 10.5, color: '#059669' }}>(tocá para editar)</span>
                     </span>
-                    <span>Diferencia vs Solo: <b style={{ color: '#047857' }}>-${Math.max(0, Number(form.oldN) - Number(form.priceN))}</b></span>
+                    <span>Diferencia vs Individual: <b style={{ color: '#047857' }}>-${Math.max(0, Number(form.oldN) - Number(form.priceN))}</b></span>
                   </div>
                 </div>
 
@@ -4783,7 +4810,16 @@ function MobileAdminProductos() {
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: '#64748b', marginTop: -4, lineHeight: 1.35 }}>
-                  "Meta del grupo" es el objetivo de kg para cerrar la compra grupal (la barra "Faltan X kg"). "Tiempo límite" es la cuenta regresiva que ven los compradores en la tarjeta.
+                  "Meta del grupo" es el objetivo de kg para cerrar la compra grupal (la barra "Faltan X kg"). "Tiempo límite" es la cuenta regresiva REAL que ven todos los compradores en la tarjeta: corre desde que guardás.
+                </div>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px', fontSize: 12, color: '#334155', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div>
+                    ⏱️ Cierra: <b>{editingItem && editingItem.deadlineAt ? new Date(Number(editingItem.deadlineAt)).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'al guardar (ahora + las horas de arriba)'}</b>
+                  </div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontWeight: 600 }}>
+                    <input type="checkbox" checked={!!form.resetWindow} onChange={(e) => setForm({ ...form, resetWindow: e.target.checked })} />
+                    Reiniciar la cuenta regresiva ahora (empieza de nuevo con las horas de arriba)
+                  </label>
                 </div>
 
                 {/* Foto / Imagen con Drag & Drop o Clic para abrir carpeta */}
@@ -4966,12 +5002,7 @@ function MobileGrupoDetalle() {
   const MIN_QTY = isUnit ? 1 : 3;
   const [qty, setQty] = React.useState(MIN_QTY);
   const live = groupProgressView(g.product);
-  const membersCount = (() => {
-    const raw = g.members;
-    if (typeof raw === 'number' && raw > 0) return raw;
-    const n = parseInt(String(raw || '').split('/')[0], 10);
-    return Number.isFinite(n) && n > 0 ? n : 6;
-  })();
+  const membersCount = live.members;
   const priceNum = parseInt((g.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const oldNum = parseInt((g.old || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const totalPrice = priceNum * qty;
@@ -5011,14 +5042,13 @@ function MobileGrupoDetalle() {
           <div style={{ fontSize: 11, color: '#888', marginBottom: 1 }}>Compra en conjunto · 📍 Buenos Aires</div>
           <h1 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{g.product}</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-            <span style={{ fontSize: 12.5, color: '#666' }}>Precio Solo</span>
+            <span style={{ fontSize: 12.5, color: '#666' }}>Individual</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <s style={{ fontSize: 14, fontWeight: 750, color: '#dc2626', textDecoration: 'line-through' }}>{g.old}{g.unit}</s>
-              <em style={{ fontStyle: 'normal', fontSize: 10, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase' }}>COTO</em>
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ fontSize: 13, fontWeight: 700 }}>Precio en grupo</span>
+            <span style={{ fontSize: 13, fontWeight: 700 }}>Equipo</span>
             <span style={{ fontSize: 20, fontWeight: 900, color: primary }}>{g.price}{g.unit}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '8px 12px', marginBottom: 6 }}>
@@ -5054,7 +5084,7 @@ function MobileGrupoDetalle() {
                 <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'rgba(255,255,255,0.72)', border: `1px solid ${border}`, borderRadius: 8, padding: '5px 8px', fontSize: 11, fontWeight: 600, color: '#3d5248' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>📍 Buenos Aires</span>
                   <span style={{ opacity: 0.35 }}>·</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>👥 {membersCount} vecinos</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>👥 {vecinosLabel(membersCount)}</span>
                 </div>
               </div>);
 
@@ -6441,7 +6471,7 @@ function MobileMisGrupos() {
                           </div>
                           <div style={{ fontSize: 11.5, color: '#888', margin: '3px 0' }}>
                             {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
-                            {t.oldN > 0 && <> · <s>{fmtPrecioAR(t.oldN)}</s> Solo</>}
+                            {t.oldN > 0 && <> · <s>{fmtPrecioAR(t.oldN)}</s> Individual</>}
                             {' '}· 📍 Buenos Aires
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 8 }}>
@@ -6463,11 +6493,11 @@ function MobileMisGrupos() {
 
                 <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 14, marginTop: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: '#ecfdf5', borderRadius: 12, padding: '12px 14px', marginBottom: 10 }}>
-                    <span style={{ fontWeight: 700, fontSize: 14, color: '#0f766e' }}>Total en grupo</span>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: '#0f766e' }}>Total en equipo</span>
                     <strong style={{ color: '#0f766e', fontSize: 22 }}>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, marginBottom: 12, color: '#888' }}>
-                    <span>Si compraras en Solo</span>
+                    <span>Comprando individual</span>
                     <s style={{ color: '#e0524a', fontWeight: 700, fontSize: 16 }}>{fmtPrecioAR(totals.coto)}</s>
                   </div>
                   {!user ? (
@@ -6647,7 +6677,7 @@ function MobilePerfil() {
                   <span style={{ fontSize: 18 }}>🛠️</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 700, color: '#166534' }}>Panel de Administración</div>
-                    <div style={{ fontSize: 11, color: '#15803d' }}>Gestionar catálogo, precios Solo y productos</div>
+                    <div style={{ fontSize: 11, color: '#15803d' }}>Gestionar catálogo, precios Individual y productos</div>
                   </div>
                   <span style={{ color: '#166534', fontSize: 18, fontWeight: 800 }}>›</span>
                 </div>
@@ -6686,7 +6716,7 @@ function MobileComparador() {
           </button>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 800, fontSize: 15, lineHeight: 1.1 }}>Comparador de precios</div>
-            <div style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Solo · Mayoristas · HUBADOR</div>
+            <div style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Individual · Mayoristas · HUBADOR</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -6701,7 +6731,7 @@ function MobileComparador() {
         <div style={{ flexShrink: 0, padding: '10px 14px', background: '#fff', borderBottom: '1px solid #e8eaec' }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {[
-              { c: '#ea580c', t: 'Solo' },
+              { c: '#ea580c', t: 'Individual' },
               { c: '#4f46e5', t: 'Quilmes' },
               { c: '#7c3aed', t: 'Nueva Luna' },
               { c: '#2563eb', t: 'MC' },
@@ -6714,7 +6744,7 @@ function MobileComparador() {
             ))}
           </div>
           <p style={{ margin: '8px 0 0', fontSize: 11.5, color: '#888', lineHeight: 1.35 }}>
-            Compará precio mayorista vs góndola y el precio HUBADOR (−30% vs Solo).
+            Compará precio mayorista vs góndola y el precio HUBADOR (−30% vs Individual).
           </p>
         </div>
 
@@ -7072,7 +7102,7 @@ function WebHome() {
                   </div>
                 </div>
                 <div className="web-stats">
-                  <div className="web-stat"><strong>50%</strong><span>vs Solo</span></div>
+                  <div className="web-stat"><strong>50%</strong><span>vs Individual</span></div>
                   <div className="web-stat"><strong>500+</strong><span>Vecinos</span></div>
                   <div className="web-stat"><strong>Hub</strong><span>Retiro</span></div>
                 </div>
@@ -7145,7 +7175,7 @@ function WebHome() {
                       {p.old && (
                         <div className="web-price-coto">
                           <s>{p.old}</s>
-                          <em>Solo</em>
+                          <em>Individual</em>
                         </div>
                       )}
                     </div>
@@ -7296,7 +7326,7 @@ function WebProductos() {
                       {p.old && (
                         <div className="web-price-coto">
                           <s>{p.old}</s>
-                          <em>Solo</em>
+                          <em>Individual</em>
                         </div>
                       )}
                     </div>
@@ -7646,12 +7676,7 @@ function WebGrupoDetalle() {
   const totalPrice = priceNum * qty;
   const unitLabel = g.unit === '/u' ? 'u' : 'kg';
   const live = groupProgressView(g.product);
-  const membersCount = (() => {
-    const raw = g.members;
-    if (typeof raw === 'number' && raw > 0) return raw;
-    const n = parseInt(String(raw || '').split('/')[0], 10);
-    return Number.isFinite(n) && n > 0 ? n : 6;
-  })();
+  const membersCount = live.members;
   const join = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
@@ -7699,12 +7724,11 @@ function WebGrupoDetalle() {
             <h1>{g.product}</h1>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 4px' }}>
-              <span style={{ fontSize: 13, color: '#666' }}>Precio Solo</span>
+              <span style={{ fontSize: 13, color: '#666' }}>Individual</span>
               <s style={{ fontSize: 15, fontWeight: 750, color: '#dc2626' }}>{g.old}{g.unit}</s>
-              <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase' }}>COTO</em>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <span style={{ fontSize: 14, fontWeight: 700 }}>Precio en grupo</span>
+              <span style={{ fontSize: 14, fontWeight: 700 }}>Equipo</span>
               <span style={{ fontSize: 24, fontWeight: 900, color: primary }}>{g.price}{g.unit}</span>
             </div>
 
@@ -7718,7 +7742,7 @@ function WebGrupoDetalle() {
                 <div className="web-vecinos-chip" style={{ marginTop: 6 }}>
                   <span>📍 Buenos Aires</span>
                   <span className="sep">·</span>
-                  <span>👥 {membersCount} vecinos sumados</span>
+                  <span>👥 {vecinosLabel(membersCount, true)}</span>
                 </div>
               </div>
 
@@ -7767,7 +7791,7 @@ function WebGrupoDetalle() {
                       {p.old && (
                         <div className="web-price-coto">
                           <s>{p.old}</s>
-                          <em>Solo</em>
+                          <em>Individual</em>
                         </div>
                       )}
                     </div>
@@ -7868,7 +7892,7 @@ function WebMisGrupos() {
                           <h3>{g.name}</h3>
                           <p className="web-cart-item-meta">
                             {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
-                            {t.oldN > 0 && <> · <s className="web-cart-coto">{fmtPrecioAR(t.oldN)}</s> Solo</>}
+                            {t.oldN > 0 && <> · <s className="web-cart-coto">{fmtPrecioAR(t.oldN)}</s> Individual</>}
                             {' '}· 📍 Buenos Aires
                           </p>
                           <div className="web-cart-qty">
@@ -7889,10 +7913,10 @@ function WebMisGrupos() {
 
                 <aside className="web-cart-summary">
                   <div className="web-cart-row web-cart-total">
-                    <span>Total en grupo</span>
+                    <span>Total en equipo</span>
                     <strong>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
-                  <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 4 }}><span>Si compraras en Solo</span><s>{fmtPrecioAR(totals.coto)}</s></div>
+                  <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 4 }}><span>Comprando individual</span><s>{fmtPrecioAR(totals.coto)}</s></div>
                   {!user ? (
                     <>
                       <input
@@ -8006,7 +8030,7 @@ function WebPerfil() {
               <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: '16px', margin: '16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 15, color: '#166534' }}>🛠️ Panel de Administración</div>
-                  <div style={{ fontSize: 12, color: '#15803d', marginTop: 2 }}>Agregar, ocultar/mostrar productos, modificar precios Solo y distribuidor</div>
+                  <div style={{ fontSize: 12, color: '#15803d', marginTop: 2 }}>Agregar, ocultar/mostrar productos, modificar precios Individual y distribuidor</div>
                 </div>
                 <button
                   type="button"
@@ -8143,6 +8167,108 @@ function WebAdminGrupos() {
   );
 }
 
+/** Admin → Pedidos: quién pidió qué (con su WhatsApp), desde las tablas orders + profiles de Supabase. */
+function MobileAdminPedidos() {
+  const primary = 'oklch(0.55 0.15 165)';
+  const [rows, setRows] = React.useState(null);
+  const [err, setErr] = React.useState('');
+  const load = async () => {
+    if (!sb) { setErr('Supabase no está conectado en este sitio.'); setRows([]); return; }
+    setErr('');
+    setRows(null);
+    try {
+      const { data: orders, error } = await sb.from('orders').select('*').order('created_at', { ascending: false }).limit(300);
+      if (error) throw error;
+      const ids = Array.from(new Set((orders || []).map((o) => o.user_id)));
+      const profMap = {};
+      if (ids.length) {
+        const { data: profs } = await sb.from('profiles').select('id,tel,nombre,email').in('id', ids);
+        (profs || []).forEach((p) => { profMap[p.id] = p; });
+      }
+      setRows((orders || []).map((o) => ({ ...o, prof: profMap[o.user_id] || {} })));
+    } catch (e) {
+      setErr((e && e.message) || 'No se pudieron cargar los pedidos.');
+      setRows([]);
+    }
+  };
+  React.useEffect(() => { load(); }, []);
+
+  const waLink = (tel) => {
+    const d = String(tel || '').replace(/\D/g, '');
+    if (!d) return null;
+    return 'https://wa.me/' + (d.startsWith('54') ? d : d.length === 10 ? '549' + d : d);
+  };
+  const list = rows || [];
+  const byProduct = {};
+  list.forEach((o) => {
+    const k = o.product_name;
+    if (!byProduct[k]) byProduct[k] = { kg: 0, users: new Set() };
+    byProduct[k].kg += Number(o.qty) || 0;
+    byProduct[k].users.add(o.user_id);
+  });
+  const summary = Object.entries(byProduct).sort((a, b) => b[1].kg - a[1].kg);
+
+  return (
+    <AdminShell active="admin-pedidos">
+      <div style={{ padding: 14, fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>Pedidos</div>
+            <div style={{ fontSize: 11.5, color: '#64748b' }}>{rows === null ? 'Cargando…' : `${list.length} pedido${list.length === 1 ? '' : 's'} · toca el WhatsApp para escribirles`}</div>
+          </div>
+          <button type="button" onClick={load} style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>↻ Actualizar</button>
+        </div>
+
+        {err && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', borderRadius: 10, padding: '10px 12px', fontSize: 12.5, marginBottom: 12 }}>⚠️ {err} (¿corriste el SQL de pedidos y estás con tu cuenta admin?)</div>}
+
+        {summary.length > 0 && (
+          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '10px 12px', marginBottom: 12 }}>
+            <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 6 }}>Total por producto</div>
+            {summary.map(([name, s]) => (
+              <div key={name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0', borderTop: '1px solid #f1f5f9' }}>
+                <span style={{ fontWeight: 600 }}>{name}</span>
+                <span style={{ color: primary, fontWeight: 800 }}>{s.kg} kg · {s.users.size} {s.users.size === 1 ? 'vecino' : 'vecinos'}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {rows !== null && list.length === 0 && !err && (
+          <div style={{ background: '#fff', border: '1px dashed #cbd5e1', borderRadius: 12, padding: '28px 16px', textAlign: 'center', color: '#64748b', fontSize: 13 }}>Todavía no hay pedidos.</div>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {list.map((o) => {
+            const tel = o.prof && o.prof.tel;
+            const link = waLink(tel);
+            return (
+              <div key={o.id} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '10px 12px', display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14 }}>{o.product_name} · {o.qty} kg</div>
+                  <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
+                    {new Date(o.created_at).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} · {o.total != null ? fmtPrecioAR(o.total) : ''} · {o.status}
+                  </div>
+                </div>
+                {link
+                  ? <a href={link} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#fff', textDecoration: 'none', borderRadius: 8, padding: '8px 10px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>💬 {tel}</a>
+                  : <span style={{ fontSize: 11.5, color: '#94a3b8' }}>sin teléfono</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </AdminShell>
+  );
+}
+
+function WebAdminPedidos() {
+  return (
+    <WebShell title="Admin pedidos" wide>
+      <div className="web-panel"><h1>Pedidos</h1><div className="web-port web-port-tall"><MobileAdminPedidos /></div></div>
+    </WebShell>
+  );
+}
+
 function WebAdminProductos() {
   return (
     <WebShell title="Admin productos" wide>
@@ -8164,6 +8290,7 @@ const WEB_SCREEN_COMPONENTS = {
   signup: WebSignup,
   admin: WebAdmin,
   'admin-grupos': WebAdminGrupos,
+  'admin-pedidos': WebAdminPedidos,
   'admin-productos': WebAdminProductos,
   'grupo-detalle': WebGrupoDetalle,
   'grupo-participantes': WebGrupoParticipantes,
@@ -8184,6 +8311,7 @@ const SCREEN_COMPONENTS = {
   signup: MobileSignup,
   admin: MobileAdmin,
   'admin-grupos': MobileAdminGrupos,
+  'admin-pedidos': MobileAdminPedidos,
   'admin-productos': MobileAdminProductos,
   'grupo-detalle': MobileGrupoDetalle,
   'grupo-participantes': MobileGrupoParticipantes,
@@ -8486,7 +8614,7 @@ function App() {
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <ScreenComp />
         </div>
-        {!['login', 'signup', 'admin', 'admin-grupos', 'admin-productos'].includes(active) &&
+        {!['login', 'signup', 'admin', 'admin-grupos', 'admin-pedidos', 'admin-productos'].includes(active) &&
         <BottomNav active={active} />
         }
       </SelectionContext.Provider>
