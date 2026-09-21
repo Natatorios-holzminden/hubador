@@ -1936,10 +1936,10 @@ const DEFAULT_CITY = 'Buenos Aires';
 // Zonas de la prueba. Cada una corre su propia orden (barra de kg independiente).
 // TODO: reemplazar "A confirmar" por la dirección/punto de entrega real de cada zona.
 const NODOS_HUBADOR = [
-  { id: 'garin', nombre: 'HUB Garín', address: 'A confirmar', barrio: 'Garín', lat: -34.4239, lng: -58.7554 },
-  { id: 'belgrano', nombre: 'HUB Belgrano', address: 'A confirmar', barrio: 'Belgrano', lat: -34.5620, lng: -58.4568 },
+  { id: 'garin', nombre: 'HUB Garín', address: 'Plaza de Garín', barrio: 'Garín', lat: -34.4239, lng: -58.7554 },
+  { id: 'belgrano', nombre: 'HUB Belgrano', address: 'Plaza Belgrano', barrio: 'Belgrano', lat: -34.5620, lng: -58.4568 },
 ];
-const DEFAULT_HUB = { name: 'HUB Garín', address: 'A confirmar', barrio: 'Garín', lat: -34.4239, lng: -58.7554 };
+const DEFAULT_HUB = { name: 'HUB Garín', address: 'Plaza de Garín', barrio: 'Garín', lat: -34.4239, lng: -58.7554 };
 /** Zona de entrega elegida: se recuerda en el navegador y se puede fijar con un link de publicidad,
  *  ej. hubador.com/?nodo=palermo  → ya queda preseleccionada para quien entra desde el aviso. */
 const HUBADOR_NODO_KEY = 'hubador_nodo_id';
@@ -1981,30 +1981,14 @@ function nodoIdFromLabel(label) {
   return n ? n.id : '';
 }
 function NodoSelect({ value, onChange, style }) {
-  const qs = new URLSearchParams(location.search);
-  const fixedFromUrl = (qs.get('hub') || qs.get('nodo') || '').toLowerCase();
   const currentVal = value || getSavedNodoId();
   const activeNodo = NODOS_HUBADOR.find((n) => n.id === currentVal) || NODOS_HUBADOR[0];
 
-  if (fixedFromUrl && NODOS_HUBADOR.some((x) => x.id === fixedFromUrl)) {
-    return (
-      <div style={Object.assign({ width: '100%', minHeight: 44, border: '1.5px solid #0d9488', borderRadius: 10, padding: '10px 14px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', background: '#f0fdf4', marginBottom: 8, color: '#166534', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }, style || {})}>
-        <span>📍</span>
-        <span>{activeNodo.nombre} — {activeNodo.address}</span>
-      </div>
-    );
-  }
-
   return (
-    <select
-      value={currentVal}
-      onChange={(e) => { onChange(e.target.value); setSavedNodoId(e.target.value); }}
-      style={Object.assign({ width: '100%', height: 44, border: '1.5px solid #cbd5e1', borderRadius: 10, padding: '0 10px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', background: '#fff', marginBottom: 8, color: '#0f172a', fontWeight: 600 }, style || {})}
-    >
-      {NODOS_HUBADOR.map((n) => (
-        <option key={n.id} value={n.id}>{n.nombre} — {n.address}</option>
-      ))}
-    </select>
+    <div style={Object.assign({ width: '100%', minHeight: 44, border: '1.5px solid #0d9488', borderRadius: 10, padding: '10px 14px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', background: '#f0fdf4', marginBottom: 8, color: '#166534', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }, style || {})}>
+      <span>📍</span>
+      <span>{activeNodo.nombre} — {activeNodo.address}</span>
+    </div>
   );
 }
 const HUB_ADDRESS = DEFAULT_HUB.address + ', ' + DEFAULT_HUB.barrio;
