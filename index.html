@@ -3623,8 +3623,52 @@ function maybeInsertOrdersRemote(newRows) {
         ({ error } = await sb.from('orders').insert(payload.map(({ nodo, zona, ...rest }) => rest)));
       }
       if (error) console.warn('[HUBADOR] orders insert (opcional)', error.message || error);
-    } catch (e) { console.warn('[HUBADOR] orders insert skipped', e); }
-  })();
+async function fetchUserOrdersRemote(user) {
+  if (!sb || !user) return [];
+  try {
+    const userContact = resolveUserContact(user);
+    const tel = (userContact && userContact.tel) || user.tel || user.phone || user.nombre;
+    const uid = user.id;
+
+    let query = sb.from('orders').select('*').order('created_at', { ascending: false });
+    if (uid && typeof uid === 'string' && uid.includes('-')) {
+      query = query.eq('user_id', uid);
+    } else if (tel) {
+      const { data: profs } = await sb.from('profiles').select('id').eq('tel', tel);
+      const ids = (profs || []).map((p) => p.id);
+      if (ids.length) {
+        query = query.in('user_id', ids);
+      } else {
+        return [];
+      }
+    } else {
+      return [];
+    }
+
+    const { data, error } = await query;
+    if (error || !data) return [];
+
+    return data.map((o) => ({
+      id: o.id || ('ord-' + new Date(o.created_at).getTime()),
+      name: o.product_name,
+      qty: (o.qty != null ? o.qty : 0) + ' kg',
+      qtyN: Number(o.qty) || 0,
+      price: fmtPrecioAR(o.unit_price || 0),
+      priceN: Number(o.unit_price) || 0,
+      total: fmtPrecioAR(o.total || 0),
+      totalN: Number(o.total) || 0,
+      status: o.status || 'en_formacion',
+      date: formatPedidoDate(o.created_at),
+      createdAt: new Date(o.created_at).getTime(),
+      confirmedAt: new Date(o.created_at).getTime(),
+      img: (HUBADOR_CATALOG.find((x) => x.name.toLowerCase() === (o.product_name || '').toLowerCase()) || {}).img || 'img/papa.jpg',
+      userId: o.user_id,
+      nodo: o.nodo || formatNodoLabel(o.zona),
+      tel: tel,
+    }));
+  } catch (e) {
+    return [];
+  }
 }
 
 // Legacy: historial / pedidos → Perfil (lista embebida ahí)
@@ -8507,6 +8551,37 @@ function App() {
       unsub = () => { try { data.subscription.unsubscribe(); } catch (e) {} };
     })();
   }, []);
+
+  React.useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetchUserOrdersRemote(user).then((remoteOrders) => {
+      if (cancelled || !remoteOrders || !remoteOrders.length) return;
+      setOrders((prev) => {
+        const local = Array.isArray(prev) ? prev : [];
+        let combined = [...local];
+        remoteOrders.forEach((r) => {
+          const idx = combined.findIndex((l) => l.name === r.name && isActivoPedidoStatus(l.status));
+          if (idx >= 0) {
+            const curQty = combined[idx].qtyN != null ? combined[idx].qtyN : parseFloat(String(combined[idx].qty || '').replace(/[^\d.]/g, '')) || 0;
+            if (r.qtyN > curQty) {
+              combined[idx] = Object.assign({}, combined[idx], {
+                qtyN: r.qtyN,
+                qty: r.qty,
+                totalN: r.totalN,
+                total: r.total,
+              });
+            }
+          } else {
+            combined.unshift(r);
+          }
+        });
+        saveHubadorOrders(combined);
+        return combined;
+      });
+    });
+    return () => { cancelled = true; };
+  }, [user]);
 
   React.useEffect(() => {
     const normalizeScreen = (s) => {
