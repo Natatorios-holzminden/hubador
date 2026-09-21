@@ -1936,10 +1936,10 @@ const DEFAULT_CITY = 'Buenos Aires';
 // Zonas de la prueba. Cada una corre su propia orden (barra de kg independiente).
 // TODO: reemplazar "A confirmar" por la dirección/punto de entrega real de cada zona.
 const NODOS_HUBADOR = [
-  { id: 'garin', nombre: 'HUB Garín', address: 'A confirmar', barrio: 'Garín' },
-  { id: 'belgrano', nombre: 'HUB Belgrano', address: 'A confirmar', barrio: 'Belgrano' },
+  { id: 'garin', nombre: 'HUB Garín', address: 'A confirmar', barrio: 'Garín', lat: -34.4239, lng: -58.7554 },
+  { id: 'belgrano', nombre: 'HUB Belgrano', address: 'A confirmar', barrio: 'Belgrano', lat: -34.5620, lng: -58.4568 },
 ];
-const DEFAULT_HUB = { name: 'HUB Garín', address: 'A confirmar', barrio: 'Garín' };
+const DEFAULT_HUB = { name: 'HUB Garín', address: 'A confirmar', barrio: 'Garín', lat: -34.4239, lng: -58.7554 };
 /** Zona de entrega elegida: se recuerda en el navegador y se puede fijar con un link de publicidad,
  *  ej. hubador.com/?nodo=palermo  → ya queda preseleccionada para quien entra desde el aviso. */
 const HUBADOR_NODO_KEY = 'hubador_nodo_id';
@@ -1959,6 +1959,10 @@ function getSavedNodoId() {
     if (NODOS_HUBADOR.some((x) => x.id === v)) return v;
   } catch (e) {}
   return NODOS_HUBADOR[0].id;
+}
+function currentHubObject() {
+  const id = getSavedNodoId();
+  return NODOS_HUBADOR.find((x) => x.id === id) || NODOS_HUBADOR[0];
 }
 /** Cambia la zona activa y avisa a la app para que las barras/kg se recalculen para esa zona. */
 function setSavedNodoId(id) {
@@ -3025,7 +3029,7 @@ function MobileHome() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#888', fontWeight: 500 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block', animation: 'pulse 1.6s infinite' }} />
-            3 lugares en {user?.barrio || 'Buenos Aires'}
+            3 lugares en {currentZoneName()}
           </div>
         </div>
 
@@ -6859,7 +6863,124 @@ function MobileComparador() {
 
 /** Desktop WebHome hero right card — C3 clean map preview; click → pantalla mapa. */
 function HeroMapPreview({ barrio }) {
-  const label = barrio || currentZoneName();
+  const mapRef = React.useRef(null);
+  const mapInstance = React.useRef(null);
+  const [ready, setReady] = React.useState(false);
+
+  const hub = currentHubObject();
+  const label = hub.barrio;
+  const lat = hub.lat;
+  const lng = hub.lng;
+
+  React.useEffect(() => {
+    let cancelled = false;
+    if (!document.getElementById('map-anim-css')) {
+      const style = document.createElement('style');
+      style.id = 'map-anim-css';
+      style.textContent = `
+        @keyframes mapPulse { 0%{transform:scale(1);opacity:.7} 70%{transform:scale(2.2);opacity:0} 100%{transform:scale(1);opacity:0} }
+        .map-pulse { animation: mapPulse 2s ease-out infinite; }
+        .hubador-hero-pin { background:transparent!important;border:none!important }
+      `;
+      document.head.appendChild(style);
+    }
+
+    ensureLeafletLoaded().then((L) => {
+      if (cancelled || !mapRef.current || !L) return;
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+      mapRef.current.innerHTML = '';
+
+      const pinTeal = '#0d9488';
+      const HERO_PREVIEW_ZOOM = 15;
+      const map = L.map(mapRef.current, {
+        zoomControl: false,
+        attributionControl: false,
+        dragging: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false,
+        tap: false,
+        touchZoom: false,
+      }).setView([lat, lng], HERO_PREVIEW_ZOOM);
+      mapInstance.current = map;
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd', maxZoom: 19,
+      }).addTo(map);
+
+      setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 100);
+      setTimeout(() => { try { map.invalidateSize(); } catch(e){} }, 400);
+
+      // Circle around the plaza (~300m radius feel)
+      L.circle([lat, lng], {
+        radius: 300,
+        color: pinTeal,
+        fillColor: pinTeal,
+        fillOpacity: 0.08,
+        weight: 1.6,
+        opacity: 0.45,
+        dashArray: '6 5',
+      }).addTo(map);
+
+      // 7 offer pins scattered around the plaza
+      const offsets = [
+        { dLat: 0.0012, dLng: 0.0015, pct: 70, isTop: true },
+        { dLat: -0.0010, dLng: 0.0018, pct: 45, isTop: false },
+        { dLat: 0.0018, dLng: -0.0012, pct: 36, isTop: false },
+        { dLat: -0.0015, dLng: -0.0016, pct: 70, isTop: true },
+        { dLat: 0.0006, dLng: 0.0024, pct: 28, isTop: false },
+        { dLat: -0.0022, dLng: 0.0008, pct: 48, isTop: false },
+        { dLat: 0.0021, dLng: -0.0025, pct: 35, isTop: false },
+      ];
+
+      offsets.forEach((off) => {
+        const bg = off.isTop ? '#dc2626' : '#16a34a';
+        const shadow = off.isTop ? 'rgba(220,38,38,.4)' : 'rgba(22,163,74,.35)';
+        const chip = `<span style="display:inline-block;padding:1px 5px;border-radius:999px;background:${bg};color:#fff;font:800 10px/1.25 system-ui,Segoe UI,sans-serif;letter-spacing:-0.02em;white-space:nowrap;box-shadow:0 1px 3px ${shadow};border:1px solid rgba(255,255,255,.85)">−${off.pct}%</span>`;
+        const pin = `<div style="position:relative;width:22px;height:30px;margin-top:2px">
+          <span style="position:absolute;left:50%;bottom:1px;width:16px;height:7px;margin-left:-8px;border-radius:50%;background:rgba(13,148,136,.28);filter:blur(2.5px)"></span>
+          <svg width="22" height="30" viewBox="0 0 24 32" aria-hidden="true" style="position:relative;display:block;filter:drop-shadow(0 1px 2px rgba(13,148,136,.35))">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 20 12 20s12-11 12-20C24 5.37 18.63 0 12 0z" fill="${pinTeal}"/>
+            <circle cx="12" cy="11.5" r="4.2" fill="#fff"/>
+          </svg>
+        </div>`;
+        const iconHtml = `<div style="display:flex;flex-direction:column;align-items:center;pointer-events:none;width:48px;overflow:visible">${chip}${pin}</div>`;
+        const icon = L.divIcon({
+          html: iconHtml,
+          iconSize: [48, 48],
+          iconAnchor: [24, 46],
+          className: 'hubador-hero-pin',
+        });
+        L.marker([lat + off.dLat, lng + off.dLng], { icon, interactive: false, keyboard: false }).addTo(map);
+      });
+
+      // User / Plaza center pulse marker
+      const userIcon = L.divIcon({
+        html: `<div style="position:relative;width:16px;height:16px">
+          <div class="map-pulse" style="position:absolute;top:50%;left:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:${pinTeal}"></div>
+          <div style="position:relative;width:16px;height:16px;border-radius:50%;background:${pinTeal};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(13,148,136,.4)"></div>
+        </div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+        className: 'hubador-hero-pin',
+      });
+      L.marker([lat, lng], { icon: userIcon, interactive: false, zIndexOffset: 1000 }).addTo(map);
+
+      setReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+    };
+  }, [lat, lng]);
 
   return (
     <div
@@ -6868,7 +6989,8 @@ function HeroMapPreview({ barrio }) {
       aria-label={`Cerca tuyo · ${label}`}
       style={{ cursor: 'default' }}
     >
-      <div className="web-hero-offer-map-canvas" aria-hidden="true" style={{ background: '#eef2f6 url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h40v40H0z\' fill=\'%23f1f5f9\'/%3E%3Cpath d=\'M0 20h40M20 0v40\' stroke=\'%23e2e8f0\' stroke-width=\'1\'/%3E%3C/svg%3E")' }} />
+      <div ref={mapRef} className="web-hero-offer-map-canvas" aria-hidden="true" />
+      {!ready && <div className="web-hero-offer-map-loading">Cargando mapa de {label}…</div>}
       <div className="web-hero-offer-map-hit" aria-hidden="true" />
       <div className="web-hero-offer-map-bar">
         Cerca tuyo · <span className="web-hero-offer-map-bar-barrio">{label}</span>
@@ -6979,7 +7101,7 @@ function WebHome() {
           </div>
           <div className="web-hero-art">
             <HeroMapPreview
-              barrio={user?.barrio || currentZoneName()}
+              barrio={currentZoneName()}
             />
           </div>
         </div>
@@ -7894,7 +8016,7 @@ function WebPerfil() {
               <div>
                 <h2>{user.nombre}</h2>
                 <p>{user.email}</p>
-                <p>📍 {user.barrio}</p>
+                <p>📍 HUB {currentZoneName()}</p>
                 <p>{cart.length} en carrito · {list.length} pedido{list.length === 1 ? '' : 's'}</p>
               </div>
             </div>
