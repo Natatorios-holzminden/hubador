@@ -1619,8 +1619,10 @@ function buildCartWhatsAppLink(cart, totals, nodoLabel) {
  *  nunca por tipear el número — así nadie puede "entrar" viendo pedidos ajenos con solo saber el tel. */
 async function checkoutCartByWhatsApp({ phone, nodoId, cart, totals, login, confirmCartAsOrders }) {
   const nodoLabel = formatNodoLabel(nodoId);
+  const cleanPhone = String(phone || '').trim();
+  const displayName = cleanPhone || 'Vecino';
   try { localStorage.setItem(HUBADOR_NODO_KEY, nodoId); } catch (e) {}
-  try { saveHubadorProfileExtra({ tel: phone, nodo: nodoLabel }); } catch (e) {}
+  try { saveHubadorProfileExtra({ tel: cleanPhone, nombre: displayName, nodo: nodoLabel }); } catch (e) {}
   let effectiveUser = null;
   if (sb) {
     try {
@@ -1633,16 +1635,17 @@ async function checkoutCartByWhatsApp({ phone, nodoId, cart, totals, login, conf
         else session = data.session;
       }
       if (session && session.user) {
-        const row = await upsertProfile(session.user.id, { tel: phone, nombre: 'Vecino', role: 'user' });
-        effectiveUser = profileFromRow(row, session.user) || { id: session.user.id, tel: phone, nombre: 'Vecino', role: 'user' };
-        effectiveUser = Object.assign({}, effectiveUser, { tel: phone, nodo: nodoLabel });
+        const row = await upsertProfile(session.user.id, { tel: cleanPhone, nombre: displayName, role: 'user' });
+        effectiveUser = profileFromRow(row, session.user) || { id: session.user.id, tel: cleanPhone, nombre: displayName, role: 'user' };
+        effectiveUser = Object.assign({}, effectiveUser, { nombre: displayName, tel: cleanPhone, nodo: nodoLabel });
         if (typeof login === 'function') login(effectiveUser);
       }
     } catch (e) {
       console.warn('[HUBADOR] No se pudo crear la cuenta por WhatsApp', e);
     }
   }
-  if (!effectiveUser) effectiveUser = { tel: phone, nombre: 'Vecino', nodo: nodoLabel };
+  if (!effectiveUser) effectiveUser = { tel: cleanPhone, nombre: displayName, nodo: nodoLabel };
+  if (typeof login === 'function') login(effectiveUser);
   const link = buildCartWhatsAppLink(cart, totals, nodoLabel);
   confirmCartAsOrders({
     status: 'en_formacion',
@@ -5474,7 +5477,7 @@ function MobileSeguimiento() {
           </div>
         )}
 
-        {/* Ruta logística: Mayorista → Hub (dirección) → Casa */}
+        {/* Ruta logística: Mayorista → Armado → HUB de retiro */}
         <div style={{ background: '#e8f4f0', border: '1px solid #c8e6d8', borderRadius: 14, marginBottom: 14, overflow: 'hidden' }}>
           <div style={{ padding: '14px 12px 10px' }}>
             <div style={{ position: 'relative', padding: '0 2px 2px' }}>
@@ -5483,20 +5486,20 @@ function MobileSeguimiento() {
                 <div style={{ position: 'absolute', left: truckPct + '%', top: '50%', transform: 'translate(-50%, -50%)', fontSize: 16, transition: 'left .6s ease', lineHeight: 1 }}>{showReparto ? '🚚' : '📦'}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-                <div style={{ textAlign: 'center', width: 72, flexShrink: 0 }}>
+                <div style={{ textAlign: 'center', width: 78, flexShrink: 0 }}>
                   <div style={{ fontSize: 24, lineHeight: 1.2, filter: 'drop-shadow(0 1px 0 #e8f4f0)' }}>🏭</div>
                   <div style={{ fontSize: 10, color: '#333', fontWeight: 700, marginTop: 4 }}>Mayorista</div>
                   <div style={{ fontSize: 9.5, color: '#666', marginTop: 2 }}>Mercado Central</div>
                 </div>
                 <div style={{ textAlign: 'center', width: 84, flexShrink: 0 }}>
+                  <div style={{ fontSize: 24, lineHeight: 1.2, filter: 'drop-shadow(0 1px 0 #e8f4f0)' }}>📦</div>
+                  <div style={{ fontSize: 10, color: '#333', fontWeight: 700, marginTop: 4 }}>Armado</div>
+                  <div style={{ fontSize: 9.5, color: '#2d6a5a', fontWeight: 600, marginTop: 2, lineHeight: 1.25 }}>Centro acopio</div>
+                </div>
+                <div style={{ textAlign: 'center', width: 88, flexShrink: 0 }}>
                   <div style={{ fontSize: 24, lineHeight: 1.2, filter: 'drop-shadow(0 1px 0 #e8f4f0)' }}>📍</div>
                   <div style={{ fontSize: 10, color: '#333', fontWeight: 700, marginTop: 4 }}>{hubName}</div>
-                  <div style={{ fontSize: 9.5, color: '#2d6a5a', fontWeight: 600, marginTop: 2, lineHeight: 1.25 }}>{hubSub}</div>
-                </div>
-                <div style={{ textAlign: 'center', width: 72, flexShrink: 0 }}>
-                  <div style={{ fontSize: 24, lineHeight: 1.2, filter: 'drop-shadow(0 1px 0 #e8f4f0)' }}>🏠</div>
-                  <div style={{ fontSize: 10, color: '#333', fontWeight: 700, marginTop: 4 }}>Casa</div>
-                  <div style={{ fontSize: 9.5, color: '#666', fontWeight: 500, marginTop: 2, lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 72 }} title={casaSub}>{casaSub}</div>
+                  <div style={{ fontSize: 9.5, color: '#2d6a5a', fontWeight: 600, marginTop: 2, lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 88 }} title={hubSub}>{hubSub}</div>
                 </div>
               </div>
             </div>
