@@ -6439,7 +6439,7 @@ function MobileMisGrupos() {
                       Confirmar pedido y transferir
                     </button>
                   )}
-                  <button type="button" onClick={() => navigate('home')} style={{ width: '100%', marginTop: 10, background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Seguir sumando productos</button>
+                  <button type="button" onClick={() => navigate('productos')} style={{ width: '100%', marginTop: 10, background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Seguir sumando productos</button>
                 </div>
               </>
             )}
@@ -7124,6 +7124,145 @@ function WebHome() {
   );
 }
 
+/** Catálogo desktop: igual que WebHome pero sin el banner — para "seguir sumando productos" desde el carrito. */
+function WebProductos() {
+  const primary = 'oklch(0.55 0.15 165)';
+  const navigate = React.useContext(NavContext);
+  const { user, setSelected, setSelectedGroup, webSearch, setWebSearch, progressTick } = React.useContext(SelectionContext);
+  void progressTick;
+  const search = webSearch || '';
+  const setSearch = (v) => { if (typeof setWebSearch === 'function') setWebSearch(v); };
+  const [cat, setCat] = React.useState('todos');
+  const [sort, setSort] = React.useState('descuento');
+  const [showFilters, setShowFilters] = React.useState(true);
+  const [catalogItems, setCatalogItems] = React.useState(() => HUBADOR_CATALOG.map(hubadorCard));
+  React.useEffect(() => {
+    const handleUpdate = () => setCatalogItems(HUBADOR_CATALOG.map(hubadorCard));
+    window.addEventListener('hubador_catalog_updated', handleUpdate);
+    return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
+  }, []);
+
+  const categories = [
+    { id: 'todos', label: 'Todos', emoji: '🌿' },
+    { id: 'almacen', label: 'Frescos & Almacén', emoji: '🥪' },
+    { id: 'verduras', label: 'Verduras', emoji: '🥦' },
+    { id: 'frutas', label: 'Frutas', emoji: '🍎' },
+  ];
+
+  let filtered = catalogItems.filter((p) =>
+    (cat === 'todos' || p.cat === cat) &&
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
+  let secondary = null;
+  if (sort === 'precio-asc') secondary = (a, b) => parseInt(a.price.replace(/[^\d]/g, '')) - parseInt(b.price.replace(/[^\d]/g, ''));
+  if (sort === 'precio-desc') secondary = (a, b) => parseInt(b.price.replace(/[^\d]/g, '')) - parseInt(a.price.replace(/[^\d]/g, ''));
+  if (sort === 'descuento' || sort === 'relevancia') secondary = (a, b) => (b.disc || 0) - (a.disc || 0);
+  if (sort === 'cierre') secondary = (a, b) => (a.deadlineHrs || 99) - (b.deadlineHrs || 99);
+  sortActualizadoPrimero(filtered, secondary);
+
+  const openProduct = (p) => {
+    const live = groupProgressView(p.name);
+    setSelected(p);
+    setSelectedGroup({
+      product: p.name, location: user?.barrio || 'Buenos Aires', members: p.members, progress: live.pct,
+      closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, cat: p.cat, totalKg: live.goal, precioActualizado: !!p.precioActualizado, status: 'abierto'
+    });
+    navigate('grupo-detalle');
+  };
+
+  return (
+    <div className="web-page web-page-market">
+      <WebHeader showSearch />
+
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '20px 24px 0' }}>
+        <h1 style={{ margin: '0 0 4px', fontSize: 24, letterSpacing: '-0.02em' }}>Catálogo</h1>
+        <p style={{ margin: 0, color: '#667', fontSize: 13.5 }}>Sumá más productos a tu pedido.</p>
+      </div>
+
+      <div className="web-toolbar">
+        <div className="web-sort-row">
+          <span>{filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}</span>
+          <div className="web-toolbar-actions">
+            <button type="button" className={'web-filter-toggle' + (showFilters || cat !== 'todos' ? ' activo' : '')} onClick={() => setShowFilters((v) => !v)}>
+              Filtrar{cat !== 'todos' ? ` · ${categories.find((c) => c.id === cat)?.label || ''}` : ''}
+            </button>
+            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="descuento">Mayor descuento</option>
+              <option value="relevancia">Más relevantes</option>
+              <option value="precio-asc">Menor precio</option>
+              <option value="precio-desc">Mayor precio</option>
+              <option value="cierre">Cierran antes</option>
+            </select>
+          </div>
+        </div>
+        {showFilters && (
+          <div className="web-cats">
+            {categories.map((c) => (
+              <button key={c.id} className={cat === c.id ? 'activo' : ''} onClick={() => setCat(c.id)}>
+                <span>{c.emoji}</span>{c.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <section className="web-section web-section-tight" id="web-ofertas">
+        {filtered.length === 0 ? (
+          <div className="web-empty">
+            <div>🔍</div>
+            <b>No encontramos productos</b>
+            <span>Probá con otra búsqueda o categoría.</span>
+          </div>
+        ) : (
+          <div className="web-grid web-grid-products">
+            {filtered.map((p) => {
+              const live = groupProgressView(p.name);
+              const miss = live.missing, almost = live.almost;
+              return (
+                <article key={p.name} className="web-prod-card" onClick={() => openProduct(p)} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+                  <div className="web-prod-img" style={{ height: 150, maxHeight: 150, minHeight: 150, flex: '0 0 150px', overflow: 'hidden', position: 'relative', width: '100%' }}>
+                    <img src={p.img} alt={p.name} width={400} height={150}
+                      style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
+                    <span className="web-badge">-{p.disc}%</span>
+                    <span className={'web-check' + (p.precioActualizado ? '' : ' web-check-red')}>✓</span>
+                  </div>
+                  <div className="web-prod-body" style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'visible', padding: '8px 10px 10px', minHeight: 0 }}>
+                    <h3>{p.name}</h3>
+                    <div className="web-prod-prices">
+                      <div className="web-price-now">
+                        <strong>{p.price}</strong>
+                        <span>{p.unit}</span>
+                      </div>
+                      {p.old && (
+                        <div className="web-price-coto">
+                          <s>{p.old}</s>
+                          <em>Coto</em>
+                        </div>
+                      )}
+                    </div>
+                    <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', flexShrink: 0 }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
+                    <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible', flexShrink: 0 }}>
+                      <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
+                        {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
+                      </span>
+                    </div>
+                    <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
+                    <button
+                      className="web-join-card"
+                      onClick={(e) => { e.stopPropagation(); openProduct(p); }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
+                    >Quiero esta oferta</button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
 
 // ─── WEB SHELL + pantallas escritorio (mobile intacto) ─────────
 
@@ -7408,24 +7547,6 @@ function WebSignup() {
       </form>
       <p className="web-auth-switch">¿Ya tenés cuenta? <button type="button" onClick={() => navigate('login')}>Ingresar</button></p>
     </WebAuthCard>
-  );
-}
-
-function WebProductos() {
-  // Nav Productos → mismo flujo que clickear el mejor gancho (detalle + Unirme)
-  const navigate = React.useContext(NavContext);
-  const { setSelected, setSelectedGroup, user } = React.useContext(SelectionContext);
-  React.useEffect(() => {
-    const p = hubadorBestGancho();
-    if (!p) { navigate('home'); return; }
-    setSelected(p);
-    setSelectedGroup(grupoFromHubadorProduct(p, user?.barrio));
-    navigate('grupo-detalle');
-  }, []);
-  return (
-    <WebShell title="Productos">
-      <div className="web-muted" style={{ padding: '48px 24px', textAlign: 'center' }}>Abriendo la mejor oferta…</div>
-    </WebShell>
   );
 }
 
@@ -7719,7 +7840,7 @@ function WebMisGrupos() {
                       Confirmar pedido y transferir
                     </button>
                   )}
-                  <button type="button" className="web-linkish" onClick={() => navigate('home')}>+ Seguir sumando productos</button>
+                  <button type="button" className="web-linkish" onClick={() => navigate('productos')}>+ Seguir sumando productos</button>
                 </aside>
               </>
             )}
@@ -7948,7 +8069,7 @@ function WebAdminProductos() {
 
 const WEB_SCREEN_COMPONENTS = {
   home: WebHome,
-  productos: WebHome,
+  productos: WebProductos,
   producto: WebGrupoDetalle,
   pedidos: WebPerfil,
   historial: WebPerfil,
