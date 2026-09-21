@@ -6390,7 +6390,9 @@ function MobileMisGrupos() {
                             <button type="button" onClick={() => removeFromCart(g.id || g.name)} style={{ background: 'none', border: 'none', color: '#aaa', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>Quitar</button>
                           </div>
                           <div style={{ fontSize: 11.5, color: '#888', margin: '3px 0' }}>
-                            Solo {fmtPrecioAR(t.priceN)}{g.unit || '/kg'} · 📍 Buenos Aires
+                            {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
+                            {t.oldN > 0 && <> · <s>{fmtPrecioAR(t.oldN)}</s> Solo</>}
+                            {' '}· 📍 Buenos Aires
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 8 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f5f7', borderRadius: 999, padding: '4px 6px' }}>
@@ -7670,7 +7672,9 @@ function WebMisGrupos() {
                         <div className="web-cart-item-main">
                           <h3>{g.name}</h3>
                           <p className="web-cart-item-meta">
-                            Solo {fmtPrecioAR(t.priceN)}{g.unit || '/kg'} · 📍 Buenos Aires
+                            {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
+                            {t.oldN > 0 && <> · <s className="web-cart-coto">{fmtPrecioAR(t.oldN)}</s> Solo</>}
+                            {' '}· 📍 Buenos Aires
                           </p>
                           <div className="web-cart-qty">
                             <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(step, t.qty - step))}>−</button>
