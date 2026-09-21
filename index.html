@@ -2270,12 +2270,22 @@ async function shareOrderWithFriends(order, showToast) {
   }
 }
 
-function ActiveOrderExtras({ order }) {
+function userAccumulatedKg(ordersList, productName) {
+  if (!ordersList || !productName) return 0;
+  return ordersList
+    .filter((o) => (o.name === productName || o.product_name === productName) && isActivoPedidoStatus(o.status))
+    .reduce((sum, o) => {
+      const q = o.qtyN != null ? Number(o.qtyN) : parseFloat(String(o.qty || '').replace(/[^\d.]/g, '')) || 0;
+      return sum + q;
+    }, 0);
+}
+
+function ActiveOrderExtras({ order, userKg }) {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
   const { showToast, progressTick, setSelectedOrder } = React.useContext(SelectionContext);
   void progressTick;
-  const name = (order && order.name) || '';
+  const name = (order && (order.name || order.product_name)) || '';
   let live;
   if (name) {
     live = groupProgressView(name);
@@ -2291,12 +2301,19 @@ function ActiveOrderExtras({ order }) {
     if (setSelectedOrder) setSelectedOrder(order);
     if (navigate) navigate('seguimiento');
   };
+  const myKg = userKg || (order && (order.qtyN != null ? order.qtyN : parseFloat(String(order.qty || '').replace(/[^\d.]/g, '')))) || 0;
+
   return (
     <div style={{ marginTop: 10 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-      <div style={{ marginBottom: 5 }}>
+      <div style={{ marginBottom: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
         <span style={{ fontSize: 11.5, fontWeight: 600, color: '#444', fontVariantNumeric: 'tabular-nums', letterSpacing: '0.01em' }}>
-          Faltan {live.missing} kg · {live.filled}/{live.goal} kg
+          Faltan {live.missing} kg · Grupo: {live.filled}/{live.goal} kg
         </span>
+        {myKg > 0 && (
+          <span style={{ fontSize: 11.5, fontWeight: 800, color: '#0f766e', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: 6 }}>
+            👤 Tu compra: {myKg} kg
+          </span>
+        )}
       </div>
       <div style={{ height: 5, background: '#e8ecea', borderRadius: 999, overflow: 'hidden', marginBottom: 8 }} aria-hidden="true">
         <div style={{ height: '100%', width: pct + '%', background: barColor, borderRadius: 999, transition: 'width .35s ease' }} />
@@ -3557,8 +3574,23 @@ function mergeCartIntoOrders(existing, cart, user, opts) {
       (o.cartId === draft.cartId || o.name === draft.name) &&
       (!email || !orderOwnerEmail(o) || orderOwnerEmail(o) === email)
     );
-    if (idx >= 0) next[idx] = Object.assign({}, next[idx], draft, { id: next[idx].id });
-    else next.unshift(draft);
+    if (idx >= 0) {
+      const prevQty = Number(next[idx].qtyN != null ? next[idx].qtyN : parseFloat(String(next[idx].qty || '').replace(/[^\d.]/g, ''))) || 0;
+      const addQty = Number(draft.qtyN != null ? draft.qtyN : parseFloat(String(draft.qty || '').replace(/[^\d.]/g, ''))) || 0;
+      const totalQty = prevQty + addQty;
+      const unitLabel = (draft.qty && draft.qty.includes('u')) ? 'u' : 'kg';
+      const totalN = (next[idx].totalN || 0) + (draft.totalN || 0);
+      next[idx] = Object.assign({}, next[idx], draft, {
+        id: next[idx].id,
+        qtyN: totalQty,
+        qty: totalQty + ' ' + unitLabel,
+        totalN: totalN,
+        total: fmtPrecioAR(totalN),
+        confirmedAt: Date.now(),
+      });
+    } else {
+      next.unshift(draft);
+    }
   });
   next.sort((a, b) => (b.confirmedAt || b.createdAt || 0) - (a.confirmedAt || a.createdAt || 0));
   return next;
@@ -6641,6 +6673,7 @@ function MobileMisGrupos() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {activos.map((p) => {
                 const s = PEDIDO_STATUS_STYLE[p.status] || PEDIDO_STATUS_STYLE.en_formacion;
+                const userKg = userAccumulatedKg(activos, p.name || p.product_name);
                 return (
                   <div key={p.id || p.name} onClick={() => { setSelectedOrder && setSelectedOrder(p); navigate('seguimiento'); }} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 13, padding: 12, cursor: 'pointer' }}>
                     <div style={{ display: 'flex', gap: 12 }}>
@@ -6656,7 +6689,7 @@ function MobileMisGrupos() {
                         <div style={{ fontWeight: 800, fontSize: 15, color: primary }}>{p.total}</div>
                       </div>
                     </div>
-                    <ActiveOrderExtras order={p} />
+                    <ActiveOrderExtras order={p} userKg={userKg} />
                   </div>
                 );
               })}
@@ -7952,6 +7985,7 @@ function WebMisGrupos() {
               <div className="web-list">
                 {activos.map((p) => {
                   const s = PEDIDO_STATUS_STYLE[p.status] || PEDIDO_STATUS_STYLE.en_formacion;
+                  const userKg = userAccumulatedKg(activos, p.name || p.product_name);
                   return (
                     <article key={p.id || p.name} className="web-list-item" onClick={() => { setSelectedOrder && setSelectedOrder(p); navigate('seguimiento'); }} style={{ cursor: 'pointer', alignItems: 'stretch', flexDirection: 'column', gap: 0 }}>
                       <div style={{ display: 'flex', gap: 14, alignItems: 'center', width: '100%', flex: '0 0 auto' }}>
@@ -7962,7 +7996,7 @@ function WebMisGrupos() {
                         </div>
                         <span style={{ flexShrink: 0, background: s.bg, color: s.color, borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700 }}>{s.label}</span>
                       </div>
-                      <ActiveOrderExtras order={p} />
+                      <ActiveOrderExtras order={p} userKg={userKg} />
                     </article>
                   );
                 })}
@@ -8206,6 +8240,21 @@ function MobileAdminPedidos() {
     return { kg, goal, pct: Math.min(100, Math.round((kg / goal) * 100)), members: r ? Number(r.members) || 0 : 0 };
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm('¿Eliminar este pedido no pagado? Se descontarán sus kilos del tablero.')) return;
+    try {
+      if (sb && orderId) {
+        const { error } = await sb.from('orders').delete().eq('id', orderId);
+        if (error) console.warn('[HUBADOR] delete order error', error);
+      }
+      setRows((prev) => (prev || []).filter((r) => r.id !== orderId));
+      if (showToast) showToast('Pedido eliminado');
+      load();
+    } catch (e) {
+      if (showToast) showToast('No se pudo eliminar');
+    }
+  };
+
   return (
     <AdminShell active="admin-pedidos">
       <div style={{ padding: 14, fontFamily: "'Inter', sans-serif" }}>
@@ -8284,9 +8333,12 @@ function MobileAdminPedidos() {
                   </div>
                   <div style={{ fontSize: 11.5, color: '#0f766e', fontWeight: 700, marginTop: 2 }}>📍 {o.nodo || 'Sin zona'}</div>
                 </div>
-                {link
-                  ? <a href={link} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#fff', textDecoration: 'none', borderRadius: 8, padding: '8px 10px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>💬 {tel}</a>
-                  : <span style={{ fontSize: 11.5, color: '#94a3b8' }}>sin teléfono</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  {link
+                    ? <a href={link} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#fff', textDecoration: 'none', borderRadius: 8, padding: '8px 10px', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap' }}>💬 {tel}</a>
+                    : <span style={{ fontSize: 11.5, color: '#94a3b8' }}>sin teléfono</span>}
+                  <button type="button" onClick={() => handleDeleteOrder(o.id)} title="Eliminar pedido no pagado" style={{ background: '#fee2e2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 8, padding: '7px 9px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>🗑️</button>
+                </div>
               </div>
             );
           })}
