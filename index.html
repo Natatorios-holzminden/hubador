@@ -4976,7 +4976,7 @@ function MobileGrupoDetalle() {
           <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, borderRadius: '50%', background: checkBg(g.precioActualizado), color: '#fff', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 800, boxShadow: checkShadow(g.precioActualizado), pointerEvents: 'none' }}>✓</div>
         </div>
         <div style={{ padding: '8px 16px 88px' }}>
-          <div style={{ fontSize: 11, color: '#888', marginBottom: 1 }}>Compra en conjunto · 📍 CABA</div>
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 1 }}>Compra en conjunto · 📍 Buenos Aires</div>
           <h1 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{g.product}</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
             <span style={{ fontSize: 12.5, color: '#666' }}>Precio Coto</span>
@@ -5020,7 +5020,7 @@ function MobileGrupoDetalle() {
                   <Countdown deadline={getDeadline(g.product, g.deadlineHrs || 48)} compact />
                 </div>
                 <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'rgba(255,255,255,0.72)', border: `1px solid ${border}`, borderRadius: 8, padding: '5px 8px', fontSize: 11, fontWeight: 600, color: '#3d5248' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>📍 {g.location || 'Buenos Aires'}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>📍 Buenos Aires</span>
                   <span style={{ opacity: 0.35 }}>·</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>👥 {membersCount} vecinos</span>
                 </div>
@@ -7526,17 +7526,15 @@ function WebGrupoDetalle() {
             <span className={'web-check' + (g.precioActualizado ? '' : ' web-check-red')}>✓</span>
           </div>
           <div className="web-detail-body">
-            <div className="web-muted">Compra en conjunto · 📍 {g.location || 'CABA'}</div>
+            <div className="web-muted">Compra en conjunto · 📍 Buenos Aires</div>
             <h1>{g.product}</h1>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '10px 0 4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 4px' }}>
               <span style={{ fontSize: 13, color: '#666' }}>Precio Coto</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <s style={{ fontSize: 15, fontWeight: 750, color: '#dc2626' }}>{g.old}{g.unit}</s>
-                <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase' }}>COTO</em>
-              </div>
+              <s style={{ fontSize: 15, fontWeight: 750, color: '#dc2626' }}>{g.old}{g.unit}</s>
+              <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase' }}>COTO</em>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
               <span style={{ fontSize: 14, fontWeight: 700 }}>Precio en grupo</span>
               <span style={{ fontSize: 24, fontWeight: 900, color: primary }}>{g.price}{g.unit}</span>
             </div>
@@ -7549,7 +7547,7 @@ function WebGrupoDetalle() {
                   <div style={{ marginTop: 6 }}><Countdown deadline={getDeadline(g.product, g.deadlineHrs)} compact /></div>
                 )}
                 <div className="web-vecinos-chip" style={{ marginTop: 6 }}>
-                  <span>📍 {g.location || 'Buenos Aires'}</span>
+                  <span>📍 Buenos Aires</span>
                   <span className="sep">·</span>
                   <span>👥 {membersCount} vecinos sumados</span>
                 </div>
