@@ -1602,6 +1602,18 @@ function buildWhatsAppLink(message) {
 function buildOfertaWhatsAppLink(p) {
   return buildWhatsAppLink(`Hola! Quiero sumarme a la compra de ${p.name} a ${p.price}${p.unit} que vi en HUBADOR.`);
 }
+/** Pedido por WhatsApp sin cuenta: arma el carrito como texto y abre wa.me con todo precargado.
+ *  El comprador solo tiene que tocar "Enviar" desde su propio WhatsApp — ahí le llega a HUBADOR
+ *  con su número real como remitente, sin haber tenido que crear cuenta ni tipear nada en el sitio. */
+function buildCartWhatsAppLink(cart, totals) {
+  const lines = (cart || []).map((item) => {
+    const t = cartLineTotals(item);
+    const unit = item.unit === '/u' ? 'u' : 'kg';
+    return `• ${t.qty} ${unit} ${item.name} — ${fmtPrecioAR(t.grupo)}`;
+  });
+  const msg = `Hola! Quiero confirmar este pedido en HUBADOR:\n\n${lines.join('\n')}\n\nTotal: ${fmtPrecioAR(totals.grupo)}\n\n¿Cómo hago la transferencia?`;
+  return buildWhatsAppLink(msg);
+}
 
 function isSupabaseConfigured() {
   const u = String(SUPABASE_URL || '').trim();
@@ -6421,7 +6433,15 @@ function MobileMisGrupos() {
                     <strong style={{ fontSize: 18 }}>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
                   {!user ? (
-                    <button type="button" onClick={() => navigate('login')} style={{ width: '100%', background: primary, color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ingresar para continuar</button>
+                    <a
+                      href={buildCartWhatsAppLink(cart, totals)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', background: '#25D366', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', boxSizing: 'border-box' }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
+                      Enviar pedido por WhatsApp
+                    </a>
                   ) : (
                     <button
                       type="button"
@@ -7733,7 +7753,16 @@ function WebMisGrupos() {
                     <strong>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
                   {!user ? (
-                    <button type="button" className="web-btn" onClick={() => navigate('login')}>Ingresar para continuar</button>
+                    <a
+                      href={buildCartWhatsAppLink(cart, totals)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="web-btn"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#25D366', textDecoration: 'none' }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
+                      Enviar pedido por WhatsApp
+                    </a>
                   ) : (
                     <button
                       type="button"
