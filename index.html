@@ -8289,15 +8289,24 @@ function MobileAdminPedidos() {
   };
 
   const handleDeleteOrder = async (orderId) => {
-    if (!window.confirm('¿Eliminar este pedido no pagado? Se descontarán sus kilos del tablero.')) return;
+    if (!window.confirm('¿Eliminar este pedido de prueba? Se descontarán sus kilos del tablero.')) return;
     try {
       if (sb && orderId) {
         const { error } = await sb.from('orders').delete().eq('id', orderId);
-        if (error) console.warn('[HUBADOR] delete order error', error);
+        if (error) {
+          console.warn('[HUBADOR] delete order error', error);
+          if (showToast) showToast('Supabase: borralo también desde Table Editor → orders', 4000);
+        }
       }
+      try {
+        const local = loadHubadorOrders();
+        const filtered = (local || []).filter((o) => o.id !== orderId);
+        saveHubadorOrders(filtered);
+      } catch (e) {}
+
       setRows((prev) => (prev || []).filter((r) => r.id !== orderId));
-      if (showToast) showToast('Pedido eliminado');
-      load();
+      if (showToast) showToast('Pedido eliminado localmente');
+      setTimeout(() => load(), 300);
     } catch (e) {
       if (showToast) showToast('No se pudo eliminar');
     }
