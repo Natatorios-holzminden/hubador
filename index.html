@@ -1621,8 +1621,9 @@ async function checkoutCartByWhatsApp({ phone, nodoId, cart, totals, login, conf
   const nodoLabel = formatNodoLabel(nodoId);
   const cleanPhone = String(phone || '').trim();
   const displayName = cleanPhone || 'Vecino';
+  const activeBarrio = currentZoneName();
   try { localStorage.setItem(HUBADOR_NODO_KEY, nodoId); } catch (e) {}
-  try { saveHubadorProfileExtra({ tel: cleanPhone, nombre: displayName, nodo: nodoLabel }); } catch (e) {}
+  try { saveHubadorProfileExtra({ tel: cleanPhone, nombre: displayName, barrio: activeBarrio, nodo: nodoLabel }); } catch (e) {}
   let effectiveUser = null;
   if (sb) {
     try {
@@ -1635,16 +1636,16 @@ async function checkoutCartByWhatsApp({ phone, nodoId, cart, totals, login, conf
         else session = data.session;
       }
       if (session && session.user) {
-        const row = await upsertProfile(session.user.id, { tel: cleanPhone, nombre: displayName, role: 'user' });
-        effectiveUser = profileFromRow(row, session.user) || { id: session.user.id, tel: cleanPhone, nombre: displayName, role: 'user' };
-        effectiveUser = Object.assign({}, effectiveUser, { nombre: displayName, tel: cleanPhone, nodo: nodoLabel });
+        const row = await upsertProfile(session.user.id, { tel: cleanPhone, nombre: displayName, barrio: activeBarrio, role: 'user' });
+        effectiveUser = profileFromRow(row, session.user) || { id: session.user.id, tel: cleanPhone, nombre: displayName, barrio: activeBarrio, role: 'user' };
+        effectiveUser = Object.assign({}, effectiveUser, { nombre: displayName, tel: cleanPhone, barrio: activeBarrio, nodo: nodoLabel });
         if (typeof login === 'function') login(effectiveUser);
       }
     } catch (e) {
       console.warn('[HUBADOR] No se pudo crear la cuenta por WhatsApp', e);
     }
   }
-  if (!effectiveUser) effectiveUser = { tel: cleanPhone, nombre: displayName, nodo: nodoLabel };
+  if (!effectiveUser) effectiveUser = { tel: cleanPhone, nombre: displayName, barrio: activeBarrio, nodo: nodoLabel };
   if (typeof login === 'function') login(effectiveUser);
   const link = buildCartWhatsAppLink(cart, totals, nodoLabel);
   confirmCartAsOrders({
