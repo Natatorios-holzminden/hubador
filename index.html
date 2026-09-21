@@ -2845,7 +2845,7 @@ function MobileHome() {
           { x: 330, y: 95, lider: 'JA', color: '#14b8a6', status: 'abierto' }];
 
           return (
-            <div onClick={() => navigate('mapa')} style={{ margin: '14px 16px 0', borderRadius: 16, overflow: 'hidden', border: '1px solid #e8eaec', boxShadow: '0 4px 20px rgba(0,0,0,0.10)', cursor: 'pointer', position: 'relative' }}>
+            <div style={{ margin: '14px 16px 0', borderRadius: 16, overflow: 'hidden', border: '1px solid #e8eaec', boxShadow: '0 4px 20px rgba(0,0,0,0.10)', cursor: 'default', position: 'relative' }}>
             <svg width="100%" height="200" viewBox="0 0 370 200" preserveAspectRatio="xMidYMid slice" style={{ display: 'block' }}>
               <defs>
                 <pattern id="mp-blocks" x="0" y="0" width="42" height="32" patternUnits="userSpaceOnUse">
@@ -2969,31 +2969,19 @@ function MobileHome() {
             {/* Live badge */}
             <div style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(6px)', borderRadius: 999, padding: '5px 11px', fontSize: 11, fontWeight: 700, color: '#0e9c82', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 10px rgba(0,0,0,0.12)' }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', animation: 'pulse 1.6s infinite' }} />
-              16 órdenes cerca tuyo
+              Cerca tuyo · {currentZoneName()}
             </div>
 
             {/* Mini stat chips */}
             <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 5 }}>
               <div style={{ background: 'rgba(255,255,255,0.94)', backdropFilter: 'blur(6px)', borderRadius: 8, padding: '4px 8px', fontSize: 10.5, fontWeight: 700, color: '#333', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
-                👑 12 líderes
+                7 ofertas en el mapa
               </div>
-            </div>
-
-            {/* Map controls (decorative) */}
-            <div style={{ position: 'absolute', bottom: 50, right: 10, display: 'flex', flexDirection: 'column', background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', overflow: 'hidden' }}>
-              <div style={{ width: 24, height: 24, display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 600, color: '#555', borderBottom: '1px solid #eee' }}>+</div>
-              <div style={{ width: 24, height: 24, display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 600, color: '#555' }}>−</div>
             </div>
 
             {/* CTA */}
             <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', borderRadius: 999, padding: '6px 13px', fontSize: 11.5, fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: 5 }}>
-              Ver mapa en vivo
-              <span style={{ fontSize: 13 }}>→</span>
-            </div>
-
-            {/* Attribution faux */}
-            <div style={{ position: 'absolute', bottom: 4, left: 8, fontSize: 8, color: 'rgba(0,0,0,0.35)', fontFamily: 'Inter,sans-serif' }}>
-              © CartoDB · HUBADOR
+              Preventa de insumos
             </div>
           </div>);
 
@@ -5516,10 +5504,10 @@ function MobileSeguimiento() {
           </div>
           <button
             type="button"
-            onClick={() => navigate('mapa')}
+            onClick={() => navigate('productos')}
             style={{ width: '100%', border: 'none', borderTop: '1px solid #c8e6d8', background: 'rgba(255,255,255,0.55)', padding: '10px 14px', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, color: primary, cursor: 'pointer' }}
           >
-            Ruta en vivo · Ver mapa →
+            Ver productos en catálogo →
           </button>
         </div>
 
@@ -6853,251 +6841,25 @@ function MobileComparador() {
 // ─── WEB (escritorio): sitio aparte, no toca el mobile ─────────
 
 /** Desktop WebHome hero right card — C3 clean map preview; click → pantalla mapa. */
-function HeroMapPreview({ barrio, onOpen }) {
-  const mapRef = React.useRef(null);
-  const mapInstance = React.useRef(null);
-  const [ready, setReady] = React.useState(false);
-  const [pinCount, setPinCount] = React.useState(0);
-  const label = barrio || DEFAULT_CITY;
-
-  React.useEffect(() => {
-    let cancelled = false;
-    if (!document.getElementById('map-anim-css')) {
-      const style = document.createElement('style');
-      style.id = 'map-anim-css';
-      style.textContent = `
-        @keyframes mapPulse { 0%{transform:scale(1);opacity:.7} 70%{transform:scale(2.2);opacity:0} 100%{transform:scale(1);opacity:0} }
-        .map-pulse { animation: mapPulse 2s ease-out infinite; }
-        .hubador-oferta-pin { background:transparent!important;border:none!important }
-        .hubador-oferta-thumb { background-size:cover!important;background-position:center!important }
-        .hubador-hero-pin { background:transparent!important;border:none!important }
-      `;
-      document.head.appendChild(style);
-    }
-
-    ensureLeafletLoaded().then((L) => {
-      if (cancelled || !mapRef.current || !L) return;
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-      mapRef.current.innerHTML = '';
-
-      const lat = MAP_DEFAULT_USER.lat;
-      const lng = MAP_DEFAULT_USER.lng;
-      const pinTeal = '#0d9488';
-      /* Neighborhood card: ~400–900m feel; fixed zoom (no city-wide fitBounds). */
-      const HERO_PREVIEW_ZOOM = 15;
-      const HERO_PREVIEW_PIN_TARGET = 22;
-      const HERO_PREVIEW_OUTSIDE = 7;
-      const HERO_PREVIEW_MIN_SEP_M = 100;
-      const map = L.map(mapRef.current, {
-        zoomControl: false,
-        attributionControl: false,
-        dragging: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        boxZoom: false,
-        keyboard: false,
-        tap: false,
-        touchZoom: false,
-      }).setView([lat, lng], HERO_PREVIEW_ZOOM);
-      mapInstance.current = map;
-
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd', maxZoom: 19,
-      }).addTo(map);
-
-      const nearCircle = L.circle([lat, lng], {
-        radius: MAP_NEAR_RADIUS_M,
-        color: pinTeal,
-        fillColor: pinTeal,
-        fillOpacity: 0.08,
-        weight: 1.6,
-        opacity: 0.45,
-        dashArray: '6 5',
-      }).addTo(map);
-
-      /*
-       * Hero-only scatter: reuse oferta metadata from buildMapaOfertas50 but
-       * re-place every pin (do not keep near-cluster coords — chips were piling
-       * in the dashed circle). Polar rings + min separation.
-       */
-      const allDemo = buildMapaOfertas50(lat, lng);
-      const placed = [];
-      const tryPlace = (rMin, rMax, angleBias, seed) => {
-        for (let attempt = 0; attempt < 28; attempt++) {
-          const s = seed * 17 + attempt * 41;
-          const ang = ((angleBias + ((s * 137.508) % 360) + attempt * 13.7) % 360) * Math.PI / 180;
-          const t = (((s * 59) % 97) + 3) / 100;
-          const r = rMin + Math.sqrt(t) * (rMax - rMin);
-          const off = metersOffsetToLatLng(lat, Math.cos(ang) * r, Math.sin(ang) * r);
-          const pLat = lat + off.dLat;
-          const pLng = lng + off.dLng;
-          let ok = true;
-          for (let k = 0; k < placed.length; k++) {
-            if (distMetersApprox(pLat, pLng, placed[k].lat, placed[k].lng) < HERO_PREVIEW_MIN_SEP_M) {
-              ok = false;
-              break;
-            }
-          }
-          if (ok) return { lat: pLat, lng: pLng, r };
-        }
-        return null;
-      };
-      /*
-       * Polar slots: angle 0=N, 90=E (right / higher lng), 180=S, 270=W.
-       * Bias ~45–50% toward the east half so the card isn’t empty right of the dashed circle.
-       */
-      const insideSlots = [
-        /* East / NE / SE — denser on the right half of the card */
-        { a: 38, r0: 165, r1: 330 }, { a: 58, r0: 210, r1: 370 },
-        { a: 78, r0: 155, r1: 315 }, { a: 95, r0: 230, r1: 378 },
-        { a: 112, r0: 185, r1: 350 }, { a: 130, r0: 260, r1: 380 },
-        { a: 148, r0: 195, r1: 355 },
-        /* West / NW / SW — fewer; keep a bit of left balance */
-        { a: 200, r0: 160, r1: 305 }, { a: 228, r0: 200, r1: 355 },
-        { a: 255, r0: 175, r1: 330 }, { a: 282, r0: 225, r1: 368 },
-        { a: 308, r0: 190, r1: 345 }, { a: 335, r0: 240, r1: 372 },
-        { a: 185, r0: 250, r1: 365 }, { a: 265, r0: 170, r1: 320 },
-      ];
-      const outsideSlots = [
-        /* Prefer east of the dashed ring (fills empty right of card) */
-        { a: 45, r0: 490, r1: 750 }, { a: 72, r0: 530, r1: 870 },
-        { a: 98, r0: 500, r1: 830 }, { a: 122, r0: 550, r1: 900 },
-        { a: 150, r0: 480, r1: 760 },
-        /* A couple west so layout isn’t one-sided only */
-        { a: 245, r0: 520, r1: 840 }, { a: 305, r0: 490, r1: 780 },
-        { a: 345, r0: 510, r1: 860 },
-      ];
-      const insideN = HERO_PREVIEW_PIN_TARGET - HERO_PREVIEW_OUTSIDE;
-      const previewOfertas = [];
-      let srcIdx = 0;
-      const takeSrc = () => {
-        const src = allDemo[srcIdx % allDemo.length];
-        srcIdx++;
-        return src;
-      };
-      for (let i = 0; i < insideN && i < insideSlots.length; i++) {
-        const slot = insideSlots[i];
-        const pos = tryPlace(slot.r0, slot.r1, slot.a, i + 3);
-        if (!pos) continue;
-        placed.push(pos);
-        const src = takeSrc();
-        previewOfertas.push({ ...src, lat: pos.lat, lng: pos.lng, near: true });
-      }
-      for (let i = 0; i < HERO_PREVIEW_OUTSIDE && i < outsideSlots.length; i++) {
-        const slot = outsideSlots[i];
-        const pos = tryPlace(slot.r0, slot.r1, slot.a, i + 61);
-        if (!pos) continue;
-        placed.push(pos);
-        const src = takeSrc();
-        previewOfertas.push({ ...src, lat: pos.lat, lng: pos.lng, near: false });
-      }
-      /* Compact −N% chip above teal pin (hero teaser only; WebMapa keeps rich markers). */
-      const heroPinPct = (o) => {
-        const raw = o.disc != null ? o.disc
-          : (o.descuento != null ? o.descuento
-          : (typeof o.ahorro === 'number' && o.ahorro > 0 && o.ahorro < 100 ? o.ahorro : null));
-        if (raw != null && isFinite(raw) && raw > 0) {
-          return Math.max(5, Math.min(90, Math.round(Number(raw))));
-        }
-        const s = String(o.id != null ? o.id : (o.prod || 'pin'));
-        let h = 0;
-        for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i);
-        return 30 + (Math.abs(h) % 26); /* 30–55 stable by id */
-      };
-      /* Top ~4 “más económicas” (highest disc): force −70% red chip (rest keep green −N%). */
-      const HERO_TOP_DEAL_N = Math.min(4, previewOfertas.length);
-      const rankedDeals = previewOfertas.map((o, idx) => ({
-        idx,
-        id: String(o.id != null ? o.id : idx),
-        disc: heroPinPct(o),
-      })).sort((a, b) => (b.disc - a.disc) || a.id.localeCompare(b.id));
-      const topDealIdx = new Set(rankedDeals.slice(0, HERO_TOP_DEAL_N).map((r) => r.idx));
-      const heroPinHtml = (pct, isTopDeal) => {
-        const showPct = isTopDeal ? 70 : pct;
-        const bg = isTopDeal ? '#dc2626' : '#16a34a';
-        const shadow = isTopDeal ? 'rgba(220,38,38,.4)' : 'rgba(22,163,74,.35)';
-        const chip = `<span style="display:inline-block;padding:1px 5px;border-radius:999px;background:${bg};color:#fff;font:800 10px/1.25 system-ui,Segoe UI,sans-serif;letter-spacing:-0.02em;white-space:nowrap;box-shadow:0 1px 3px ${shadow};border:1px solid rgba(255,255,255,.85)">−${showPct}%</span>`;
-        const pin = `<div style="position:relative;width:22px;height:30px;margin-top:2px">
-          <span style="position:absolute;left:50%;bottom:1px;width:16px;height:7px;margin-left:-8px;border-radius:50%;background:rgba(13,148,136,.28);filter:blur(2.5px)"></span>
-          <svg width="22" height="30" viewBox="0 0 24 32" aria-hidden="true" style="position:relative;display:block;filter:drop-shadow(0 1px 2px rgba(13,148,136,.35))">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 20 12 20s12-11 12-20C24 5.37 18.63 0 12 0z" fill="${pinTeal}"/>
-            <circle cx="12" cy="11.5" r="4.2" fill="#fff"/>
-          </svg>
-        </div>`;
-        /* Wider wrapper so −70% chip never clips at card edges */
-        return `<div style="display:flex;flex-direction:column;align-items:center;pointer-events:none;width:48px;overflow:visible">${chip}${pin}</div>`;
-      };
-      /* iconSize 48×48; tip of pin ~2px from bottom → anchor [24, 46] keeps latlng on pin tip */
-      previewOfertas.forEach((o, idx) => {
-        const isTopDeal = topDealIdx.has(idx);
-        const pct = heroPinPct(o);
-        const icon = L.divIcon({
-          html: heroPinHtml(pct, isTopDeal),
-          iconSize: [48, 48],
-          iconAnchor: [24, 46],
-          className: 'hubador-hero-pin',
-        });
-        L.marker([o.lat, o.lng], { icon, interactive: false, keyboard: false }).addTo(map);
-      });
-      if (!cancelled) setPinCount(previewOfertas.length);
-
-      const userIcon = L.divIcon({
-        html: `<div style="position:relative;width:16px;height:16px">
-          <div class="map-pulse" style="position:absolute;top:50%;left:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:${pinTeal}"></div>
-          <div style="position:relative;width:16px;height:16px;border-radius:50%;background:${pinTeal};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(13,148,136,.4)"></div>
-        </div>`,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
-        className: 'hubador-hero-pin',
-      });
-      L.marker([lat, lng], { icon: userIcon, interactive: false, zIndexOffset: 1000 }).addTo(map);
-
-      const lockView = () => {
-        if (!mapInstance.current) return;
-        mapInstance.current.invalidateSize();
-        mapInstance.current.setView([lat, lng], HERO_PREVIEW_ZOOM, { animate: false });
-      };
-      lockView();
-      setTimeout(lockView, 80);
-      setTimeout(lockView, 280);
-      if (!cancelled) setReady(true);
-    });
-
-    return () => {
-      cancelled = true;
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-    };
-  }, []);
-
-  const open = () => { if (typeof onOpen === 'function') onOpen(); };
+function HeroMapPreview({ barrio }) {
+  const label = barrio || currentZoneName();
 
   return (
     <div
       className="web-hero-offer web-hero-offer-map"
-      role="button"
-      tabIndex={0}
-      aria-label={`Cerca tuyo · ${label}. Abrir mapa`}
-      onClick={open}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } }}
+      role="region"
+      aria-label={`Cerca tuyo · ${label}`}
+      style={{ cursor: 'default' }}
     >
-      <div ref={mapRef} className="web-hero-offer-map-canvas" aria-hidden="true" />
-      {!ready && <div className="web-hero-offer-map-loading">Cargando mapa…</div>}
+      <div className="web-hero-offer-map-canvas" aria-hidden="true" style={{ background: '#eef2f6 url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h40v40H0z\' fill=\'%23f1f5f9\'/%3E%3Cpath d=\'M0 20h40M20 0v40\' stroke=\'%23e2e8f0\' stroke-width=\'1\'/%3E%3C/svg%3E")' }} />
       <div className="web-hero-offer-map-hit" aria-hidden="true" />
       <div className="web-hero-offer-map-bar">
         Cerca tuyo · <span className="web-hero-offer-map-bar-barrio">{label}</span>
       </div>
       <div className="web-hero-offer-map-caption">
-        <p className="web-hero-offer-map-caption-title">Preventa de merma</p>
+        <p className="web-hero-offer-map-caption-title">Preventa de insumos</p>
         <p className="web-hero-offer-map-caption-sub">Ofertas cerca tuyo, listas para aprovechar.</p>
-        {pinCount > 0 && (
-          <p className="web-hero-offer-map-caption-meta">{pinCount} ofertas en el mapa</p>
-        )}
+        <p className="web-hero-offer-map-caption-meta">7 ofertas en el mapa</p>
       </div>
     </div>
   );
@@ -7200,8 +6962,7 @@ function WebHome() {
           </div>
           <div className="web-hero-art">
             <HeroMapPreview
-              barrio={user?.barrio || DEFAULT_CITY}
-              onOpen={() => navigate('mapa')}
+              barrio={user?.barrio || currentZoneName()}
             />
           </div>
         </div>
@@ -7488,7 +7249,7 @@ function WebHeader({ showSearch = true, authMode = null }) {
           <button type="button" onClick={() => navigate('home')}>Inicio</button>
           <button type="button" onClick={() => navigate('productos')}>Productos</button>
           <button type="button" onClick={() => navigate('mis-grupos')}>Mis grupos</button>
-          <button type="button" onClick={() => navigate('mapa')}>Mapa</button>
+          <button type="button" onClick={() => navigate('productos')}>Mapa</button>
           <button type="button" onClick={() => navigate('perfil')}>Perfil</button>
           {user && user.role === 'admin' && (
             <button type="button" onClick={() => navigate('admin-productos')} style={{ color: '#0d9488', fontWeight: 800, background: '#e6fffa', padding: '4px 10px', borderRadius: 6 }}>🛠️ Admin</button>
@@ -8247,7 +8008,7 @@ function WebAdmin() {
         <div className="web-admin-grid">
           <button type="button" className="web-admin-tile" onClick={() => navigate('admin-grupos')}>Grupos</button>
           <button type="button" className="web-admin-tile" onClick={() => navigate('admin-productos')}>Productos</button>
-          <button type="button" className="web-admin-tile" onClick={() => navigate('mapa')}>Mapa</button>
+          <button type="button" className="web-admin-tile" onClick={() => navigate('productos')}>Catálogo</button>
         </div>
         <div className="web-port web-port-tall"><MobileAdmin /></div>
       </div>
@@ -8583,6 +8344,7 @@ function App() {
       if (APP_MODE && target === 'comparador') target = 'home';
       if (APP_MODE && target === 'grupo-participantes') target = 'mis-grupos';
       if (target === 'historial' || target === 'pedidos') target = 'perfil';
+      if (target === 'mapa') target = 'productos';
       if (!SCREEN_COMPONENTS[target] && !WEB_SCREEN_COMPONENTS[target]) target = 'home';
       return target;
     };
@@ -8747,6 +8509,7 @@ function App() {
     if (APP_MODE && id === 'grupo-participantes') id = 'mis-grupos';
     // Historial / pedidos → Perfil (lista de estados embebida ahí)
     if (id === 'historial' || id === 'pedidos') id = 'perfil';
+    if (id === 'mapa') id = 'productos';
     if (id === active) return;
     setActive(id);
     try { window.__hubadorActive = id; } catch (e) {}
