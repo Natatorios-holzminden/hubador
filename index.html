@@ -1933,35 +1933,50 @@ const CHECK_ROJO = '#dc2626';
 // UI city under brand; future hub assign via IP geo (no GPS permission) + barrio confirm
 const DEFAULT_CITY = 'Buenos Aires';
 /** Nodos barriales de retiro HUBADOR */
+// Zonas de la prueba. Cada una corre su propia orden (barra de kg independiente).
+// TODO: reemplazar "A confirmar" por la dirección/punto de entrega real de cada zona.
 const NODOS_HUBADOR = [
-  { id: 'palermo', nombre: 'Nodo Palermo', address: 'Av. Santa Fe 3200', barrio: 'Palermo' },
-  { id: 'belgrano', nombre: 'Nodo Belgrano', address: 'Av. Cabildo 2200', barrio: 'Belgrano' },
-  { id: 'caballito', nombre: 'Nodo Caballito', address: 'Av. Rivadavia 5100', barrio: 'Caballito' },
-  { id: 'recoleta', nombre: 'Nodo Recoleta', address: 'Av. Pueyrredón y Las Heras', barrio: 'Recoleta' },
-  { id: 'villa-crespo', nombre: 'Nodo Villa Crespo', address: 'Av. Corrientes 4800', barrio: 'Villa Crespo' },
-  { id: 'almagro', nombre: 'Nodo Almagro', address: 'Av. Medrano 450', barrio: 'Almagro' },
-  { id: 'colegiales', nombre: 'Nodo Colegiales', address: 'Av. Federico Lacroze 2400', barrio: 'Colegiales' },
-  { id: 'nunez', nombre: 'Nodo Núñez', address: 'Av. del Libertador 7200', barrio: 'Núñez' },
-  { id: 'chacarita', nombre: 'Nodo Chacarita', address: 'Av. Dorrego 1100', barrio: 'Chacarita' },
+  { id: 'belgrano', nombre: 'Nodo Belgrano', address: 'A confirmar', barrio: 'Belgrano' },
+  { id: 'garin', nombre: 'Nodo Garín', address: 'A confirmar', barrio: 'Garín' },
 ];
-const DEFAULT_HUB = { name: 'Nodo Palermo', address: 'Av. Santa Fe 3200', barrio: 'Palermo' };
+const DEFAULT_HUB = { name: 'Nodo Belgrano', address: 'A confirmar', barrio: 'Belgrano' };
 /** Zona de entrega elegida: se recuerda en el navegador y se puede fijar con un link de publicidad,
  *  ej. hubador.com/?nodo=palermo  → ya queda preseleccionada para quien entra desde el aviso. */
 const HUBADOR_NODO_KEY = 'hubador_nodo_id';
 (function captureNodoFromUrl() {
   try {
-    const n = new URLSearchParams(location.search).get('nodo');
+    const qs = new URLSearchParams(location.search);
+    const n = (qs.get('hub') || qs.get('nodo') || '').toLowerCase();
     if (n && NODOS_HUBADOR.some((x) => x.id === n)) localStorage.setItem(HUBADOR_NODO_KEY, n);
   } catch (e) {}
 })();
 function getSavedNodoId() {
-  try { return localStorage.getItem(HUBADOR_NODO_KEY) || ''; } catch (e) { return ''; }
+  try {
+    const v = localStorage.getItem(HUBADOR_NODO_KEY) || '';
+    return NODOS_HUBADOR.some((x) => x.id === v) ? v : '';
+  } catch (e) { return ''; }
+}
+/** Cambia la zona activa y avisa a la app para que las barras/kg se recalculen para esa zona. */
+function setSavedNodoId(id) {
+  try { if (id) localStorage.setItem(HUBADOR_NODO_KEY, id); } catch (e) {}
+  try { window.dispatchEvent(new CustomEvent('hubador_progress_updated')); } catch (e) {}
+}
+/** Nombre de la zona activa ("Belgrano" / "Garín"); si no hay ninguna, "Buenos Aires". */
+function currentZoneName() {
+  const n = NODOS_HUBADOR.find((x) => x.id === getSavedNodoId());
+  return n ? n.barrio : 'Buenos Aires';
+}
+/** id de zona a partir del texto guardado en el pedido ("Nodo Belgrano · A confirmar"). */
+function nodoIdFromLabel(label) {
+  const s = String(label || '').toLowerCase();
+  const n = NODOS_HUBADOR.find((x) => s.includes(x.nombre.toLowerCase()) || s.includes(x.id));
+  return n ? n.id : '';
 }
 function NodoSelect({ value, onChange, style }) {
   return (
     <select
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => { onChange(e.target.value); setSavedNodoId(e.target.value); }}
       style={Object.assign({ width: '100%', height: 44, border: '1.5px solid #cbd5e1', borderRadius: 10, padding: '0 10px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', background: '#fff', marginBottom: 8, color: value ? '#0f172a' : '#94a3b8' }, style || {})}
     >
       <option value="">📍 Elegí tu zona de entrega</option>
@@ -2036,8 +2051,10 @@ const HUBADOR_PROGRESS_KEY = 'hubadorProgress'; // fallback: solo si Supabase no
 
 /** Progreso REAL: kg confirmados por producto, sumados en Supabase (vista product_progress)
  *  a partir de la tabla orders — compartido para todos, no por navegador. */
-let HUBADOR_REAL_PROGRESS = {};
+let HUBADOR_REAL_PROGRESS = {};   // kg por producto, sumando todas las zonas (para quien no tiene zona)
 let HUBADOR_REAL_MEMBERS = {};
+let HUBADOR_ZONE_PROGRESS = {};   // { zona: { producto: kg } } — cada zona tiene SU PROPIA orden
+let HUBADOR_ZONE_MEMBERS = {};
 async function syncProductProgressFromSupabase() {
   if (!sb) return;
   try {
@@ -2045,12 +2062,23 @@ async function syncProductProgressFromSupabase() {
     if (error || !Array.isArray(data)) return;
     const map = {};
     const membersMap = {};
+    const zoneMap = {};
+    const zoneMembers = {};
     data.forEach((row) => {
-      map[row.product_name] = Number(row.filled_kg) || 0;
-      membersMap[row.product_name] = Number(row.members) || 0;
+      const kg = Number(row.filled_kg) || 0;
+      const mem = Number(row.members) || 0;
+      map[row.product_name] = (map[row.product_name] || 0) + kg;
+      membersMap[row.product_name] = (membersMap[row.product_name] || 0) + mem;
+      const z = row.zona || '';
+      if (z) {
+        (zoneMap[z] = zoneMap[z] || {})[row.product_name] = kg;
+        (zoneMembers[z] = zoneMembers[z] || {})[row.product_name] = mem;
+      }
     });
     HUBADOR_REAL_PROGRESS = map;
     HUBADOR_REAL_MEMBERS = membersMap;
+    HUBADOR_ZONE_PROGRESS = zoneMap;
+    HUBADOR_ZONE_MEMBERS = zoneMembers;
     window.dispatchEvent(new CustomEvent('hubador_progress_updated'));
   } catch (e) {
     console.warn('[HUBADOR] No se pudo sincronizar el progreso real', e);
@@ -2108,7 +2136,11 @@ function resolveGoalForProduct(name) {
 /** Kg juntados de un producto: reales desde Supabase si está configurado; si no, demo local. */
 function getGroupFilled(name) {
   const goal = resolveGoalForProduct(name);
-  if (sb) return Math.min(goal, Math.max(0, Math.round(HUBADOR_REAL_PROGRESS[name] || 0)));
+  if (sb) {
+    const zone = getSavedNodoId();
+    const real = zone ? ((HUBADOR_ZONE_PROGRESS[zone] || {})[name] || 0) : (HUBADOR_REAL_PROGRESS[name] || 0);
+    return Math.min(goal, Math.max(0, Math.round(real)));
+  }
   const map = loadHubadorProgress();
   const v = map[name];
   if (v != null && !Number.isNaN(Number(v))) return Math.min(goal, Math.max(0, Math.round(Number(v))));
@@ -2127,7 +2159,14 @@ function bumpGroupFilled(name, qty) {
   const goal = resolveGoalForProduct(name);
   if (sb) {
     // Feedback inmediato en pantalla; syncProductProgressFromSupabase() trae el número real después.
-    HUBADOR_REAL_PROGRESS[name] = (HUBADOR_REAL_PROGRESS[name] || 0) + Math.max(0, Number(qty) || 0);
+    const add = Math.max(0, Number(qty) || 0);
+    HUBADOR_REAL_PROGRESS[name] = (HUBADOR_REAL_PROGRESS[name] || 0) + add;
+    const zone = getSavedNodoId();
+    if (zone) {
+      HUBADOR_ZONE_PROGRESS[zone] = HUBADOR_ZONE_PROGRESS[zone] || {};
+      HUBADOR_ZONE_PROGRESS[zone][name] = (HUBADOR_ZONE_PROGRESS[zone][name] || 0) + add;
+      return Math.min(goal, Math.round(HUBADOR_ZONE_PROGRESS[zone][name]));
+    }
     return Math.min(goal, Math.round(HUBADOR_REAL_PROGRESS[name]));
   }
   return setGroupFilled(name, getGroupFilled(name) + Math.max(0, Number(qty) || 0));
@@ -2139,7 +2178,10 @@ function groupProgressView(name) {
   const pct = Math.min(100, Math.round(filled / goal * 100));
   const almost = missing > 0 && missing <= Math.max(1, Math.round(goal * 0.15));
   // Vecinos reales (personas distintas con pedido). Sin Supabase (demo local) se estima por kg.
-  const members = sb ? (HUBADOR_REAL_MEMBERS[name] || 0) : Math.max(1, Math.round(filled / 10));
+  const zoneNow = getSavedNodoId();
+  const members = sb
+    ? (zoneNow ? ((HUBADOR_ZONE_MEMBERS[zoneNow] || {})[name] || 0) : (HUBADOR_REAL_MEMBERS[name] || 0))
+    : Math.max(1, Math.round(filled / 10));
   return { filled, missing, pct, almost, goal, members };
 }
 
@@ -3543,12 +3585,13 @@ function maybeInsertOrdersRemote(newRows) {
         total: o.totalN != null ? o.totalN : null,
         status: o.status || 'en_formacion',
         nodo: o.nodo || null,
+        zona: nodoIdFromLabel(o.nodo) || null,
       }));
       let { error } = await sb.from('orders').insert(payload);
-      // Si todavía no corriste supabase-nodos.sql, la columna "nodo" no existe: reintentamos sin ella
+      // Si todavía no corriste el SQL de zonas, faltan las columnas "nodo"/"zona": reintentamos sin ellas
       // para no perder el pedido.
-      if (error && /nodo/i.test(error.message || '')) {
-        ({ error } = await sb.from('orders').insert(payload.map(({ nodo, ...rest }) => rest)));
+      if (error && /nodo|zona/i.test(error.message || '')) {
+        ({ error } = await sb.from('orders').insert(payload.map(({ nodo, zona, ...rest }) => rest)));
       }
       if (error) console.warn('[HUBADOR] orders insert (opcional)', error.message || error);
     } catch (e) { console.warn('[HUBADOR] orders insert skipped', e); }
@@ -5078,7 +5121,7 @@ function MobileGrupoDetalle() {
           <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, borderRadius: '50%', background: checkBg(g.precioActualizado), color: '#fff', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 800, boxShadow: checkShadow(g.precioActualizado), pointerEvents: 'none' }}>✓</div>
         </div>
         <div style={{ padding: '8px 16px 88px' }}>
-          <div style={{ fontSize: 11, color: '#888', marginBottom: 1 }}>Compra en conjunto · 📍 Buenos Aires</div>
+          <div style={{ fontSize: 11, color: '#888', marginBottom: 1 }}>Compra en conjunto · 📍 {currentZoneName()}</div>
           <h1 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{g.product}</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
             <span style={{ fontSize: 12.5, color: '#666' }}>Individual</span>
@@ -5121,7 +5164,7 @@ function MobileGrupoDetalle() {
                   <Countdown deadline={getDeadline(g.product, g.deadlineHrs || 48)} compact />
                 </div>
                 <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'rgba(255,255,255,0.72)', border: `1px solid ${border}`, borderRadius: 8, padding: '5px 8px', fontSize: 11, fontWeight: 600, color: '#3d5248' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>📍 Buenos Aires</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>📍 {currentZoneName()}</span>
                   <span style={{ opacity: 0.35 }}>·</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>👥 {vecinosLabel(membersCount)}</span>
                 </div>
@@ -6517,7 +6560,7 @@ function MobileMisGrupos() {
                           <div style={{ fontSize: 11.5, color: '#888', margin: '3px 0' }}>
                             {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
                             {t.oldN > 0 && <> · <s>{fmtPrecioAR(t.oldN)}</s> Individual</>}
-                            {' '}· 📍 Buenos Aires
+                            {' '}· 📍 {currentZoneName()}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 8 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f5f7', borderRadius: 999, padding: '4px 6px' }}>
@@ -7766,7 +7809,7 @@ function WebGrupoDetalle() {
             <span className={'web-check' + (g.precioActualizado ? '' : ' web-check-red')}>✓</span>
           </div>
           <div className="web-detail-body">
-            <div className="web-muted">Compra en conjunto · 📍 Buenos Aires</div>
+            <div className="web-muted">Compra en conjunto · 📍 {currentZoneName()}</div>
             <h1>{g.product}</h1>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 4px' }}>
@@ -7786,7 +7829,7 @@ function WebGrupoDetalle() {
                   <div style={{ marginTop: 6 }}><Countdown deadline={getDeadline(g.product, g.deadlineHrs)} compact /></div>
                 )}
                 <div className="web-vecinos-chip" style={{ marginTop: 6 }}>
-                  <span>📍 Buenos Aires</span>
+                  <span>📍 {currentZoneName()}</span>
                   <span className="sep">·</span>
                   <span>👥 {vecinosLabel(membersCount, true)}</span>
                 </div>
@@ -7945,7 +7988,7 @@ function WebMisGrupos() {
                           <p className="web-cart-item-meta">
                             {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
                             {t.oldN > 0 && <> · <s className="web-cart-coto">{fmtPrecioAR(t.oldN)}</s> Individual</>}
-                            {' '}· 📍 Buenos Aires
+                            {' '}· 📍 {currentZoneName()}
                           </p>
                           <div className="web-cart-qty">
                             <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(minQ, t.qty - step))}>−</button>
