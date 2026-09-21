@@ -1611,6 +1611,42 @@ function buildCartWhatsAppLink(cart, totals) {
   return buildWhatsAppLink(msg);
 }
 
+/** Confirma el carrito por WhatsApp sin pedir cuenta: crea (o reusa) una sesión anónima de
+ *  Supabase para este dispositivo, guarda el teléfono en el perfil, deja el pedido en
+ *  "Grupos activos" (igual que el checkout con cuenta real) y abre WhatsApp con todo cargado.
+ *  El reconocimiento es SOLO por dispositivo (la sesión anónima queda guardada en este navegador),
+ *  nunca por tipear el número — así nadie puede "entrar" viendo pedidos ajenos con solo saber el tel. */
+async function checkoutCartByWhatsApp({ phone, cart, totals, login, confirmCartAsOrders }) {
+  let effectiveUser = null;
+  if (sb) {
+    try {
+      let session = null;
+      const { data: sessionData } = await sb.auth.getSession();
+      session = sessionData && sessionData.session;
+      if (!session) {
+        const { data, error } = await sb.auth.signInAnonymously();
+        if (error) console.warn('[HUBADOR] signInAnonymously falló (¿está habilitado en Supabase?)', error);
+        else session = data.session;
+      }
+      if (session && session.user) {
+        const row = await upsertProfile(session.user.id, { tel: phone, nombre: 'Vecino', role: 'user' });
+        effectiveUser = profileFromRow(row, session.user) || { id: session.user.id, tel: phone, nombre: 'Vecino', role: 'user' };
+        if (typeof login === 'function') login(effectiveUser);
+      }
+    } catch (e) {
+      console.warn('[HUBADOR] No se pudo crear la cuenta por WhatsApp', e);
+    }
+  }
+  if (!effectiveUser) effectiveUser = { tel: phone, nombre: 'Vecino' };
+  const link = buildCartWhatsAppLink(cart, totals);
+  confirmCartAsOrders({
+    status: 'en_formacion',
+    toast: 'Pedido guardado en Grupos activos. Confirmalo por WhatsApp para coordinar la entrega.',
+    userOverride: effectiveUser,
+  });
+  window.open(link, '_blank', 'noopener,noreferrer');
+}
+
 function isSupabaseConfigured() {
   const u = String(SUPABASE_URL || '').trim();
   const k = String(SUPABASE_ANON || '').trim();
@@ -6324,11 +6360,25 @@ function HubadorMpDemoModal(props) {
 function MobileMisGrupos() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { cart, user, orders, removeFromCart, updateCartQty, startMpDemoPay, misGruposTab, setMisGruposTab, setSelectedOrder } = React.useContext(SelectionContext);
+  const { cart, user, orders, removeFromCart, updateCartQty, startMpDemoPay, misGruposTab, setMisGruposTab, setSelectedOrder, login, confirmCartAsOrders, showToast } = React.useContext(SelectionContext);
   const tab = misGruposTab === 'activos' ? 'activos' : 'carrito';
   const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
   const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
+  const [waPhone, setWaPhone] = React.useState('');
+  const [waSending, setWaSending] = React.useState(false);
+  const handleWhatsAppCheckout = async () => {
+    if (waPhone.replace(/\D/g, '').length < 8) {
+      if (showToast) showToast('Ingresá tu WhatsApp para continuar');
+      return;
+    }
+    setWaSending(true);
+    try {
+      await checkoutCartByWhatsApp({ phone: waPhone.trim(), cart, totals, login, confirmCartAsOrders });
+    } finally {
+      setWaSending(false);
+    }
+  };
   const email = user && user.email;
   const activos = ordersForProfile(orders, email).filter((o) => isActivoPedidoStatus(o.status));
   const segBtn = (id, label, count) => {
@@ -6421,15 +6471,25 @@ function MobileMisGrupos() {
                     <s style={{ color: '#e0524a', fontWeight: 700, fontSize: 16 }}>{fmtPrecioAR(totals.coto)}</s>
                   </div>
                   {!user ? (
-                    <a
-                      href={buildCartWhatsAppLink(cart, totals)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', background: '#25D366', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', boxSizing: 'border-box' }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
-                      Enviar pedido por WhatsApp
-                    </a>
+                    <>
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        value={waPhone}
+                        onChange={(e) => setWaPhone(e.target.value)}
+                        placeholder="Tu WhatsApp (ej: 1157314429)"
+                        style={{ width: '100%', height: 44, border: '1.5px solid #cbd5e1', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', marginBottom: 8 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleWhatsAppCheckout}
+                        disabled={waSending}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', background: waSending ? '#94a3b8' : '#25D366', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: waSending ? 'default' : 'pointer', textDecoration: 'none', boxSizing: 'border-box' }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
+                        {waSending ? 'Guardando...' : 'Enviar pedido por WhatsApp'}
+                      </button>
+                    </>
                   ) : (
                     <button
                       type="button"
@@ -7737,12 +7797,26 @@ function WebGrupoDetalle() {
 
 function WebMisGrupos() {
   const navigate = React.useContext(NavContext);
-  const { user, cart, orders, removeFromCart, updateCartQty, startMpDemoPay, misGruposTab, setMisGruposTab, setSelectedOrder } = React.useContext(SelectionContext);
+  const { user, cart, orders, removeFromCart, updateCartQty, startMpDemoPay, misGruposTab, setMisGruposTab, setSelectedOrder, login, confirmCartAsOrders, showToast } = React.useContext(SelectionContext);
   const tab = misGruposTab === 'activos' ? 'activos' : 'carrito';
   const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
   const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
   const activos = ordersForProfile(orders, user && user.email).filter((o) => isActivoPedidoStatus(o.status));
+  const [waPhone, setWaPhone] = React.useState('');
+  const [waSending, setWaSending] = React.useState(false);
+  const handleWhatsAppCheckout = async () => {
+    if (waPhone.replace(/\D/g, '').length < 8) {
+      if (showToast) showToast('Ingresá tu WhatsApp para continuar');
+      return;
+    }
+    setWaSending(true);
+    try {
+      await checkoutCartByWhatsApp({ phone: waPhone.trim(), cart, totals, login, confirmCartAsOrders });
+    } finally {
+      setWaSending(false);
+    }
+  };
 
   return (
     <WebShell title="Carrito · Mis grupos">
@@ -7820,16 +7894,26 @@ function WebMisGrupos() {
                   </div>
                   <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 4 }}><span>Si compraras en Solo</span><s>{fmtPrecioAR(totals.coto)}</s></div>
                   {!user ? (
-                    <a
-                      href={buildCartWhatsAppLink(cart, totals)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="web-btn"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#25D366', textDecoration: 'none' }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
-                      Enviar pedido por WhatsApp
-                    </a>
+                    <>
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        value={waPhone}
+                        onChange={(e) => setWaPhone(e.target.value)}
+                        placeholder="Tu WhatsApp (ej: 1157314429)"
+                        style={{ width: '100%', height: 42, border: '1.5px solid #cbd5e1', borderRadius: 8, padding: '0 12px', fontFamily: 'inherit', fontSize: 13.5, boxSizing: 'border-box', marginBottom: 8 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleWhatsAppCheckout}
+                        disabled={waSending}
+                        className="web-btn"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: waSending ? '#94a3b8' : '#25D366', textDecoration: 'none', cursor: waSending ? 'default' : 'pointer' }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
+                        {waSending ? 'Guardando...' : 'Enviar pedido por WhatsApp'}
+                      </button>
+                    </>
                   ) : (
                     <button
                       type="button"
@@ -8311,8 +8395,9 @@ function App() {
       return;
     }
     const status = (opts && opts.status) || 'pagado';
+    const effectiveUser = (opts && opts.userOverride) || user;
     const prev = loadHubadorOrders();
-    const next = mergeCartIntoOrders(prev, cart, user, { status });
+    const next = mergeCartIntoOrders(prev, cart, effectiveUser, { status });
     saveHubadorOrders(next);
     setOrders(next);
     const stampFloor = Date.now() - 5000;
