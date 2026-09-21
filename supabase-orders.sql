@@ -38,6 +38,11 @@ create policy "orders_update_own"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+drop policy if exists "orders_delete_policy" on public.orders;
+create policy "orders_delete_policy"
+  on public.orders for delete
+  using (true);
+
 -- Si ya existe is_admin() (supabase-schema.sql), admins pueden leer todo
 do $$
 begin
