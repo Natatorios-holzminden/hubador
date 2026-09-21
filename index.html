@@ -3623,6 +3623,10 @@ function maybeInsertOrdersRemote(newRows) {
         ({ error } = await sb.from('orders').insert(payload.map(({ nodo, zona, ...rest }) => rest)));
       }
       if (error) console.warn('[HUBADOR] orders insert (opcional)', error.message || error);
+    } catch (e) { console.warn('[HUBADOR] orders insert skipped', e); }
+  })();
+}
+
 async function fetchUserOrdersRemote(user) {
   if (!sb || !user) return [];
   try {
