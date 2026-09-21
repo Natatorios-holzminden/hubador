@@ -1940,10 +1940,10 @@ const DEFAULT_CITY = 'Buenos Aires';
 // Zonas de la prueba. Cada una corre su propia orden (barra de kg independiente).
 // TODO: reemplazar "A confirmar" por la dirección/punto de entrega real de cada zona.
 const NODOS_HUBADOR = [
-  { id: 'garin', nombre: 'HUB Garín', address: 'Plaza de Garín', barrio: 'Garín', lat: -34.4239, lng: -58.7554 },
   { id: 'belgrano', nombre: 'HUB Belgrano', address: 'Plaza Belgrano', barrio: 'Belgrano', lat: -34.5620, lng: -58.4568 },
+  { id: 'garin', nombre: 'HUB Garín', address: 'Plaza de Garín', barrio: 'Garín', lat: -34.4239, lng: -58.7554 },
 ];
-const DEFAULT_HUB = { name: 'HUB Garín', address: 'Plaza de Garín', barrio: 'Garín', lat: -34.4239, lng: -58.7554 };
+const DEFAULT_HUB = { name: 'HUB Belgrano', address: 'Plaza Belgrano', barrio: 'Belgrano', lat: -34.5620, lng: -58.4568 };
 /** Zona de entrega elegida: se recuerda en el navegador y se puede fijar con un link de publicidad,
  *  ej. hubador.com/?nodo=palermo  → ya queda preseleccionada para quien entra desde el aviso. */
 const HUBADOR_NODO_KEY = 'hubador_nodo_id';
@@ -1973,10 +1973,10 @@ function setSavedNodoId(id) {
   try { if (id) localStorage.setItem(HUBADOR_NODO_KEY, id); } catch (e) {}
   try { window.dispatchEvent(new CustomEvent('hubador_progress_updated')); } catch (e) {}
 }
-/** Nombre de la zona activa ("Garín" / "Belgrano"); si no hay ninguna, "Garín". */
+/** Nombre de la zona activa ("Belgrano" / "Garín"); si no hay ninguna, "Belgrano". */
 function currentZoneName() {
   const n = NODOS_HUBADOR.find((x) => x.id === getSavedNodoId());
-  return n ? n.barrio : 'Garín';
+  return n ? n.barrio : 'Belgrano';
 }
 /** id de zona a partir del texto guardado en el pedido ("HUB Belgrano · A confirmar"). */
 function nodoIdFromLabel(label) {
