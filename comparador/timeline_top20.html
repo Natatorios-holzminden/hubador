@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Línea de Tiempo - Evolución de Precios Top 20</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f0f0f; color: #e0e0e0; font-family: "Segoe UI", sans-serif; }
+    .top-bar { background: #1a1a2e; border-bottom: 2px solid #4a90e2; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 100; }
+    .top-bar h1 { font-size: 1.2rem; color: #4a90e2; display: flex; align-items: center; gap: 10px; }
+    .badge { background: #4a90e2; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: .75rem; }
+    .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { background: #2a2a3e; color: #ccc; border: 1px solid #444; padding: 7px 14px; border-radius: 6px; text-decoration: none; font-size: .85rem; display: inline-flex; align-items: center; gap: 6px; transition: all .2s; cursor: pointer; }
+    .btn:hover { background: #3a3a5e; color: #fff; border-color: #4a90e2; }
+    .filter-bar { background: #161626; padding: 12px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #222; }
+    .filter-bar label { color: #888; font-size: .85rem; }
+    .pill { padding: 6px 16px; border-radius: 20px; border: 1px solid #444; background: #1e1e2e; color: #aaa; cursor: pointer; font-size: .82rem; transition: all .2s; }
+    .pill.active { background: #4a90e2; color: #fff; border-color: #4a90e2; }
+    .summary-row { display: flex; gap: 12px; padding: 16px 24px; flex-wrap: wrap; background: #111; }
+    .summary-card { flex: 1; min-width: 160px; background: #1a1a2e; border-radius: 10px; padding: 14px; border-left: 4px solid #4a90e2; }
+    .summary-card .slabel { font-size: .75rem; color: #888; margin-bottom: 4px; }
+    .summary-card .svalue { font-size: 1.4rem; font-weight: bold; color: #fff; }
+    .summary-card .ssub { font-size: .72rem; color: #666; margin-top: 2px; }
+    .timeline-dates { display: flex; align-items: center; padding: 10px 24px; gap: 6px; overflow-x: auto; background: #0f0f1e; border-bottom: 1px solid #222; }
+    .tdate { background: #1e1e2e; border: 1px solid #333; border-radius: 20px; padding: 5px 14px; font-size: .8rem; color: #aaa; white-space: nowrap; }
+    .tdate.highlight { background: #4a90e2; color: #fff; border-color: #4a90e2; font-weight: bold; }
+    .tdate-arrow { color: #444; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; padding: 20px 24px; }
+    .product-card { background: #1a1a2e; border-radius: 12px; overflow: hidden; border: 1px solid #2a2a3e; transition: border-color .2s; }
+    .product-card:hover { border-color: #4a90e2; }
+    .product-card.verdura { border-top: 3px solid #27ae60; }
+    .product-card.fruta { border-top: 3px solid #e67e22; }
+    .card-header { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #12121e; }
+    .card-img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid #333; background: #111; }
+    .card-img-ph { width: 64px; height: 64px; border-radius: 8px; background: #222; display: none; align-items: center; justify-content: center; font-size: 1.8rem; }
+    .card-title-block { flex: 1; }
+    .card-title { font-size: 1rem; font-weight: 700; color: #eee; margin-bottom: 2px; }
+    .card-cat { font-size: .72rem; text-transform: uppercase; color: #666; }
+    .card-latest { text-align: right; }
+    .price-now { font-size: 1.2rem; font-weight: bold; color: #fff; }
+    .price-label { font-size: .65rem; color: #666; }
+    .delta-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: .75rem; font-weight: bold; }
+    .delta-up { background: rgba(231,76,60,.2); color: #e74c3c; }
+    .delta-down { background: rgba(39,174,96,.2); color: #27ae60; }
+    .delta-same { background: rgba(150,150,150,.15); color: #888; }
+    .card-chart-wrap { padding: 12px 14px 14px; }
+    .price-timeline { display: flex; gap: 6px; justify-content: space-between; margin-bottom: 10px; }
+    .pt-item { flex: 1; background: #111; border-radius: 6px; padding: 6px 8px; text-align: center; border: 1px solid #222; }
+    .pt-item .pt-date { font-size: .62rem; color: #666; margin-bottom: 2px; }
+    .pt-item .pt-price { font-size: .9rem; font-weight: bold; color: #ddd; }
+    .pt-item .pt-price.nv { color: #444; font-size: .75rem; }
+    .pt-item.current { border-color: #4a90e2; background: #0d1a2e; }
+    .pt-item.current .pt-price { color: #4a90e2; }
+    .sparkwrap { position: relative; height: 85px; }
+    footer { text-align: center; padding: 20px; color: #444; font-size: .75rem; border-top: 1px solid #1a1a2e; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1><i class="fas fa-chart-line"></i> Línea de Tiempo — Evolución Precios Coto <span class="badge">Top 20</span></h1>
+  <div class="nav-links">
+    <a href="index.html" class="btn"><i class="fas fa-arrow-left"></i> Comparador</a>
+    <a href="coto_top20_galeria.html" class="btn"><i class="fas fa-camera"></i> Fotos Coto</a>
+    <a href="coto_chart_top20.html" class="btn" target="_blank"><i class="fas fa-chart-bar"></i> Gráfico Barras</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <label><i class="fas fa-filter"></i> Filtrar:</label>
+  <button class="pill active" onclick="filterProducts('todos',this)">Todos (20)</button>
+  <button class="pill" onclick="filterProducts('verdura',this)">🥦 Verduras (10)</button>
+  <button class="pill" onclick="filterProducts('fruta',this)">🍊 Frutas (10)</button>
+</div>
+
+<div class="summary-row" id="summaryRow"></div>
+
+<div class="timeline-dates">
+  <span class="tdate">11-Ago</span><span class="tdate-arrow">→</span>
+  <span class="tdate">19-Ago</span><span class="tdate-arrow">→</span>
+  <span class="tdate">16-Sep</span><span class="tdate-arrow">→</span>
+  <span class="tdate highlight">17-Sep ★ último dato</span>
+</div>
+
+<div class="products-grid" id="productsGrid"></div>
+
+<footer>Datos: Coto Digital scraper — Hubador · 2026 | Última actualización: 17-Sep-2026</footer>
+
+<script>
+const FECHAS = ['11-Ago','19-Ago','16-Sep','17-Sep'];
+const PRODUCTS = [
+  {id:'papa_spunta',nombre:'Papa Spunta',cat:'verdura',emoji:'🥔',img:'evidencias/coto_top20/coto_papa_spunta.png',coto:[1999,2299,2299,2294]},
+  {id:'tomate_redondo',nombre:'Tomate Redondo',cat:'verdura',emoji:'🍅',img:'evidencias/coto_top20/coto_tomate_redondo.png',coto:[2490,2399,3299,3299]},
+  {id:'cebolla_valenciani',nombre:'Cebolla Valenciani',cat:'verdura',emoji:'🧅',img:'evidencias/coto_top20/coto_cebolla_valenciani.png',coto:[1090,null,2999,3299]},
+  {id:'zanahoria_chantenay',nombre:'Zanahoria Chantenay',cat:'verdura',emoji:'🥕',img:'evidencias/coto_top20/coto_zanahoria_chantenay.png',coto:[1290,1290,1899,1999]},
+  {id:'zapallo_tetsukab',nombre:'Zapallo Tetsukabuto',cat:'verdura',emoji:'🎃',img:'evidencias/coto_top20/coto_zapallo_tetsukab..png',coto:[1490,null,2799,1899]},
+  {id:'zapallito_redondo',nombre:'Zapallito Redondo',cat:'verdura',emoji:'🫑',img:'evidencias/coto_top20/coto_zapallito_redondo.png',coto:[2999,2999,2999,2549]},
+  {id:'acelga',nombre:'Acelga',cat:'verdura',emoji:'🥬',img:'evidencias/coto_top20/coto_acelga.png',coto:[1890,1890,1299,1099]},
+  {id:'lechuga_criolla',nombre:'Lechuga Criolla',cat:'verdura',emoji:'🥗',img:'evidencias/coto_top20/coto_lechuga_criolla.png',coto:[2590,2590,2699,2699]},
+  {id:'batata_arapey',nombre:'Batata Arapey',cat:'verdura',emoji:'🍠',img:'evidencias/coto_top20/coto_batata_arapey.png',coto:[1390,1490,2399,2039]},
+  {id:'pepino',nombre:'Pepino',cat:'verdura',emoji:'🥒',img:'evidencias/coto_top20/coto_pepino.png',coto:[2190,2190,2499,2124]},
+  {id:'banana_cavendish',nombre:'Banana Cavendish',cat:'fruta',emoji:'🍌',img:'evidencias/coto_top20/coto_banana_cavendish.png',coto:[null,5405,2499,1954]},
+  {id:'manzana_red_delicious',nombre:'Manzana Red Delicious',cat:'fruta',emoji:'🍎',img:'evidencias/coto_top20/coto_manzana_red_delicious.png',coto:[null,2890,2890,2899]},
+  {id:'naranja_salustiana',nombre:'Naranja Salustiana',cat:'fruta',emoji:'🍊',img:'evidencias/coto_top20/coto_naranja_salustiana.png',coto:[null,1490,899,899]},
+  {id:'mandarinamurcot',nombre:'Mandarina Murcot',cat:'fruta',emoji:'🍊',img:'evidencias/coto_top20/coto_mandarinamurcot.png',coto:[null,2077,999,1299]},
+  {id:'pera_packhams',nombre:"Pera Packham's",cat:'fruta',emoji:'🍐',img:'evidencias/coto_top20/coto_pera_packhams.png',coto:[null,3489,2299,2549]},
+  {id:'limon_eureka',nombre:'Limón Eureka',cat:'fruta',emoji:'🍋',img:'evidencias/coto_top20/coto_limon_eureka.png',coto:[null,1395,1499,1299]},
+  {id:'frutilla',nombre:'Frutilla',cat:'fruta',emoji:'🍓',img:'evidencias/coto_top20/coto_frutilla.png',coto:[null,18612,12796,3199]},
+  {id:'pomelo_starruby',nombre:'Pomelo Star Ruby',cat:'fruta',emoji:'🍈',img:'evidencias/coto_top20/coto_pomelo_starruby.png',coto:[null,1890,999,999]},
+  {id:'palta_hass',nombre:'Palta Hass',cat:'fruta',emoji:'🥑',img:'evidencias/coto_top20/coto_palta_hass.png',coto:[null,11332,7999,7999]},
+  {id:'kiwi',nombre:'Kiwi',cat:'fruta',emoji:'🥝',img:'evidencias/coto_top20/coto_kiwi.png',coto:[null,8536,7999,7999]}
+];
+
+function fmt(v){return v!=null?'$'+Number(v).toLocaleString('es-AR'):'—';}
+function deltaPct(b,h){if(b==null||h==null)return null;return((h-b)/b*100).toFixed(1);}
+function dClass(p){if(p===null)return 'delta-same';if(p>0)return 'delta-up';if(p<0)return 'delta-down';return 'delta-same';}
+function dStr(p){if(p===null)return '—';if(p>0)return '▲ +'+p+'%';if(p<0)return '▼ '+p+'%';return '= 0%';}
+
+function renderSummary(){
+  const vp=PRODUCTS.filter(p=>p.cat==='verdura');
+  const fp=PRODUCTS.filter(p=>p.cat==='fruta');
+  function avg(arr){const v=arr.filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
+  const vB=avg(vp.map(p=>p.coto[2])),vH=avg(vp.map(p=>p.coto[3]));
+  const fB=avg(fp.map(p=>p.coto[2])),fH=avg(fp.map(p=>p.coto[3]));
+  const vPct=deltaPct(vB,vH),fPct=deltaPct(fB,fH);
+  const vBaj=vp.filter(p=>p.coto[3]!=null&&p.coto[2]!=null&&p.coto[3]<p.coto[2]).length;
+  const vSub=vp.filter(p=>p.coto[3]!=null&&p.coto[2]!=null&&p.coto[3]>p.coto[2]).length;
+  const fBaj=fp.filter(p=>p.coto[3]!=null&&p.coto[2]!=null&&p.coto[3]<p.coto[2]).length;
+  const fSub=fp.filter(p=>p.coto[3]!=null&&p.coto[2]!=null&&p.coto[3]>p.coto[2]).length;
+  document.getElementById('summaryRow').innerHTML=`
+    <div class="summary-card" style="border-left-color:#27ae60">
+      <div class="slabel">🥦 Verduras — Precio promedio Coto</div>
+      <div class="svalue">${fmt(vH?Math.round(vH):null)}</div>
+      <div class="ssub">vs 16-Sep: <span class="${dClass(vPct)}">${dStr(vPct)}</span> · ${vBaj} bajaron / ${vSub} subieron</div>
+    </div>
+    <div class="summary-card" style="border-left-color:#e67e22">
+      <div class="slabel">🍊 Frutas — Precio promedio Coto</div>
+      <div class="svalue">${fmt(fH?Math.round(fH):null)}</div>
+      <div class="ssub">vs 16-Sep: <span class="${dClass(fPct)}">${dStr(fPct)}</span> · ${fBaj} bajaron / ${fSub} subieron</div>
+    </div>
+    <div class="summary-card" style="border-left-color:#9b59b6">
+      <div class="slabel">📅 Período cubierto</div>
+      <div class="svalue" style="font-size:1rem;color:#9b59b6;">11-Ago → 17-Sep 2026</div>
+      <div class="ssub">4 fechas de medición · ${PRODUCTS.length} productos Top 20</div>
+    </div>
+    <div class="summary-card" style="border-left-color:#e74c3c">
+      <div class="slabel">💸 Mayor variación (16→17-Sep)</div>
+      <div class="svalue" style="font-size:1rem;color:#e74c3c;">Frutilla -75%</div>
+      <div class="ssub">$12.796 → $3.199 por kg en Coto</div>
+    </div>`;
+}
+
+const charts={};
+function renderCards(filter='todos'){
+  const grid=document.getElementById('productsGrid');
+  const filtered=filter==='todos'?PRODUCTS:PRODUCTS.filter(p=>p.cat===filter);
+  grid.innerHTML=filtered.map(p=>{
+    const last=p.coto[3],prev=p.coto[2];
+    const pct=deltaPct(prev,last);
+    const ptItems=FECHAS.map((f,i)=>{
+      const v=p.coto[i],cur=i===3;
+      return `<div class="pt-item${cur?' current':''}"><div class="pt-date">${f}</div><div class="pt-price${v==null?' nv':''}">${v!=null?'$'+Number(v).toLocaleString('es-AR'):'S/D'}</div></div>`;
+    }).join('');
+    return `<div class="product-card ${p.cat}" data-cat="${p.cat}">
+      <div class="card-header">
+        <img class="card-img" src="${p.img}" alt="${p.nombre}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="card-img-ph">${p.emoji}</div>
+        <div class="card-title-block">
+          <div class="card-title">${p.nombre}</div>
+          <div class="card-cat">${p.cat==='verdura'?'🥦 Verdura':'🍊 Fruta'}</div>
+          <div style="margin-top:4px"><span class="delta-badge ${dClass(pct)}">${dStr(pct)}</span> <span style="font-size:.65rem;color:#666">vs 16-Sep</span></div>
+        </div>
+        <div class="card-latest">
+          <div class="price-label">17-Sep · Coto</div>
+          <div class="price-now">${fmt(last)}</div>
+        </div>
+      </div>
+      <div class="card-chart-wrap">
+        <div class="price-timeline">${ptItems}</div>
+        <div class="sparkwrap"><canvas id="spark_${p.id}"></canvas></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  filtered.forEach(p=>{
+    const ctx=document.getElementById('spark_'+p.id);
+    if(!ctx)return;
+    if(charts[p.id]){charts[p.id].destroy();}
+    const labels=[],values=[];
+    FECHAS.forEach((f,i)=>{if(p.coto[i]!=null){labels.push(f);values.push(p.coto[i]);}});
+    if(values.length<2){ctx.parentElement.style.display='none';return;}
+    const ptColors=values.map((v,i)=>i===0?'rgba(74,144,226,0.9)':(v<values[i-1]?'rgba(39,174,96,0.9)':(v>values[i-1]?'rgba(231,76,60,0.9)':'rgba(150,150,150,0.6)')));
+    charts[p.id]=new Chart(ctx,{
+      type:'line',
+      data:{labels,datasets:[{data:values,borderColor:p.cat==='verdura'?'#27ae60':'#e67e22',borderWidth:2.5,tension:.35,fill:{target:'origin',above:p.cat==='verdura'?'rgba(39,174,96,.07)':'rgba(230,126,34,.07)'},pointBackgroundColor:ptColors,pointRadius:5,pointHoverRadius:7}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+Number(c.parsed.y).toLocaleString('es-AR')}}},scales:{x:{ticks:{color:'#777',font:{size:10}},grid:{color:'#1e1e2e'}},y:{ticks:{color:'#777',font:{size:10},callback:v=>'$'+Number(v).toLocaleString('es-AR')},grid:{color:'#1e1e2e'}}}}
+    });
+  });
+}
+
+function filterProducts(cat,btn){
+  document.querySelectorAll('.filter-bar .pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(cat);
+}
+
+renderSummary();
+renderCards();
+</script>
+</body>
+</html>

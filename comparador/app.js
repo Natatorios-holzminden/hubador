@@ -651,14 +651,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const TOP_VERDURAS_MAP = {
-    'papa': 1, 'tomate': 2, 'cebolla': 3, 'zanahoria': 4, 'zapallo': 5,
-    'zapallito': 6, 'acelga': 7, 'lechuga': 8, 'batata': 9, 'espinaca': 10,
-    'pepino': 10, 'berenjena': 10
+    'papa': 1, 'cebolla': 2, 'tomate': 3, 'zapallo': 4, 'zapallito': 5,
+    'zanahoria': 6, 'pimiento': 7, 'morron': 7, 'choclo': 8, 'berenjena': 9,
+    'lechuga': 10, 'mandioca': 11, 'batata': 12, 'acelga': 13, 'espinaca': 14,
+    'repollo': 15
   };
 
   const TOP_FRUTAS_MAP = {
-    'banana': 1, 'manzana': 2, 'naranja': 3, 'mandarina': 4, 'pera': 5,
-    'limon': 6, 'frutilla': 7, 'pomelo': 8, 'palta': 9
+    'mandarina': 1, 'naranja': 2, 'manzana': 3, 'banana': 4, 'pera': 5,
+    'limon': 6, 'uva': 7, 'pelon': 8, 'durazno': 8, 'ciruela': 9,
+    'pomelo': 10, 'kiwi': 11, 'frutilla': 12, 'palta': 13
   };
 
   const FRUITS_KEYWORDS = [
@@ -2283,15 +2285,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let visualCatalogQuery = '';
 
   const TOP_VERDURAS_CANONICAL = [
-    'papa_spunta', 'tomate_redondo', 'cebolla_valenciani', 'zanahoria_chantenay',
-    'zapallo_tetsukab.', 'zapallito_redondo', 'acelga', 'lechuga_criolla',
-    'batata_arapey', 'pepino'
+    'papa_spunta', 'cebolla_valenciani', 'tomate_redondo', 'zapallo_tetsukab.',
+    'zapallito_redondo', 'zanahoria_chantenay', 'pimiento_morron', 'choclo_amarillo',
+    'berenjena_vta.med.la', 'lechuga_criolla', 'mandioca', 'batata_arapey',
+    'acelga', 'espinaca', 'repollo_blanco'
   ];
 
   const TOP_FRUTAS_CANONICAL = [
-    'banana_cavendish', 'manzana_red_delicious', 'naranja_salustiana', 'mandarinamurcot',
-    'pera_packhams', 'limon_eureka', 'frutilla', 'pomelo_starruby',
-    'palta_hass', 'kiwi'
+    'mandarinamurcot', 'naranja_salustiana', 'manzana_red_delicious', 'banana_cavendish',
+    'pera_packhams', 'limon_eureka', 'uvaredglobe', 'ciruelafortune',
+    'pomelo_starruby', 'kiwi', 'frutilla', 'palta_hass'
   ];
 
   function initVisualCatalogTab() {

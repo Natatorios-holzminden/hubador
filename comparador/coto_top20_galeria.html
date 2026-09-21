@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📸 Evidencia Digital Coto — Top 20 Productos Auditados</title>
+  <title>📸 Evidencia Digital Coto — Scrapers Auditados por Fecha</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -17,7 +17,7 @@
     }
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 1.5rem; }
-    .header { max-width: 1300px; margin: 0 auto 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .header { max-width: 1300px; margin: 0 auto 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
     .title-box h1 { font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
     .title-box p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
     .nav-btns { display: flex; gap: 0.6rem; }
@@ -26,8 +26,16 @@
     .btn-back:hover { background: #334155; }
     .btn-pdf { background: #2563eb; color: #fff; border-color: #3b82f6; }
     
-    .filters { max-width: 1300px; margin: 0 auto 1.5rem; display: flex; gap: 0.5rem; }
-    .filter-btn { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); padding: 0.5rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+    .toolbar-section { max-width: 1300px; margin: 0 auto 1.5rem; display: flex; flex-direction: column; gap: 1rem; background: #151f32; padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border); }
+    .toolbar-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .toolbar-group { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .toolbar-label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; }
+
+    .date-btn { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); padding: 0.55rem 1.1rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
+    .date-btn:hover { background: #334155; color: #fff; }
+    .date-btn.active { background: #e11d48; color: #fff; border-color: #f43f5e; box-shadow: 0 0 12px rgba(225, 29, 72, 0.4); }
+
+    .filter-btn { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); padding: 0.45rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.82rem; }
     .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
 
     .grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.25rem; }
@@ -39,23 +47,49 @@
     .badge-verdura { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
     .badge-fruta { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); }
 
-    .card-price-row { display: flex; gap: 0.75rem; align-items: center; padding: 0.6rem 1.25rem; background: rgba(239, 68, 68, 0.1); border-bottom: 1px solid rgba(239, 68, 68, 0.2); }
-    .price-coto { font-size: 1.15rem; font-weight: 800; color: #f87171; }
+    .card-price-row { display: flex; gap: 0.75rem; align-items: center; padding: 0.6rem 1.25rem; background: rgba(239, 68, 68, 0.1); border-bottom: 1px solid rgba(239, 68, 68, 0.2); justify-content: space-between; }
+    .price-coto { font-size: 1.1rem; font-weight: 800; color: #f87171; }
     .price-mc { font-size: 0.85rem; color: #6ee7b7; font-weight: 600; }
-    
+    .date-indicator { font-size: 0.72rem; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #cbd5e1; }
+
     .card-img-container { padding: 0.75rem; background: #0f172a; text-align: center; border-bottom: 1px solid var(--border); }
-    .card-img-container img { width: 100%; height: auto; max-height: 240px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; }
-    
+    .card-img-container img { width: 100%; height: auto; max-height: 240px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); cursor: zoom-in; transition: transform .2s; }
+    .card-img-container img:hover { transform: scale(1.01); }
+
+    /* Lightbox */
+    #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 92vw; max-height: 80vh; border-radius: 10px; border: 2px solid rgba(56,189,248,.4); box-shadow: 0 0 40px rgba(0,0,0,.8); }
+    #lightbox .lb-title { color: #f8fafc; font-size: 1.1rem; font-weight: 800; margin-bottom: 12px; text-align: center; }
+    #lightbox .lb-close { position: fixed; top: 18px; right: 22px; font-size: 2rem; color: #fff; cursor: pointer; background: rgba(255,255,255,.1); border: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background .2s; }
+    #lightbox .lb-close:hover { background: rgba(255,255,255,.25); }
+    #lightbox .lb-footer { margin-top: 14px; display: flex; gap: 12px; align-items: center; }
+    #lightbox .lb-url { color: #38bdf8; text-decoration: none; font-size: .85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+    #lightbox .lb-url:hover { text-decoration: underline; }
+    #lightbox .lb-prices { color: #94a3b8; font-size: .82rem; }
+
     .card-footer { padding: 0.75rem 1.25rem; margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
     .coto-link { color: #38bdf8; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; }
     .coto-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
+
+  <!-- Lightbox overlay -->
+  <div id="lightbox" onclick="closeLightbox(event)">
+    <button class="lb-close" onclick="closeLightbox()" title="Cerrar">✕</button>
+    <div class="lb-title" id="lbTitle"></div>
+    <img id="lbImg" src="" alt="">
+    <div class="lb-footer">
+      <span class="lb-prices" id="lbPrices"></span>
+      <a class="lb-url" id="lbUrl" href="#" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver en Coto Digital</a>
+    </div>
+  </div>
+
   <div class="header">
     <div class="title-box">
-      <h1><i class="fa-solid fa-camera text-danger"></i> Evidencia Directa de Coto Digital — Top 20</h1>
-      <p>Capturas directas de pantalla tomadas del sitio oficial de Coto Digital para los 10 productos de verdulería y 10 de frutería.</p>
+      <h1><i class="fa-solid fa-camera text-danger"></i> Evidencias de Scrapers Coto Digital — Top 20</h1>
+      <p>Seleccioná la fecha para inspeccionar la evidencia fotográfica exacta y verificar que cada precio impreso coincida 100% con su imagen.</p>
     </div>
     <div class="nav-btns">
       <a href="index.html" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Comparador</a>
@@ -63,45 +97,226 @@
     </div>
   </div>
 
-  <div class="filters">
-    <button class="filter-btn active" onclick="filterGallery('todos', this)">Todos (20)</button>
-    <button class="filter-btn" onclick="filterGallery('verduras', this)">🥬 Verduras (10)</button>
-    <button class="filter-btn" onclick="filterGallery('frutas', this)">🍎 Frutas (10)</button>
+  <div class="toolbar-section">
+    <div class="toolbar-row">
+      <div class="toolbar-group">
+        <span class="toolbar-label"><i class="fa-solid fa-calendar-days text-danger"></i> Seleccionar Scraper / Fecha:</span>
+        <button class="date-btn active" id="btnDate17" onclick="selectDate('17sep')">
+          <i class="fa-solid fa-file-pdf"></i> Scraper 17-Sep (Auditado PDF)
+        </button>
+        <button class="date-btn" id="btnDate16" onclick="selectDate('16sep')">
+          <i class="fa-solid fa-clock-rotate-left"></i> Scraper 16-Sep (Baseline)
+        </button>
+        <button class="date-btn" id="btnDate21" onclick="selectDate('21sep')">
+          <i class="fa-solid fa-circle-dot"></i> Scraper 21-Sep (En Vivo Hoy)
+        </button>
+      </div>
+
+      <div class="toolbar-group">
+        <span class="toolbar-label"><i class="fa-solid fa-filter"></i> Categoría:</span>
+        <button class="filter-btn active" onclick="filterGallery('todos', this)">Todos (20)</button>
+        <button class="filter-btn" onclick="filterGallery('verduras', this)">🥬 Verduras (10)</button>
+        <button class="filter-btn" onclick="filterGallery('frutas', this)">🍎 Frutas (10)</button>
+      </div>
+    </div>
   </div>
 
   <div class="grid" id="galleryGrid"></div>
 
   <script>
+    let currentDate = '17sep';
+    let currentFilter = 'todos';
+
     const ITEMS = [
       // Verduras
-      { id:'papa_spunta', cat:'verduras', rank:1, name:'Papa Spunta / Negra', coto:'$2.294 / $2.299', mc:'$1.125', img:'evidencias/recorte_coto_papa.png', url:'https://www.coto.com.ar/productos/papa' },
-      { id:'tomate_redondo', cat:'verduras', rank:2, name:'Tomate Redondo', coto:'$3.299', mc:'$1.528', img:'evidencias/recorte_coto_tomate.png', url:'https://www.coto.com.ar/productos/tomate' },
-      { id:'cebolla_valenciani', cat:'verduras', rank:3, name:'Cebolla Valenciani', coto:'$3.299', mc:'$1.675', img:'evidencias/recorte_coto_cebolla.png', url:'https://www.coto.com.ar/productos/cebolla' },
-      { id:'zanahoria_chantenay', cat:'verduras', rank:4, name:'Zanahoria Selección', coto:'$1.999', mc:'$1.154', img:'evidencias/recorte_coto_zanahoria.png', url:'https://www.coto.com.ar/productos/zanahoria' },
-      { id:'zapallo_tetsukab.', cat:'verduras', rank:5, name:'Zapallo Cabutiá / Japonés', coto:'$1.899 (Oferta)', mc:'$1.074', img:'evidencias/recorte_coto_zapallo.png', url:'https://www.coto.com.ar/productos/zapallo' },
-      { id:'zapallito_redondo', cat:'verduras', rank:6, name:'Zapallito Redondo', coto:'$2.549 (15% Dto)', mc:'$907', img:'evidencias/recorte_coto_zapallito.png', url:'https://www.coto.com.ar/productos/zapallito' },
-      { id:'acelga', cat:'verduras', rank:7, name:'Acelga Selección', coto:'$1.099', mc:'$510', img:'evidencias/recorte_coto_acelga.png', url:'https://www.coto.com.ar/productos/acelga' },
-      { id:'lechuga_criolla', cat:'verduras', rank:8, name:'Lechuga Criolla', coto:'$2.699', mc:'$729', img:'evidencias/recorte_coto_lechuga.png', url:'https://www.coto.com.ar/productos/lechuga' },
-      { id:'batata_arapey', cat:'verduras', rank:9, name:'Batata Selección', coto:'$2.039 (15% Dto)', mc:'$1.302', img:'evidencias/recorte_coto_batata.png', url:'https://www.coto.com.ar/productos/batata' },
-      { id:'pepino', cat:'verduras', rank:10, name:'Pepino Selección', coto:'$2.124 (15% Dto)', mc:'$944', img:'evidencias/recorte_coto_pepino.png', url:'https://www.coto.com.ar/productos/pepino' },
+      {
+        id:'papa_spunta', cat:'verduras', rank:1, name:'Papa Spunta / Negra', url:'https://www.coto.com.ar/productos/papa',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.299', mc: '$1.118', img: 'evidencias/recorte_coto_papa.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.299', mc: '$1.125', img: 'evidencias/recorte_coto_papa.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.699 (OFERTA)', mc: '$1.125', img: 'evidencias/coto_top20/coto_papa_spunta.png' }
+        }
+      },
+      {
+        id:'tomate_redondo', cat:'verduras', rank:2, name:'Tomate Redondo', url:'https://www.coto.com.ar/productos/tomate',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$3.299', mc: '$1.411', img: 'evidencias/recorte_coto_tomate.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$3.299', mc: '$1.528', img: 'evidencias/recorte_coto_tomate.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$3.299 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_top20/coto_tomate_redondo.png' }
+        }
+      },
+      {
+        id:'cebolla_valenciani', cat:'verduras', rank:3, name:'Cebolla Valenciani', url:'https://www.coto.com.ar/productos/cebolla',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.999', mc: '$1.300', img: 'evidencias/recorte_coto_cebolla.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.999', mc: '$1.675', img: 'evidencias/recorte_coto_cebolla.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_top20/coto_cebolla_valenciani.png' }
+        }
+      },
+      {
+        id:'zanahoria_chantenay', cat:'verduras', rank:4, name:'Zanahoria Chantenay', url:'https://www.coto.com.ar/productos/zanahoria',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$1.899', mc: '$1.148', img: 'evidencias/recorte_coto_zanahoria.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.899', mc: '$1.154', img: 'evidencias/recorte_coto_zanahoria.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.999', mc: '$1.154', img: 'evidencias/coto_top20/coto_zanahoria_chantenay.png' }
+        }
+      },
+      {
+        id:'zapallo_tetsukab.', cat:'verduras', rank:5, name:'Zapallo Tetsukabuto', url:'https://www.coto.com.ar/productos/zapallo',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.799', mc: '$906', img: 'evidencias/recorte_coto_zapallo.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.799', mc: '$1.074', img: 'evidencias/recorte_coto_zapallo.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.899', mc: '$1.074', img: 'evidencias/coto_top20/coto_zapallo_tetsukab..png' }
+        }
+      },
+      {
+        id:'zapallito_redondo', cat:'verduras', rank:6, name:'Zapallito Redondo', url:'https://www.coto.com.ar/productos/zapallito',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.999', mc: '$933', img: 'evidencias/recorte_coto_zapallito.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.999', mc: '$907', img: 'evidencias/recorte_coto_zapallito.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.999 (OFERTA)', mc: '$907', img: 'evidencias/coto_top20/coto_zapallito_redondo.png' }
+        }
+      },
+      {
+        id:'acelga', cat:'verduras', rank:7, name:'Acelga Selección', url:'https://www.coto.com.ar/productos/acelga',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$1.299', mc: '$470', img: 'evidencias/recorte_coto_acelga.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.299', mc: '$510', img: 'evidencias/recorte_coto_acelga.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.099 (OFERTA)', mc: '$510', img: 'evidencias/coto_top20/coto_acelga.png' }
+        }
+      },
+      {
+        id:'lechuga_criolla', cat:'verduras', rank:8, name:'Lechuga Criolla', url:'https://www.coto.com.ar/productos/lechuga',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.699', mc: '$750', img: 'evidencias/recorte_coto_lechuga.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.699', mc: '$729', img: 'evidencias/recorte_coto_lechuga.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.699 (OFERTA)', mc: '$729', img: 'evidencias/coto_top20/coto_lechuga_criolla.png' }
+        }
+      },
+      {
+        id:'batata_arapey', cat:'verduras', rank:9, name:'Batata Arapey', url:'https://www.coto.com.ar/productos/batata',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.399 (OFERTA)', mc: '$1.277', img: 'evidencias/recorte_coto_batata.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/recorte_coto_batata.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/coto_top20/coto_batata_arapey.png' }
+        }
+      },
+      {
+        id:'pepino', cat:'verduras', rank:10, name:'Pepino Selección', url:'https://www.coto.com.ar/productos/pepino',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.499', mc: '$944', img: 'evidencias/recorte_coto_pepino.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.499', mc: '$944', img: 'evidencias/recorte_coto_pepino.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.999 (OFERTA)', mc: '$944', img: 'evidencias/coto_top20/coto_pepino.png' }
+        }
+      },
       // Frutas
-      { id:'banana_cavendish', cat:'frutas', rank:1, name:'Banana Cavendish', coto:'$1.954 (Oferta)', mc:'$1.781', img:'evidencias/recorte_coto_banana.png', url:'https://www.coto.com.ar/productos/banana' },
-      { id:'manzana_red_delicious', cat:'frutas', rank:2, name:'Manzana Red Delicious', coto:'$2.899', mc:'$1.708', img:'evidencias/recorte_coto_manzana.png', url:'https://www.coto.com.ar/productos/manzana' },
-      { id:'naranja_salustiana', cat:'frutas', rank:3, name:'Naranja Salustiana Jugo', coto:'$899', mc:'$694', img:'evidencias/recorte_coto_naranja.png', url:'https://www.coto.com.ar/productos/naranja' },
-      { id:'mandarinamurcot', cat:'frutas', rank:4, name:'Mandarina Murcot', coto:'$1.299', mc:'$722', img:'evidencias/recorte_coto_mandarina.png', url:'https://www.coto.com.ar/productos/mandarinamurcot' },
-      { id:'pera_packhams', cat:'frutas', rank:5, name:'Pera Packham\'s', coto:'$2.549 (10% Dto)', mc:'$1.333', img:'evidencias/recorte_coto_pera.png', url:'https://www.coto.com.ar/productos/pera' },
-      { id:'limon_eureka', cat:'frutas', rank:6, name:'Limón Eureka', coto:'$1.299', mc:'$571', img:'evidencias/recorte_coto_limon.png', url:'https://www.coto.com.ar/productos/limon' },
-      { id:'frutilla', cat:'frutas', rank:7, name:'Frutilla Selección', coto:'$3.199 (Oferta 250g)', mc:'$5.770', img:'evidencias/recorte_coto_frutilla.png', url:'https://www.coto.com.ar/productos/frutilla' },
-      { id:'pomelo_starruby', cat:'frutas', rank:8, name:'Pomelo Star Ruby', coto:'$999', mc:'$861', img:'evidencias/recorte_coto_pomelo.png', url:'https://www.coto.com.ar/productos/pomelo' },
-      { id:'palta_hass', cat:'frutas', rank:9, name:'Palta Hass', coto:'$7.999', mc:'$4.811', img:'evidencias/recorte_coto_palta.png', url:'https://www.coto.com.ar/productos/palta' },
-      { id:'kiwi', cat:'frutas', rank:10, name:'Kiwi Selección', coto:'$7.999', mc:'$5.475', img:'evidencias/recorte_coto_kiwi.png', url:'https://www.coto.com.ar/productos/kiwi' }
+      {
+        id:'banana_cavendish', cat:'frutas', rank:1, name:'Banana Cavendish', url:'https://www.coto.com.ar/productos/banana',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.499', mc: '$1.781', img: 'evidencias/recorte_coto_banana.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.499', mc: '$1.781', img: 'evidencias/recorte_coto_banana.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.299 (OFERTA)', mc: '$1.781', img: 'evidencias/coto_top20/coto_banana_cavendish.png' }
+        }
+      },
+      {
+        id:'manzana_red_delicious', cat:'frutas', rank:2, name:'Manzana Red Delicious', url:'https://www.coto.com.ar/productos/manzana',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.890', mc: '$2.119', img: 'evidencias/recorte_coto_manzana.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.890', mc: '$1.708', img: 'evidencias/recorte_coto_manzana.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.899 (OFERTA)', mc: '$1.708', img: 'evidencias/coto_top20/coto_manzana_red_delicious.png' }
+        }
+      },
+      {
+        id:'naranja_salustiana', cat:'frutas', rank:3, name:'Naranja Salustiana Jugo', url:'https://www.coto.com.ar/productos/naranja',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$899', mc: '$694', img: 'evidencias/recorte_coto_naranja.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$899', mc: '$694', img: 'evidencias/recorte_coto_naranja.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$899 (OFERTA)', mc: '$694', img: 'evidencias/coto_top20/coto_naranja_salustiana.png' }
+        }
+      },
+      {
+        id:'mandarinamurcot', cat:'frutas', rank:4, name:'Mandarina Murcot', url:'https://www.coto.com.ar/productos/mandarinamurcot',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$999', mc: '$722', img: 'evidencias/recorte_coto_mandarina.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$999', mc: '$722', img: 'evidencias/recorte_coto_mandarina.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.299 (OFERTA)', mc: '$722', img: 'evidencias/coto_top20/coto_mandarinamurcot.png' }
+        }
+      },
+      {
+        id:'pera_packhams', cat:'frutas', rank:5, name:"Pera Packham's", url:'https://www.coto.com.ar/productos/pera',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$2.299 (OFERTA)', mc: '$1.776', img: 'evidencias/recorte_coto_pera.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.299 (OFERTA)', mc: '$1.333', img: 'evidencias/recorte_coto_pera.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.999', mc: '$1.333', img: 'evidencias/coto_top20/coto_pera_packhams.png' }
+        }
+      },
+      {
+        id:'limon_eureka', cat:'frutas', rank:6, name:'Limón Eureka', url:'https://www.coto.com.ar/productos/limon',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$1.499', mc: '$693', img: 'evidencias/recorte_coto_limon.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.499', mc: '$571', img: 'evidencias/recorte_coto_limon.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.299 (OFERTA)', mc: '$571', img: 'evidencias/coto_top20/coto_limon_eureka.png' }
+        }
+      },
+      {
+        id:'frutilla', cat:'frutas', rank:7, name:'Frutilla Selección', url:'https://www.coto.com.ar/productos/frutilla',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$12.796', mc: '$12.796', img: 'evidencias/recorte_coto_frutilla.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$12.796', mc: '$5.770', img: 'evidencias/recorte_coto_frutilla.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$3.199 (OFERTA 250g)', mc: '$5.770', img: 'evidencias/coto_top20/coto_frutilla.png' }
+        }
+      },
+      {
+        id:'pomelo_starruby', cat:'frutas', rank:8, name:'Pomelo Star Ruby', url:'https://www.coto.com.ar/productos/pomelo',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$999', mc: '$861', img: 'evidencias/recorte_coto_pomelo.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$999', mc: '$861', img: 'evidencias/recorte_coto_pomelo.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$999 (OFERTA)', mc: '$861', img: 'evidencias/coto_top20/coto_pomelo_starruby.png' }
+        }
+      },
+      {
+        id:'palta_hass', cat:'frutas', rank:9, name:'Palta Hass', url:'https://www.coto.com.ar/productos/palta',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$7.999', mc: '$4.913', img: 'evidencias/recorte_coto_palta.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$7.999', mc: '$4.811', img: 'evidencias/recorte_coto_palta.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$7.999 (OFERTA)', mc: '$4.811', img: 'evidencias/coto_top20/coto_palta_hass.png' }
+        }
+      },
+      {
+        id:'kiwi', cat:'frutas', rank:10, name:'Kiwi Selección', url:'https://www.coto.com.ar/productos/kiwi',
+        dates: {
+          '16sep': { dateLabel: '16-Sep', coto: '$7.999', mc: '$5.175', img: 'evidencias/recorte_coto_kiwi.png' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$7.999', mc: '$5.475', img: 'evidencias/recorte_coto_kiwi.png' },
+          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_top20/coto_kiwi.png' }
+        }
+      }
     ];
 
-    function render(filter) {
+    // Lightbox
+    function openLightbox(item) {
+      const dData = item.dates[currentDate];
+      document.getElementById('lbImg').src = dData.img;
+      document.getElementById('lbTitle').textContent = item.name + ' (' + dData.dateLabel + ')';
+      document.getElementById('lbPrices').textContent = 'Coto: ' + dData.coto + '  ·  Mercado Central: ' + dData.mc;
+      document.getElementById('lbUrl').href = item.url;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(e) {
+      if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lb-close')) return;
+      document.getElementById('lightbox').classList.remove('open');
+      document.getElementById('lbImg').src = '';
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; } });
+
+    function render() {
       const grid = document.getElementById('galleryGrid');
       grid.innerHTML = ITEMS
-        .filter(item => filter === 'todos' || item.cat === filter)
-        .map(item => `
+        .filter(item => currentFilter === 'todos' || item.cat === currentFilter)
+        .map(item => {
+          const dData = item.dates[currentDate];
+          return `
           <div class="card">
             <div class="card-header">
               <div class="card-title">${item.name}</div>
@@ -110,27 +325,41 @@
               </span>
             </div>
             <div class="card-price-row">
-              <span class="price-coto"><i class="fa-solid fa-cart-shopping"></i> Coto: ${item.coto}</span>
-              <span class="price-mc">vs Central: ${item.mc}</span>
+              <div>
+                <span class="price-coto"><i class="fa-solid fa-cart-shopping"></i> Coto: ${dData.coto}</span>
+                <span style="margin: 0 4px; color:#475569;">|</span>
+                <span class="price-mc">Central: ${dData.mc}</span>
+              </div>
+              <span class="date-indicator"><i class="fa-solid fa-calendar-day"></i> ${dData.dateLabel}</span>
             </div>
-            <div class="card-img-container" onclick="window.open('${item.img}', '_blank')">
-              <img src="${item.img}" alt="Evidencia ${item.name}" title="Click para ver en tamaño completo">
+            <div class="card-img-container" onclick="openLightbox(ITEMS.find(x=>x.id==='${item.id}'))" title="Click para ver en pantalla completa">
+              <img src="${dData.img}" alt="Evidencia ${item.name} (${dData.dateLabel})">
             </div>
             <div class="card-footer">
-              <span style="color:#64748b;">📸 Captura Scraper Oficial</span>
-              <a href="${item.url}" target="_blank" class="coto-link">Ver en Coto Digital <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              <span style="color:#64748b;">📸 Captura ${dData.dateLabel}</span>
+              <a href="${item.url}" target="_blank" class="coto-link" onclick="event.stopPropagation()">Ver en Coto Digital <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
             </div>
           </div>
-        `).join('');
+        `;
+        }).join('');
     }
 
-    function filterGallery(filter, btn) {
+    function selectDate(dateKey) {
+      currentDate = dateKey;
+      document.getElementById('btnDate16').classList.toggle('active', dateKey === '16sep');
+      document.getElementById('btnDate17').classList.toggle('active', dateKey === '17sep');
+      document.getElementById('btnDate21').classList.toggle('active', dateKey === '21sep');
+      render();
+    }
+
+    function filterGallery(cat, btn) {
+      currentFilter = cat;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      render(filter);
+      render();
     }
 
-    render('todos');
+    render();
   </script>
 </body>
 </html>

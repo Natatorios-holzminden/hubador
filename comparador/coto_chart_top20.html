@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluctuación Precios Coto - Top 20</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .header h2 {
+            margin: 0;
+            color: #4a90e2;
+        }
+        .btn {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover { background-color: #444; }
+        .chart-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto 40px auto;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .chart-container h3 {
+            text-align: center;
+            margin-top: 0;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2><i class="fas fa-chart-bar"></i> Fluctuación de Precios - Coto Digital (Top 20)</h2>
+        <a href="index.html" class="btn"><i class="fas fa-arrow-left"></i> Volver al Comparador</a>
+    </div>
+
+    <div class="chart-container">
+        <h3>Verduras (16-Sep vs 17-Sep)</h3>
+        <canvas id="chartVerduras"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h3>Frutas (16-Sep vs 17-Sep)</h3>
+        <canvas id="chartFrutas"></canvas>
+    </div>
+
+    <script>
+        const data = [
+            {"id": "papa_spunta", "nombre": "Papa Spunta", "categoria": "verdura", "coto_base": 2299, "coto_today": 2294},
+            {"id": "tomate_redondo", "nombre": "Tomate Redondo", "categoria": "verdura", "coto_base": 3299, "coto_today": 3299},
+            {"id": "cebolla_valenciani", "nombre": "Cebolla Valenciani", "categoria": "verdura", "coto_base": 2999, "coto_today": 3299},
+            {"id": "zanahoria_chantenay", "nombre": "Zanahoria Chantenay", "categoria": "verdura", "coto_base": 1899, "coto_today": 1999},
+            {"id": "zapallo_tetsukab.", "nombre": "Zapallo Tetsukab.", "categoria": "verdura", "coto_base": 2799, "coto_today": 1899},
+            {"id": "zapallito_redondo", "nombre": "Zapallito Redondo", "categoria": "verdura", "coto_base": 2999, "coto_today": 2549},
+            {"id": "acelga", "nombre": "Acelga", "categoria": "verdura", "coto_base": 1299, "coto_today": 1099},
+            {"id": "lechuga_criolla", "nombre": "Lechuga Criolla", "categoria": "verdura", "coto_base": 2699, "coto_today": 2699},
+            {"id": "batata_arapey", "nombre": "Batata Arapey", "categoria": "verdura", "coto_base": 2399, "coto_today": 2039},
+            {"id": "pepino", "nombre": "Pepino", "categoria": "verdura", "coto_base": 2499, "coto_today": 2124},
+            {"id": "banana_cavendish", "nombre": "Banana Cavendish", "categoria": "fruta", "coto_base": 2499, "coto_today": 1954},
+            {"id": "manzana_red_delicious", "nombre": "Manzana Red Delicious", "categoria": "fruta", "coto_base": 2890, "coto_today": 2899},
+            {"id": "naranja_salustiana", "nombre": "Naranja Salustiana Jugo", "categoria": "fruta", "coto_base": 899, "coto_today": 899},
+            {"id": "mandarinamurcot", "nombre": "Mandarinamurcot", "categoria": "fruta", "coto_base": 999, "coto_today": 1299},
+            {"id": "pera_packhams", "nombre": "Pera Packham's Triumph", "categoria": "fruta", "coto_base": 2299, "coto_today": 2549},
+            {"id": "limon_eureka", "nombre": "Limón Eureka", "categoria": "fruta", "coto_base": 1499, "coto_today": 1299},
+            {"id": "frutilla", "nombre": "Frutilla", "categoria": "fruta", "coto_base": 12796, "coto_today": 3199},
+            {"id": "pomelo_starruby", "nombre": "Pomelo Star Ruby", "categoria": "fruta", "coto_base": 999, "coto_today": 999},
+            {"id": "palta_hass", "nombre": "Palta Hass", "categoria": "fruta", "coto_base": 7999, "coto_today": 7999},
+            {"id": "kiwi", "nombre": "Kiwi", "categoria": "fruta", "coto_base": 7999, "coto_today": 7999}
+        ];
+
+        const verduras = data.filter(d => d.categoria === 'verdura');
+        const frutas = data.filter(d => d.categoria === 'fruta');
+
+        function createChart(ctxId, dataset, labelColor1, labelColor2) {
+            const ctx = document.getElementById(ctxId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dataset.map(d => d.nombre),
+                    datasets: [
+                        {
+                            label: 'Precio 16-Sep ($)',
+                            data: dataset.map(d => d.coto_base),
+                            backgroundColor: labelColor1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Precio 17-Sep ($)',
+                            data: dataset.map(d => d.coto_today),
+                            // Si bajó es verde, si subió es rojo, si igual es gris claro
+                            backgroundColor: dataset.map(d => d.coto_today > d.coto_base ? '#e74c3c' : (d.coto_today < d.coto_base ? '#2ecc71' : labelColor2)),
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e0e0e0', font: { size: 14 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += '$' + context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#e0e0e0', callback: function(value) { return '$' + value; } },
+                            grid: { color: '#333' }
+                        },
+                        x: {
+                            ticks: { color: '#e0e0e0', maxRotation: 45, minRotation: 45 },
+                            grid: { color: '#333', display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        createChart('chartVerduras', verduras, '#3498db', '#95a5a6');
+        createChart('chartFrutas', frutas, '#f39c12', '#95a5a6');
+    </script>
+</body>
+</html>

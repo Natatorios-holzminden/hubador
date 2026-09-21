@@ -2675,7 +2675,7 @@ function MobileHome() {
                     {p.old && (
                       <div className="web-price-coto" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05, marginLeft: 2 }}>
                         <s style={{ fontSize: 14, color: '#dc2626', fontWeight: 750, textDecoration: 'line-through', textDecorationColor: 'rgba(220,38,38,0.55)' }}>{p.old}</s>
-                        <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 1 }}>COTO</em>
+                        <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 1 }}>SOLO</em>
                       </div>
                     )}
                   </div>
@@ -3065,7 +3065,7 @@ function MobileProductos() {
                     {p.old && (
                       <div className="web-price-coto" style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05, marginLeft: 2 }}>
                         <s style={{ fontSize: 14, color: '#dc2626', fontWeight: 750, textDecoration: 'line-through', textDecorationColor: 'rgba(220,38,38,0.55)' }}>{p.old}</s>
-                        <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 1 }}>COTO</em>
+                        <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 1 }}>SOLO</em>
                       </div>
                     )}
                   </div>
@@ -4251,7 +4251,7 @@ function MobileAdminProductos() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>Control del Catálogo</div>
-              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Coto y visibilidad en tienda</div>
+              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Gestioná productos, precios Solo y visibilidad en tienda</div>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               {sb && (
@@ -4449,14 +4449,14 @@ function MobileAdminProductos() {
                     </span>
                     {(p.oldN > 0 || p.old) && (
                       <span style={{ fontSize: 12, color: '#ef4444', textDecoration: 'line-through', fontWeight: 700 }}>
-                        {p.old || fmtPrecioAR(p.oldN)} <small style={{ textDecoration: 'none', color: '#ef4444', fontSize: 10 }}>COTO</small>
+                        {p.old || fmtPrecioAR(p.oldN)} <small style={{ textDecoration: 'none', color: '#ef4444', fontSize: 10 }}>SOLO</small>
                       </span>
                     )}
                   </div>
 
                   {ahorro > 0 && (
                     <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', background: '#ecfdf5', padding: '3px 6px', borderRadius: 4, width: 'fit-content' }}>
-                      Ahorrás {fmtPrecioAR(ahorro)}{p.unit} vs Coto
+                      Ahorrás {fmtPrecioAR(ahorro)}{p.unit} vs Solo
                     </div>
                   )}
 
@@ -4607,7 +4607,7 @@ function MobileAdminProductos() {
                   <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>Comparativa de Precios ($ / {form.unit === '/u' ? 'unidad' : 'kilo'})</div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#ef4444', marginBottom: 3 }}>Precio Coto (Supermercado / Referencia)</label>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#ef4444', marginBottom: 3 }}>Precio Solo (Supermercado / Referencia)</label>
                     <input
                       required
                       type="number"
@@ -4647,7 +4647,7 @@ function MobileAdminProductos() {
                             key={pct}
                             type="button"
                             onClick={() => applyDiscountPct(pct)}
-                            title={`Aplicar ${pct}% de descuento sobre Coto ($${form.oldN || 0})`}
+                            title={`Aplicar ${pct}% de descuento sobre Solo ($${form.oldN || 0})`}
                             style={{
                               border: isSelected ? '1.5px solid #047857' : '1px solid #a7f3d0',
                               background: isSelected ? '#047857' : '#ffffff',
@@ -4673,7 +4673,7 @@ function MobileAdminProductos() {
                   <div
                     onClick={() => {
                       const cur = (form.oldN > 0 && form.priceN) ? calcDisc(Number(form.priceN), Number(form.oldN)) : 35;
-                      const ans = window.prompt(`Ingresá el % de descuento para ${form.name || 'este producto'}\n(Calculado sobre Precio Coto: $${form.oldN || 0}):`, cur > 0 ? cur : '35');
+                      const ans = window.prompt(`Ingresá el % de descuento para ${form.name || 'este producto'}\n(Calculado sobre Precio Solo: $${form.oldN || 0}):`, cur > 0 ? cur : '35');
                       if (ans !== null && ans.trim() !== '') {
                         const val = parseFloat(ans.replace('%', '').trim());
                         if (!isNaN(val) && val > 0 && val < 100) {
@@ -4703,7 +4703,7 @@ function MobileAdminProductos() {
                       </b>
                       <span style={{ fontSize: 10.5, color: '#059669' }}>(tocá para editar)</span>
                     </span>
-                    <span>Diferencia vs Coto: <b style={{ color: '#047857' }}>-${Math.max(0, Number(form.oldN) - Number(form.priceN))}</b></span>
+                    <span>Diferencia vs Solo: <b style={{ color: '#047857' }}>-${Math.max(0, Number(form.oldN) - Number(form.priceN))}</b></span>
                   </div>
                 </div>
 
@@ -4975,7 +4975,7 @@ function MobileGrupoDetalle() {
           <div style={{ fontSize: 11, color: '#888', marginBottom: 1 }}>Compra en conjunto · 📍 Buenos Aires</div>
           <h1 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{g.product}</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-            <span style={{ fontSize: 12.5, color: '#666' }}>Precio Coto</span>
+            <span style={{ fontSize: 12.5, color: '#666' }}>Precio Solo</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <s style={{ fontSize: 14, fontWeight: 750, color: '#dc2626', textDecoration: 'line-through' }}>{g.old}{g.unit}</s>
               <em style={{ fontStyle: 'normal', fontSize: 10, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase' }}>COTO</em>
@@ -6417,7 +6417,7 @@ function MobileMisGrupos() {
                     <strong style={{ color: '#0f766e', fontSize: 22 }}>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, marginBottom: 12, color: '#888' }}>
-                    <span>Si compraras en Coto</span>
+                    <span>Si compraras en Solo</span>
                     <s style={{ color: '#e0524a', fontWeight: 700, fontSize: 16 }}>{fmtPrecioAR(totals.coto)}</s>
                   </div>
                   {!user ? (
@@ -6587,7 +6587,7 @@ function MobilePerfil() {
                   <span style={{ fontSize: 18 }}>🛠️</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 700, color: '#166534' }}>Panel de Administración</div>
-                    <div style={{ fontSize: 11, color: '#15803d' }}>Gestionar catálogo, precios Coto y productos</div>
+                    <div style={{ fontSize: 11, color: '#15803d' }}>Gestionar catálogo, precios Solo y productos</div>
                   </div>
                   <span style={{ color: '#166534', fontSize: 18, fontWeight: 800 }}>›</span>
                 </div>
@@ -6626,7 +6626,7 @@ function MobileComparador() {
           </button>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 800, fontSize: 15, lineHeight: 1.1 }}>Comparador de precios</div>
-            <div style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Coto · Mayoristas · HUBADOR</div>
+            <div style={{ fontSize: 10.5, color: '#888', marginTop: 2 }}>Solo · Mayoristas · HUBADOR</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -6641,7 +6641,7 @@ function MobileComparador() {
         <div style={{ flexShrink: 0, padding: '10px 14px', background: '#fff', borderBottom: '1px solid #e8eaec' }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {[
-              { c: '#ea580c', t: 'Coto' },
+              { c: '#ea580c', t: 'Solo' },
               { c: '#4f46e5', t: 'Quilmes' },
               { c: '#7c3aed', t: 'Nueva Luna' },
               { c: '#2563eb', t: 'MC' },
@@ -6654,7 +6654,7 @@ function MobileComparador() {
             ))}
           </div>
           <p style={{ margin: '8px 0 0', fontSize: 11.5, color: '#888', lineHeight: 1.35 }}>
-            Compará precio mayorista vs góndola y el precio HUBADOR (−30% vs Coto).
+            Compará precio mayorista vs góndola y el precio HUBADOR (−30% vs Solo).
           </p>
         </div>
 
@@ -7012,7 +7012,7 @@ function WebHome() {
                   </div>
                 </div>
                 <div className="web-stats">
-                  <div className="web-stat"><strong>50%</strong><span>vs Coto</span></div>
+                  <div className="web-stat"><strong>50%</strong><span>vs Solo</span></div>
                   <div className="web-stat"><strong>500+</strong><span>Vecinos</span></div>
                   <div className="web-stat"><strong>Hub</strong><span>Retiro</span></div>
                 </div>
@@ -7085,7 +7085,7 @@ function WebHome() {
                       {p.old && (
                         <div className="web-price-coto">
                           <s>{p.old}</s>
-                          <em>Coto</em>
+                          <em>Solo</em>
                         </div>
                       )}
                     </div>
@@ -7236,7 +7236,7 @@ function WebProductos() {
                       {p.old && (
                         <div className="web-price-coto">
                           <s>{p.old}</s>
-                          <em>Coto</em>
+                          <em>Solo</em>
                         </div>
                       )}
                     </div>
@@ -7639,7 +7639,7 @@ function WebGrupoDetalle() {
             <h1>{g.product}</h1>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 4px' }}>
-              <span style={{ fontSize: 13, color: '#666' }}>Precio Coto</span>
+              <span style={{ fontSize: 13, color: '#666' }}>Precio Solo</span>
               <s style={{ fontSize: 15, fontWeight: 750, color: '#dc2626' }}>{g.old}{g.unit}</s>
               <em style={{ fontStyle: 'normal', fontSize: 10.5, color: '#dc2626', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase' }}>COTO</em>
             </div>
@@ -7707,7 +7707,7 @@ function WebGrupoDetalle() {
                       {p.old && (
                         <div className="web-price-coto">
                           <s>{p.old}</s>
-                          <em>Coto</em>
+                          <em>Solo</em>
                         </div>
                       )}
                     </div>
@@ -7818,7 +7818,7 @@ function WebMisGrupos() {
                     <span>Total en grupo</span>
                     <strong>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
-                  <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 4 }}><span>Si compraras en Coto</span><s>{fmtPrecioAR(totals.coto)}</s></div>
+                  <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 4 }}><span>Si compraras en Solo</span><s>{fmtPrecioAR(totals.coto)}</s></div>
                   {!user ? (
                     <a
                       href={buildCartWhatsAppLink(cart, totals)}
@@ -7922,7 +7922,7 @@ function WebPerfil() {
               <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: '16px', margin: '16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 15, color: '#166534' }}>🛠️ Panel de Administración</div>
-                  <div style={{ fontSize: 12, color: '#15803d', marginTop: 2 }}>Agregar, ocultar/mostrar productos, modificar precios Coto y distribuidor</div>
+                  <div style={{ fontSize: 12, color: '#15803d', marginTop: 2 }}>Agregar, ocultar/mostrar productos, modificar precios Solo y distribuidor</div>
                 </div>
                 <button
                   type="button"
