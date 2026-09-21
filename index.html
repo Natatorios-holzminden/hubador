@@ -2528,7 +2528,7 @@ function MobileHome() {
         </div>
         <div onClick={() => navigate('mis-grupos')} style={{ position: 'relative', width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
-          <div style={{ position: 'absolute', top: 2, right: 2, minWidth: 14, height: 14, padding: '0 3px', borderRadius: 999, background: cart.length > 0 ? primary : '#aaa', color: '#fff', fontSize: 9, fontWeight: 700, display: 'grid', placeItems: 'center', border: '1.5px solid #fff' }}>{cartTotals(cart).items}</div>
+          <div style={{ position: 'absolute', top: 2, right: 2, minWidth: 14, height: 14, padding: '0 3px', borderRadius: 999, background: cart.length > 0 ? primary : '#aaa', color: '#fff', fontSize: 9, fontWeight: 700, display: 'grid', placeItems: 'center', border: '1.5px solid #fff' }}>{cart.length}</div>
         </div>
       </header>
 
@@ -3000,7 +3000,7 @@ function MobileProductos() {
         </div>
         <div onClick={() => navigate('mis-grupos')} style={{ position: 'relative', width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
-          <div style={{ position: 'absolute', top: 2, right: 2, minWidth: 14, height: 14, padding: '0 3px', borderRadius: 999, background: cart.length > 0 ? primary : '#aaa', color: '#fff', fontSize: 9, fontWeight: 700, display: 'grid', placeItems: 'center', border: '1.5px solid #fff' }}>{cartTotals(cart).items}</div>
+          <div style={{ position: 'absolute', top: 2, right: 2, minWidth: 14, height: 14, padding: '0 3px', borderRadius: 999, background: cart.length > 0 ? primary : '#aaa', color: '#fff', fontSize: 9, fontWeight: 700, display: 'grid', placeItems: 'center', border: '1.5px solid #fff' }}>{cart.length}</div>
         </div>
       </header>
 
@@ -6081,7 +6081,7 @@ function BottomNav({ active }) {
   const navigate = React.useContext(NavContext);
   const { cart } = React.useContext(SelectionContext);
   const primary = 'oklch(0.55 0.15 165)';
-  const cartCount = cartTotals(cart).items;
+  const cartCount = (cart || []).length;
   const items = [
   { id: 'home', label: 'Inicio', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
   { id: 'productos', label: 'Productos', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg> },
@@ -6359,7 +6359,7 @@ function MobileMisGrupos() {
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 64 }}>
         <div style={{ padding: '12px 16px 0' }}>
           <div style={{ display: 'flex', background: '#e8eaec', borderRadius: 11, padding: 3, marginBottom: 14, gap: 2 }}>
-            {segBtn('carrito', 'Carrito', totals.items)}
+            {segBtn('carrito', 'Carrito', cart.length)}
             {segBtn('activos', 'Grupos activos', activos.length)}
           </div>
         </div>
@@ -7199,7 +7199,7 @@ function WebHeader({ showSearch = true, authMode = null }) {
           {!BOTH_MODE && <a href="?both" className="web-btn-ghost" style={{ textDecoration: 'none', fontSize: 12, opacity: 0.7 }}>💻📱</a>}
           <button className="web-cart" type="button" onClick={() => navigate('mis-grupos')} aria-label="Carrito / Mis grupos">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
-            <span>{cartTotals(cart).items}</span>
+            <span>{cart.length}</span>
           </button>
         </div>
       </div>
@@ -7644,7 +7644,7 @@ function WebMisGrupos() {
             <p className="web-cart-sub">Carrito para armar · Grupos activos = confirmados · {user ? user.nombre : 'Invitado'}</p>
           </div>
           {tab === 'carrito' && cart.length > 0 && (
-            <span className="web-cart-count">{totals.items} {totals.items === 1 ? 'ítem' : 'ítems'}</span>
+            <span className="web-cart-count">{cart.length} {cart.length === 1 ? 'ítem' : 'ítems'}</span>
           )}
           {tab === 'activos' && activos.length > 0 && (
             <span className="web-cart-count">{activos.length} activo{activos.length === 1 ? '' : 's'}</span>
@@ -7653,7 +7653,7 @@ function WebMisGrupos() {
 
         <div style={{ display: 'flex', background: '#e8eaec', borderRadius: 11, padding: 3, marginBottom: 18, gap: 2, maxWidth: 480 }}>
           <button type="button" className="web-btn" onClick={() => setTab('carrito')} style={{ flex: 1, background: tab === 'carrito' ? '#0d9488' : 'transparent', color: tab === 'carrito' ? '#fff' : '#555', boxShadow: 'none' }}>
-            Carrito{totals.items ? ` (${totals.items})` : ''}
+            Carrito{cart.length ? ` (${cart.length})` : ''}
           </button>
           <button type="button" className="web-btn" onClick={() => setTab('activos')} style={{ flex: 1, background: tab === 'activos' ? '#0d9488' : 'transparent', color: tab === 'activos' ? '#fff' : '#555', boxShadow: 'none', fontSize: 13 }}>
             Grupos activos{activos.length ? ` (${activos.length})` : ''}
@@ -7662,25 +7662,6 @@ function WebMisGrupos() {
 
         {tab === 'carrito' ? (
           <>
-            <div className="web-cart-metrics" aria-label="Resumen del carrito">
-              <div className="web-cart-metric">
-                <div className="web-cart-metric-label">Ítems</div>
-                <div className="web-cart-metric-value">{totals.items}</div>
-              </div>
-              <div className="web-cart-metric web-cart-metric--pay">
-                <div className="web-cart-metric-label">A pagar</div>
-                <div className="web-cart-metric-value">{fmtPrecioAR(totals.grupo)}</div>
-              </div>
-              <div className="web-cart-metric web-cart-metric--muted">
-                <div className="web-cart-metric-label">Ahorro</div>
-                <div className="web-cart-metric-value">{fmtPrecioAR(totals.ahorro)}</div>
-              </div>
-            </div>
-            {totals.coto > 0 && cart.length > 0 && (
-              <p className="web-cart-coto-hint">
-                En Coto serían <s>{fmtPrecioAR(totals.coto)}</s> · ahorrás <b>{fmtPrecioAR(totals.ahorro)}</b>
-              </p>
-            )}
 
             {cart.length === 0 ? (
               <div className="web-empty-panel">
@@ -8374,7 +8355,7 @@ function App() {
                   Misma pantalla y carrito en ambos lados · <a href="?dev" style={{ color: 'oklch(0.75 0.12 165)' }}>Solo mobile (?dev)</a>
                   {' · '}
                   <a href="./" style={{ color: 'oklch(0.75 0.12 165)' }}>App pública</a>
-                  {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cartTotals(cart).items} ítems)</span>}
+                  {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cart.length} ítems)</span>}
                 </div>
               </div>
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -8469,7 +8450,7 @@ function App() {
       <div className="top-bar">
         <div>
           <div className="brand">HUBADOR <span>Mobile</span></div>
-          <div className="sub">Vista previa en iPhone 15 Pro · <a href="?both" style={{ color: 'oklch(0.75 0.12 165)' }}>Comparar Web + Mobile</a> {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cartTotals(cart).items} en formación)</span>}</div>
+          <div className="sub">Vista previa en iPhone 15 Pro · <a href="?both" style={{ color: 'oklch(0.75 0.12 165)' }}>Comparar Web + Mobile</a> {user && <span style={{ marginLeft: 8, color: 'oklch(0.75 0.15 165)' }}>· 👤 {user.nombre} ({cart.length} en formación)</span>}</div>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
               <button type="button" onClick={hubadorConnectSupabaseDev} style={{ background: 'transparent', border: '1px solid #3d6b64', color: 'oklch(0.75 0.12 165)', borderRadius: 6, padding: '6px 10px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer' }}>{sb ? 'Supabase ✓' : 'Conectar Supabase'}</button>
