@@ -6473,7 +6473,15 @@ function MobileMisGrupos() {
   const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
   const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
-  const [waPhone, setWaPhone] = React.useState('');
+  const userContact = resolveUserContact(user);
+  const initialPhone = (userContact && userContact.tel) || (user && (user.tel || user.phone || user.nombre)) || '';
+  const [waPhone, setWaPhone] = React.useState(initialPhone);
+  React.useEffect(() => {
+    if (!waPhone) {
+      const p = (userContact && userContact.tel) || (user && (user.tel || user.phone || user.nombre)) || '';
+      if (p) setWaPhone(p);
+    }
+  }, [user]);
   const [waNodo, setWaNodo] = React.useState(getSavedNodoId);
   const [waSending, setWaSending] = React.useState(false);
   const handleWhatsAppCheckout = async () => {
@@ -6481,7 +6489,7 @@ function MobileMisGrupos() {
       if (showToast) showToast('Elegí tu zona de entrega para continuar');
       return;
     }
-    if (waPhone.replace(/\D/g, '').length < 8) {
+    if (!waPhone.trim() || waPhone.replace(/\D/g, '').length < 3) {
       if (showToast) showToast('Ingresá tu WhatsApp para continuar');
       return;
     }
@@ -6584,36 +6592,24 @@ function MobileMisGrupos() {
                     <span>Comprando individual</span>
                     <s style={{ color: '#e0524a', fontWeight: 700, fontSize: 16 }}>{fmtPrecioAR(totals.coto)}</s>
                   </div>
-                  {!user ? (
-                    <>
-                      <NodoSelect value={waNodo} onChange={setWaNodo} />
-                      <input
-                        type="tel"
-                        inputMode="tel"
-                        value={waPhone}
-                        onChange={(e) => setWaPhone(e.target.value)}
-                        placeholder="Tu WhatsApp (ej: 1157314429)"
-                        style={{ width: '100%', height: 44, border: '1.5px solid #cbd5e1', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', marginBottom: 8 }}
-                      />
-                      <button
-                        type="button"
-                        onClick={handleWhatsAppCheckout}
-                        disabled={waSending}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', background: waSending ? '#94a3b8' : '#25D366', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: waSending ? 'default' : 'pointer', textDecoration: 'none', boxSizing: 'border-box' }}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
-                        {waSending ? 'Guardando...' : 'Enviar pedido por WhatsApp'}
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => startMpDemoPay && startMpDemoPay()}
-                      style={{ width: '100%', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14.5, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(22,163,74,.32)' }}
-                    >
-                      Confirmar pedido y transferir
-                    </button>
-                  )}
+                  <NodoSelect value={waNodo} onChange={setWaNodo} />
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={waPhone}
+                    onChange={(e) => setWaPhone(e.target.value)}
+                    placeholder="Tu WhatsApp (ej: 1157314429)"
+                    style={{ width: '100%', height: 44, border: '1.5px solid #cbd5e1', borderRadius: 10, padding: '0 12px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', marginBottom: 8 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppCheckout}
+                    disabled={waSending}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', background: waSending ? '#94a3b8' : '#25D366', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: waSending ? 'default' : 'pointer', textDecoration: 'none', boxSizing: 'border-box' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
+                    {waSending ? 'Guardando...' : 'Enviar pedido por WhatsApp'}
+                  </button>
                   <button type="button" onClick={() => navigate('productos')} style={{ width: '100%', marginTop: 10, background: 'transparent', border: `1.5px solid ${primary}`, color: primary, borderRadius: 10, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Seguir sumando productos</button>
                 </div>
               </>
@@ -7803,7 +7799,15 @@ function WebMisGrupos() {
   const totals = cartTotals(cart);
   const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
   const activos = ordersForProfile(orders, user && user.email).filter((o) => isActivoPedidoStatus(o.status));
-  const [waPhone, setWaPhone] = React.useState('');
+  const userContact = resolveUserContact(user);
+  const initialPhone = (userContact && userContact.tel) || (user && (user.tel || user.phone || user.nombre)) || '';
+  const [waPhone, setWaPhone] = React.useState(initialPhone);
+  React.useEffect(() => {
+    if (!waPhone) {
+      const p = (userContact && userContact.tel) || (user && (user.tel || user.phone || user.nombre)) || '';
+      if (p) setWaPhone(p);
+    }
+  }, [user]);
   const [waNodo, setWaNodo] = React.useState(getSavedNodoId);
   const [waSending, setWaSending] = React.useState(false);
   const handleWhatsAppCheckout = async () => {
@@ -7811,7 +7815,7 @@ function WebMisGrupos() {
       if (showToast) showToast('Elegí tu zona de entrega para continuar');
       return;
     }
-    if (waPhone.replace(/\D/g, '').length < 8) {
+    if (!waPhone.trim() || waPhone.replace(/\D/g, '').length < 3) {
       if (showToast) showToast('Ingresá tu WhatsApp para continuar');
       return;
     }
@@ -7899,38 +7903,25 @@ function WebMisGrupos() {
                     <strong>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
                   <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 4 }}><span>Comprando individual</span><s>{fmtPrecioAR(totals.coto)}</s></div>
-                  {!user ? (
-                    <>
-                      <NodoSelect value={waNodo} onChange={setWaNodo} />
-                      <input
-                        type="tel"
-                        inputMode="tel"
-                        value={waPhone}
-                        onChange={(e) => setWaPhone(e.target.value)}
-                        placeholder="Tu WhatsApp (ej: 1157314429)"
-                        style={{ width: '100%', height: 42, border: '1.5px solid #cbd5e1', borderRadius: 8, padding: '0 12px', fontFamily: 'inherit', fontSize: 13.5, boxSizing: 'border-box', marginBottom: 8 }}
-                      />
-                      <button
-                        type="button"
-                        onClick={handleWhatsAppCheckout}
-                        disabled={waSending}
-                        className="web-btn"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: waSending ? '#94a3b8' : '#25D366', textDecoration: 'none', cursor: waSending ? 'default' : 'pointer' }}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
-                        {waSending ? 'Guardando...' : 'Enviar pedido por WhatsApp'}
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      className="web-btn"
-                      onClick={() => startMpDemoPay && startMpDemoPay()}
-                      style={{ background: '#16a34a', fontWeight: 700 }}
-                    >
-                      Confirmar pedido y transferir
-                    </button>
-                  )}
+                  <NodoSelect value={waNodo} onChange={setWaNodo} />
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    value={waPhone}
+                    onChange={(e) => setWaPhone(e.target.value)}
+                    placeholder="Tu WhatsApp (ej: 1157314429)"
+                    style={{ width: '100%', height: 42, border: '1.5px solid #cbd5e1', borderRadius: 8, padding: '0 12px', fontFamily: 'inherit', fontSize: 13.5, boxSizing: 'border-box', marginBottom: 8 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppCheckout}
+                    disabled={waSending}
+                    className="web-btn"
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: waSending ? '#94a3b8' : '#25D366', textDecoration: 'none', cursor: waSending ? 'default' : 'pointer' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
+                    {waSending ? 'Guardando...' : 'Enviar pedido por WhatsApp'}
+                  </button>
                   <button type="button" className="web-linkish" onClick={() => navigate('productos')}>+ Seguir sumando productos</button>
                 </aside>
               </>
