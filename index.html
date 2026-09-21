@@ -1936,10 +1936,10 @@ const DEFAULT_CITY = 'Buenos Aires';
 // Zonas de la prueba. Cada una corre su propia orden (barra de kg independiente).
 // TODO: reemplazar "A confirmar" por la dirección/punto de entrega real de cada zona.
 const NODOS_HUBADOR = [
-  { id: 'belgrano', nombre: 'Nodo Belgrano', address: 'A confirmar', barrio: 'Belgrano' },
-  { id: 'garin', nombre: 'Nodo Garín', address: 'A confirmar', barrio: 'Garín' },
+  { id: 'garin', nombre: 'HUB Garín', address: 'A confirmar', barrio: 'Garín' },
+  { id: 'belgrano', nombre: 'HUB Belgrano', address: 'A confirmar', barrio: 'Belgrano' },
 ];
-const DEFAULT_HUB = { name: 'Nodo Belgrano', address: 'A confirmar', barrio: 'Belgrano' };
+const DEFAULT_HUB = { name: 'HUB Garín', address: 'A confirmar', barrio: 'Garín' };
 /** Zona de entrega elegida: se recuerda en el navegador y se puede fijar con un link de publicidad,
  *  ej. hubador.com/?nodo=palermo  → ya queda preseleccionada para quien entra desde el aviso. */
 const HUBADOR_NODO_KEY = 'hubador_nodo_id';
@@ -1952,34 +1952,51 @@ const HUBADOR_NODO_KEY = 'hubador_nodo_id';
 })();
 function getSavedNodoId() {
   try {
+    const qs = new URLSearchParams(location.search);
+    const nFromUrl = (qs.get('hub') || qs.get('nodo') || '').toLowerCase();
+    if (nFromUrl && NODOS_HUBADOR.some((x) => x.id === nFromUrl)) return nFromUrl;
     const v = localStorage.getItem(HUBADOR_NODO_KEY) || '';
-    return NODOS_HUBADOR.some((x) => x.id === v) ? v : '';
-  } catch (e) { return ''; }
+    if (NODOS_HUBADOR.some((x) => x.id === v)) return v;
+  } catch (e) {}
+  return NODOS_HUBADOR[0].id;
 }
 /** Cambia la zona activa y avisa a la app para que las barras/kg se recalculen para esa zona. */
 function setSavedNodoId(id) {
   try { if (id) localStorage.setItem(HUBADOR_NODO_KEY, id); } catch (e) {}
   try { window.dispatchEvent(new CustomEvent('hubador_progress_updated')); } catch (e) {}
 }
-/** Nombre de la zona activa ("Belgrano" / "Garín"); si no hay ninguna, "Buenos Aires". */
+/** Nombre de la zona activa ("Garín" / "Belgrano"); si no hay ninguna, "Garín". */
 function currentZoneName() {
   const n = NODOS_HUBADOR.find((x) => x.id === getSavedNodoId());
-  return n ? n.barrio : 'Buenos Aires';
+  return n ? n.barrio : 'Garín';
 }
-/** id de zona a partir del texto guardado en el pedido ("Nodo Belgrano · A confirmar"). */
+/** id de zona a partir del texto guardado en el pedido ("HUB Belgrano · A confirmar"). */
 function nodoIdFromLabel(label) {
   const s = String(label || '').toLowerCase();
   const n = NODOS_HUBADOR.find((x) => s.includes(x.nombre.toLowerCase()) || s.includes(x.id));
   return n ? n.id : '';
 }
 function NodoSelect({ value, onChange, style }) {
+  const qs = new URLSearchParams(location.search);
+  const fixedFromUrl = (qs.get('hub') || qs.get('nodo') || '').toLowerCase();
+  const currentVal = value || getSavedNodoId();
+  const activeNodo = NODOS_HUBADOR.find((n) => n.id === currentVal) || NODOS_HUBADOR[0];
+
+  if (fixedFromUrl && NODOS_HUBADOR.some((x) => x.id === fixedFromUrl)) {
+    return (
+      <div style={Object.assign({ width: '100%', minHeight: 44, border: '1.5px solid #0d9488', borderRadius: 10, padding: '10px 14px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', background: '#f0fdf4', marginBottom: 8, color: '#166534', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }, style || {})}>
+        <span>📍</span>
+        <span>{activeNodo.nombre} — {activeNodo.address}</span>
+      </div>
+    );
+  }
+
   return (
     <select
-      value={value}
+      value={currentVal}
       onChange={(e) => { onChange(e.target.value); setSavedNodoId(e.target.value); }}
-      style={Object.assign({ width: '100%', height: 44, border: '1.5px solid #cbd5e1', borderRadius: 10, padding: '0 10px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', background: '#fff', marginBottom: 8, color: value ? '#0f172a' : '#94a3b8' }, style || {})}
+      style={Object.assign({ width: '100%', height: 44, border: '1.5px solid #cbd5e1', borderRadius: 10, padding: '0 10px', fontFamily: 'inherit', fontSize: 14, boxSizing: 'border-box', background: '#fff', marginBottom: 8, color: '#0f172a', fontWeight: 600 }, style || {})}
     >
-      <option value="">📍 Elegí tu zona de entrega</option>
       {NODOS_HUBADOR.map((n) => (
         <option key={n.id} value={n.id}>{n.nombre} — {n.address}</option>
       ))}
@@ -6265,9 +6282,9 @@ function HubadorProfileGateModal({ open, initialTel, initialDireccion, initialNo
     <div style={{ position: 'fixed', inset: 0, zIndex: 220, background: 'rgba(15,23,30,0.48)', display: 'grid', placeItems: 'center', padding: 18 }} onClick={onCancel}>
       <div role="dialog" aria-modal="true" aria-label="Datos de entrega y retiro" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 410, background: '#fff', borderRadius: 18, padding: '22px 20px', boxShadow: '0 18px 48px rgba(0,0,0,.18)', fontFamily: "'Inter', sans-serif" }}>
         <div style={{ fontWeight: 800, fontSize: 17.5, marginBottom: 4, color: '#0f172a' }}>Punto de retiro y tus datos</div>
-        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 14, lineHeight: 1.45 }}>Elegí el nodo donde retirarás tu pedido y completá tus datos de contacto.</div>
+        <div style={{ fontSize: 13, color: '#64748b', marginBottom: 14, lineHeight: 1.45 }}>Elegí el HUB donde retirarás tu pedido y completá tus datos de contacto.</div>
 
-        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>📍 Punto / Nodo de retiro</label>
+        <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>📍 Punto / HUB de retiro</label>
         <div style={{ position: 'relative', marginBottom: 6 }}>
           <select
             value={nodo}
@@ -6285,7 +6302,7 @@ function HubadorProfileGateModal({ open, initialTel, initialDireccion, initialNo
           </select>
         </div>
         <div style={{ fontSize: 11.5, color: '#0f766e', background: '#ecfdf5', border: '1px solid #ccfbf1', padding: '7px 10px', borderRadius: 8, marginBottom: 14, lineHeight: 1.35 }}>
-          📦 Retirás tu pedido fresco en este nodo barrial sin costo de flete individual.
+          📦 Retirás tu pedido fresco en este HUB barrial sin costo de flete individual.
         </div>
 
         <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#334155', marginBottom: 6 }}>📞 Teléfono de contacto (WhatsApp)</label>
@@ -6349,7 +6366,7 @@ function HubadorTransferenciaModal({ open, cart, user, totalLabel, onConfirmTran
       '',
       `👤 *Nombre:* ${user?.nombre || 'Cliente'}`,
       tel ? `📞 *Teléfono:* ${tel}` : '',
-      `📍 *Punto / Nodo de retiro:* ${nodoStr}`,
+      `📍 *Punto / HUB de retiro:* ${nodoStr}`,
       dir ? `🏠 *Dirección:* ${dir}` : '',
       '',
       'Adjunto aquí el comprobante de la transferencia bancaria 👇'
