@@ -3295,7 +3295,7 @@ function MasOfertas({ excludeName, barrio = 'Buenos Aires' }) {
                     <span style={{ color: almost ? accent : '#666', fontWeight: almost ? 700 : 500 }}>
                       {almost ? `¡Sólo faltan ${missing} kg!` : <>Faltan <b style={{ color: '#333' }}>{missing} kg</b> · {live.filled}/{live.goal} kg</>}
                     </span>
-                    <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{live.filled}/{live.goal}</span>
+                    {almost && <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{live.filled}/{live.goal}</span>}
                   </div>
                   <div style={{ height: 5, background: '#ececef', borderRadius: 999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 999, transition: 'width 0.3s' }} />
@@ -5011,7 +5011,7 @@ function MobileGrupoDetalle() {
                   <span style={{ fontWeight: 700, color: accent }}>
                     {almost ? `⚡ ¡Sólo faltan ${missingKg} kg!` : <>Faltan <b>{missingKg} kg</b> · {filledKg}/{totalKg} kg</>}
                   </span>
-                  <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{filledKg}/{totalKg} kg</span>
+                  {almost && <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{filledKg}/{totalKg} kg</span>}
                 </div>
                 <div style={{ height: 5, background: '#e0ede0', borderRadius: 999, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 999, transition: 'width 0.3s' }} />
