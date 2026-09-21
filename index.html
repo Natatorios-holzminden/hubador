@@ -8267,6 +8267,7 @@ function WebAdminGrupos() {
 function MobileAdminPedidos() {
   const primary = 'oklch(0.55 0.15 165)';
   const [zona, setZona] = React.useState('todas');
+  const [board, setBoard] = React.useState([]);
   const [rows, setRows] = React.useState(null);
   const [err, setErr] = React.useState('');
   const load = async () => {
@@ -8274,6 +8275,11 @@ function MobileAdminPedidos() {
     setErr('');
     setRows(null);
     try {
+      // Tablero por zona: viene de la vista product_progress (ya agregada, completa, sin límite de 300 pedidos).
+      try {
+        const { data: prog } = await sb.from('product_progress').select('*');
+        setBoard(Array.isArray(prog) ? prog : []);
+      } catch (e) { setBoard([]); }
       const { data: orders, error } = await sb.from('orders').select('*').order('created_at', { ascending: false }).limit(300);
       if (error) throw error;
       const ids = Array.from(new Set((orders || []).map((o) => o.user_id)));
@@ -8307,6 +8313,20 @@ function MobileAdminPedidos() {
   });
   const summary = Object.entries(byProduct).sort((a, b) => b[1].kg - a[1].kg);
 
+  // Tablero: una fila por producto, una columna por zona (cada zona con SU barra y SU meta).
+  const boardZones = NODOS_HUBADOR.map((n) => ({ id: n.id, name: n.barrio }));
+  if (board.some((r) => !r.zona && Number(r.filled_kg) > 0)) boardZones.push({ id: '', name: 'Sin zona' });
+  const boardProducts = Array.from(new Set([
+    ...getHubadorCatalogList(true).filter((p) => !p.oculto).map((p) => p.name),
+    ...board.map((r) => r.product_name),
+  ]));
+  const cellOf = (name, zid) => {
+    const r = board.find((x) => x.product_name === name && (x.zona || '') === zid);
+    const kg = r ? Number(r.filled_kg) || 0 : 0;
+    const goal = resolveGoalForProduct(name);
+    return { kg, goal, pct: Math.min(100, Math.round((kg / goal) * 100)), members: r ? Number(r.members) || 0 : 0 };
+  };
+
   return (
     <AdminShell active="admin-pedidos">
       <div style={{ padding: 14, fontFamily: "'Inter', sans-serif" }}>
@@ -8319,6 +8339,35 @@ function MobileAdminPedidos() {
         </div>
 
         {err && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', borderRadius: 10, padding: '10px 12px', fontSize: 12.5, marginBottom: 12 }}>⚠️ {err} (¿corriste el SQL de pedidos y estás con tu cuenta admin?)</div>}
+
+        {boardProducts.length > 0 && (
+          <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '10px 12px', marginBottom: 12, overflowX: 'auto' }}>
+            <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 8 }}>Tablero por zona <span style={{ fontWeight: 500, color: '#64748b', fontSize: 11.5 }}>· cada zona corre su propia orden</span></div>
+            <div style={{ display: 'grid', gridTemplateColumns: `minmax(110px, 1.2fr) repeat(${boardZones.length}, minmax(104px, 1fr))`, gap: '10px 10px', alignItems: 'center', minWidth: 110 + boardZones.length * 108 }}>
+              <div />
+              {boardZones.map((z) => (
+                <div key={'h' + z.id} style={{ fontWeight: 800, fontSize: 12, color: primary, textAlign: 'center' }}>📍 {z.name}</div>
+              ))}
+              {boardProducts.map((name) => (
+                <React.Fragment key={name}>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{name}</div>
+                  {boardZones.map((z) => {
+                    const c = cellOf(name, z.id);
+                    return (
+                      <div key={name + z.id} style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: c.pct >= 100 ? '#dc2626' : '#0f172a' }}>{c.kg}/{c.goal} kg <span style={{ color: '#64748b', fontWeight: 600 }}>· {c.pct}%</span></div>
+                        <div style={{ height: 5, background: '#e8ecea', borderRadius: 999, overflow: 'hidden', margin: '3px 0' }}>
+                          <div style={{ height: '100%', width: c.pct + '%', background: c.pct >= 100 ? '#dc2626' : primary, borderRadius: 999 }} />
+                        </div>
+                        <div style={{ fontSize: 10.5, color: '#64748b' }}>{c.members} {c.members === 1 ? 'vecino' : 'vecinos'}</div>
+                      </div>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        )}
 
         {zonas.length > 0 && (
           <select value={zona} onChange={(e) => setZona(e.target.value)} style={{ width: '100%', height: 40, border: '1px solid #cbd5e1', borderRadius: 10, padding: '0 10px', fontFamily: 'inherit', fontSize: 13, marginBottom: 12, background: '#fff' }}>
