@@ -6416,13 +6416,9 @@ function MobileMisGrupos() {
                     <span style={{ fontWeight: 700, fontSize: 14, color: '#0f766e' }}>Total en grupo</span>
                     <strong style={{ color: '#0f766e', fontSize: 22 }}>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, marginBottom: 6, color: '#888' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, marginBottom: 12, color: '#888' }}>
                     <span>Si compraras en Coto</span>
                     <s style={{ color: '#e0524a', fontWeight: 700, fontSize: 16 }}>{fmtPrecioAR(totals.coto)}</s>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 12, color: '#15803d' }}>
-                    <span style={{ fontWeight: 600 }}>Ahorrás</span>
-                    <span style={{ fontWeight: 800 }}>{fmtPrecioAR(totals.ahorro)}</span>
                   </div>
                   {!user ? (
                     <a
@@ -7701,11 +7697,7 @@ function WebMisGrupos() {
                     <span>Total en grupo</span>
                     <strong>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
-                  <div className="web-cart-row web-cart-coto-row"><span>Si compraras en Coto</span><s>{fmtPrecioAR(totals.coto)}</s></div>
-                  <div className="web-cart-row web-cart-ahorro-row">
-                    <span>Ahorrás</span>
-                    <strong>{fmtPrecioAR(totals.ahorro)}</strong>
-                  </div>
+                  <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 4 }}><span>Si compraras en Coto</span><s>{fmtPrecioAR(totals.coto)}</s></div>
                   {!user ? (
                     <a
                       href={buildCartWhatsAppLink(cart, totals)}
