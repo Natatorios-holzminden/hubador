@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -101,14 +101,17 @@
     <div class="toolbar-row">
       <div class="toolbar-group">
         <span class="toolbar-label"><i class="fa-solid fa-calendar-days text-danger"></i> Seleccionar Scraper / Fecha:</span>
-        <button class="date-btn active" id="btnDate17" onclick="selectDate('17sep')">
-          <i class="fa-solid fa-file-pdf"></i> Scraper 17-Sep (Auditado PDF)
+        <button class="date-btn active" id="btnDate22" onclick="selectDate('22sep')">
+          <i class="fa-solid fa-camera"></i> Scraper 22-Sep (Hoy Foto 4)
+        </button>
+        <button class="date-btn" id="btnDate21" onclick="selectDate('21sep')">
+          <i class="fa-solid fa-circle-dot"></i> Scraper 21-Sep
+        </button>
+        <button class="date-btn" id="btnDate17" onclick="selectDate('17sep')">
+          <i class="fa-solid fa-file-pdf"></i> Scraper 17-Sep (PDF)
         </button>
         <button class="date-btn" id="btnDate16" onclick="selectDate('16sep')">
           <i class="fa-solid fa-clock-rotate-left"></i> Scraper 16-Sep (Baseline)
-        </button>
-        <button class="date-btn" id="btnDate21" onclick="selectDate('21sep')">
-          <i class="fa-solid fa-circle-dot"></i> Scraper 21-Sep (En Vivo Hoy)
         </button>
       </div>
 
@@ -124,7 +127,7 @@
   <div class="grid" id="galleryGrid"></div>
 
   <script>
-    let currentDate = '17sep';
+    let currentDate = '22sep';
     let currentFilter = 'todos';
 
     const ITEMS = [
@@ -134,7 +137,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.299', mc: '$1.118', img: 'evidencias/recorte_coto_papa.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.299', mc: '$1.125', img: 'evidencias/recorte_coto_papa.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.699 (OFERTA)', mc: '$1.125', img: 'evidencias/coto_top20/coto_papa_spunta.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$2.699 (OFERTA)', mc: '$1.125', img: 'evidencias/coto_21sep/coto_papa_spunta.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.699 (OFERTA)', mc: '$1.125', img: 'evidencias/coto_21sep/coto_papa_spunta.png' }
         }
       },
       {
@@ -142,7 +146,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$3.299', mc: '$1.411', img: 'evidencias/recorte_coto_tomate.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$3.299', mc: '$1.528', img: 'evidencias/recorte_coto_tomate.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$3.299 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_top20/coto_tomate_redondo.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$3.299 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_21sep/coto_tomate_redondo.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.299 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_21sep/coto_tomate_redondo.png' }
         }
       },
       {
@@ -150,7 +155,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.999', mc: '$1.300', img: 'evidencias/recorte_coto_cebolla.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.999', mc: '$1.675', img: 'evidencias/recorte_coto_cebolla.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_top20/coto_cebolla_valenciani.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_21sep/coto_cebolla_valenciani.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_21sep/coto_cebolla_valenciani.png' }
         }
       },
       {
@@ -158,7 +164,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$1.899', mc: '$1.148', img: 'evidencias/recorte_coto_zanahoria.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.899', mc: '$1.154', img: 'evidencias/recorte_coto_zanahoria.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.999', mc: '$1.154', img: 'evidencias/coto_top20/coto_zanahoria_chantenay.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$1.999', mc: '$1.154', img: 'evidencias/coto_21sep/coto_zanahoria_chantenay.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.999', mc: '$1.154', img: 'evidencias/coto_21sep/coto_zanahoria_chantenay.png' }
         }
       },
       {
@@ -166,7 +173,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.799', mc: '$906', img: 'evidencias/recorte_coto_zapallo.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.799', mc: '$1.074', img: 'evidencias/recorte_coto_zapallo.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.899', mc: '$1.074', img: 'evidencias/coto_top20/coto_zapallo_tetsukab..png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$1.899', mc: '$1.074', img: 'evidencias/coto_21sep/coto_zapallo_tetsukab..png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.899', mc: '$1.074', img: 'evidencias/coto_21sep/coto_zapallo_tetsukab..png' }
         }
       },
       {
@@ -174,7 +182,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.999', mc: '$933', img: 'evidencias/recorte_coto_zapallito.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.999', mc: '$907', img: 'evidencias/recorte_coto_zapallito.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.999 (OFERTA)', mc: '$907', img: 'evidencias/coto_top20/coto_zapallito_redondo.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$2.999 (OFERTA)', mc: '$907', img: 'evidencias/coto_21sep/coto_zapallito_redondo.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.999 (OFERTA)', mc: '$907', img: 'evidencias/coto_21sep/coto_zapallito_redondo.png' }
         }
       },
       {
@@ -182,7 +191,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$1.299', mc: '$470', img: 'evidencias/recorte_coto_acelga.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.299', mc: '$510', img: 'evidencias/recorte_coto_acelga.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.099 (OFERTA)', mc: '$510', img: 'evidencias/coto_top20/coto_acelga.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$1.099 (OFERTA)', mc: '$510', img: 'evidencias/coto_21sep/coto_acelga.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.099 (OFERTA)', mc: '$510', img: 'evidencias/coto_21sep/coto_acelga.png' }
         }
       },
       {
@@ -190,7 +200,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.699', mc: '$750', img: 'evidencias/recorte_coto_lechuga.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.699', mc: '$729', img: 'evidencias/recorte_coto_lechuga.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.699 (OFERTA)', mc: '$729', img: 'evidencias/coto_top20/coto_lechuga_criolla.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$2.699 (OFERTA)', mc: '$729', img: 'evidencias/coto_21sep/coto_lechuga_criolla.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.699 (OFERTA)', mc: '$729', img: 'evidencias/coto_21sep/coto_lechuga_criolla.png' }
         }
       },
       {
@@ -198,7 +209,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.399 (OFERTA)', mc: '$1.277', img: 'evidencias/recorte_coto_batata.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/recorte_coto_batata.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/coto_top20/coto_batata_arapey.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/coto_21sep/coto_batata_arapey.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/coto_21sep/coto_batata_arapey.png' }
         }
       },
       {
@@ -206,7 +218,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.499', mc: '$944', img: 'evidencias/recorte_coto_pepino.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.499', mc: '$944', img: 'evidencias/recorte_coto_pepino.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.999 (OFERTA)', mc: '$944', img: 'evidencias/coto_top20/coto_pepino.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$1.999 (OFERTA)', mc: '$944', img: 'evidencias/coto_21sep/coto_pepino.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.999 (OFERTA)', mc: '$944', img: 'evidencias/coto_21sep/coto_pepino.png' }
         }
       },
       // Frutas
@@ -215,7 +228,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.499', mc: '$1.781', img: 'evidencias/recorte_coto_banana.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.499', mc: '$1.781', img: 'evidencias/recorte_coto_banana.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.299 (OFERTA)', mc: '$1.781', img: 'evidencias/coto_top20/coto_banana_cavendish.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$2.299 (OFERTA)', mc: '$1.781', img: 'evidencias/coto_21sep/coto_banana_cavendish.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.299 (OFERTA)', mc: '$1.781', img: 'evidencias/coto_21sep/coto_banana_cavendish.png' }
         }
       },
       {
@@ -223,7 +237,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.890', mc: '$2.119', img: 'evidencias/recorte_coto_manzana.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.890', mc: '$1.708', img: 'evidencias/recorte_coto_manzana.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.899 (OFERTA)', mc: '$1.708', img: 'evidencias/coto_top20/coto_manzana_red_delicious.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$2.899 (OFERTA)', mc: '$1.708', img: 'evidencias/coto_21sep/coto_manzana_red_delicious.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.899 (OFERTA)', mc: '$1.708', img: 'evidencias/coto_21sep/coto_manzana_red_delicious.png' }
         }
       },
       {
@@ -231,7 +246,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$899', mc: '$694', img: 'evidencias/recorte_coto_naranja.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$899', mc: '$694', img: 'evidencias/recorte_coto_naranja.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$899 (OFERTA)', mc: '$694', img: 'evidencias/coto_top20/coto_naranja_salustiana.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$899 (OFERTA)', mc: '$694', img: 'evidencias/coto_21sep/coto_naranja_salustiana.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$899 (OFERTA)', mc: '$694', img: 'evidencias/coto_21sep/coto_naranja_salustiana.png' }
         }
       },
       {
@@ -239,7 +255,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$999', mc: '$722', img: 'evidencias/recorte_coto_mandarina.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$999', mc: '$722', img: 'evidencias/recorte_coto_mandarina.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.299 (OFERTA)', mc: '$722', img: 'evidencias/coto_top20/coto_mandarinamurcot.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$1.299 (OFERTA)', mc: '$722', img: 'evidencias/coto_21sep/coto_mandarinamurcot.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.299 (OFERTA)', mc: '$722', img: 'evidencias/coto_21sep/coto_mandarinamurcot.png' }
         }
       },
       {
@@ -247,7 +264,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$2.299 (OFERTA)', mc: '$1.776', img: 'evidencias/recorte_coto_pera.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.299 (OFERTA)', mc: '$1.333', img: 'evidencias/recorte_coto_pera.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$2.999', mc: '$1.333', img: 'evidencias/coto_top20/coto_pera_packhams.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$2.999', mc: '$1.333', img: 'evidencias/coto_21sep/coto_pera_packhams.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.999', mc: '$1.333', img: 'evidencias/coto_21sep/coto_pera_packhams.png' }
         }
       },
       {
@@ -255,7 +273,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$1.499', mc: '$693', img: 'evidencias/recorte_coto_limon.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.499', mc: '$571', img: 'evidencias/recorte_coto_limon.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$1.299 (OFERTA)', mc: '$571', img: 'evidencias/coto_top20/coto_limon_eureka.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$1.299 (OFERTA)', mc: '$571', img: 'evidencias/coto_21sep/coto_limon_eureka.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.299 (OFERTA)', mc: '$571', img: 'evidencias/coto_21sep/coto_limon_eureka.png' }
         }
       },
       {
@@ -263,7 +282,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$12.796', mc: '$12.796', img: 'evidencias/recorte_coto_frutilla.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$12.796', mc: '$5.770', img: 'evidencias/recorte_coto_frutilla.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$3.199 (OFERTA 250g)', mc: '$5.770', img: 'evidencias/coto_top20/coto_frutilla.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$3.199 (OFERTA 250g)', mc: '$5.770', img: 'evidencias/coto_21sep/coto_frutilla.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.199 (OFERTA 250g)', mc: '$5.770', img: 'evidencias/coto_21sep/coto_frutilla.png' }
         }
       },
       {
@@ -271,7 +291,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$999', mc: '$861', img: 'evidencias/recorte_coto_pomelo.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$999', mc: '$861', img: 'evidencias/recorte_coto_pomelo.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$999 (OFERTA)', mc: '$861', img: 'evidencias/coto_top20/coto_pomelo_starruby.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$999 (OFERTA)', mc: '$861', img: 'evidencias/coto_21sep/coto_pomelo_starruby.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$999 (OFERTA)', mc: '$861', img: 'evidencias/coto_21sep/coto_pomelo_starruby.png' }
         }
       },
       {
@@ -279,7 +300,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$7.999', mc: '$4.913', img: 'evidencias/recorte_coto_palta.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$7.999', mc: '$4.811', img: 'evidencias/recorte_coto_palta.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$7.999 (OFERTA)', mc: '$4.811', img: 'evidencias/coto_top20/coto_palta_hass.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$7.999 (OFERTA)', mc: '$4.811', img: 'evidencias/coto_21sep/coto_palta_hass.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$7.999 (OFERTA)', mc: '$4.811', img: 'evidencias/coto_21sep/coto_palta_hass.png' }
         }
       },
       {
@@ -287,7 +309,8 @@
         dates: {
           '16sep': { dateLabel: '16-Sep', coto: '$7.999', mc: '$5.175', img: 'evidencias/recorte_coto_kiwi.png' },
           '17sep': { dateLabel: '17-Sep (PDF)', coto: '$7.999', mc: '$5.475', img: 'evidencias/recorte_coto_kiwi.png' },
-          '21sep': { dateLabel: '21-Sep (Hoy)', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_top20/coto_kiwi.png' }
+          '21sep': { dateLabel: '21-Sep', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_21sep/coto_kiwi.png' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_21sep/coto_kiwi.png' }
         }
       }
     ];
@@ -349,6 +372,7 @@
       document.getElementById('btnDate16').classList.toggle('active', dateKey === '16sep');
       document.getElementById('btnDate17').classList.toggle('active', dateKey === '17sep');
       document.getElementById('btnDate21').classList.toggle('active', dateKey === '21sep');
+      document.getElementById('btnDate22').classList.toggle('active', dateKey === '22sep');
       render();
     }
 

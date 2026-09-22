@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluctuación Precios Coto - Top 20</title>
+    <title>Fluctuación Precios Coto - Top 20 (Foto 4: 22-Sep)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #121212;
+            background-color: #0b1120;
             color: #e0e0e0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -19,86 +19,94 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 14px;
         }
         .header h2 {
             margin: 0;
-            color: #4a90e2;
+            color: #38bdf8;
+            font-size: 1.5rem;
         }
         .btn {
-            background-color: #333;
+            background-color: #1e293b;
             color: #fff;
-            border: 1px solid #555;
+            border: 1px solid #334155;
             padding: 8px 16px;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 8px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
-        .btn:hover { background-color: #444; }
+        .btn:hover { background-color: #334155; }
         .chart-container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto 40px auto;
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background: #1e293b;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.08);
         }
         .chart-container h3 {
             text-align: center;
             margin-top: 0;
-            color: #ddd;
+            color: #f8fafc;
+            font-size: 1.15rem;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2><i class="fas fa-chart-bar"></i> Fluctuación de Precios - Coto Digital (Top 20)</h2>
-        <a href="index.html" class="btn"><i class="fas fa-arrow-left"></i> Volver al Comparador</a>
+        <h2><i class="fas fa-chart-bar"></i> Fluctuación de Precios - Coto Digital (Foto 4: 22-Sep)</h2>
+        <div style="display:flex; gap:10px;">
+            <a href="coto_top20_galeria.html" class="btn"><i class="fas fa-camera"></i> Ver Galería de Fotos</a>
+            <a href="index.html" class="btn"><i class="fas fa-arrow-left"></i> Comparador</a>
+        </div>
     </div>
 
     <div class="chart-container">
-        <h3>Verduras (16-Sep vs 17-Sep)</h3>
+        <h3>🥬 Verduras (16-Sep ➔ 17-Sep ➔ 21-Sep ➔ 22-Sep - Foto 4)</h3>
         <canvas id="chartVerduras"></canvas>
     </div>
 
     <div class="chart-container">
-        <h3>Frutas (16-Sep vs 17-Sep)</h3>
+        <h3>🍎 Frutas (16-Sep ➔ 17-Sep ➔ 21-Sep ➔ 22-Sep - Foto 4)</h3>
         <canvas id="chartFrutas"></canvas>
     </div>
 
     <script>
         const data = [
-            {"id": "papa_spunta", "nombre": "Papa Spunta", "categoria": "verdura", "coto_base": 2299, "coto_today": 2294},
-            {"id": "tomate_redondo", "nombre": "Tomate Redondo", "categoria": "verdura", "coto_base": 3299, "coto_today": 3299},
-            {"id": "cebolla_valenciani", "nombre": "Cebolla Valenciani", "categoria": "verdura", "coto_base": 2999, "coto_today": 3299},
-            {"id": "zanahoria_chantenay", "nombre": "Zanahoria Chantenay", "categoria": "verdura", "coto_base": 1899, "coto_today": 1999},
-            {"id": "zapallo_tetsukab.", "nombre": "Zapallo Tetsukab.", "categoria": "verdura", "coto_base": 2799, "coto_today": 1899},
-            {"id": "zapallito_redondo", "nombre": "Zapallito Redondo", "categoria": "verdura", "coto_base": 2999, "coto_today": 2549},
-            {"id": "acelga", "nombre": "Acelga", "categoria": "verdura", "coto_base": 1299, "coto_today": 1099},
-            {"id": "lechuga_criolla", "nombre": "Lechuga Criolla", "categoria": "verdura", "coto_base": 2699, "coto_today": 2699},
-            {"id": "batata_arapey", "nombre": "Batata Arapey", "categoria": "verdura", "coto_base": 2399, "coto_today": 2039},
-            {"id": "pepino", "nombre": "Pepino", "categoria": "verdura", "coto_base": 2499, "coto_today": 2124},
-            {"id": "banana_cavendish", "nombre": "Banana Cavendish", "categoria": "fruta", "coto_base": 2499, "coto_today": 1954},
-            {"id": "manzana_red_delicious", "nombre": "Manzana Red Delicious", "categoria": "fruta", "coto_base": 2890, "coto_today": 2899},
-            {"id": "naranja_salustiana", "nombre": "Naranja Salustiana Jugo", "categoria": "fruta", "coto_base": 899, "coto_today": 899},
-            {"id": "mandarinamurcot", "nombre": "Mandarinamurcot", "categoria": "fruta", "coto_base": 999, "coto_today": 1299},
-            {"id": "pera_packhams", "nombre": "Pera Packham's Triumph", "categoria": "fruta", "coto_base": 2299, "coto_today": 2549},
-            {"id": "limon_eureka", "nombre": "Limón Eureka", "categoria": "fruta", "coto_base": 1499, "coto_today": 1299},
-            {"id": "frutilla", "nombre": "Frutilla", "categoria": "fruta", "coto_base": 12796, "coto_today": 3199},
-            {"id": "pomelo_starruby", "nombre": "Pomelo Star Ruby", "categoria": "fruta", "coto_base": 999, "coto_today": 999},
-            {"id": "palta_hass", "nombre": "Palta Hass", "categoria": "fruta", "coto_base": 7999, "coto_today": 7999},
-            {"id": "kiwi", "nombre": "Kiwi", "categoria": "fruta", "coto_base": 7999, "coto_today": 7999}
+            {"id": "papa_spunta", "nombre": "Papa Spunta", "categoria": "verdura", "p16": 2299, "p17": 2294, "p21": 2699, "p22": 2699},
+            {"id": "tomate_redondo", "nombre": "Tomate Redondo", "categoria": "verdura", "p16": 3299, "p17": 3299, "p21": 3299, "p22": 3299},
+            {"id": "cebolla_valenciani", "nombre": "Cebolla Valenciani", "categoria": "verdura", "p16": 2999, "p17": 3299, "p21": 3299, "p22": 3299},
+            {"id": "zanahoria_chantenay", "nombre": "Zanahoria Chantenay", "categoria": "verdura", "p16": 1899, "p17": 1999, "p21": 1999, "p22": 1999},
+            {"id": "zapallo_tetsukab.", "nombre": "Zapallo Tetsukab.", "categoria": "verdura", "p16": 2799, "p17": 1899, "p21": 1899, "p22": 1899},
+            {"id": "zapallito_redondo", "nombre": "Zapallito Redondo", "categoria": "verdura", "p16": 2999, "p17": 2549, "p21": 2999, "p22": 2999},
+            {"id": "acelga", "nombre": "Acelga", "categoria": "verdura", "p16": 1299, "p17": 1099, "p21": 1099, "p22": 1099},
+            {"id": "lechuga_criolla", "nombre": "Lechuga Criolla", "categoria": "verdura", "p16": 2699, "p17": 2699, "p21": 2699, "p22": 2699},
+            {"id": "batata_arapey", "nombre": "Batata Arapey", "categoria": "verdura", "p16": 2399, "p17": 2039, "p21": 2399, "p22": 2399},
+            {"id": "pepino", "nombre": "Pepino", "categoria": "verdura", "p16": 2499, "p17": 2124, "p21": 1999, "p22": 1999},
+            {"id": "banana_cavendish", "nombre": "Banana Cavendish", "categoria": "fruta", "p16": 2499, "p17": 1954, "p21": 2299, "p22": 2299},
+            {"id": "manzana_red_delicious", "nombre": "Manzana Red", "categoria": "fruta", "p16": 2890, "p17": 2899, "p21": 2899, "p22": 2899},
+            {"id": "naranja_salustiana", "nombre": "Naranja Jugo", "categoria": "fruta", "p16": 899, "p17": 899, "p21": 899, "p22": 899},
+            {"id": "mandarinamurcot", "nombre": "Mandarina Murcot", "categoria": "fruta", "p16": 999, "p17": 1299, "p21": 1299, "p22": 1299},
+            {"id": "pera_packhams", "nombre": "Pera Packham's", "categoria": "fruta", "p16": 2299, "p17": 2549, "p21": 2999, "p22": 2999},
+            {"id": "limon_eureka", "nombre": "Limón Eureka", "categoria": "fruta", "p16": 1499, "p17": 1299, "p21": 1299, "p22": 1299},
+            {"id": "frutilla", "nombre": "Frutilla", "categoria": "fruta", "p16": 12796, "p17": 3199, "p21": 3199, "p22": 3199},
+            {"id": "pomelo_starruby", "nombre": "Pomelo Star Ruby", "categoria": "fruta", "p16": 999, "p17": 999, "p21": 999, "p22": 999},
+            {"id": "palta_hass", "nombre": "Palta Hass", "categoria": "fruta", "p16": 7999, "p17": 7999, "p21": 7999, "p22": 7999},
+            {"id": "kiwi", "nombre": "Kiwi", "categoria": "fruta", "p16": 7999, "p17": 7999, "p21": 7999, "p22": 7999}
         ];
 
         const verduras = data.filter(d => d.categoria === 'verdura');
         const frutas = data.filter(d => d.categoria === 'fruta');
 
-        function createChart(ctxId, dataset, labelColor1, labelColor2) {
+        function createChart(ctxId, dataset) {
             const ctx = document.getElementById(ctxId).getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
@@ -106,16 +114,27 @@
                     labels: dataset.map(d => d.nombre),
                     datasets: [
                         {
-                            label: 'Precio 16-Sep ($)',
-                            data: dataset.map(d => d.coto_base),
-                            backgroundColor: labelColor1,
+                            label: '16-Sep ($)',
+                            data: dataset.map(d => d.p16),
+                            backgroundColor: '#3b82f6',
                             borderRadius: 4
                         },
                         {
-                            label: 'Precio 17-Sep ($)',
-                            data: dataset.map(d => d.coto_today),
-                            // Si bajó es verde, si subió es rojo, si igual es gris claro
-                            backgroundColor: dataset.map(d => d.coto_today > d.coto_base ? '#e74c3c' : (d.coto_today < d.coto_base ? '#2ecc71' : labelColor2)),
+                            label: '17-Sep ($)',
+                            data: dataset.map(d => d.p17),
+                            backgroundColor: '#64748b',
+                            borderRadius: 4
+                        },
+                        {
+                            label: '21-Sep ($)',
+                            data: dataset.map(d => d.p21),
+                            backgroundColor: '#8b5cf6',
+                            borderRadius: 4
+                        },
+                        {
+                            label: '📸 22-Sep - Foto 4 ($)',
+                            data: dataset.map(d => d.p22),
+                            backgroundColor: '#10b981',
                             borderRadius: 4
                         }
                     ]
@@ -124,7 +143,7 @@
                     responsive: true,
                     plugins: {
                         legend: {
-                            labels: { color: '#e0e0e0', font: { size: 14 } }
+                            labels: { color: '#e0e0e0', font: { size: 13, weight: 'bold' } }
                         },
                         tooltip: {
                             callbacks: {
@@ -141,20 +160,20 @@
                     },
                     scales: {
                         y: {
-                            ticks: { color: '#e0e0e0', callback: function(value) { return '$' + value; } },
-                            grid: { color: '#333' }
+                            ticks: { color: '#cbd5e1', callback: function(value) { return '$' + value; } },
+                            grid: { color: 'rgba(255,255,255,0.06)' }
                         },
                         x: {
-                            ticks: { color: '#e0e0e0', maxRotation: 45, minRotation: 45 },
-                            grid: { color: '#333', display: false }
+                            ticks: { color: '#cbd5e1', maxRotation: 45, minRotation: 45 },
+                            grid: { display: false }
                         }
                     }
                 }
             });
         }
 
-        createChart('chartVerduras', verduras, '#3498db', '#95a5a6');
-        createChart('chartFrutas', frutas, '#f39c12', '#95a5a6');
+        createChart('chartVerduras', verduras);
+        createChart('chartFrutas', frutas);
     </script>
 </body>
 </html>
