@@ -2413,6 +2413,9 @@ function saveRawCatalogStore(list) {
 const PRODUCTOS_TABLE = 'productos';
 
 function productoRowToRaw(row) {
+  const defaultImg = (row.name && row.name.toLowerCase().includes('frutilla')) 
+    ? 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=400&q=80' 
+    : 'img/papa.jpg';
   return {
     id: row.id,
     name: row.name,
@@ -2424,7 +2427,7 @@ function productoRowToRaw(row) {
     time: row.time || undefined,
     deadlineHrs: row.deadline_hrs || undefined,
     deadlineAt: row.deadline_at ? new Date(row.deadline_at).getTime() : undefined,
-    img: row.img || 'img/papa.jpg',
+    img: row.img || defaultImg,
     goal: row.goal || undefined,
     unit: row.unit || '/kg',
     stock: row.stock != null ? row.stock : 100,
@@ -2467,13 +2470,7 @@ function setCatalogDirty(isDirty) {
   } catch (e) {}
 }
 
-/** Trae el catálogo de Supabase.
- *  - Caso normal (sin ediciones locales pendientes de publicar): Supabase manda 100%,
- *    así cualquier pestaña ve el último precio/producto al instante (no hace falta
- *    "visitante totalmente nuevo" para esto — simplemente no hay nada que proteger).
- *  - Si HAY una edición de Admin que falló al publicar (ver setCatalogDirty): no se pisa
- *    ni se borra nada local, solo se agregan productos remotos que todavía no tenga,
- *    para no repetir el incidente de perder esa edición sin publicar al recargar. */
+/** Trae el catálogo de Supabase. */
 async function syncCatalogFromSupabase() {
   if (!sb) return;
   try {
@@ -2483,7 +2480,16 @@ async function syncCatalogFromSupabase() {
     let isDirty = false;
     try { isDirty = localStorage.getItem(HUBADOR_CATALOG_DIRTY_KEY) === '1'; } catch (e) {}
     if (!isDirty) {
-      saveRawCatalogStore(remoteList);
+      const localList = getRawCatalogStore();
+      const localMap = new Map(localList.map((p) => [p.id, p]));
+      const merged = remoteList.map((r) => {
+        const loc = localMap.get(r.id);
+        if (loc && loc.img && loc.img !== 'img/papa.jpg' && (!r.img || r.img === 'img/papa.jpg')) {
+          return { ...r, img: loc.img };
+        }
+        return r;
+      });
+      saveRawCatalogStore(merged);
       return;
     }
     const localList = getRawCatalogStore();
@@ -8569,29 +8575,37 @@ function App() {
     if (!user) return;
     let cancelled = false;
     fetchUserOrdersRemote(user).then((remoteOrders) => {
-      if (cancelled || !remoteOrders || !remoteOrders.length) return;
-      setOrders((prev) => {
-        const local = Array.isArray(prev) ? prev : [];
-        let combined = [...local];
-        remoteOrders.forEach((r) => {
-          const idx = combined.findIndex((l) => l.name === r.name && isActivoPedidoStatus(l.status));
-          if (idx >= 0) {
-            const curQty = combined[idx].qtyN != null ? combined[idx].qtyN : parseFloat(String(combined[idx].qty || '').replace(/[^\d.]/g, '')) || 0;
-            if (r.qtyN > curQty) {
-              combined[idx] = Object.assign({}, combined[idx], {
-                qtyN: r.qtyN,
-                qty: r.qty,
-                totalN: r.totalN,
-                total: r.total,
-              });
+      if (cancelled) return;
+      if (Array.isArray(remoteOrders)) {
+        if (remoteOrders.length === 0) {
+          // Si Supabase se reseteó/vació, sincronizamos el dispositivo a 0 pedidos
+          setOrders([]);
+          saveHubadorOrders([]);
+          return;
+        }
+        setOrders((prev) => {
+          const local = Array.isArray(prev) ? prev : [];
+          let combined = [...local];
+          remoteOrders.forEach((r) => {
+            const idx = combined.findIndex((l) => l.name === r.name && isActivoPedidoStatus(l.status));
+            if (idx >= 0) {
+              const curQty = combined[idx].qtyN != null ? combined[idx].qtyN : parseFloat(String(combined[idx].qty || '').replace(/[^\d.]/g, '')) || 0;
+              if (r.qtyN > curQty) {
+                combined[idx] = Object.assign({}, combined[idx], {
+                  qtyN: r.qtyN,
+                  qty: r.qty,
+                  totalN: r.totalN,
+                  total: r.total,
+                });
+              }
+            } else {
+              combined.unshift(r);
             }
-          } else {
-            combined.unshift(r);
-          }
+          });
+          saveHubadorOrders(combined);
+          return combined;
         });
-        saveHubadorOrders(combined);
-        return combined;
-      });
+      }
     });
     return () => { cancelled = true; };
   }, [user]);
