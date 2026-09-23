@@ -76,9 +76,12 @@ html.app-mode .web-prod-card .web-prod-meta,
 }
 html.app-mode .web-prod-card .web-countdown-wrap,
 .web-prod-card .web-countdown-wrap {
-  display: block !important;
+  display: flex !important;
   visibility: visible !important;
   flex-shrink: 0 !important;
+  margin-top: auto !important;
+  width: 100% !important;
+  min-height: 52px !important;
 }
 html.app-mode .web-prod-card .web-join-card,
 html.app-mode .web-grid-products .web-join-card,
@@ -1083,12 +1086,16 @@ html.app-mode .web-root { min-height: 100vh; }
 }
 .web-prod-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .web-prod-body {
-  padding: 8px 10px 6px; display: flex !important; flex-direction: column; gap: 3px;
-  flex: 0 0 auto !important; visibility: visible !important; opacity: 1 !important;
+  padding: 8px 10px 8px; display: flex !important; flex-direction: column; gap: 4px;
+  flex: 1 1 auto !important; visibility: visible !important; opacity: 1 !important;
   height: auto !important; min-height: 0; max-height: none !important;
   overflow: visible !important; background: #fff;
 }
-.web-prod-body h3 { margin: 0; font-size: 14px; font-weight: 700; color: #14201c; display: block !important; }
+.web-prod-body h3 {
+  margin: 0; font-size: 14px; font-weight: 700; color: #14201c; display: block !important;
+  min-height: 36px !important; line-height: 1.25 !important;
+  display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important;
+}
 .web-prod-prices { display: flex !important; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
 .web-price-now { display: flex; align-items: baseline; gap: 4px; }
 .web-price-now strong { font-size: 17px; color: oklch(0.48 0.12 165); font-weight: 900; }
@@ -1096,7 +1103,7 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-price-coto { display: flex !important; flex-direction: column; line-height: 1.1; margin-left: 2px; }
 .web-price-coto s { font-size: 16px !important; color: #dc2626 !important; font-weight: 750 !important; text-decoration: line-through !important; text-decoration-thickness: 1.2px !important; text-decoration-color: rgba(220, 38, 38, 0.55) !important; }
 .web-price-coto em { font-style: normal; font-size: 11px !important; color: #dc2626 !important; font-weight: 800 !important; letter-spacing: .06em; text-transform: uppercase; margin-top: 1px; }
-.web-countdown-wrap { margin: 1px 0 2px; }
+.web-countdown-wrap { margin: auto 0 2px; width: 100%; min-height: 52px; display: flex; flex-direction: column; justify-content: center; }
 .web-prod-meta { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 11.5px; color: #888; }
 .web-prod-meta .web-deadline-line { flex-shrink: 0; white-space: nowrap; }
 .web-prod-body > .web-countdown-wrap { align-self: flex-start; }
@@ -1545,14 +1552,14 @@ html.app-mode .web-root { min-height: 100vh; }
   object-fit: cover !important; display: block !important; flex-shrink: 0 !important;
 }
 .web-prod-body {
-  display: flex !important; flex-direction: column !important; gap: 3px;
-  flex: 0 0 auto !important; overflow: visible !important;
+  display: flex !important; flex-direction: column !important; gap: 4px;
+  flex: 1 1 auto !important; overflow: visible !important;
   height: auto !important; max-height: none !important;
   padding: 8px 10px 10px !important; background: #fff !important;
 }
 .web-prod-card .web-progress { display: block !important; height: 8px !important; margin: 6px 0 3px !important; }
 .web-prod-card .web-prod-meta { display: flex !important; }
-.web-prod-card .web-countdown-wrap { display: block !important; }
+.web-prod-card .web-countdown-wrap { display: flex !important; margin-top: auto !important; width: 100% !important; min-height: 52px !important; }
 .web-prod-card .web-join-card,
 .web-grid-products .web-join-card {
   display: block !important; visibility: visible !important; opacity: 1 !important;
@@ -1834,8 +1841,9 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
 
   if (diff <= 0 && card) {
     return (
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 7, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#166534', width: '100%', boxSizing: 'border-box' }}>
-        <span>Entrega en preparación {deliveryLabel ? `(${deliveryLabel})` : ''}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '6px 8px', fontSize: 11, fontWeight: 700, color: '#166534', width: '100%', minHeight: 52, boxSizing: 'border-box' }}>
+        <span>Entrega en preparación</span>
+        {deliveryLabel && <span style={{ fontSize: 10.5, opacity: 0.85 }}>({deliveryLabel})</span>}
       </div>
     );
   }
@@ -1891,9 +1899,9 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
       </div>);
   }
 
-  // card — dentro del cuerpo de la tarjeta: TIMER ARRIBA, ENTREGA ABAJO (sin autito)
+  // card — dentro del cuerpo de la tarjeta: TIMER ARRIBA, ENTREGA ABAJO (sin autito, alto uniforme 52px)
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4, background: urgent ? 'oklch(0.97 0.03 28)' : '#f4f6f5', border: `1px solid ${urgent ? 'oklch(0.86 0.08 28)' : '#e3e7e5'}`, borderRadius: 8, padding: '6px 8px', width: '100%', boxSizing: 'border-box' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 4, background: urgent ? 'oklch(0.97 0.03 28)' : '#f4f6f5', border: `1px solid ${urgent ? 'oklch(0.86 0.08 28)' : '#e3e7e5'}`, borderRadius: 8, padding: '6px 8px', width: '100%', minHeight: 52, boxSizing: 'border-box' }}>
       {/* 1. Timer Arriba */}
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
