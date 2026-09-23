@@ -1794,13 +1794,24 @@ function getDeadline(key, hours) {
   return ts;
 }
 
+function formatDeliveryDate(timestamp) {
+  if (!timestamp || isNaN(timestamp)) return '';
+  const dt = new Date(Number(timestamp));
+  if (isNaN(dt.getTime())) return '';
+  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const dayName = days[dt.getDay()];
+  const hh = String(dt.getHours()).padStart(2, '0');
+  const mm = String(dt.getMinutes()).padStart(2, '0');
+  return `Entrega: ${dayName} ${hh}:${mm} hs`;
+}
+
 function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) {
   const [now, setNow] = React.useState(Date.now());
   React.useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
-  let diff = Math.max(0, deadline - now);
+  let diff = Math.max(0, (deadline || 0) - now);
   const totalSec = Math.floor(diff / 1000);
   const h = Math.floor(totalSec / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
@@ -1811,6 +1822,7 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
   const urgent = h < 12; // menos de 12h restantes = rojo
   const urgentColor = 'oklch(0.6 0.2 28)';
   const accent = urgent ? urgentColor : 'oklch(0.55 0.15 165)';
+  const deliveryLabel = formatDeliveryDate(deadline);
 
   // Bloque H/M/S con etiqueta — se ve el tiempo pasar
   const Seg = ({ v, lbl, size }) => (
@@ -1819,6 +1831,14 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
       <span style={{ fontSize: size <= 16 ? 8 : 9, fontWeight: 600, color: '#9aa0a6', letterSpacing: '0.04em', marginTop: 2 }}>{lbl}</span>
     </span>);
   const Sep = ({ size }) => <span style={{ fontWeight: 800, fontSize: size, color: '#c8ccd0', alignSelf: 'flex-start', lineHeight: 1 }}>:</span>;
+
+  if (diff <= 0 && card) {
+    return (
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 7, padding: '4px 8px', fontSize: 11, fontWeight: 700, color: '#166534', width: '100%', boxSizing: 'border-box' }}>
+        <span>🚚 Entrega en preparación {deliveryLabel ? `(${deliveryLabel})` : ''}</span>
+      </div>
+    );
+  }
 
   // Una línea corta para cards de grilla (no abulta la tarjeta)
   if (compact) {
@@ -1848,22 +1868,55 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
   if (big) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: urgent ? 'oklch(0.97 0.03 28)' : 'oklch(0.97 0.02 165)', border: `1px solid ${urgent ? 'oklch(0.85 0.08 28)' : 'oklch(0.88 0.06 165)'}`, borderRadius: 12, padding: '10px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-          <span style={{ fontSize: 13, color: urgent ? urgentColor : '#555', fontWeight: 700 }}>{urgent ? '¡Cierra pronto!' : 'Cierra en'}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+            <span style={{ fontSize: 13, color: urgent ? urgentColor : '#555', fontWeight: 700 }}>{urgent ? '¡Cierra pronto!' : 'Cierra en'}</span>
+          </div>
+          {deliveryLabel && <div style={{ fontSize: 11.5, fontWeight: 800, color: '#166534', marginLeft: 24 }}>🚚 {deliveryLabel}</div>}
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7 }}>
-          <Seg v={h} lbl="HS" size={22} /><Sep size={22} /><Seg v={m} lbl="MIN" size={22} /><Sep size={22} /><Seg v={s} lbl="SEG" size={22} />
+          {d > 0 ? (
+            <>
+              <Seg v={d} lbl="DÍAS" size={20} /><Sep size={20} />
+              <Seg v={hRem} lbl="HS" size={20} /><Sep size={20} />
+              <Seg v={m} lbl="MIN" size={20} />
+            </>
+          ) : (
+            <>
+              <Seg v={h} lbl="HS" size={22} /><Sep size={22} /><Seg v={m} lbl="MIN" size={22} /><Sep size={22} /><Seg v={s} lbl="SEG" size={22} />
+            </>
+          )}
         </div>
       </div>);
   }
-  // card — dentro del cuerpo de la tarjeta, no sobre la foto (compacto pero con HS:MIN:SEG en vivo)
+
+  // card — dentro del cuerpo de la tarjeta, con día/hora de entrega visible + reloj regresivo
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: urgent ? 'oklch(0.97 0.03 28)' : '#f4f6f5', border: `1px solid ${urgent ? 'oklch(0.86 0.08 28)' : '#e3e7e5'}`, borderRadius: 7, padding: '3px 6px' }}>
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-      <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 2 }}>
-        <Seg v={h} lbl="HS" size={12.5} /><Sep size={12.5} /><Seg v={m} lbl="MIN" size={12.5} /><Sep size={12.5} /><Seg v={s} lbl="SEG" size={12.5} />
-      </span>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 3, background: urgent ? 'oklch(0.97 0.03 28)' : '#f4f6f5', border: `1px solid ${urgent ? 'oklch(0.86 0.08 28)' : '#e3e7e5'}`, borderRadius: 8, padding: '5px 8px', width: '100%', boxSizing: 'border-box' }}>
+      {deliveryLabel && (
+        <div style={{ fontSize: 11, fontWeight: 800, color: urgent ? urgentColor : '#1e293b', letterSpacing: '0.01em', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span>🚚 <b>{deliveryLabel}</b></span>
+        </div>
+      )}
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+        <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 2 }}>
+          {d > 0 ? (
+            <>
+              <Seg v={d} lbl="DÍAS" size={12} /><Sep size={12} />
+              <Seg v={hRem} lbl="HS" size={12} /><Sep size={12} />
+              <Seg v={m} lbl="MIN" size={12} />
+            </>
+          ) : (
+            <>
+              <Seg v={h} lbl="HS" size={12.5} /><Sep size={12.5} />
+              <Seg v={m} lbl="MIN" size={12.5} /><Sep size={12.5} />
+              <Seg v={s} lbl="SEG" size={12.5} />
+            </>
+          )}
+        </span>
+      </div>
     </div>);
 }
 
@@ -2752,14 +2805,14 @@ function MobileHome() {
                 rel="noopener"
                 style={{
                   background: '#25D366', color: '#fff', border: 'none', borderRadius: 999,
-                  padding: '11px 18px', minHeight: 46, width: '100%', fontWeight: 800, fontSize: 15,
+                  padding: '8px 16px', minHeight: 38, width: 'fit-content', fontWeight: 800, fontSize: 13.5,
                   fontFamily: 'inherit', cursor: 'pointer', textDecoration: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, boxSizing: 'border-box',
-                  boxShadow: '0 4px 14px rgba(37,211,102,0.38)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxSizing: 'border-box',
+                  boxShadow: '0 3px 10px rgba(37,211,102,0.35)',
                   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
                 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true" style={{ flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true" style={{ flexShrink: 0 }}>
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.572-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.99c-.002 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c-.001 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
                 <span>Recibir precios por WhatsApp</span>
@@ -4286,8 +4339,31 @@ function MobileAdminProductos() {
     if (showToast) showToast((item.oculto ? `🟢 "${item.name}" activado en la tienda` : `🙈 "${item.name}" ocultado del catálogo`) + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
+  const getNextSaturday12pm = () => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = (6 - day + 7) % 7 || 7;
+    d.setDate(d.getDate() + diff);
+    d.setHours(12, 0, 0, 0);
+    return d;
+  };
+
+  const toDatetimeLocalString = (date) => {
+    if (!date || isNaN(date.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    const mm = pad(date.getMonth() + 1);
+    const dd = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const min = pad(date.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  };
+
   const handleOpenCreate = () => {
     setEditingItem(null);
+    const defaultSat = getNextSaturday12pm();
+    const dtStr = toDatetimeLocalString(defaultSat);
+    const hrs = Math.max(1, Math.round((defaultSat.getTime() - Date.now()) / (3600 * 1000)));
     setForm({
       id: 'prod-' + Date.now(),
       name: '',
@@ -4298,7 +4374,8 @@ function MobileAdminProductos() {
       unit: '/kg',
       stock: 100,
       goal: GOAL_KG,
-      deadlineHrs: 40,
+      deadlineHrs: hrs,
+      deliveryDateTime: dtStr,
       img: 'img/papa.jpg',
       desc: '',
       oculto: false
@@ -4308,6 +4385,11 @@ function MobileAdminProductos() {
 
   const handleOpenEdit = (item) => {
     setEditingItem(item);
+    const dt = item.deadlineAt ? new Date(Number(item.deadlineAt)) : getNextSaturday12pm();
+    const dtStr = toDatetimeLocalString(dt);
+    const hrs = item.deadlineAt
+      ? Math.max(1, Math.round((Number(item.deadlineAt) - Date.now()) / (3600 * 1000)))
+      : (item.deadlineHrs != null ? item.deadlineHrs : 40);
     setForm({
       id: item.id,
       name: item.name || '',
@@ -4318,7 +4400,8 @@ function MobileAdminProductos() {
       unit: item.unit || '/kg',
       stock: item.stock != null ? item.stock : 100,
       goal: item.goal != null ? item.goal : GOAL_KG,
-      deadlineHrs: item.deadlineHrs != null ? item.deadlineHrs : 40,
+      deadlineHrs: hrs,
+      deliveryDateTime: dtStr,
       img: item.img || 'img/papa.jpg',
       desc: item.desc || item.descripcion || '',
       oculto: !!item.oculto
@@ -4364,14 +4447,12 @@ function MobileAdminProductos() {
     if (!form.name.trim()) return;
     const rawList = getRawCatalogStore();
     let updated = [];
-    // Ventana de tiempo REAL: se reinicia (cierre = ahora + horas) si es producto nuevo, si cambiaron
-    // las horas, o si Admin tildó "Reiniciar"; si no, se conserva el cierre que ya tenía.
-    const newHrs = Math.max(1, Number(form.deadlineHrs) || 40);
-    const prevDeadlineAt = editingItem && editingItem.deadlineAt ? Number(editingItem.deadlineAt) : null;
-    const hrsChanged = !editingItem || Number(editingItem.deadlineHrs) !== newHrs;
-    const restartWindow = !!form.resetWindow || hrsChanged || !prevDeadlineAt;
-    const deadlineAt = restartWindow ? Date.now() + newHrs * 3600 * 1000 : prevDeadlineAt;
-    const { resetWindow: _omitReset, ...formRest } = form;
+    const targetDeadlineAt = form.deliveryDateTime
+      ? new Date(form.deliveryDateTime).getTime()
+      : (form.resetWindow || !editingItem?.deadlineAt ? Date.now() + (Number(form.deadlineHrs) || 40) * 3600 * 1000 : Number(editingItem.deadlineAt));
+    const newHrs = Math.max(1, Math.round((targetDeadlineAt - Date.now()) / (3600 * 1000)));
+    const deadlineAt = targetDeadlineAt;
+    const { resetWindow: _omitReset, deliveryDateTime: _omitDt, ...formRest } = form;
     const itemData = {
       ...formRest,
       priceN: Number(form.priceN),
@@ -4960,31 +5041,40 @@ function MobileAdminProductos() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Tiempo límite (hs)</label>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>📅 Fecha y Hora de Entrega</label>
                     <input
-                      type="number"
-                      min="1"
-                      value={form.deadlineHrs}
-                      onChange={(e) => setForm({ ...form, deadlineHrs: e.target.value })}
-                      placeholder="Ej: 40"
-                      style={{ width: '100%', height: 38, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 8px', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box' }}
+                      type="datetime-local"
+                      value={form.deliveryDateTime || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val) return;
+                        const targetTs = new Date(val).getTime();
+                        const hrs = Math.max(1, Math.round((targetTs - Date.now()) / (3600 * 1000)));
+                        setForm((prev) => ({ ...prev, deliveryDateTime: val, deadlineHrs: hrs }));
+                      }}
+                      style={{ width: '100%', height: 38, border: '1px solid #059669', borderRadius: 8, padding: '0 8px', fontFamily: 'inherit', fontSize: 12.5, boxSizing: 'border-box', background: '#f0fdf4', fontWeight: 600 }}
                     />
-                    <div style={{ fontSize: 10.5, color: '#94a3b8', marginTop: 3 }}>
-                      ≈ {(Number(form.deadlineHrs) / 24 || 0).toFixed(1)} día{Number(form.deadlineHrs) === 24 ? '' : 's'} (72 hs = 3 días)
+                    <div style={{ fontSize: 10.5, color: '#166534', marginTop: 3, fontWeight: 700 }}>
+                      🚚 {formatDeliveryDate(form.deliveryDateTime ? new Date(form.deliveryDateTime).getTime() : Date.now() + (Number(form.deadlineHrs) || 40) * 3600 * 1000)}
                     </div>
                   </div>
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: -4, lineHeight: 1.35 }}>
-                  "Meta del grupo" es el objetivo de kg para cerrar la compra grupal (la barra "Faltan X kg"). "Tiempo límite" es la cuenta regresiva REAL que ven todos los compradores en la tarjeta: corre desde que guardás.
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sat = getNextSaturday12pm();
+                      const dtStr = toDatetimeLocalString(sat);
+                      const hrs = Math.max(1, Math.round((sat.getTime() - Date.now()) / (3600 * 1000)));
+                      setForm((prev) => ({ ...prev, deliveryDateTime: dtStr, deadlineHrs: hrs }));
+                    }}
+                    style={{ background: '#ecfdf5', border: '1px solid #10b981', color: '#047857', borderRadius: 6, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    ✨ Fijar entrega para Próximo Sábado 12:00 hs
+                  </button>
                 </div>
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px', fontSize: 12, color: '#334155', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div>
-                    ⏱️ Cierra: <b>{editingItem && editingItem.deadlineAt ? new Date(Number(editingItem.deadlineAt)).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'al guardar (ahora + las horas de arriba)'}</b>
-                  </div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontWeight: 600 }}>
-                    <input type="checkbox" checked={!!form.resetWindow} onChange={(e) => setForm({ ...form, resetWindow: e.target.checked })} />
-                    Reiniciar la cuenta regresiva ahora (empieza de nuevo con las horas de arriba)
-                  </label>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2, lineHeight: 1.35 }}>
+                  Elegí la fecha y hora exacta de entrega (ej: Sábado 12:00 hs). La tarjeta mostrará la fecha de entrega y la cuenta regresiva calculará automáticamente el tiempo restante desde este momento.
                 </div>
 
                 {/* Foto / Imagen con Drag & Drop o Clic para abrir carpeta */}
