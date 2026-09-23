@@ -1,26 +1,28 @@
 {
   "fecha": "2026-09-23",
-  "fotoId": "foto_5",
-  "scrapedAt": "2026-09-23T17:19:37.552Z",
+  "scrapedAt": "2026-09-23T17:50:43.677Z",
   "totalProductos": 20,
   "productos": [
     {
       "id": "papa_spunta",
       "nombre": "Papa Spunta",
+      "nombre_coto": "Papa Blanca 1 Kg",
       "categoria": "verdura",
-      "coto_today": 2699,
-      "oferta": true
+      "coto_today": 2799,
+      "oferta": false
     },
     {
       "id": "tomate_redondo",
       "nombre": "Tomate Redondo",
+      "nombre_coto": "Tomate Redondo 1 Kg",
       "categoria": "verdura",
-      "coto_today": 3299,
-      "oferta": true
+      "coto_today": 3999,
+      "oferta": false
     },
     {
       "id": "cebolla_valenciani",
       "nombre": "Cebolla Valenciani",
+      "nombre_coto": "Cebolla a Granel 1 Kg",
       "categoria": "verdura",
       "coto_today": 3299,
       "oferta": false
@@ -28,104 +30,119 @@
     {
       "id": "zanahoria_chantenay",
       "nombre": "Zanahoria Chantenay",
-      "categoria": "verdura",
-      "coto_today": 1999,
-      "oferta": false
-    },
-    {
-      "id": "zapallo_tetsukab.",
-      "nombre": "Zapallo Tetsukabuto",
-      "categoria": "verdura",
-      "coto_today": 1899,
-      "oferta": false
-    },
-    {
-      "id": "zapallito_redondo",
-      "nombre": "Zapallito Redondo",
-      "categoria": "verdura",
-      "coto_today": 2999,
-      "oferta": true
-    },
-    {
-      "id": "acelga",
-      "nombre": "Acelga Selección",
-      "categoria": "verdura",
-      "coto_today": 1099,
-      "oferta": true
-    },
-    {
-      "id": "lechuga_criolla",
-      "nombre": "Lechuga Criolla",
-      "categoria": "verdura",
-      "coto_today": 2699,
-      "oferta": true
-    },
-    {
-      "id": "batata_arapey",
-      "nombre": "Batata Arapey",
+      "nombre_coto": "Zanahoria 1 Kg",
       "categoria": "verdura",
       "coto_today": 2399,
       "oferta": true
     },
     {
-      "id": "pepino",
-      "nombre": "Pepino Selección",
+      "id": "zapallo_tetsukab.",
+      "nombre": "Zapallo Tetsukabuto",
+      "nombre_coto": "Zapallo Anco 1 Kg",
       "categoria": "verdura",
-      "coto_today": 1999,
+      "coto_today": 2399,
       "oferta": true
     },
     {
-      "id": "banana_cavendish",
-      "nombre": "Banana Cavendish",
-      "categoria": "fruta",
+      "id": "zapallito_redondo",
+      "nombre": "Zapallito Redondo",
+      "nombre_coto": "Zapallito Redondo 1 Kg",
+      "categoria": "verdura",
+      "coto_today": 3399,
+      "oferta": false
+    },
+    {
+      "id": "acelga",
+      "nombre": "Acelga Selección",
+      "nombre_coto": "Acelga en Paquete 1 Un",
+      "categoria": "verdura",
       "coto_today": 2299,
       "oferta": true
     },
     {
+      "id": "lechuga_criolla",
+      "nombre": "Lechuga Criolla",
+      "nombre_coto": "Lechuga Francesa Organica x 1 Kg",
+      "categoria": "verdura",
+      "coto_today": 4799,
+      "oferta": false
+    },
+    {
+      "id": "batata_arapey",
+      "nombre": "Batata Arapey",
+      "nombre_coto": "Batata 1 Kg",
+      "categoria": "verdura",
+      "coto_today": 2699,
+      "oferta": false
+    },
+    {
+      "id": "pepino",
+      "nombre": "Pepino Selección",
+      "nombre_coto": "Pepino 1 Kg",
+      "categoria": "verdura",
+      "coto_today": 3999,
+      "oferta": false
+    },
+    {
+      "id": "banana_cavendish",
+      "nombre": "Banana Cavendish",
+      "nombre_coto": "Banana Cavendish 1 Kg",
+      "categoria": "fruta",
+      "coto_today": 3999,
+      "oferta": false
+    },
+    {
       "id": "manzana_red_delicious",
       "nombre": "Manzana Red",
+      "nombre_coto": "Manzana Pink Lady 1 Kg",
       "categoria": "fruta",
-      "coto_today": 2899,
-      "oferta": true
+      "coto_today": 3999,
+      "oferta": false
     },
     {
       "id": "naranja_salustiana",
       "nombre": "Naranja Jugo",
+      "nombre_coto": "Naranja 1 Kg",
       "categoria": "fruta",
-      "coto_today": 899,
+      "coto_today": 699,
       "oferta": true
     },
     {
       "id": "mandarinamurcot",
       "nombre": "Mandarina Murcot",
+      "nombre_coto": "Mandarina Bolsa Coto 1 Kg",
       "categoria": "fruta",
-      "coto_today": 1299,
+      "coto_today": 1699,
       "oferta": true
     },
     {
       "id": "pera_packhams",
       "nombre": "Pera Packham's",
+      "nombre_coto": "Pera Packams Comercial 1 Kg",
       "categoria": "fruta",
-      "coto_today": 2999,
-      "oferta": false
+      "coto_today": 2299,
+      "oferta": true
     },
     {
       "id": "limon_eureka",
       "nombre": "Limón Eureka",
+      "nombre_coto": "Limon 1 Kg",
       "categoria": "fruta",
-      "coto_today": 1299,
+      "coto_today": 1499,
       "oferta": true
     },
     {
       "id": "frutilla",
       "nombre": "Frutilla Selección",
+      "nombre_coto": "Frutilla 250 Gr",
       "categoria": "fruta",
-      "coto_today": 3199,
-      "oferta": true
+      "coto_today": 8999,
+      "oferta": false
     },
     {
       "id": "pomelo_starruby",
       "nombre": "Pomelo Star Ruby",
+      "nombre_coto": "Pomelo Rojo 1 Kg",
       "categoria": "fruta",
       "coto_today": 999,
       "oferta": true
@@ -133,13 +150,15 @@
     {
       "id": "palta_hass",
       "nombre": "Palta Hass",
+      "nombre_coto": "Mixto Palta Limon 1 Kg",
       "categoria": "fruta",
-      "coto_today": 7999,
-      "oferta": true
+      "coto_today": 7499,
+      "oferta": false
     },
     {
       "id": "kiwi",
       "nombre": "Kiwi Selección",
+      "nombre_coto": "Kiwi 1 Kg",
       "categoria": "fruta",
       "coto_today": 7999,
       "oferta": false
