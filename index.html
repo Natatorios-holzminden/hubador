@@ -1774,31 +1774,24 @@ function formatAuthErrorEs(error) {
 
 
 // ⏱ Cronómetro de urgencia — deadline persistente por producto (48–72h)
+function getNextFriday6pm() {
+  const d = new Date();
+  const day = d.getDay();
+  let diff = (5 - day + 7) % 7;
+  if (diff === 0 && d.getHours() >= 18) {
+    diff = 7;
+  }
+  d.setDate(d.getDate() + diff);
+  d.setHours(18, 0, 0, 0);
+  return d;
+}
+
 function getDeadline(key, hours) {
-  // Cierre REAL (guardado en Supabase por Admin): igual para todos los visitantes.
   try {
-    const p = getRawCatalogStore().find((x) => x.name === key);
+    const p = getRawCatalogStore().find((x) => x.name === key || x.id === key);
     if (p && p.deadlineAt && Number(p.deadlineAt) > 0) return Number(p.deadlineAt);
   } catch (e) {}
-  const storeKey = 'conlat_deadline_' + key;
-  const hoursKey = storeKey + '_hrs';
-  let v = null, storedHours = null;
-  try {
-    v = localStorage.getItem(storeKey);
-    storedHours = localStorage.getItem(hoursKey);
-  } catch (e) {}
-  let ts = v ? parseInt(v, 10) : NaN;
-  // Reiniciar si no existe, ya venció, o si Admin cambió las horas configuradas (para cualquier lado,
-  // no solo hacia abajo — antes un valor MÁS ALTO que el cacheado no disparaba el reinicio).
-  const hoursChanged = storedHours != null && Number(storedHours) !== Number(hours);
-  if (!ts || isNaN(ts) || ts < Date.now() || hoursChanged) {
-    ts = Date.now() + hours * 3600 * 1000;
-    try {
-      localStorage.setItem(storeKey, String(ts));
-      localStorage.setItem(hoursKey, String(hours));
-    } catch (e) {}
-  }
-  return ts;
+  return getNextFriday6pm().getTime();
 }
 
 function formatDeliveryDate(timestamp) {
@@ -4345,9 +4338,12 @@ function MobileAdminProductos() {
   const getNextSaturday12pm = () => {
     const d = new Date();
     const day = d.getDay();
-    const diff = (6 - day + 7) % 7 || 7;
+    let diff = (5 - day + 7) % 7;
+    if (diff === 0 && d.getHours() >= 18) {
+      diff = 7;
+    }
     d.setDate(d.getDate() + diff);
-    d.setHours(12, 0, 0, 0);
+    d.setHours(18, 0, 0, 0);
     return d;
   };
 
@@ -5073,11 +5069,11 @@ function MobileAdminProductos() {
                     }}
                     style={{ background: '#ecfdf5', border: '1px solid #10b981', color: '#047857', borderRadius: 6, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
                   >
-                    ✨ Fijar entrega para Próximo Sábado 12:00 hs
+                    ✨ Fijar entrega para Próximo Viernes 18:00 hs
                   </button>
                 </div>
                 <div style={{ fontSize: 11, color: '#64748b', marginTop: 2, lineHeight: 1.35 }}>
-                  Elegí la fecha y hora exacta de entrega (ej: Sábado 12:00 hs). La tarjeta mostrará la fecha de entrega y la cuenta regresiva calculará automáticamente el tiempo restante desde este momento.
+                  Elegí la fecha y hora exacta de entrega (ej: Viernes 18:00 hs). La tarjeta mostrará la fecha de entrega y la cuenta regresiva calculará automáticamente el tiempo restante desde este momento.
                 </div>
 
                 {/* Foto / Imagen con Drag & Drop o Clic para abrir carpeta */}
