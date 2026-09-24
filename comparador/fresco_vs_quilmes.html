@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor de Precios: FRESCO.BA vs Mercado Abasto de Quilmes (Puesto 21)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --card-hover: #1c2744;
+      --border: rgba(255, 255, 255, 0.08);
+      --ink: #f8fafc;
+      --muted: #94a3b8;
+      --fresco: #06b6d4;
+      --quilmes: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --accent: #3b82f6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      padding-bottom: 4rem;
+    }
+
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Top Ticker */
+    .ticker {
+      background: linear-gradient(90deg, #d97706, #f59e0b);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    /* Header */
+    header {
+      background: rgba(19, 27, 46, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      margin-top: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.2rem;
+    }
+
+    .btn-back {
+      background: rgba(255,255,255,0.08);
+      color: var(--ink);
+      text-decoration: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .btn-back:hover { background: rgba(255,255,255,0.15); }
+
+    /* Super Ofertas Banner */
+    .quilmes-section {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(17, 24, 39, 0.8));
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .quilmes-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--quilmes);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .quilmes-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .ofertas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .oferta-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .oferta-card:hover { transform: translateY(-3px); }
+
+    .oferta-card .badge-savings {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .oferta-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .oferta-price-quilmes {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--quilmes);
+    }
+
+    .oferta-price-fresco {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    /* Controls & Toolbar */
+    .toolbar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-input {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .view-toggle {
+      display: flex;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .pills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .pill {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill.active {
+      background: rgba(6, 182, 212, 0.2);
+      color: var(--fresco);
+      border-color: var(--fresco);
+    }
+    .pill.pill-quilmes.active {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--quilmes);
+      border-color: var(--quilmes);
+    }
+
+    /* Data Table */
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: rgba(0,0,0,0.3);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover { background: var(--card-hover); }
+
+    .item-name {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .badge-up { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .badge-down { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .badge-equal { background: rgba(148, 163, 184, 0.15); color: var(--muted); }
+    .badge-quilmes { background: rgba(245, 158, 11, 0.2); color: var(--quilmes); border: 1px solid rgba(245, 158, 11, 0.4); }
+
+    .val-fresco-now { font-weight: 800; color: var(--fresco); }
+    .val-quilmes { font-weight: 800; color: var(--quilmes); }
+
+    .diff-plus { color: var(--danger); font-weight: 700; }
+    .diff-minus { color: var(--success); font-weight: 700; }
+
+    @media (max-width: 768px) {
+      .toolbar-row { flex-direction: column; align-items: stretch; }
+      .search-input { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ticker">
+    <i class="fa-solid fa-bolt"></i> SUPER OFERTAS QUILMES (24/9) VS FRESCO.BA (23/9) • PRECIOS EN EFECTIVO
+  </div>
+
+  <div class="wrap">
+
+    <header>
+      <div>
+        <h1 class="brand-title">
+          <i class="fa-solid fa-chart-line" style="color:var(--fresco);"></i>
+          Monitor Comparativo FRESCO vs Quilmes
+        </h1>
+        <p class="brand-subtitle">
+          Análisis completo de Bulto Cerrado (Efectivo) + Desglose por Kilo (24-Ago vs 23-Sep vs 24-Sep Quilmes)
+        </p>
+      </div>
+      <a href="../indice.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Índice General</a>
+    </header>
+
+    <!-- Super Ofertas Quilmes Section -->
+    <section class="quilmes-section">
+      <div class="quilmes-title">
+        <i class="fa-solid fa-fire"></i>
+        SUPER OFERTAS DE QUILMES (24/09 - Mercado Abasto Puesto 21)
+      </div>
+      <div class="quilmes-sub">
+        Comparativa directa de las 7 Super Ofertas de Quilmes vs la lista oficial de FRESCO.BA:
+      </div>
+
+      <div class="ofertas-grid">
+        <div class="oferta-card">
+          <span class="badge-savings">-68.7% de Ahorro</span>
+          <div class="oferta-name">🥕 Zanahoria (20 kg)</div>
+          <div class="oferta-price-quilmes">$8.000 <span style="font-size:0.8rem; font-weight:500;">($400/kg)</span></div>
+          <div class="oferta-price-fresco">FRESCO.BA: $23.000 ($1.278/kg)</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">-54.8% de Ahorro</span>
+          <div class="oferta-name">🍊 Mandarina (17 kg)</div>
+          <div class="oferta-price-quilmes">$7.000 <span style="font-size:0.8rem; font-weight:500;">($412/kg)</span></div>
+          <div class="oferta-price-fresco">FRESCO.BA Nova: $15.500 ($912/kg)</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">-53.7% de Ahorro</span>
+          <div class="oferta-name">🍐 Pera (19 kg)</div>
+          <div class="oferta-price-quilmes">$15.000 <span style="font-size:0.8rem; font-weight:500;">($789/kg)</span></div>
+          <div class="oferta-price-fresco">FRESCO.BA: $29.000 (17kg = $1.706/kg)</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">-47.1% de Ahorro</span>
+          <div class="oferta-name">🧅 Cebollín (17 kg)</div>
+          <div class="oferta-price-quilmes">$20.000 <span style="font-size:0.8rem; font-weight:500;">($1.176/kg)</span></div>
+          <div class="oferta-price-fresco">FRESCO.BA Cebolla Roja: $40.000 ($2.222/kg)</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">-28.6% de Ahorro</span>
+          <div class="oferta-name">🍈 Pomelo Rojo (14 kg)</div>
+          <div class="oferta-price-quilmes">$10.000 <span style="font-size:0.8rem; font-weight:500;">($714/kg)</span></div>
+          <div class="oferta-price-fresco">FRESCO.BA: $14.000 ($1.000/kg)</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">Hasta -73% Ahorro</span>
+          <div class="oferta-name">🍎 Manzana (19 kg)</div>
+          <div class="oferta-price-quilmes">$18.000 <span style="font-size:0.8rem; font-weight:500;">($947/kg)</span></div>
+          <div class="oferta-price-fresco">FRESCO.BA: $18.000 (Chica) / $64.000 (Gaucho)</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">-5.0% de Ahorro</span>
+          <div class="oferta-name">🧅 Cebolla (17 kg)</div>
+          <div class="oferta-price-quilmes">$35.000 <span style="font-size:0.8rem; font-weight:500;">($2.059/kg)</span></div>
+          <div class="oferta-price-fresco">FRESCO.BA: $39.000 (18kg = $2.167/kg)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-row">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar producto (ej. cebolla, manzana)..." />
+
+        <div class="view-toggle">
+          <button id="btnModeBulto" class="toggle-btn active" onclick="setViewMode('bulto')">📦 Modo Bolsón Cerrado ($ Final)</button>
+          <button id="btnModeKilo" class="toggle-btn" onclick="setViewMode('kilo')">⚖️ Modo $/kg o $/unidad</button>
+        </div>
+      </div>
+
+      <div class="pills-container" id="pillsContainer">
+        <button class="pill active" data-cat="todos">Todos</button>
+        <button class="pill pill-quilmes" data-cat="quilmes">⭐ Super Ofertas Quilmes</button>
+        <button class="pill" data-cat="CÍTRICOS">Cítricos</button>
+        <button class="pill" data-cat="FRUTAS">Frutas</button>
+        <button class="pill" data-cat="TOMATE Y PIMIENTOS">Tomate y Pimientos</button>
+        <button class="pill" data-cat="VERDURAS">Verduras</button>
+        <button class="pill" data-cat="PAPA, BATATA, ZAPALLO Y ZANAHORIA">Papa / Zapallo / Zanahoria</button>
+        <button class="pill" data-cat="CEBOLLAS Y AJOS">Cebollas y Ajos</button>
+        <button class="pill" data-cat="LECHUGAS Y HOJAS">Lechugas y Hojas</button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr id="tableHeader">
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    const DATASET = [{"cat":"CÍTRICOS","name":"Naranja Jugo","id":"naranja_jugo","bulto":12000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":9000,"oldCant":18,"oldUnit":"kg","oldUnitVal":500,"frescoUnitVal":666.6666666666666,"quilmesUnitVal":null,"frescoDiffNom":3000,"frescoDiffPct":33.33333333333333,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"CÍTRICOS","name":"Naranja Ombligo","id":"naranja_ombligo","bulto":12000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":10000,"oldCant":18,"oldUnit":"kg","oldUnitVal":555.5555555555555,"frescoUnitVal":666.6666666666666,"quilmesUnitVal":null,"frescoDiffNom":2000,"frescoDiffPct":20,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"CÍTRICOS","name":"Limón","id":"limón","bulto":13000,"cant":17,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":13000,"oldCant":18,"oldUnit":"kg","oldUnitVal":722.2222222222222,"frescoUnitVal":764.7058823529412,"quilmesUnitVal":null,"frescoDiffNom":0,"frescoDiffPct":0,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"CÍTRICOS","name":"Pomelo Rojo","id":"pomelo","bulto":14000,"cant":14,"unit":"kg","quilmesBulto":10000,"quilmesCant":14,"oldBulto":13000,"oldCant":18,"oldUnit":"kg","oldUnitVal":722.2222222222222,"frescoUnitVal":1000,"quilmesUnitVal":714.2857142857143,"frescoDiffNom":1000,"frescoDiffPct":7.6923076923076925,"quilmesSavingsVsFrescoUnitPct":28.571428571428566},{"cat":"CÍTRICOS","name":"Mandarina Nova","id":"mandarina_nova","bulto":15500,"cant":17,"unit":"kg","quilmesBulto":7000,"quilmesCant":17,"oldBulto":9000,"oldCant":17,"oldUnit":"kg","oldUnitVal":529.4117647058823,"frescoUnitVal":911.7647058823529,"quilmesUnitVal":411.7647058823529,"frescoDiffNom":6500,"frescoDiffPct":72.22222222222221,"quilmesSavingsVsFrescoUnitPct":54.83870967741935},{"cat":"CÍTRICOS","name":"Mandarina Encore","id":"mandarina_encore","bulto":15000,"cant":17,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":null,"oldCant":null,"oldUnit":null,"oldUnitVal":null,"frescoUnitVal":882.3529411764706,"quilmesUnitVal":null,"frescoDiffNom":null,"frescoDiffPct":null,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Manzana R Chica Funji","id":"manzana_r_chica_gaucho","bulto":18000,"cant":18,"unit":"kg","quilmesBulto":18000,"quilmesCant":19,"oldBulto":34000,"oldCant":18,"oldUnit":"kg","oldUnitVal":1888.888888888889,"frescoUnitVal":1000,"quilmesUnitVal":947.3684210526316,"frescoDiffNom":-16000,"frescoDiffPct":-47.05882352941176,"quilmesSavingsVsFrescoUnitPct":5.263157894736844},{"cat":"FRUTAS","name":"Manzana R Grande Gaucho","id":"manzana_r_grande_gaucho","bulto":64000,"cant":18,"unit":"kg","quilmesBulto":18000,"quilmesCant":19,"oldBulto":66000,"oldCant":18,"oldUnit":"kg","oldUnitVal":3666.6666666666665,"frescoUnitVal":3555.5555555555557,"quilmesUnitVal":947.3684210526316,"frescoDiffNom":-2000,"frescoDiffPct":-3.0303030303030303,"quilmesSavingsVsFrescoUnitPct":73.35526315789474},{"cat":"FRUTAS","name":"Manzana Smith","id":"manzana_smith","bulto":30000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":45000,"oldCant":18,"oldUnit":"kg","oldUnitVal":2500,"frescoUnitVal":1666.6666666666667,"quilmesUnitVal":null,"frescoDiffNom":-15000,"frescoDiffPct":-33.33333333333333,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Arándanos","id":"arándanos","bulto":20000,"cant":12,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":23000,"oldCant":12,"oldUnit":"kg","oldUnitVal":1916.6666666666667,"frescoUnitVal":1666.6666666666667,"quilmesUnitVal":null,"frescoDiffNom":-3000,"frescoDiffPct":-13.043478260869565,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Ananá","id":"ananá","bulto":44000,"cant":6,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":19000,"oldCant":6,"oldUnit":"u","oldUnitVal":3166.6666666666665,"frescoUnitVal":7333.333333333333,"quilmesUnitVal":null,"frescoDiffNom":25000,"frescoDiffPct":131.57894736842107,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Uva Blanca","id":"uva_blanca","bulto":50000,"cant":8,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":56000,"oldCant":8,"oldUnit":"kg","oldUnitVal":7000,"frescoUnitVal":6250,"quilmesUnitVal":null,"frescoDiffNom":-6000,"frescoDiffPct":-10.714285714285714,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Frutilla","id":"frutilla","bulto":20000,"cant":5,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":18000,"oldCant":2,"oldUnit":"kg","oldUnitVal":9000,"frescoUnitVal":4000,"quilmesUnitVal":null,"frescoDiffNom":2000,"frescoDiffPct":11.11111111111111,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Kiwi Grande","id":"kiwi","bulto":54000,"cant":8,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":44000,"oldCant":8,"oldUnit":"kg","oldUnitVal":5500,"frescoUnitVal":6750,"quilmesUnitVal":null,"frescoDiffNom":10000,"frescoDiffPct":22.727272727272727,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Mango","id":"mango","bulto":19000,"cant":7,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":18500,"oldCant":10,"oldUnit":"u","oldUnitVal":1850,"frescoUnitVal":2714.285714285714,"quilmesUnitVal":null,"frescoDiffNom":500,"frescoDiffPct":2.7027027027027026,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Palta","id":"palta","bulto":55000,"cant":50,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":45000,"oldCant":54,"oldUnit":"u","oldUnitVal":833.3333333333334,"frescoUnitVal":1100,"quilmesUnitVal":null,"frescoDiffNom":10000,"frescoDiffPct":22.22222222222222,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Banana Ecuador","id":"banana_ecuador","bulto":29000,"cant":19,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":55500,"oldCant":19,"oldUnit":"kg","oldUnitVal":2921.0526315789475,"frescoUnitVal":1526.3157894736842,"quilmesUnitVal":null,"frescoDiffNom":-26500,"frescoDiffPct":-47.74774774774775,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Pera Belvedere","id":"pera","bulto":29000,"cant":17,"unit":"kg","quilmesBulto":15000,"quilmesCant":19,"oldBulto":25000,"oldCant":17,"oldUnit":"kg","oldUnitVal":1470.5882352941176,"frescoUnitVal":1705.8823529411766,"quilmesUnitVal":789.4736842105264,"frescoDiffNom":4000,"frescoDiffPct":16,"quilmesSavingsVsFrescoUnitPct":53.72050816696915},{"cat":"FRUTAS","name":"Melón","id":"melón","bulto":45000,"cant":6,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":34500,"oldCant":6,"oldUnit":"u","oldUnitVal":5750,"frescoUnitVal":7500,"quilmesUnitVal":null,"frescoDiffNom":10500,"frescoDiffPct":30.434782608695656,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"FRUTAS","name":"Manzana Pink","id":"manzana_pink","bulto":45000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":45000,"oldCant":18,"oldUnit":"kg","oldUnitVal":2500,"frescoUnitVal":2500,"quilmesUnitVal":null,"frescoDiffNom":0,"frescoDiffPct":0,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"TOMATE Y PIMIENTOS","name":"Tomate Redondo","id":"tomate_redondo","bulto":42000,"cant":17,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":41000,"oldCant":18,"oldUnit":"kg","oldUnitVal":2277.777777777778,"frescoUnitVal":2470.5882352941176,"quilmesUnitVal":null,"frescoDiffNom":1000,"frescoDiffPct":2.4390243902439024,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"TOMATE Y PIMIENTOS","name":"Cherry Norte","id":"tomate_cherry","bulto":64000,"cant":10,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":22000,"oldCant":5,"oldUnit":"kg","oldUnitVal":4400,"frescoUnitVal":6400,"quilmesUnitVal":null,"frescoDiffNom":42000,"frescoDiffPct":190.9090909090909,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"TOMATE Y PIMIENTOS","name":"Tomate Perita","id":"tomate_perita","bulto":42000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":32000,"oldCant":18,"oldUnit":"kg","oldUnitVal":1777.7777777777778,"frescoUnitVal":2333.3333333333335,"quilmesUnitVal":null,"frescoDiffNom":10000,"frescoDiffPct":31.25,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"TOMATE Y PIMIENTOS","name":"Ají Verde","id":"ají_verde","bulto":28000,"cant":7,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":18000,"oldCant":7,"oldUnit":"kg","oldUnitVal":2571.4285714285716,"frescoUnitVal":4000,"quilmesUnitVal":null,"frescoDiffNom":10000,"frescoDiffPct":55.55555555555556,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"TOMATE Y PIMIENTOS","name":"Ají Rojo","id":"ají_rojo","bulto":43000,"cant":8,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":25000,"oldCant":8,"oldUnit":"kg","oldUnitVal":3125,"frescoUnitVal":5375,"quilmesUnitVal":null,"frescoDiffNom":18000,"frescoDiffPct":72,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Zucchini","id":"zucchini","bulto":36000,"cant":17,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":38000,"oldCant":17,"oldUnit":"kg","oldUnitVal":2235.294117647059,"frescoUnitVal":2117.6470588235293,"quilmesUnitVal":null,"frescoDiffNom":-2000,"frescoDiffPct":-5.263157894736842,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Zapallito","id":"zapallito","bulto":29000,"cant":17,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":38000,"oldCant":17,"oldUnit":"kg","oldUnitVal":2235.294117647059,"frescoUnitVal":1705.8823529411766,"quilmesUnitVal":null,"frescoDiffNom":-9000,"frescoDiffPct":-23.684210526315788,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Berenjena","id":"berenjena","bulto":10000,"cant":10,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":20000,"oldCant":10,"oldUnit":"kg","oldUnitVal":2000,"frescoUnitVal":1000,"quilmesUnitVal":null,"frescoDiffNom":-10000,"frescoDiffPct":-50,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Pepino","id":"pepino","bulto":15000,"cant":15,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":18000,"oldCant":15,"oldUnit":"kg","oldUnitVal":1200,"frescoUnitVal":1000,"quilmesUnitVal":null,"frescoDiffNom":-3000,"frescoDiffPct":-16.666666666666664,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Brócoli","id":"brócoli","bulto":23000,"cant":6,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":18000,"oldCant":9,"oldUnit":"u","oldUnitVal":2000,"frescoUnitVal":3833.3333333333335,"quilmesUnitVal":null,"frescoDiffNom":5000,"frescoDiffPct":27.77777777777778,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Repollo Rojo","id":"repollo_rojo","bulto":16000,"cant":17,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":14000,"oldCant":17,"oldUnit":"kg","oldUnitVal":823.5294117647059,"frescoUnitVal":941.1764705882352,"quilmesUnitVal":null,"frescoDiffNom":2000,"frescoDiffPct":14.285714285714285,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Repollo Blanco","id":"repollo_blanco","bulto":16000,"cant":17,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":12000,"oldCant":17,"oldUnit":"kg","oldUnitVal":705.8823529411765,"frescoUnitVal":941.1764705882352,"quilmesUnitVal":null,"frescoDiffNom":4000,"frescoDiffPct":33.33333333333333,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Remolacha","id":"remolacha","bulto":19000,"cant":12,"unit":"at","quilmesBulto":null,"quilmesCant":null,"oldBulto":18000,"oldCant":12,"oldUnit":"atado","oldUnitVal":1500,"frescoUnitVal":1583.3333333333333,"quilmesUnitVal":null,"frescoDiffNom":1000,"frescoDiffPct":5.555555555555555,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Choclo","id":"choclo","bulto":45000,"cant":50,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":55000,"oldCant":35,"oldUnit":"u","oldUnitVal":1571.4285714285713,"frescoUnitVal":900,"quilmesUnitVal":null,"frescoDiffNom":-10000,"frescoDiffPct":-18.181818181818183,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"VERDURAS","name":"Coliflor","id":"coliflor","bulto":23000,"cant":13,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":15000,"oldCant":13,"oldUnit":"u","oldUnitVal":1153.8461538461538,"frescoUnitVal":1769.2307692307693,"quilmesUnitVal":null,"frescoDiffNom":8000,"frescoDiffPct":53.333333333333336,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Papa Blanca Córdoba","id":"papa_blanca","bulto":26500,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":20000,"oldCant":18,"oldUnit":"kg","oldUnitVal":1111.111111111111,"frescoUnitVal":1472.2222222222222,"quilmesUnitVal":null,"frescoDiffNom":6500,"frescoDiffPct":32.5,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Papa Lavada","id":"papa_lavada_garlic","bulto":39000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":30000,"oldCant":18,"oldUnit":"kg","oldUnitVal":1666.6666666666667,"frescoUnitVal":2166.6666666666665,"quilmesUnitVal":null,"frescoDiffNom":9000,"frescoDiffPct":30,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Papa Negra","id":"papa_negra","bulto":25000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":19000,"oldCant":18,"oldUnit":"kg","oldUnitVal":1055.5555555555557,"frescoUnitVal":1388.888888888889,"quilmesUnitVal":null,"frescoDiffNom":6000,"frescoDiffPct":31.57894736842105,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Batata","id":"batata","bulto":18000,"cant":15,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":13000,"oldCant":10,"oldUnit":"kg","oldUnitVal":1300,"frescoUnitVal":1200,"quilmesUnitVal":null,"frescoDiffNom":5000,"frescoDiffPct":38.46153846153847,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Boñato","id":"boñato","bulto":28000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":21000,"oldCant":18,"oldUnit":"kg","oldUnitVal":1166.6666666666667,"frescoUnitVal":1555.5555555555557,"quilmesUnitVal":null,"frescoDiffNom":7000,"frescoDiffPct":33.33333333333333,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Anco Chico","id":"anco_chico","bulto":38000,"cant":15,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":25000,"oldCant":15,"oldUnit":"kg","oldUnitVal":1666.6666666666667,"frescoUnitVal":2533.3333333333335,"quilmesUnitVal":null,"frescoDiffNom":13000,"frescoDiffPct":52,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Anco Abra","id":"anco_grande","bulto":42000,"cant":15,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":28000,"oldCant":15,"oldUnit":"kg","oldUnitVal":1866.6666666666667,"frescoUnitVal":2800,"quilmesUnitVal":null,"frescoDiffNom":14000,"frescoDiffPct":50,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Anco Bandejero","id":"anco_bandejero","bulto":40000,"cant":15,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":33000,"oldCant":20,"oldUnit":"kg","oldUnitVal":1650,"frescoUnitVal":2666.6666666666665,"quilmesUnitVal":null,"frescoDiffNom":7000,"frescoDiffPct":21.21212121212121,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Zanahoria Cubito","id":"zanahoria_cubito","bulto":13000,"cant":10,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":8000,"oldCant":10,"oldUnit":"kg","oldUnitVal":800,"frescoUnitVal":1300,"quilmesUnitVal":null,"frescoDiffNom":5000,"frescoDiffPct":62.5,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"PAPA, BATATA, ZAPALLO Y ZANAHORIA","name":"Zanahoria Industrial","id":"zanahoria_industrial","bulto":23000,"cant":18,"unit":"kg","quilmesBulto":8000,"quilmesCant":20,"oldBulto":11000,"oldCant":18,"oldUnit":"kg","oldUnitVal":611.1111111111111,"frescoUnitVal":1277.7777777777778,"quilmesUnitVal":400,"frescoDiffNom":12000,"frescoDiffPct":109.09090909090908,"quilmesSavingsVsFrescoUnitPct":68.69565217391305},{"cat":"CEBOLLAS Y AJOS","name":"Cebolla/ Cebollón","id":"cebollón","bulto":39000,"cant":18,"unit":"kg","quilmesBulto":35000,"quilmesCant":17,"oldBulto":18000,"oldCant":18,"oldUnit":"kg","oldUnitVal":1000,"frescoUnitVal":2166.6666666666665,"quilmesUnitVal":2058.823529411765,"frescoDiffNom":21000,"frescoDiffPct":116.66666666666667,"quilmesSavingsVsFrescoUnitPct":4.977375565610846},{"cat":"CEBOLLAS Y AJOS","name":"Cebollín","id":"cebollín","bulto":null,"cant":null,"unit":"kg","quilmesBulto":20000,"quilmesCant":17,"oldBulto":null,"oldCant":null,"oldUnit":null,"oldUnitVal":null,"frescoUnitVal":null,"quilmesUnitVal":1176.4705882352941,"frescoDiffNom":null,"frescoDiffPct":null,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"CEBOLLAS Y AJOS","name":"Cebolla Roja","id":"cebolla_roja","bulto":40000,"cant":18,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":23000,"oldCant":18,"oldUnit":"kg","oldUnitVal":1277.7777777777778,"frescoUnitVal":2222.222222222222,"quilmesUnitVal":null,"frescoDiffNom":17000,"frescoDiffPct":73.91304347826086,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"CEBOLLAS Y AJOS","name":"Ajo Super","id":"ajo_mendocino","bulto":34000,"cant":50,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":32000,"oldCant":50,"oldUnit":"u","oldUnitVal":640,"frescoUnitVal":680,"quilmesUnitVal":null,"frescoDiffNom":2000,"frescoDiffPct":6.25,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Lechuga Criolla","id":"lechuga_criolla","bulto":7000,"cant":5,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":9000,"oldCant":5,"oldUnit":"kg","oldUnitVal":1800,"frescoUnitVal":1400,"quilmesUnitVal":null,"frescoDiffNom":-2000,"frescoDiffPct":-22.22222222222222,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Lechuga Manteca","id":"lechuga_manteca","bulto":7000,"cant":5,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":9000,"oldCant":5,"oldUnit":"kg","oldUnitVal":1800,"frescoUnitVal":1400,"quilmesUnitVal":null,"frescoDiffNom":-2000,"frescoDiffPct":-22.22222222222222,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Lechuga Francesa","id":"lechuga_francesa","bulto":7000,"cant":5,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":9000,"oldCant":5,"oldUnit":"kg","oldUnitVal":1800,"frescoUnitVal":1400,"quilmesUnitVal":null,"frescoDiffNom":-2000,"frescoDiffPct":-22.22222222222222,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Lechuga Capuchina","id":"lechuga_capuchina","bulto":16000,"cant":10,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":17000,"oldCant":7,"oldUnit":"kg","oldUnitVal":2428.5714285714284,"frescoUnitVal":1600,"quilmesUnitVal":null,"frescoDiffNom":-1000,"frescoDiffPct":-5.88235294117647,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Lechuga Morada","id":"lechuga_morada","bulto":8000,"cant":3,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":9000,"oldCant":2.5,"oldUnit":"kg","oldUnitVal":3600,"frescoUnitVal":2666.6666666666665,"quilmesUnitVal":null,"frescoDiffNom":-1000,"frescoDiffPct":-11.11111111111111,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Espinaca","id":"espinaca","bulto":6500,"cant":12,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":6000,"oldCant":12,"oldUnit":"kg","oldUnitVal":500,"frescoUnitVal":541.6666666666666,"quilmesUnitVal":null,"frescoDiffNom":500,"frescoDiffPct":8.333333333333332,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Acelga","id":"acelga","bulto":7000,"cant":12,"unit":"kg","quilmesBulto":null,"quilmesCant":null,"oldBulto":6000,"oldCant":12,"oldUnit":"kg","oldUnitVal":500,"frescoUnitVal":583.3333333333334,"quilmesUnitVal":null,"frescoDiffNom":1000,"frescoDiffPct":16.666666666666664,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Rúcula","id":"rúcula","bulto":7000,"cant":24,"unit":"at","quilmesBulto":null,"quilmesCant":null,"oldBulto":8000,"oldCant":24,"oldUnit":"atado","oldUnitVal":333.3333333333333,"frescoUnitVal":291.6666666666667,"quilmesUnitVal":null,"frescoDiffNom":-1000,"frescoDiffPct":-12.5,"quilmesSavingsVsFrescoUnitPct":null},{"cat":"LECHUGAS Y HOJAS","name":"Kale","id":"kale","bulto":1500,"cant":1,"unit":"u","quilmesBulto":null,"quilmesCant":null,"oldBulto":1500,"oldCant":1,"oldUnit":"u","oldUnitVal":1500,"frescoUnitVal":1500,"quilmesUnitVal":null,"frescoDiffNom":0,"frescoDiffPct":0,"quilmesSavingsVsFrescoUnitPct":null}];
+    let currentMode = 'bulto';
+    let currentCat = 'todos';
+    let searchQuery = '';
+
+    function getEmoji(name) {
+      const n = name.toLowerCase();
+      if (n.includes('manzana')) return '🍎';
+      if (n.includes('cebolla')) return '🧅';
+      if (n.includes('zanahoria')) return '🥕';
+      if (n.includes('pera')) return '🍐';
+      if (n.includes('mandarina') || n.includes('naranja')) return '🍊';
+      if (n.includes('pomelo')) return '🍈';
+      if (n.includes('limón') || n.includes('limon')) return '🍋';
+      if (n.includes('tomate')) return '🍅';
+      if (n.includes('frutilla')) return '🍓';
+      if (n.includes('banana')) return '🍌';
+      if (n.includes('papa')) return '🥔';
+      if (n.includes('batata') || n.includes('boñato')) return '🍠';
+      if (n.includes('zapall') || n.includes('zucchini') || n.includes('anco')) return '🎃';
+      if (n.includes('lechuga') || n.includes('acelga') || n.includes('espinaca') || n.includes('rucula') || n.includes('kale')) return '🥬';
+      if (n.includes('ají') || n.includes('morrón')) return '🫑';
+      if (n.includes('palta')) return '🥑';
+      if (n.includes('brócoli') || n.includes('coliflor')) return '🥦';
+      if (n.includes('choclo')) return '🌽';
+      return '🌱';
+    }
+
+    function setViewMode(mode) {
+      currentMode = mode;
+      document.getElementById('btnModeBulto').classList.toggle('active', mode === 'bulto');
+      document.getElementById('btnModeKilo').classList.toggle('active', mode === 'kilo');
+      render();
+    }
+
+    function renderHeader() {
+      const header = document.getElementById('tableHeader');
+      if (currentMode === 'bulto') {
+        header.innerHTML = `
+          <th>Producto</th>
+          <th>FRESCO (24-Ago)</th>
+          <th>FRESCO Actual (23-Sep)</th>
+          <th>Dif. FRESCO vs Mes Anterior</th>
+          <th>⭐ QUILMES (24-Sep)</th>
+          <th>Ahorro vs Quilmes</th>
+        `;
+      } else {
+        header.innerHTML = `
+          <th>Producto</th>
+          <th>FRESCO $/unidad (24-Ago)</th>
+          <th>FRESCO $/unidad (23-Sep)</th>
+          <th>Variación $/unidad</th>
+          <th>⭐ QUILMES $/unidad (24-Sep)</th>
+          <th>% Ahorro $/unidad Quilmes</th>
+        `;
+      }
+    }
+
+    function render() {
+      renderHeader();
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      let filtered = DATASET.filter(item => {
+        const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+        if (currentCat === 'quilmes') return matchSearch && item.quilmesBulto !== null;
+        if (currentCat !== 'todos') return matchSearch && item.cat === currentCat;
+        return matchSearch;
+      });
+
+      filtered.sort((a, b) => (b.quilmesBulto ? 1 : 0) - (a.quilmesBulto ? 1 : 0));
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        const emoji = getEmoji(item.name);
+        const quilmesBadge = item.quilmesBulto ? `<span class="badge badge-quilmes">SUPER OFERTA QUILMES</span>` : '';
+
+        if (currentMode === 'bulto') {
+          const oldB = item.oldBulto ? `$${item.oldBulto.toLocaleString('es-AR')} (${item.oldCant}${item.oldUnit})` : '—';
+          const nowB = item.bulto ? `<span class="val-fresco-now">$${item.bulto.toLocaleString('es-AR')} (${item.cant}${item.unit})</span>` : '—';
+          
+          let diffHtml = '—';
+          if (item.frescoDiffNom !== null) {
+            const sign = item.frescoDiffNom > 0 ? '+' : '';
+            const cls = item.frescoDiffNom > 0 ? 'diff-plus' : item.frescoDiffNom < 0 ? 'diff-minus' : '';
+            diffHtml = `<span class="${cls}">${sign}$${item.frescoDiffNom.toLocaleString('es-AR')} (${sign}${item.frescoDiffPct.toFixed(1)}%)</span>`;
+          }
+
+          const quilmesB = item.quilmesBulto ? `<span class="val-quilmes">$${item.quilmesBulto.toLocaleString('es-AR')} (${item.quilmesCant}${item.unit})</span>` : '<span style="color:var(--muted);">—</span>';
+
+          let ahorroQuilmes = '—';
+          if (item.quilmesBulto && item.bulto) {
+            const difQ = item.bulto - item.quilmesBulto;
+            ahorroQuilmes = `<span class="diff-minus">-$${difQ.toLocaleString('es-AR')}</span>`;
+          }
+
+          tr.innerHTML = `
+            <td>
+              <div class="item-name">${emoji} ${item.name}</div>
+              ${quilmesBadge}
+            </td>
+            <td>${oldB}</td>
+            <td>${nowB}</td>
+            <td>${diffHtml}</td>
+            <td>${quilmesB}</td>
+            <td>${ahorroQuilmes}</td>
+          `;
+        } else {
+          const oldU = item.oldUnitVal ? `$${item.oldUnitVal.toFixed(2)} / ${item.unit}` : '—';
+          const nowU = item.frescoUnitVal ? `<span class="val-fresco-now">$${item.frescoUnitVal.toFixed(2)} / ${item.unit}</span>` : '—';
+
+          let diffU = '—';
+          if (item.oldUnitVal && item.frescoUnitVal) {
+            const pct = ((item.frescoUnitVal - item.oldUnitVal) / item.oldUnitVal) * 100;
+            const sign = pct > 0 ? '+' : '';
+            const cls = pct > 0 ? 'diff-plus' : pct < 0 ? 'diff-minus' : '';
+            diffU = `<span class="${cls}">${sign}${pct.toFixed(1)}%</span>`;
+          }
+
+          const quilmesU = item.quilmesUnitVal ? `<span class="val-quilmes">$${item.quilmesUnitVal.toFixed(2)} / ${item.unit}</span>` : '<span style="color:var(--muted);">—</span>';
+
+          let pctAhorroQ = '—';
+          if (item.quilmesSavingsVsFrescoUnitPct !== null) {
+            pctAhorroQ = `<span class="diff-minus">-${item.quilmesSavingsVsFrescoUnitPct.toFixed(1)}% Ahorro</span>`;
+          }
+
+          tr.innerHTML = `
+            <td>
+              <div class="item-name">${emoji} ${item.name}</div>
+              ${quilmesBadge}
+            </td>
+            <td>${oldU}</td>
+            <td>${nowU}</td>
+            <td>${diffU}</td>
+            <td>${quilmesU}</td>
+            <td>${pctAhorroQ}</td>
+          `;
+        }
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      render();
+    });
+
+    document.getElementById('pillsContainer').addEventListener('click', (e) => {
+      if (e.target.classList.contains('pill')) {
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        e.target.classList.add('active');
+        currentCat = e.target.dataset.cat;
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
