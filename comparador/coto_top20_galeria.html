@@ -71,6 +71,10 @@
     .card-footer { padding: 0.75rem 1.25rem; margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
     .coto-link { color: #38bdf8; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; }
     .coto-link:hover { text-decoration: underline; }
+
+    .edit-btn { background: transparent; border: none; cursor: pointer; font-size: 0.82rem; padding: 2px 5px; border-radius: 4px; transition: background 0.2s; color: #94a3b8; }
+    .edit-btn:hover { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+
   </style>
 </head>
 <body>
@@ -93,6 +97,7 @@
     </div>
     <div class="nav-btns">
       <a href="index.html" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Comparador</a>
+      <button class="btn btn-back" onclick="resetCustomPrices()" title="Restablecer precios originales"><i class="fa-solid fa-rotate-left"></i> Restablecer Precios</button>
       <a href="timeline_coto_4fechas.html" class="btn btn-pdf"><i class="fa-solid fa-timeline"></i> Línea de Tiempo (5 Fechas)</a>
     </div>
   </div>
@@ -415,10 +420,12 @@
               </span>
             </div>
             <div class="card-price-row">
-              <div>
+              <div style="display:flex; align-items:center; gap:0.3rem;">
                 <span class="price-coto"><i class="fa-solid fa-cart-shopping"></i> Coto: ${dData.coto}</span>
+                <button class="edit-btn" onclick="editPrice('${item.id}', 'coto', '${currentDate}')" title="✏️ Editar precio de Coto">✏️</button>
                 <span style="margin: 0 4px; color:#475569;">|</span>
                 <span class="price-mc">Central: ${dData.mc}</span>
+                <button class="edit-btn" onclick="editPrice('${item.id}', 'mc', '${currentDate}')" title="✏️ Editar precio del Mercado Central">✏️</button>
               </div>
               <span class="date-indicator"><i class="fa-solid fa-calendar-day"></i> ${dData.dateLabel}</span>
             </div>
@@ -452,6 +459,50 @@
       btn.classList.add('active');
       render();
     }
+
+
+    function editPrice(itemId, storeKey, dateKey) {
+      const item = ITEMS.find(x => x.id === itemId);
+      if (!item) return;
+      const dData = item.dates[dateKey] || item.dates['29sep'];
+      const currentVal = storeKey === 'coto' ? dData.coto : dData.mc;
+      
+      const storeName = storeKey === 'coto' ? 'Coto Digital' : 'Mercado Central';
+      const newVal = prompt(`✏️ Editar precio manual de ${item.name} (${storeName} - ${dData.dateLabel}):`, currentVal);
+      if (newVal !== null && newVal.trim() !== "") {
+        let formattedVal = newVal.trim();
+        if (!formattedVal.startsWith('$')) formattedVal = '$' + formattedVal;
+        if (storeKey === 'coto') {
+          dData.coto = formattedVal;
+        } else {
+          dData.mc = formattedVal;
+        }
+        localStorage.setItem(`custom_price_${itemId}_${storeKey}_${dateKey}`, formattedVal);
+        render();
+      }
+    }
+
+    function loadCustomPrices() {
+      ITEMS.forEach(item => {
+        Object.keys(item.dates).forEach(dKey => {
+          const savedCoto = localStorage.getItem(`custom_price_${item.id}_coto_${dKey}`);
+          if (savedCoto) item.dates[dKey].coto = savedCoto;
+          const savedMc = localStorage.getItem(`custom_price_${item.id}_mc_${dKey}`);
+          if (savedMc) item.dates[dKey].mc = savedMc;
+        });
+      });
+    }
+
+    function resetCustomPrices() {
+      if (confirm("¿Deseas restablecer todos los precios editados manualmente a sus valores originales de los scrapers?")) {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('custom_price_')) localStorage.removeItem(key);
+        });
+        location.reload();
+      }
+    }
+
+    loadCustomPrices();
 
     render();
   </script>
