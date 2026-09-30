@@ -2418,6 +2418,47 @@ function ActiveOrderExtras({ order, userKg }) {
 }
 const ActivoHubJourney = ActiveOrderExtras;
 
+// Comprime una foto subida por Admin antes de guardarla (achica el ancho y
+// convierte a JPEG calidad 0.72) para que el catálogo cargue rápido: sin esto,
+// una foto de celular sin achicar puede pesar 500-900 KB y romper la carga inicial.
+const IMG_MAX_WIDTH = 800;
+const IMG_JPEG_QUALITY = 0.72;
+function compressImageFile(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, IMG_MAX_WIDTH / img.width);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', IMG_JPEG_QUALITY));
+      } catch (e) {
+        // Si algo falla (ej. imagen corrupta), devolvemos el archivo original sin comprimir.
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target.result);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve(ev.target.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    };
+    img.src = objectUrl;
+  });
+}
+
 const RAW_BASE_CATALOG = [
   { id: 'morron', name: 'Morrón rojo', cat: 'verduras', priceN: 4224, oldN: 6499, distribuidorN: 2500, members: '3/8', time: '2d', deadlineHrs: 40, img: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=400&q=80', goal: GOAL_KG, unit: '/kg', stock: 60, oculto: false },
   { id: 'zapallo', name: 'Zapallo anco', cat: 'verduras', priceN: 1169, oldN: 1799, distribuidorN: 700, members: '5/12', time: '3d', deadlineHrs: 45, img: 'img/zapallo-ok-20260730c.jpg', goal: GOAL_KG, unit: '/kg', stock: 130, oculto: false },
@@ -4792,11 +4833,9 @@ function MobileAdminProductos() {
                     e.stopPropagation();
                     const files = e.dataTransfer && e.dataTransfer.files;
                     if (files && files[0] && files[0].type.startsWith('image/')) {
-                      const reader = new FileReader();
-                      reader.onload = (ev) => {
-                        handleQuickUpdateImage(p, ev.target.result);
-                      };
-                      reader.readAsDataURL(files[0]);
+                      compressImageFile(files[0]).then((dataUrl) => {
+                        if (dataUrl) handleQuickUpdateImage(p, dataUrl);
+                      });
                     }
                   }}
                   title="💡 Tip: Podés arrastrar una foto directamente acá para actualizar la portada de este producto"
@@ -5204,12 +5243,12 @@ function MobileAdminProductos() {
                       setIsDragging(false);
                       const files = e.dataTransfer && e.dataTransfer.files;
                       if (files && files[0] && files[0].type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          setForm((prev) => ({ ...prev, img: ev.target.result }));
-                          if (showToast) showToast('📸 Foto cargada');
-                        };
-                        reader.readAsDataURL(files[0]);
+                        compressImageFile(files[0]).then((dataUrl) => {
+                          if (dataUrl) {
+                            setForm((prev) => ({ ...prev, img: dataUrl }));
+                            if (showToast) showToast('📸 Foto cargada');
+                          }
+                        });
                       }
                     }}
                     onClick={() => fileInputRef.current && fileInputRef.current.click()}
@@ -5234,12 +5273,12 @@ function MobileAdminProductos() {
                       onChange={(e) => {
                         const file = e.target.files && e.target.files[0];
                         if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (ev) => {
-                            setForm((prev) => ({ ...prev, img: ev.target.result }));
-                            if (showToast) showToast('📸 Foto cargada');
-                          };
-                          reader.readAsDataURL(file);
+                          compressImageFile(file).then((dataUrl) => {
+                            if (dataUrl) {
+                              setForm((prev) => ({ ...prev, img: dataUrl }));
+                              if (showToast) showToast('📸 Foto cargada');
+                            }
+                          });
                         }
                       }}
                     />
