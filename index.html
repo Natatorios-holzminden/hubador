@@ -2519,35 +2519,75 @@ function setCatalogDirty(isDirty) {
   } catch (e) {}
 }
 
-/** Trae el catálogo de Supabase. */
-async function syncCatalogFromSupabase() {
-  if (!sb) return;
+// ─── Estado de carga del catálogo remoto ──────────────────────────────────
+// Antes: los componentes arrancaban mostrando RAW_BASE_CATALOG (productos viejos)
+// hasta que Supabase respondía (a veces ~5s, a veces nunca si fallaba en silencio).
+// Ahora hay un estado explícito que los componentes leen para mostrar "Cargando…"
+// en vez de la lista vieja, y solo mostrar productos reales (o el respaldo, avisando)
+// cuando Supabase ya contestó.
+let HUBADOR_CATALOG_STATUS = 'loading'; // 'loading' | 'ready' | 'error'
+let HUBADOR_CATALOG_LAST_ERROR = '';
+function setCatalogStatus(status, errMsg) {
+  HUBADOR_CATALOG_STATUS = status;
+  HUBADOR_CATALOG_LAST_ERROR = errMsg || '';
+  // Reusamos el mismo evento que ya escuchan los componentes de catálogo: no hace
+  // falta agregar un listener nuevo en cada uno, ya se van a enterar con esto.
+  try { window.dispatchEvent(new CustomEvent('hubador_catalog_updated')); } catch (e) {}
+}
+// Espera entre reintentos si Supabase falla o no devuelve datos: 1s, luego 3s, luego 6s.
+const CATALOG_RETRY_DELAYS_MS = [1000, 3000, 6000];
+
+/** Trae el catálogo de Supabase. Reintenta antes de rendirse y avisa el estado. */
+async function syncCatalogFromSupabase(attempt) {
+  attempt = attempt || 0; // 0 = primer intento; 1..3 = reintentos
+  if (!sb) { setCatalogStatus('ready'); return; } // sin Supabase configurado no hay nada que esperar
   try {
     const { data, error } = await sb.from(PRODUCTOS_TABLE).select('*');
-    if (error || !Array.isArray(data) || data.length === 0) return;
+    if (error || !Array.isArray(data) || data.length === 0) {
+      console.warn(`[HUBADOR] Catálogo remoto: intento ${attempt + 1} de ${CATALOG_RETRY_DELAYS_MS.length + 1} sin éxito`, error || '(Supabase no devolvió productos)');
+      if (attempt < CATALOG_RETRY_DELAYS_MS.length) {
+        setTimeout(() => syncCatalogFromSupabase(attempt + 1), CATALOG_RETRY_DELAYS_MS[attempt]);
+        return;
+      }
+      setCatalogStatus('error', (error && error.message) || 'Supabase no devolvió productos');
+      return;
+    }
     const remoteList = data.map(productoRowToRaw);
     let isDirty = false;
     try { isDirty = localStorage.getItem(HUBADOR_CATALOG_DIRTY_KEY) === '1'; } catch (e) {}
-    if (!isDirty) {
+    if (isDirty) {
+      console.warn('[HUBADOR] Catálogo local con ediciones de Admin sin publicar (dirty): no se pisa con lo remoto, solo se agregan productos nuevos.');
       const localList = getRawCatalogStore();
-      const localMap = new Map(localList.map((p) => [p.id, p]));
-      const merged = remoteList.map((r) => {
-        const loc = localMap.get(r.id);
-        if (loc && loc.img && loc.img !== 'img/papa.jpg' && (!r.img || r.img === 'img/papa.jpg')) {
-          return { ...r, img: loc.img };
-        }
-        return r;
-      });
-      saveRawCatalogStore(merged);
+      const localIds = new Set(localList.map((p) => p.id));
+      const remoteOnly = remoteList.filter((p) => !localIds.has(p.id));
+      if (remoteOnly.length > 0) saveRawCatalogStore([...localList, ...remoteOnly]);
+      setCatalogStatus('ready');
       return;
     }
     const localList = getRawCatalogStore();
-    const localIds = new Set(localList.map((p) => p.id));
-    const remoteOnly = remoteList.filter((p) => !localIds.has(p.id));
-    if (remoteOnly.length > 0) saveRawCatalogStore([...localList, ...remoteOnly]);
+    const localMap = new Map(localList.map((p) => [p.id, p]));
+    const merged = remoteList.map((r) => {
+      const loc = localMap.get(r.id);
+      if (loc && loc.img && loc.img !== 'img/papa.jpg' && (!r.img || r.img === 'img/papa.jpg')) {
+        return { ...r, img: loc.img };
+      }
+      return r;
+    });
+    saveRawCatalogStore(merged);
+    setCatalogStatus('ready');
   } catch (e) {
-    console.warn('[HUBADOR] No se pudo sincronizar el catálogo remoto', e);
+    console.warn(`[HUBADOR] Catálogo remoto: intento ${attempt + 1} tiró una excepción`, e);
+    if (attempt < CATALOG_RETRY_DELAYS_MS.length) {
+      setTimeout(() => syncCatalogFromSupabase(attempt + 1), CATALOG_RETRY_DELAYS_MS[attempt]);
+      return;
+    }
+    setCatalogStatus('error', (e && e.message) || String(e));
   }
+}
+/** Botón "reintentar" del aviso de error: vuelve a arrancar desde el intento 0. */
+function retryCatalogSync() {
+  setCatalogStatus('loading');
+  syncCatalogFromSupabase(0);
 }
 
 /** Publica un producto creado/editado en Admin para que lo vean todos (requiere sesión admin real por RLS).
@@ -2593,9 +2633,60 @@ function subscribeCatalogRealtime() {
   }
 }
 
-if (sb) {
-  syncCatalogFromSupabase();
+syncCatalogFromSupabase(); // maneja el caso !sb adentro (pasa directo a 'ready')
+if (sb) subscribeCatalogRealtime();
+
+/** Si el canal realtime se cortó (network drop, pestaña dormida, etc.), lo recrea. */
+function ensureCatalogRealtimeFresh() {
+  if (!sb) return;
+  if (hubadorProductosChannel && hubadorProductosChannel.state !== 'joined') {
+    try { sb.removeChannel(hubadorProductosChannel); } catch (e) {}
+    hubadorProductosChannel = null;
+  }
   subscribeCatalogRealtime();
+}
+// Al volver a la pestaña: traé el catálogo de nuevo y asegurate de que el realtime siga vivo.
+// (antes esto no pasaba nunca, así que una pestaña dejada abierta podía quedar desactualizada)
+try {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      syncCatalogFromSupabase();
+      ensureCatalogRealtimeFresh();
+    }
+  });
+} catch (e) {}
+
+/** Tarjetas vacías mientras se espera a Supabase — evita mostrar productos viejos con parpadeo. */
+function CatalogSkeleton({ count }) {
+  const n = count || 6;
+  return (
+    <>
+      {Array.from({ length: n }).map((_, i) => (
+        <div key={'sk' + i} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, overflow: 'hidden', height: 260 }}>
+          <div style={{ height: 130, background: '#eef1ee' }} />
+          <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ height: 12, width: '70%', background: '#eef1ee', borderRadius: 4 }} />
+            <div style={{ height: 16, width: '45%', background: '#eef1ee', borderRadius: 4 }} />
+            <div style={{ height: 10, width: '90%', background: '#f4f6f5', borderRadius: 4 }} />
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+/** Aviso cuando Supabase no contestó tras los reintentos: se ve la lista de respaldo igual. */
+function CatalogErrorNotice({ status }) {
+  if (status !== 'error') return null;
+  return (
+    <div
+      onClick={retryCatalogSync}
+      role="button"
+      title={HUBADOR_CATALOG_LAST_ERROR}
+      style={{ gridColumn: '1 / -1', background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', borderRadius: 10, padding: '10px 14px', marginBottom: 10, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
+    >
+      ⚠️ No pudimos actualizar los productos. Tocá para reintentar.
+    </div>
+  );
 }
 
 function getHubadorCatalogList(includeHidden = false) {
@@ -2681,12 +2772,13 @@ function MobileHome() {
   const { setSelected, setSelectedGroup, user, cart, webSearch, setWebSearch, progressTick } = React.useContext(SelectionContext);
   void progressTick;
   const [catalogItems, setCatalogItems] = React.useState(() => HUBADOR_CATALOG.map(hubadorCard));
+  const [catStatus, setCatStatus] = React.useState(() => HUBADOR_CATALOG_STATUS);
   const [cat, setCat] = React.useState('todos');
   const search = webSearch || '';
   const setSearch = (v) => { if (typeof setWebSearch === 'function') setWebSearch(v); };
 
   React.useEffect(() => {
-    const handleUpdate = () => setCatalogItems(HUBADOR_CATALOG.map(hubadorCard));
+    const handleUpdate = () => { setCatalogItems(HUBADOR_CATALOG.map(hubadorCard)); setCatStatus(HUBADOR_CATALOG_STATUS); };
     window.addEventListener('hubador_catalog_updated', handleUpdate);
     return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
   }, []);
@@ -2865,13 +2957,18 @@ function MobileHome() {
           ))}
         </div>
 
-        {/* Product list */}
-        {filtered.length === 0 ? (
+        {/* Product list — mientras carga Supabase, se ve un placeholder, nunca la lista vieja */}
+        {catStatus === 'loading' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <CatalogSkeleton count={4} />
+          </div>
+        ) : filtered.length === 0 ? (
           <div style={{ background: '#fff', borderRadius: 14, padding: '32px 16px', textAlign: 'center', color: '#888', fontSize: 13, border: '1px dashed #cbd5e1' }}>
             No encontramos productos para "{search}" en esta categoría.
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <CatalogErrorNotice status={catStatus} />
             {filtered.map((p) =>
               <div key={p.name} onClick={() => openProduct(p)} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, overflow: 'hidden', display: 'flex', gap: 0, cursor: 'pointer', transition: 'transform 0.12s ease, box-shadow 0.12s ease' }} onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.985)'} onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                 <div style={{ width: 118, alignSelf: 'stretch', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
@@ -3148,12 +3245,13 @@ function MobileProductos() {
   const { setSelected, setSelectedGroup, user, cart, webSearch, setWebSearch, progressTick } = React.useContext(SelectionContext);
   void progressTick;
   const [catalogItems, setCatalogItems] = React.useState(() => HUBADOR_CATALOG.map(hubadorCard));
+  const [catStatus, setCatStatus] = React.useState(() => HUBADOR_CATALOG_STATUS);
   const [cat, setCat] = React.useState('todos');
   const search = webSearch || '';
   const setSearch = (v) => { if (typeof setWebSearch === 'function') setWebSearch(v); };
 
   React.useEffect(() => {
-    const handleUpdate = () => setCatalogItems(HUBADOR_CATALOG.map(hubadorCard));
+    const handleUpdate = () => { setCatalogItems(HUBADOR_CATALOG.map(hubadorCard)); setCatStatus(HUBADOR_CATALOG_STATUS); };
     window.addEventListener('hubador_catalog_updated', handleUpdate);
     return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
   }, []);
@@ -3244,12 +3342,17 @@ function MobileProductos() {
           <span style={{ fontSize: 12, color: '#888' }}>{filtered.length} disponibles</span>
         </div>
 
-        {filtered.length === 0 ? (
+        {catStatus === 'loading' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <CatalogSkeleton count={6} />
+          </div>
+        ) : filtered.length === 0 ? (
           <div style={{ background: '#fff', borderRadius: 14, padding: '32px 16px', textAlign: 'center', color: '#888', fontSize: 13, border: '1px dashed #cbd5e1' }}>
             No encontramos productos para "{search}".
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <CatalogErrorNotice status={catStatus} />
             {filtered.map((p) => (
               <div key={p.name} onClick={() => openProduct(p)} style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, overflow: 'hidden', display: 'flex', gap: 0, cursor: 'pointer', transition: 'transform 0.12s ease' }} onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.985)'} onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                 <div style={{ width: 118, alignSelf: 'stretch', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
@@ -7175,8 +7278,9 @@ function WebHome() {
   const [sort, setSort] = React.useState('descuento');
   const [showFilters, setShowFilters] = React.useState(false);
   const [catalogItems, setCatalogItems] = React.useState(() => HUBADOR_CATALOG.map(hubadorCard));
+  const [catStatus, setCatStatus] = React.useState(() => HUBADOR_CATALOG_STATUS);
   React.useEffect(() => {
-    const handleUpdate = () => setCatalogItems(HUBADOR_CATALOG.map(hubadorCard));
+    const handleUpdate = () => { setCatalogItems(HUBADOR_CATALOG.map(hubadorCard)); setCatStatus(HUBADOR_CATALOG_STATUS); };
     window.addEventListener('hubador_catalog_updated', handleUpdate);
     return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
   }, []);
@@ -7295,7 +7399,11 @@ function WebHome() {
       </div>
 
       <section className="web-section web-section-tight" id="web-ofertas">
-        {filtered.length === 0 ? (
+        {catStatus === 'loading' ? (
+          <div className="web-grid web-grid-products">
+            <CatalogSkeleton count={8} />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="web-empty">
             <div>🔍</div>
             <b>No encontramos productos</b>
@@ -7303,6 +7411,7 @@ function WebHome() {
           </div>
         ) : (
           <div className="web-grid web-grid-products">
+            <CatalogErrorNotice status={catStatus} />
             {filtered.map((p) => {
               const live = groupProgressView(p.name);
               const miss = live.missing, almost = live.almost;
@@ -7375,8 +7484,9 @@ function WebProductos() {
   const [sort, setSort] = React.useState('descuento');
   const [showFilters, setShowFilters] = React.useState(true);
   const [catalogItems, setCatalogItems] = React.useState(() => HUBADOR_CATALOG.map(hubadorCard));
+  const [catStatus, setCatStatus] = React.useState(() => HUBADOR_CATALOG_STATUS);
   React.useEffect(() => {
-    const handleUpdate = () => setCatalogItems(HUBADOR_CATALOG.map(hubadorCard));
+    const handleUpdate = () => { setCatalogItems(HUBADOR_CATALOG.map(hubadorCard)); setCatStatus(HUBADOR_CATALOG_STATUS); };
     window.addEventListener('hubador_catalog_updated', handleUpdate);
     return () => window.removeEventListener('hubador_catalog_updated', handleUpdate);
   }, []);
@@ -7446,7 +7556,11 @@ function WebProductos() {
       </div>
 
       <section className="web-section web-section-tight" id="web-ofertas">
-        {filtered.length === 0 ? (
+        {catStatus === 'loading' ? (
+          <div className="web-grid web-grid-products">
+            <CatalogSkeleton count={8} />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="web-empty">
             <div>🔍</div>
             <b>No encontramos productos</b>
@@ -7454,6 +7568,7 @@ function WebProductos() {
           </div>
         ) : (
           <div className="web-grid web-grid-products">
+            <CatalogErrorNotice status={catStatus} />
             {filtered.map((p) => {
               const live = groupProgressView(p.name);
               const miss = live.missing, almost = live.almost;
