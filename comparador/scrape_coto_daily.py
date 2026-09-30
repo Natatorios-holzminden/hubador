@@ -49,6 +49,8 @@ ITEMS_27 = [
     {'id': 'acelga', 'name': 'Acelga Selección', 'cat': 'verduras', 'rank': 13, 'coto_term': 'acelga'},
     {'id': 'espinaca', 'name': 'Espinaca', 'cat': 'verduras', 'rank': 14, 'coto_term': 'espinaca'},
     {'id': 'repollo_blanco', 'name': 'Repollo Blanco', 'cat': 'verduras', 'rank': 15, 'coto_term': 'repollo'},
+    {'id': 'zucchini', 'name': 'Zapallito Zucchini / Largo', 'cat': 'verduras', 'rank': 16, 'coto_term': 'zucchini'},
+    {'id': 'cebolla_verdeo', 'name': 'Cebolla de Verdeo', 'cat': 'verduras', 'rank': 17, 'coto_term': 'verdeo'},
 
     # --- 12 FRUTAS ---
     {'id': 'mandarinamurcot', 'name': 'Mandarina Murcot', 'cat': 'frutas', 'rank': 1, 'coto_term': 'mandarina'},
@@ -62,7 +64,8 @@ ITEMS_27 = [
     {'id': 'pomelo_starruby', 'name': 'Pomelo Star Ruby', 'cat': 'frutas', 'rank': 9, 'coto_term': 'pomelo'},
     {'id': 'palta_hass', 'name': 'Palta Hass', 'cat': 'frutas', 'rank': 10, 'coto_term': 'palta'},
     {'id': 'kiwi', 'name': 'Kiwi Selección', 'cat': 'frutas', 'rank': 11, 'coto_term': 'kiwi'},
-    {'id': 'frutilla', 'name': 'Frutilla Selección', 'cat': 'frutas', 'rank': 12, 'coto_term': 'frutilla'}
+    {'id': 'frutilla', 'name': 'Frutilla Selección', 'cat': 'frutas', 'rank': 12, 'coto_term': 'frutilla'},
+    {'id': 'mango', 'name': 'Mango Selección', 'cat': 'frutas', 'rank': 13, 'coto_term': 'mango'},
 ]
 
 async def run_daily_scrape():
