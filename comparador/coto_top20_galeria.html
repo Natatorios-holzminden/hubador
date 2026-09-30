@@ -93,7 +93,7 @@
     </div>
     <div class="nav-btns">
       <a href="index.html" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Comparador</a>
-      <a href="Catalogo_Precios_17Sep2026.pdf" download="Catalogo_Precios_17Sep2026.pdf" class="btn btn-pdf"><i class="fa-solid fa-file-pdf"></i> Catálogo PDF 17-Sep</a>
+      <a href="timeline_coto_4fechas.html" class="btn btn-pdf"><i class="fa-solid fa-timeline"></i> Línea de Tiempo (5 Fechas)</a>
     </div>
   </div>
 
@@ -101,11 +101,17 @@
     <div class="toolbar-row">
       <div class="toolbar-group">
         <span class="toolbar-label"><i class="fa-solid fa-calendar-days text-danger"></i> Seleccionar Scraper / Fecha:</span>
-        <button class="date-btn active" id="btnDate23" onclick="selectDate('23sep')">
-          <i class="fa-solid fa-camera"></i> Scraper 23-Sep (Hoy Foto 5)
+        <button class="date-btn active" id="btnDate29" onclick="selectDate('29sep')">
+          <i class="fa-solid fa-camera" style="color:#38bdf8;"></i> Scraper 29-Sep (Hoy Live)
+        </button>
+        <button class="date-btn" id="btnDate28" onclick="selectDate('28sep')">
+          <i class="fa-solid fa-camera"></i> Scraper 28-Sep
+        </button>
+        <button class="date-btn" id="btnDate23" onclick="selectDate('23sep')">
+          <i class="fa-solid fa-camera"></i> Scraper 23-Sep
         </button>
         <button class="date-btn" id="btnDate22" onclick="selectDate('22sep')">
-          <i class="fa-solid fa-camera"></i> Scraper 22-Sep (Foto 4)
+          <i class="fa-solid fa-camera"></i> Scraper 22-Sep
         </button>
         <button class="date-btn" id="btnDate21" onclick="selectDate('21sep')">
           <i class="fa-solid fa-circle-dot"></i> Scraper 21-Sep
@@ -130,217 +136,255 @@
   <div class="grid" id="galleryGrid"></div>
 
   <script>
-    let currentDate = '23sep';
+    let currentDate = '29sep';
     let currentFilter = 'todos';
 
     const ITEMS = [
-      // Verduras
       {
         id:'papa_spunta', cat:'verduras', rank:1, name:'Papa Spunta / Negra', url:'https://www.coto.com.ar/productos/papa',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.299', mc: '$1.118', img: 'evidencias/recorte_coto_papa.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.299', mc: '$1.125', img: 'evidencias/recorte_coto_papa.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$2.699 (OFERTA)', mc: '$1.125', img: 'evidencias/coto_21sep/coto_papa_spunta.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.699 (OFERTA)', mc: '$1.125', img: 'evidencias/coto_21sep/coto_papa_spunta.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.799', mc: '$1.125', img: 'evidencias/coto_23sep/coto_papa_spunta.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.299', mc: '$1.125', img: 'evidencias/recorte_coto_papa.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.299', mc: '$1.125', img: 'evidencias/recorte_coto_papa.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$2.699 (OFERTA)', mc: '$1.125', img: 'evidencias/coto_21sep/coto_papa_spunta.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.699', mc: '$1.125', img: 'evidencias/coto_21sep/coto_papa_spunta.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.799', mc: '$1.125', img: 'evidencias/coto_23sep/coto_papa_spunta.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$2.799', mc: '$1.125', img: 'evidencias/coto_28sep/coto_papa_spunta.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.699,00', mc: '$1.125', img: 'evidencias/coto_29sep/coto_papa_spunta.png?v=29sep' }
         }
       },
       {
         id:'tomate_redondo', cat:'verduras', rank:2, name:'Tomate Redondo', url:'https://www.coto.com.ar/productos/tomate',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$3.299', mc: '$1.411', img: 'evidencias/recorte_coto_tomate.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$3.299', mc: '$1.528', img: 'evidencias/recorte_coto_tomate.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$3.299 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_21sep/coto_tomate_redondo.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.299 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_21sep/coto_tomate_redondo.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$3.999 (AUMENTÓ)', mc: '$1.528', img: 'evidencias/coto_23sep/coto_tomate_redondo.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$3.299', mc: '$1.528', img: 'evidencias/recorte_coto_tomate.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$3.299', mc: '$1.528', img: 'evidencias/recorte_coto_tomate.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$3.299 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_21sep/coto_tomate_redondo.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.299', mc: '$1.528', img: 'evidencias/coto_21sep/coto_tomate_redondo.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.199 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_23sep/coto_tomate_redondo.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$4.299', mc: '$1.528', img: 'evidencias/coto_28sep/coto_tomate_redondo.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.199 (OFERTA)', mc: '$1.528', img: 'evidencias/coto_29sep/coto_tomate_redondo.png?v=29sep' }
         }
       },
       {
         id:'cebolla_valenciani', cat:'verduras', rank:3, name:'Cebolla Valenciani', url:'https://www.coto.com.ar/productos/cebolla',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.999', mc: '$1.300', img: 'evidencias/recorte_coto_cebolla.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.999', mc: '$1.675', img: 'evidencias/recorte_coto_cebolla.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_21sep/coto_cebolla_valenciani.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_21sep/coto_cebolla_valenciani.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_23sep/coto_cebolla_valenciani.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.999', mc: '$1.675', img: 'evidencias/recorte_coto_cebolla.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.999', mc: '$1.675', img: 'evidencias/recorte_coto_cebolla.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_21sep/coto_cebolla_valenciani.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_21sep/coto_cebolla_valenciani.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$3.299', mc: '$1.675', img: 'evidencias/coto_23sep/coto_cebolla_valenciani.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$3.699', mc: '$1.675', img: 'evidencias/coto_28sep/coto_cebolla_valenciani.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$3.699,00', mc: '$1.675', img: 'evidencias/coto_29sep/coto_cebolla_valenciani.png?v=29sep' }
         }
       },
       {
         id:'zanahoria_chantenay', cat:'verduras', rank:4, name:'Zanahoria Chantenay', url:'https://www.coto.com.ar/productos/zanahoria',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$1.899', mc: '$1.148', img: 'evidencias/recorte_coto_zanahoria.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.899', mc: '$1.154', img: 'evidencias/recorte_coto_zanahoria.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$1.999', mc: '$1.154', img: 'evidencias/coto_21sep/coto_zanahoria_chantenay.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.999', mc: '$1.154', img: 'evidencias/coto_21sep/coto_zanahoria_chantenay.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.399', mc: '$1.154', img: 'evidencias/coto_23sep/coto_zanahoria_chantenay.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$1.899', mc: '$1.154', img: 'evidencias/recorte_coto_zanahoria.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.899', mc: '$1.154', img: 'evidencias/recorte_coto_zanahoria.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$1.999', mc: '$1.154', img: 'evidencias/coto_21sep/coto_zanahoria_chantenay.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.999', mc: '$1.154', img: 'evidencias/coto_21sep/coto_zanahoria_chantenay.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.399', mc: '$1.154', img: 'evidencias/coto_23sep/coto_zanahoria_chantenay.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$2.399', mc: '$1.154', img: 'evidencias/coto_28sep/coto_zanahoria_chantenay.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.399,00', mc: '$1.154', img: 'evidencias/coto_29sep/coto_zanahoria_chantenay.png?v=29sep' }
         }
       },
       {
-        id:'zapallo_tetsukab.', cat:'verduras', rank:5, name:'Zapallo Tetsukabuto', url:'https://www.coto.com.ar/productos/zapallo',
+        id:'zapallo_tetsukab.', cat:'verduras', rank:5, name:'Zapallo Japonés / Tetsukabuto', url:'https://www.coto.com.ar/productos/zapallo',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.799', mc: '$906', img: 'evidencias/recorte_coto_zapallo.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.799', mc: '$1.074', img: 'evidencias/recorte_coto_zapallo.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$1.899', mc: '$1.074', img: 'evidencias/coto_21sep/coto_zapallo_tetsukab..png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.899', mc: '$1.074', img: 'evidencias/coto_21sep/coto_zapallo_tetsukab..png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.399', mc: '$1.074', img: 'evidencias/coto_23sep/coto_zapallo_tetsukab..png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.799', mc: '$1.074', img: 'evidencias/recorte_coto_zapallo.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.799', mc: '$1.074', img: 'evidencias/recorte_coto_zapallo.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$1.899', mc: '$1.074', img: 'evidencias/coto_21sep/coto_zapallo_tetsukab..png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.899', mc: '$1.074', img: 'evidencias/coto_21sep/coto_zapallo_tetsukab..png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.399', mc: '$1.074', img: 'evidencias/coto_23sep/coto_zapallo_tetsukab..png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$3.499 (Anco) / $2.399 (Japonés)', mc: '$1.074', img: 'evidencias/coto_28sep/coto_zapallo_tetsukab..png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$3.499,00', mc: '$1.074', img: 'evidencias/coto_29sep/coto_zapallo_tetsukab..png?v=29sep' }
         }
       },
       {
         id:'zapallito_redondo', cat:'verduras', rank:6, name:'Zapallito Redondo', url:'https://www.coto.com.ar/productos/zapallito',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.999', mc: '$933', img: 'evidencias/recorte_coto_zapallito.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.999', mc: '$907', img: 'evidencias/recorte_coto_zapallito.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$2.999 (OFERTA)', mc: '$907', img: 'evidencias/coto_21sep/coto_zapallito_redondo.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.999 (OFERTA)', mc: '$907', img: 'evidencias/coto_21sep/coto_zapallito_redondo.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$3.399', mc: '$907', img: 'evidencias/coto_23sep/coto_zapallito_redondo.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.999', mc: '$907', img: 'evidencias/recorte_coto_zapallito.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.999', mc: '$907', img: 'evidencias/recorte_coto_zapallito.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$2.999 (OFERTA)', mc: '$907', img: 'evidencias/coto_21sep/coto_zapallito_redondo.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.999', mc: '$907', img: 'evidencias/coto_21sep/coto_zapallito_redondo.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$3.399', mc: '$907', img: 'evidencias/coto_23sep/coto_zapallito_redondo.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$3.399', mc: '$907', img: 'evidencias/coto_28sep/coto_zapallito_redondo.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$5.299,00', mc: '$907', img: 'evidencias/coto_29sep/coto_zapallito_redondo.png?v=29sep' }
         }
       },
       {
         id:'acelga', cat:'verduras', rank:7, name:'Acelga Selección', url:'https://www.coto.com.ar/productos/acelga',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$1.299', mc: '$470', img: 'evidencias/recorte_coto_acelga.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.299', mc: '$510', img: 'evidencias/recorte_coto_acelga.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$1.099 (OFERTA)', mc: '$510', img: 'evidencias/coto_21sep/coto_acelga.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.099 (OFERTA)', mc: '$510', img: 'evidencias/coto_21sep/coto_acelga.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.299', mc: '$510', img: 'evidencias/coto_23sep/coto_acelga.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$1.299', mc: '$510', img: 'evidencias/recorte_coto_acelga.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.299', mc: '$510', img: 'evidencias/recorte_coto_acelga.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$1.099 (OFERTA)', mc: '$510', img: 'evidencias/coto_21sep/coto_acelga.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.099', mc: '$510', img: 'evidencias/coto_21sep/coto_acelga.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.299', mc: '$510', img: 'evidencias/coto_23sep/coto_acelga.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$1.099', mc: '$510', img: 'evidencias/coto_28sep/coto_acelga.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$1.099,00', mc: '$510', img: 'evidencias/coto_29sep/coto_acelga.png?v=29sep' }
         }
       },
       {
         id:'lechuga_criolla', cat:'verduras', rank:8, name:'Lechuga Criolla', url:'https://www.coto.com.ar/productos/lechuga',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.699', mc: '$750', img: 'evidencias/recorte_coto_lechuga.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.699', mc: '$729', img: 'evidencias/recorte_coto_lechuga.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$2.699 (OFERTA)', mc: '$729', img: 'evidencias/coto_21sep/coto_lechuga_criolla.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.699 (OFERTA)', mc: '$729', img: 'evidencias/coto_21sep/coto_lechuga_criolla.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$4.799', mc: '$729', img: 'evidencias/coto_23sep/coto_lechuga_criolla.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.699', mc: '$729', img: 'evidencias/recorte_coto_lechuga.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.699', mc: '$729', img: 'evidencias/recorte_coto_lechuga.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$2.699 (OFERTA)', mc: '$729', img: 'evidencias/coto_21sep/coto_lechuga_criolla.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.699', mc: '$729', img: 'evidencias/coto_21sep/coto_lechuga_criolla.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$4.799', mc: '$729', img: 'evidencias/coto_23sep/coto_lechuga_criolla.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$2.599', mc: '$729', img: 'evidencias/coto_28sep/coto_lechuga_criolla.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.599,00', mc: '$729', img: 'evidencias/coto_29sep/coto_lechuga_criolla.png?v=29sep' }
         }
       },
       {
         id:'batata_arapey', cat:'verduras', rank:9, name:'Batata Arapey', url:'https://www.coto.com.ar/productos/batata',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.399 (OFERTA)', mc: '$1.277', img: 'evidencias/recorte_coto_batata.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/recorte_coto_batata.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/coto_21sep/coto_batata_arapey.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/coto_21sep/coto_batata_arapey.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.699', mc: '$1.302', img: 'evidencias/coto_23sep/coto_batata_arapey.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.399', mc: '$1.302', img: 'evidencias/recorte_coto_batata.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.399', mc: '$1.302', img: 'evidencias/recorte_coto_batata.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$2.399 (OFERTA)', mc: '$1.302', img: 'evidencias/coto_21sep/coto_batata_arapey.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.399', mc: '$1.302', img: 'evidencias/coto_21sep/coto_batata_arapey.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.699', mc: '$1.302', img: 'evidencias/coto_23sep/coto_batata_arapey.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$2.399', mc: '$1.302', img: 'evidencias/coto_28sep/coto_batata_arapey.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.399,00', mc: '$1.302', img: 'evidencias/coto_29sep/coto_batata_arapey.png?v=29sep' }
         }
       },
       {
         id:'pepino', cat:'verduras', rank:10, name:'Pepino Selección', url:'https://www.coto.com.ar/productos/pepino',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.499', mc: '$944', img: 'evidencias/recorte_coto_pepino.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.499', mc: '$944', img: 'evidencias/recorte_coto_pepino.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$1.999 (OFERTA)', mc: '$944', img: 'evidencias/coto_21sep/coto_pepino.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.999 (OFERTA)', mc: '$944', img: 'evidencias/coto_21sep/coto_pepino.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$3.999', mc: '$944', img: 'evidencias/coto_23sep/coto_pepino.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.499', mc: '$944', img: 'evidencias/recorte_coto_pepino.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.499', mc: '$944', img: 'evidencias/recorte_coto_pepino.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$1.999 (OFERTA)', mc: '$944', img: 'evidencias/coto_21sep/coto_pepino.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.999', mc: '$944', img: 'evidencias/coto_21sep/coto_pepino.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.199 (OFERTA)', mc: '$944', img: 'evidencias/coto_23sep/coto_pepino.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$2.199 (OFERTA)', mc: '$944', img: 'evidencias/coto_28sep/coto_pepino.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.199 (OFERTA)', mc: '$944', img: 'evidencias/coto_29sep/coto_pepino.png?v=29sep' }
         }
       },
-      // Frutas
       {
         id:'banana_cavendish', cat:'frutas', rank:1, name:'Banana Cavendish', url:'https://www.coto.com.ar/productos/banana',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.499', mc: '$1.781', img: 'evidencias/recorte_coto_banana.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.499', mc: '$1.781', img: 'evidencias/recorte_coto_banana.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$2.299 (OFERTA)', mc: '$1.781', img: 'evidencias/coto_21sep/coto_banana_cavendish.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.299 (OFERTA)', mc: '$1.781', img: 'evidencias/coto_21sep/coto_banana_cavendish.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$3.999', mc: '$1.781', img: 'evidencias/coto_23sep/coto_banana_cavendish.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.499', mc: '$1.781', img: 'evidencias/recorte_coto_banana.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.499', mc: '$1.781', img: 'evidencias/recorte_coto_banana.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$2.299 (OFERTA)', mc: '$1.781', img: 'evidencias/coto_21sep/coto_banana_cavendish.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.299', mc: '$1.781', img: 'evidencias/coto_21sep/coto_banana_cavendish.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.199 (OFERTA)', mc: '$1.781', img: 'evidencias/coto_23sep/coto_banana_cavendish.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$1.999', mc: '$1.781', img: 'evidencias/coto_28sep/coto_banana_cavendish.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$1.999,00', mc: '$1.781', img: 'evidencias/coto_29sep/coto_banana_cavendish.png?v=29sep' }
         }
       },
       {
         id:'manzana_red_delicious', cat:'frutas', rank:2, name:'Manzana Red Delicious', url:'https://www.coto.com.ar/productos/manzana',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.890', mc: '$2.119', img: 'evidencias/recorte_coto_manzana.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.890', mc: '$1.708', img: 'evidencias/recorte_coto_manzana.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$2.899 (OFERTA)', mc: '$1.708', img: 'evidencias/coto_21sep/coto_manzana_red_delicious.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.899 (OFERTA)', mc: '$1.708', img: 'evidencias/coto_21sep/coto_manzana_red_delicious.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$3.999', mc: '$1.708', img: 'evidencias/coto_23sep/coto_manzana_red_delicious.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.890', mc: '$1.708', img: 'evidencias/recorte_coto_manzana.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.890', mc: '$1.708', img: 'evidencias/recorte_coto_manzana.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$2.899 (OFERTA)', mc: '$1.708', img: 'evidencias/coto_21sep/coto_manzana_red_delicious.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.899', mc: '$1.708', img: 'evidencias/coto_21sep/coto_manzana_red_delicious.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.199 (OFERTA)', mc: '$1.708', img: 'evidencias/coto_23sep/coto_manzana_red_delicious.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$2.890', mc: '$1.708', img: 'evidencias/coto_28sep/coto_manzana_red_delicious.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.899,00', mc: '$1.708', img: 'evidencias/coto_29sep/coto_manzana_red_delicious.png?v=29sep' }
         }
       },
       {
         id:'naranja_salustiana', cat:'frutas', rank:3, name:'Naranja Salustiana Jugo', url:'https://www.coto.com.ar/productos/naranja',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$899', mc: '$694', img: 'evidencias/recorte_coto_naranja.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$899', mc: '$694', img: 'evidencias/recorte_coto_naranja.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$899 (OFERTA)', mc: '$694', img: 'evidencias/coto_21sep/coto_naranja_salustiana.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$899 (OFERTA)', mc: '$694', img: 'evidencias/coto_21sep/coto_naranja_salustiana.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$699 (OFERTA)', mc: '$694', img: 'evidencias/coto_23sep/coto_naranja_salustiana.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$899', mc: '$694', img: 'evidencias/recorte_coto_naranja.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$899', mc: '$694', img: 'evidencias/recorte_coto_naranja.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$899 (OFERTA)', mc: '$694', img: 'evidencias/coto_21sep/coto_naranja_salustiana.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$899', mc: '$694', img: 'evidencias/coto_21sep/coto_naranja_salustiana.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$699', mc: '$694', img: 'evidencias/coto_23sep/coto_naranja_salustiana.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$899', mc: '$694', img: 'evidencias/coto_28sep/coto_naranja_salustiana.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$899,00', mc: '$694', img: 'evidencias/coto_29sep/coto_naranja_salustiana.png?v=29sep' }
         }
       },
       {
         id:'mandarinamurcot', cat:'frutas', rank:4, name:'Mandarina Murcot', url:'https://www.coto.com.ar/productos/mandarinamurcot',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$999', mc: '$722', img: 'evidencias/recorte_coto_mandarina.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$999', mc: '$722', img: 'evidencias/recorte_coto_mandarina.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$1.299 (OFERTA)', mc: '$722', img: 'evidencias/coto_21sep/coto_mandarinamurcot.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.299 (OFERTA)', mc: '$722', img: 'evidencias/coto_21sep/coto_mandarinamurcot.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$1.299 (OFERTA)', mc: '$722', img: 'evidencias/coto_23sep/coto_mandarinamurcot.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$999', mc: '$722', img: 'evidencias/recorte_coto_mandarina.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$999', mc: '$722', img: 'evidencias/recorte_coto_mandarina.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$1.299 (OFERTA)', mc: '$722', img: 'evidencias/coto_21sep/coto_mandarinamurcot.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.299', mc: '$722', img: 'evidencias/coto_21sep/coto_mandarinamurcot.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$1.299', mc: '$722', img: 'evidencias/coto_23sep/coto_mandarinamurcot.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$1.299', mc: '$722', img: 'evidencias/coto_28sep/coto_mandarinamurcot.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$1.299,00', mc: '$722', img: 'evidencias/coto_29sep/coto_mandarinamurcot.png?v=29sep' }
         }
       },
       {
-        id:'pera_packhams', cat:'frutas', rank:5, name:"Pera Packham's", url:'https://www.coto.com.ar/productos/pera',
+        id:'pera_packhams', cat:'frutas', rank:5, name:'Pera Packhams', url:'https://www.coto.com.ar/productos/pera',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$2.299 (OFERTA)', mc: '$1.776', img: 'evidencias/recorte_coto_pera.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.299 (OFERTA)', mc: '$1.333', img: 'evidencias/recorte_coto_pera.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$2.999', mc: '$1.333', img: 'evidencias/coto_21sep/coto_pera_packhams.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.999', mc: '$1.333', img: 'evidencias/coto_21sep/coto_pera_packhams.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.299 (OFERTA)', mc: '$1.333', img: 'evidencias/coto_23sep/coto_pera_packhams.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$2.299', mc: '$1.333', img: 'evidencias/recorte_coto_pera.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$2.299', mc: '$1.333', img: 'evidencias/recorte_coto_pera.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$2.999', mc: '$1.333', img: 'evidencias/coto_21sep/coto_pera_packhams.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$2.999', mc: '$1.333', img: 'evidencias/coto_21sep/coto_pera_packhams.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$2.299', mc: '$1.333', img: 'evidencias/coto_23sep/coto_pera_packhams.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$2.299', mc: '$1.333', img: 'evidencias/coto_28sep/coto_pera_packhams.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.999,00', mc: '$1.333', img: 'evidencias/coto_29sep/coto_pera_packhams.png?v=29sep' }
         }
       },
       {
         id:'limon_eureka', cat:'frutas', rank:6, name:'Limón Eureka', url:'https://www.coto.com.ar/productos/limon',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$1.499', mc: '$693', img: 'evidencias/recorte_coto_limon.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.499', mc: '$571', img: 'evidencias/recorte_coto_limon.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$1.299 (OFERTA)', mc: '$571', img: 'evidencias/coto_21sep/coto_limon_eureka.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.299 (OFERTA)', mc: '$571', img: 'evidencias/coto_21sep/coto_limon_eureka.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$1.499', mc: '$571', img: 'evidencias/coto_23sep/coto_limon_eureka.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$1.499', mc: '$571', img: 'evidencias/recorte_coto_limon.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$1.499', mc: '$571', img: 'evidencias/recorte_coto_limon.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$1.299 (OFERTA)', mc: '$571', img: 'evidencias/coto_21sep/coto_limon_eureka.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$1.299', mc: '$571', img: 'evidencias/coto_21sep/coto_limon_eureka.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$1.499', mc: '$571', img: 'evidencias/coto_23sep/coto_limon_eureka.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$1.499', mc: '$571', img: 'evidencias/coto_28sep/coto_limon_eureka.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$1.299,00', mc: '$571', img: 'evidencias/coto_29sep/coto_limon_eureka.png?v=29sep' }
         }
       },
       {
         id:'frutilla', cat:'frutas', rank:7, name:'Frutilla Selección', url:'https://www.coto.com.ar/productos/frutilla',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$12.796', mc: '$12.796', img: 'evidencias/recorte_coto_frutilla.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$12.796', mc: '$5.770', img: 'evidencias/recorte_coto_frutilla.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$3.199 (OFERTA 250g)', mc: '$5.770', img: 'evidencias/coto_21sep/coto_frutilla.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.199 (OFERTA 250g)', mc: '$5.770', img: 'evidencias/coto_21sep/coto_frutilla.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$8.999', mc: '$5.770', img: 'evidencias/coto_23sep/coto_frutilla.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$12.796', mc: '$5.770', img: 'evidencias/recorte_coto_frutilla.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$12.796', mc: '$5.770', img: 'evidencias/recorte_coto_frutilla.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$3.199 (OFERTA)', mc: '$5.770', img: 'evidencias/coto_21sep/coto_frutilla.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$3.199', mc: '$5.770', img: 'evidencias/coto_21sep/coto_frutilla.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$8.999', mc: '$5.770', img: 'evidencias/coto_23sep/coto_frutilla.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$3.999 (OFERTA 500g)', mc: '$5.770', img: 'evidencias/coto_28sep/coto_frutilla.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$3.999 (OFERTA 500g)', mc: '$5.770', img: 'evidencias/coto_29sep/coto_frutilla.png?v=29sep' }
         }
       },
       {
         id:'pomelo_starruby', cat:'frutas', rank:8, name:'Pomelo Star Ruby', url:'https://www.coto.com.ar/productos/pomelo',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$999', mc: '$861', img: 'evidencias/recorte_coto_pomelo.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$999', mc: '$861', img: 'evidencias/recorte_coto_pomelo.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$999 (OFERTA)', mc: '$861', img: 'evidencias/coto_21sep/coto_pomelo_starruby.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$999 (OFERTA)', mc: '$861', img: 'evidencias/coto_21sep/coto_pomelo_starruby.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$999 (OFERTA)', mc: '$861', img: 'evidencias/coto_23sep/coto_pomelo_starruby.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$999', mc: '$861', img: 'evidencias/recorte_coto_pomelo.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$999', mc: '$861', img: 'evidencias/recorte_coto_pomelo.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$999 (OFERTA)', mc: '$861', img: 'evidencias/coto_21sep/coto_pomelo_starruby.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$999', mc: '$861', img: 'evidencias/coto_21sep/coto_pomelo_starruby.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$999', mc: '$861', img: 'evidencias/coto_23sep/coto_pomelo_starruby.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$2.999', mc: '$861', img: 'evidencias/coto_28sep/coto_pomelo_starruby.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$2.999,00', mc: '$861', img: 'evidencias/coto_29sep/coto_pomelo_starruby.png?v=29sep' }
         }
       },
       {
         id:'palta_hass', cat:'frutas', rank:9, name:'Palta Hass', url:'https://www.coto.com.ar/productos/palta',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$7.999', mc: '$4.913', img: 'evidencias/recorte_coto_palta.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$7.999', mc: '$4.811', img: 'evidencias/recorte_coto_palta.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$7.999 (OFERTA)', mc: '$4.811', img: 'evidencias/coto_21sep/coto_palta_hass.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$7.999 (OFERTA)', mc: '$4.811', img: 'evidencias/coto_21sep/coto_palta_hass.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$7.499 (OFERTA)', mc: '$4.811', img: 'evidencias/coto_23sep/coto_palta_hass.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$7.999', mc: '$4.811', img: 'evidencias/recorte_coto_palta.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$7.999', mc: '$4.811', img: 'evidencias/recorte_coto_palta.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$7.999 (OFERTA)', mc: '$4.811', img: 'evidencias/coto_21sep/coto_palta_hass.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$7.999', mc: '$4.811', img: 'evidencias/coto_21sep/coto_palta_hass.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$7.499', mc: '$4.811', img: 'evidencias/coto_23sep/coto_palta_hass.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$7.999', mc: '$4.811', img: 'evidencias/coto_28sep/coto_palta_hass.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$7.999,00', mc: '$4.811', img: 'evidencias/coto_29sep/coto_palta_hass.png?v=29sep' }
         }
       },
       {
         id:'kiwi', cat:'frutas', rank:10, name:'Kiwi Selección', url:'https://www.coto.com.ar/productos/kiwi',
         dates: {
-          '16sep': { dateLabel: '16-Sep', coto: '$7.999', mc: '$5.175', img: 'evidencias/recorte_coto_kiwi.png' },
-          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$7.999', mc: '$5.475', img: 'evidencias/recorte_coto_kiwi.png' },
-          '21sep': { dateLabel: '21-Sep', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_21sep/coto_kiwi.png' },
-          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_21sep/coto_kiwi.png' },
-          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_23sep/coto_kiwi.png' }
+          '16sep': { dateLabel: '16-Sep', coto: '$7.999', mc: '$5.475', img: 'evidencias/recorte_coto_kiwi.png?v=29sep' },
+          '17sep': { dateLabel: '17-Sep (PDF)', coto: '$7.999', mc: '$5.475', img: 'evidencias/recorte_coto_kiwi.png?v=29sep' },
+          '21sep': { dateLabel: '21-Sep', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_21sep/coto_kiwi.png?v=29sep' },
+          '22sep': { dateLabel: '22-Sep (Foto 4)', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_21sep/coto_kiwi.png?v=29sep' },
+          '23sep': { dateLabel: '23-Sep (Foto 5)', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_23sep/coto_kiwi.png?v=29sep' },
+          '28sep': { dateLabel: '28-Sep', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_28sep/coto_kiwi.png?v=29sep' },
+          '29sep': { dateLabel: '29-Sep (Hoy Live)', coto: '$7.999', mc: '$5.475', img: 'evidencias/coto_29sep/coto_kiwi.png?v=29sep' }
         }
       }
     ];
 
     // Lightbox
     function openLightbox(item) {
-      const dData = item.dates[currentDate];
+      const dData = item.dates[currentDate] || item.dates['29sep'] || item.dates['28sep'];
       document.getElementById('lbImg').src = dData.img;
       document.getElementById('lbTitle').textContent = item.name + ' (' + dData.dateLabel + ')';
       document.getElementById('lbPrices').textContent = 'Coto: ' + dData.coto + '  ·  Mercado Central: ' + dData.mc;
@@ -361,7 +405,7 @@
       grid.innerHTML = ITEMS
         .filter(item => currentFilter === 'todos' || item.cat === currentFilter)
         .map(item => {
-          const dData = item.dates[currentDate];
+          const dData = item.dates[currentDate] || item.dates['29sep'] || item.dates['28sep'];
           return `
           <div class="card">
             <div class="card-header">
@@ -397,6 +441,8 @@
       document.getElementById('btnDate21').classList.toggle('active', dateKey === '21sep');
       document.getElementById('btnDate22').classList.toggle('active', dateKey === '22sep');
       document.getElementById('btnDate23').classList.toggle('active', dateKey === '23sep');
+      document.getElementById('btnDate28').classList.toggle('active', dateKey === '28sep');
+      document.getElementById('btnDate29').classList.toggle('active', dateKey === '29sep');
       render();
     }
 

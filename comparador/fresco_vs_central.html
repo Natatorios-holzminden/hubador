@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Comparativa por BULTO: FRESCO.BA vs Mercado Central</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card-bg: #1e293b;
+      --card-inner: #0f172a;
+      --border: rgba(255, 255, 255, 0.1);
+      --primary: #38bdf8;
+      --accent-fresco: #3b82f6;
+      --accent-central: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 1.5rem; line-height: 1.5; }
+    
+    .header { max-width: 1400px; margin: 0 auto 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .title-box h1 { font-size: 1.65rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.6rem; }
+    .title-box p { color: var(--text-muted); font-size: 0.92rem; margin-top: 4px; }
+    
+    .nav-btns { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn { padding: 0.55rem 1.1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; }
+    .btn-back { background: #1e293b; color: #fff; }
+    .btn-back:hover { background: #334155; }
+    .btn-mc { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.4); }
+    .btn-mc:hover { background: rgba(16, 185, 129, 0.3); }
+
+    /* KPI Summary Cards */
+    .kpi-section { max-width: 1400px; margin: 0 auto 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem; display: flex; align-items: center; gap: 1rem; box-shadow: 0 4px 14px rgba(0,0,0,0.2); }
+    .kpi-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .icon-central { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .icon-fresco { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .icon-total { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .kpi-title { font-size: 0.78rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-val { font-size: 1.4rem; font-weight: 800; color: #fff; margin-top: 2px; }
+    .kpi-sub { font-size: 0.75rem; color: #94a3b8; font-weight: 600; margin-top: 2px; }
+
+    /* Chart Container Section */
+    .chart-box-wrapper { max-width: 1400px; margin: 0 auto 1.5rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+    .chart-title-text { font-size: 1.2rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.6rem; }
+    
+    .chart-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .chart-btn { background: #0f172a; color: #94a3b8; border: 1px solid var(--border); padding: 0.45rem 0.95rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.82rem; transition: all 0.2s; }
+    .chart-btn:hover { background: #1e293b; color: #fff; }
+    .chart-btn.active { background: #38bdf8; color: #082f49; border-color: #7dd3fc; font-weight: 800; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
+
+    .canvas-container { position: relative; height: 500px; width: 100%; }
+
+    /* Toolbar Section */
+    .toolbar-section { max-width: 1400px; margin: 0 auto 1.5rem; background: #151f32; padding: 1.1rem 1.3rem; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .search-box { position: relative; min-width: 260px; }
+    .search-box input { width: 100%; padding: 0.55rem 1rem 0.55rem 2.4rem; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; color: #fff; font-size: 0.88rem; outline: none; }
+    .search-box input:focus { border-color: var(--primary); }
+    .search-box i { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; }
+
+    .filter-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .pill-btn { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); padding: 0.45rem 0.95rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.82rem; transition: all 0.2s; }
+    .pill-btn:hover { background: #334155; color: #fff; }
+    .pill-btn.active { background: #38bdf8; color: #092e42; border-color: #7dd3fc; font-weight: 800; box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
+    .pill-btn.pill-mc.active { background: #10b981; color: #022c22; border-color: #34d399; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+    .pill-btn.pill-fr.active { background: #3b82f6; color: #030712; border-color: #60a5fa; box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+
+    .view-toggles { display: flex; gap: 0.4rem; background: #0f172a; padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+    .view-btn { background: transparent; border: none; color: #94a3b8; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .view-btn.active { background: #1e293b; color: #fff; }
+
+    /* Cards Grid View */
+    .grid { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 1.25rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 14px rgba(0,0,0,0.3); transition: transform 0.2s, border-color 0.2s; }
+    .card:hover { transform: translateY(-3px); }
+    .card.winner-central:hover { border-color: rgba(16, 185, 129, 0.5); }
+    .card.winner-fresco:hover { border-color: rgba(59, 130, 246, 0.5); }
+    
+    .card-header { padding: 0.9rem 1.1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+    .card-title { font-size: 1.1rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+    .badge-winner { font-size: 0.72rem; padding: 3px 9px; border-radius: 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
+    .badge-central { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-fresco { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .badge-neutral { background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); }
+
+    .bulto-info-bar { padding: 0.5rem 1.1rem; background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid var(--border); font-size: 0.82rem; color: #cbd5e1; display: flex; justify-content: space-between; font-weight: 700; }
+
+    .dual-price-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0.85rem 1.1rem; background: #0f172a; border-bottom: 1px solid var(--border); text-align: center; }
+    .price-card-box { padding: 8px 6px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .price-card-label { font-size: 0.68rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+    .price-card-val { font-size: 1.35rem; font-weight: 900; margin-top: 3px; }
+    .val-fresco { color: #60a5fa; }
+    .val-central { color: #34d399; }
+
+    .diff-bar-section { padding: 0.85rem 1.1rem; background: var(--card-bg); display: flex; flex-direction: column; gap: 6px; }
+    .diff-text { font-size: 0.82rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+    .diff-tag-cheaper { color: #34d399; font-weight: 800; }
+
+    .ratio-bar-bg { height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; display: flex; border: 1px solid rgba(255,255,255,0.08); }
+    .ratio-bar-central { background: #10b981; height: 100%; transition: width 0.3s; }
+    .ratio-bar-fresco { background: #3b82f6; height: 100%; transition: width 0.3s; }
+
+    /* Table View */
+    .table-container { max-width: 1400px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; display: none; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th { background: #0f172a; color: #94a3b8; font-weight: 800; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; }
+    td { padding: 0.85rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc; font-weight: 600; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="title-box">
+      <h1><i class="fa-solid fa-chart-column text-primary"></i> Comparativa por BULTO: FRESCO.BA vs Mercado Central</h1>
+      <p>Comparación directa del PRECIO TOTAL POR BULTO completo (Lista FRESCO.BA vs Bulto Equivalente en Mercado Central).</p>
+    </div>
+    <div class="nav-btns">
+      <a href="index.html" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Monitor Principal</a>
+      <a href="timeline_mercado_central.html" class="btn btn-mc"><i class="fa-solid fa-building-columns"></i> Línea de Tiempo Mercado Central</a>
+    </div>
+  </div>
+
+  <!-- Summary KPI Cards -->
+  <div class="kpi-section">
+    <div class="kpi-card">
+      <div class="kpi-icon icon-central"><i class="fa-solid fa-building-columns"></i></div>
+      <div>
+        <div class="kpi-title">Mercado Central Bulto Más Barato</div>
+        <div class="kpi-val text-success">15 Bultos</div>
+        <div class="kpi-sub">Ahorro de hasta $21.890 por bulto de Zapallo Anco</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon icon-fresco"><i class="fa-solid fa-box-open"></i></div>
+      <div>
+        <div class="kpi-title">FRESCO.BA Bulto Más Barato</div>
+        <div class="kpi-val" style="color:#60a5fa;">7 Bultos</div>
+        <div class="kpi-sub">Ahorro de hasta $12.744 por bulto de Manzana Chica</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon icon-total"><i class="fa-solid fa-boxes-stacked"></i></div>
+      <div>
+        <div class="kpi-title">Total Bultos Auditados</div>
+        <div class="kpi-val">57 Bultos</div>
+        <div class="kpi-sub">Presentación original Lista 23/09/2026 FRESCO.BA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Chart Section -->
+  <div class="chart-box-wrapper" id="chartWrapper">
+    <div class="chart-header">
+      <div class="chart-title-text">
+        <i class="fa-solid fa-chart-bar" style="color:#38bdf8;"></i> Gráfico de Barras: Precio TOTAL por BULTOS ($)
+      </div>
+      <div class="chart-filters">
+        <button class="chart-btn active" onclick="updateChartFilter('top', this)">Top Bultos (15)</button>
+        <button class="chart-btn" onclick="updateChartFilter('verduras', this)">🥬 Verduras</button>
+        <button class="chart-btn" onclick="updateChartFilter('frutas', this)">🍎 Frutas</button>
+        <button class="chart-btn" onclick="updateChartFilter('pesados', this)">🥔 Pesados</button>
+        <button class="chart-btn" onclick="updateChartFilter('hojas', this)">🍃 Hojas</button>
+        <button class="chart-btn" onclick="updateChartFilter('citricos', this)">🍊 Cítricos</button>
+      </div>
+    </div>
+    <div class="canvas-container">
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Toolbar Filters & Views -->
+  <div class="toolbar-section">
+    <div class="search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchInput" placeholder="Buscar producto o bulto (ej. Papa, Manzana, 18 Kg)..." oninput="filterItems()">
+    </div>
+
+    <div class="filter-pills" id="filterPills">
+      <button class="pill-btn active" onclick="setFilter('todos', this)">Todos (57)</button>
+      <button class="pill-btn pill-mc" onclick="setFilter('central', this)">🏛️ Central Bulto Más Barato (15)</button>
+      <button class="pill-btn pill-fr" onclick="setFilter('fresco', this)">📦 Fresco.ba Bulto Más Barato (7)</button>
+      <button class="pill-btn" onclick="setFilter('citricos', this)">🍊 Cítricos</button>
+      <button class="pill-btn" onclick="setFilter('frutas', this)">🍎 Frutas</button>
+      <button class="pill-btn" onclick="setFilter('tomate_pimientos', this)">🍅 Tomates y Ajíes</button>
+      <button class="pill-btn" onclick="setFilter('verduras', this)">🥬 Verduras</button>
+      <button class="pill-btn" onclick="setFilter('pesados', this)">🥔 Pesados</button>
+      <button class="pill-btn" onclick="setFilter('hojas', this)">🍃 Hojas</button>
+    </div>
+
+    <div class="view-toggles">
+      <button class="view-btn active" id="btnGrid" onclick="toggleView('grid')"><i class="fa-solid fa-grip"></i> Tarjetas</button>
+      <button class="view-btn" id="btnTable" onclick="toggleView('table')"><i class="fa-solid fa-table-list"></i> Tabla</button>
+    </div>
+  </div>
+
+  <!-- Cards Grid View -->
+  <div class="grid" id="cardsGrid"></div>
+
+  <!-- Table View -->
+  <div class="table-container" id="tableView">
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Presentación Bulto</th>
+          <th>Precio Bulto FRESCO.BA</th>
+          <th>Precio Bulto Mercado Central</th>
+          <th>Diferencia por Bulto</th>
+          <th>% Brecha</th>
+          <th>Mejor Opción Bulto</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const DATASET = [{"cat": "citricos", "cat_label": "🍊 Cítricos", "name": "Naranja Jugo", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 12000, "mc_bulto_price": 12492, "diff_val": -492, "diff_pct": -3.9, "winner": "fresco"}, {"cat": "citricos", "cat_label": "🍊 Cítricos", "name": "Naranja Ombligo", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 12000, "mc_bulto_price": 12492, "diff_val": -492, "diff_pct": -3.9, "winner": "fresco"}, {"cat": "citricos", "cat_label": "🍊 Cítricos", "name": "Limón", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 13000, "mc_bulto_price": 9707, "diff_val": 3293, "diff_pct": 33.9, "winner": "central"}, {"cat": "citricos", "cat_label": "🍊 Cítricos", "name": "Pomelo", "bulto_desc": "Bulto de 14 Kg", "bulto_qty": 14, "unit": "Kg", "fresco_bulto_price": 13000, "mc_bulto_price": 12054, "diff_val": 946, "diff_pct": 7.8, "winner": "central"}, {"cat": "citricos", "cat_label": "🍊 Cítricos", "name": "Mandarina Nova", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 15500, "mc_bulto_price": 12274, "diff_val": 3226, "diff_pct": 26.3, "winner": "central"}, {"cat": "citricos", "cat_label": "🍊 Cítricos", "name": "Mandarina Encore", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 15000, "mc_bulto_price": 12274, "diff_val": 2726, "diff_pct": 22.2, "winner": "central"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Manzana R Chica Funji", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 18000, "mc_bulto_price": 30744, "diff_val": -12744, "diff_pct": -41.5, "winner": "fresco"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Manzana R Grande Gaucho", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 64000, "mc_bulto_price": 30744, "diff_val": 33256, "diff_pct": 108.2, "winner": "central"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Manzana Smith", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 30000, "mc_bulto_price": 30744, "diff_val": -744, "diff_pct": -2.4, "winner": "fresco"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Arándanos", "bulto_desc": "Bulto de 12 Kg", "bulto_qty": 12, "unit": "Kg", "fresco_bulto_price": 20000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Ananá", "bulto_desc": "Bulto de 6 u", "bulto_qty": 6, "unit": "u", "fresco_bulto_price": 44000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Uva Blanca", "bulto_desc": "Bulto de 8 Kg", "bulto_qty": 8, "unit": "Kg", "fresco_bulto_price": 50000, "mc_bulto_price": 55000, "diff_val": -5000, "diff_pct": -9.1, "winner": "fresco"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Frutilla", "bulto_desc": "Bulto de 5 Kg", "bulto_qty": 5, "unit": "Kg", "fresco_bulto_price": 20000, "mc_bulto_price": 28850, "diff_val": -8850, "diff_pct": -30.7, "winner": "fresco"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Kiwi Grande", "bulto_desc": "Bulto de 8 Kg", "bulto_qty": 8, "unit": "Kg", "fresco_bulto_price": 54000, "mc_bulto_price": 43800, "diff_val": 10200, "diff_pct": 23.3, "winner": "central"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Mango", "bulto_desc": "Bulto de 7 u", "bulto_qty": 7, "unit": "u", "fresco_bulto_price": 19000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Palta", "bulto_desc": "Bulto de 50 u", "bulto_qty": 50, "unit": "u", "fresco_bulto_price": 55000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Banana Ecuador", "bulto_desc": "Bulto de 19 Kg", "bulto_qty": 19, "unit": "Kg", "fresco_bulto_price": 29000, "mc_bulto_price": 33839, "diff_val": -4839, "diff_pct": -14.3, "winner": "fresco"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Pera Belvedere", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 29000, "mc_bulto_price": 22661, "diff_val": 6339, "diff_pct": 28.0, "winner": "central"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Melón", "bulto_desc": "Bulto de 6 u", "bulto_qty": 6, "unit": "u", "fresco_bulto_price": 45000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "frutas", "cat_label": "🍎 Frutas", "name": "Pink (Pomelo)", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 45000, "mc_bulto_price": 15498, "diff_val": 29502, "diff_pct": 190.4, "winner": "central"}, {"cat": "tomate_pimientos", "cat_label": "🍅 Tomate y Pimientos", "name": "Tomate Redondo", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 42000, "mc_bulto_price": 25976, "diff_val": 16024, "diff_pct": 61.7, "winner": "central"}, {"cat": "tomate_pimientos", "cat_label": "🍅 Tomate y Pimientos", "name": "Cherry Norte", "bulto_desc": "Bulto de 10 Kg", "bulto_qty": 10, "unit": "Kg", "fresco_bulto_price": 64000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "tomate_pimientos", "cat_label": "🍅 Tomate y Pimientos", "name": "Tomate Perita", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 42000, "mc_bulto_price": 27504, "diff_val": 14496, "diff_pct": 52.7, "winner": "central"}, {"cat": "tomate_pimientos", "cat_label": "🍅 Tomate y Pimientos", "name": "Ají Verde", "bulto_desc": "Bulto de 7 Kg", "bulto_qty": 7, "unit": "Kg", "fresco_bulto_price": 28000, "mc_bulto_price": 31108, "diff_val": -3108, "diff_pct": -10.0, "winner": "fresco"}, {"cat": "tomate_pimientos", "cat_label": "🍅 Tomate y Pimientos", "name": "Ají Rojo", "bulto_desc": "Bulto de 8 Kg", "bulto_qty": 8, "unit": "Kg", "fresco_bulto_price": 43000, "mc_bulto_price": 35552, "diff_val": 7448, "diff_pct": 20.9, "winner": "central"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Zucchini", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 36000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Zapallito", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 29000, "mc_bulto_price": 15419, "diff_val": 13581, "diff_pct": 88.1, "winner": "central"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Berenjena", "bulto_desc": "Bulto de 10 Kg", "bulto_qty": 10, "unit": "Kg", "fresco_bulto_price": 10000, "mc_bulto_price": 8330, "diff_val": 1670, "diff_pct": 20.0, "winner": "central"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Pepino", "bulto_desc": "Bulto de 15 Kg", "bulto_qty": 15, "unit": "Kg", "fresco_bulto_price": 15000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Brócoli", "bulto_desc": "Bulto de 6 u", "bulto_qty": 6, "unit": "u", "fresco_bulto_price": 23000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Repollo Rojo", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 16000, "mc_bulto_price": 10761, "diff_val": 5239, "diff_pct": 48.7, "winner": "central"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Repollo Blanco", "bulto_desc": "Bulto de 17 Kg", "bulto_qty": 17, "unit": "Kg", "fresco_bulto_price": 16000, "mc_bulto_price": 10761, "diff_val": 5239, "diff_pct": 48.7, "winner": "central"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Remolacha", "bulto_desc": "Bulto de 12 at", "bulto_qty": 12, "unit": "at", "fresco_bulto_price": 19000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Choclo", "bulto_desc": "Bulto de 50 u", "bulto_qty": 50, "unit": "u", "fresco_bulto_price": 45000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "verduras", "cat_label": "🥬 Verduras", "name": "Coliflor", "bulto_desc": "Bulto de 13 u", "bulto_qty": 13, "unit": "u", "fresco_bulto_price": 23000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Papa Blanca Córdoba", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 26500, "mc_bulto_price": 20250, "diff_val": 6250, "diff_pct": 30.9, "winner": "central"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Papa Lavada", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 39000, "mc_bulto_price": 20250, "diff_val": 18750, "diff_pct": 92.6, "winner": "central"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Papa Negra", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 25000, "mc_bulto_price": 20250, "diff_val": 4750, "diff_pct": 23.5, "winner": "central"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Batata", "bulto_desc": "Bulto de 15 Kg", "bulto_qty": 15, "unit": "Kg", "fresco_bulto_price": 18000, "mc_bulto_price": 19530, "diff_val": -1530, "diff_pct": -7.8, "winner": "fresco"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Boñato", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 28000, "mc_bulto_price": 23436, "diff_val": 4564, "diff_pct": 19.5, "winner": "central"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Anco Chico", "bulto_desc": "Bulto de 15 Kg", "bulto_qty": 15, "unit": "Kg", "fresco_bulto_price": 38000, "mc_bulto_price": 16110, "diff_val": 21890, "diff_pct": 135.9, "winner": "central"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Anco Abra", "bulto_desc": "Bulto de 15 Kg", "bulto_qty": 15, "unit": "Kg", "fresco_bulto_price": 42000, "mc_bulto_price": 16110, "diff_val": 25890, "diff_pct": 160.7, "winner": "central"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Anco Bandejero", "bulto_desc": "Bulto de 15 Kg", "bulto_qty": 15, "unit": "Kg", "fresco_bulto_price": 40000, "mc_bulto_price": 16110, "diff_val": 23890, "diff_pct": 148.3, "winner": "central"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Zanahoria Cubito", "bulto_desc": "Bulto de 10 Kg", "bulto_qty": 10, "unit": "Kg", "fresco_bulto_price": 13000, "mc_bulto_price": 11540, "diff_val": 1460, "diff_pct": 12.7, "winner": "central"}, {"cat": "pesados", "cat_label": "🥔 Pesados", "name": "Zanahoria Industrial", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 23000, "mc_bulto_price": 20772, "diff_val": 2228, "diff_pct": 10.7, "winner": "central"}, {"cat": "cebollas_ajos", "cat_label": "🧅 Cebollas y Ajos", "name": "Cebolla / Cebollón", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 39000, "mc_bulto_price": 30150, "diff_val": 8850, "diff_pct": 29.4, "winner": "central"}, {"cat": "cebollas_ajos", "cat_label": "🧅 Cebollas y Ajos", "name": "Cebolla Roja", "bulto_desc": "Bulto de 18 Kg", "bulto_qty": 18, "unit": "Kg", "fresco_bulto_price": 40000, "mc_bulto_price": 30150, "diff_val": 9850, "diff_pct": 32.7, "winner": "central"}, {"cat": "cebollas_ajos", "cat_label": "🧅 Cebollas y Ajos", "name": "Ajo Super", "bulto_desc": "Bulto de 50 u", "bulto_qty": 50, "unit": "u", "fresco_bulto_price": 34000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Lechuga Criolla", "bulto_desc": "Bulto de 5 Kg", "bulto_qty": 5, "unit": "Kg", "fresco_bulto_price": 7000, "mc_bulto_price": 3645, "diff_val": 3355, "diff_pct": 92.0, "winner": "central"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Lechuga Manteca", "bulto_desc": "Bulto de 5 Kg", "bulto_qty": 5, "unit": "Kg", "fresco_bulto_price": 7000, "mc_bulto_price": 3645, "diff_val": 3355, "diff_pct": 92.0, "winner": "central"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Lechuga Francesa", "bulto_desc": "Bulto de 5 Kg", "bulto_qty": 5, "unit": "Kg", "fresco_bulto_price": 7000, "mc_bulto_price": 3645, "diff_val": 3355, "diff_pct": 92.0, "winner": "central"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Lechuga Capuchina", "bulto_desc": "Bulto de 10 Kg", "bulto_qty": 10, "unit": "Kg", "fresco_bulto_price": 16000, "mc_bulto_price": 7290, "diff_val": 8710, "diff_pct": 119.5, "winner": "central"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Lechuga Morada", "bulto_desc": "Bulto de 3 Kg", "bulto_qty": 3, "unit": "Kg", "fresco_bulto_price": 8000, "mc_bulto_price": 2187, "diff_val": 5813, "diff_pct": 265.8, "winner": "central"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Espinaca", "bulto_desc": "Bulto de 12 Kg", "bulto_qty": 12, "unit": "Kg", "fresco_bulto_price": 6500, "mc_bulto_price": 10320, "diff_val": -3820, "diff_pct": -37.0, "winner": "fresco"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Acelga", "bulto_desc": "Bulto de 12 Kg", "bulto_qty": 12, "unit": "Kg", "fresco_bulto_price": 7000, "mc_bulto_price": 6120, "diff_val": 880, "diff_pct": 14.4, "winner": "central"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Rúcula", "bulto_desc": "Bulto de 24 at", "bulto_qty": 24, "unit": "at", "fresco_bulto_price": 7000, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}, {"cat": "hojas", "cat_label": "🍃 Lechugas y Hojas", "name": "Kale", "bulto_desc": "Bulto de 1 u", "bulto_qty": 1, "unit": "u", "fresco_bulto_price": 1500, "mc_bulto_price": null, "diff_val": null, "diff_pct": null, "winner": "unmatched"}];
+    let activeFilter = 'todos';
+    let currentView = 'grid';
+    let myBarChart = null;
+
+    function getChartData(catFilter) {
+      let matched = DATASET.filter(d => d.mc_bulto_price && d.unit === 'Kg');
+      if (catFilter === 'top') {
+        const topKeys = ['Papa Negra', 'Cebolla / Cebollón', 'Tomate Redondo', 'Anco Chico', 'Zapallito', 'Zanahoria Industrial', 'Ají Rojo', 'Berenjena', 'Lechuga Criolla', 'Batata', 'Espinaca', 'Acelga', 'Repollo Blanco', 'Mandarina Encore', 'Naranja Jugo', 'Manzana R Chica Funji', 'Banana Ecuador', 'Pera Belvedere', 'Limón', 'Uva Blanca', 'Frutilla'];
+        matched = matched.filter(d => topKeys.some(k => d.name.includes(k) || k.includes(d.name)));
+      } else if (catFilter !== 'all') {
+        matched = matched.filter(d => d.cat === catFilter);
+      }
+      return matched;
+    }
+
+    function initBarChart(catFilter) {
+      const items = getChartData(catFilter);
+      const labels = items.map(d => `${d.name} (${d.bulto_qty} ${d.unit})`);
+      const frescoPrices = items.map(d => d.fresco_bulto_price);
+      const centralPrices = items.map(d => d.mc_bulto_price);
+
+      const ctx = document.getElementById('barChart').getContext('2d');
+      if (myBarChart) myBarChart.destroy();
+
+      myBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '📦 FRESCO.BA ($ / Bulto)',
+              data: frescoPrices,
+              backgroundColor: 'rgba(59, 130, 246, 0.85)',
+              borderColor: '#3b82f6',
+              borderWidth: 1,
+              borderRadius: 6
+            },
+            {
+              label: '🏛️ Mercado Central ($ / Bulto Equivalente)',
+              data: centralPrices,
+              backgroundColor: 'rgba(16, 185, 129, 0.85)',
+              borderColor: '#10b981',
+              borderWidth: 1,
+              borderRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#f8fafc', font: { weight: '700', size: 13 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ': $' + ctx.raw.toLocaleString('es-AR');
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#cbd5e1', font: { weight: '600', size: 11 } },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' }
+            },
+            y: {
+              ticks: {
+                color: '#cbd5e1',
+                font: { weight: '600' },
+                callback: function(val) { return '$' + val.toLocaleString('es-AR'); }
+              },
+              grid: { color: 'rgba(255, 255, 255, 0.08)' }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChartFilter(catFilter, btn) {
+      document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      initBarChart(catFilter);
+    }
+
+    function render() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      const filtered = DATASET.filter(item => {
+        const matchesQuery = item.name.toLowerCase().includes(q) || item.bulto_desc.toLowerCase().includes(q) || item.cat_label.toLowerCase().includes(q);
+        if (!matchesQuery) return false;
+
+        if (activeFilter === 'todos') return true;
+        if (activeFilter === 'central') return item.winner === 'central';
+        if (activeFilter === 'fresco') return item.winner === 'fresco';
+        return item.cat === activeFilter;
+      });
+
+      // Render Cards Grid
+      const gridContainer = document.getElementById('cardsGrid');
+      gridContainer.innerHTML = filtered.map(item => {
+        let winnerClass = 'winner-neutral';
+        let badgeHtml = '<span class="badge-winner badge-neutral">Sin Comparativa Directa</span>';
+        let diffHtml = '<span style="color:#94a3b8;">Sin bulto equivalente</span>';
+        
+        let ratioCentral = 50;
+        let ratioFresco = 50;
+
+        if (item.winner === 'central') {
+          winnerClass = 'winner-central';
+          badgeHtml = `<span class="badge-winner badge-central"><i class="fa-solid fa-building-columns"></i> Central ${-item.diff_pct}% más barato</span>`;
+          diffHtml = `<span class="diff-tag-cheaper">Mercado Central es $${item.diff_val.toLocaleString('es-AR')} más barato por bulto</span>`;
+          ratioCentral = roundRatio(item.fresco_bulto_price, item.mc_bulto_price);
+          ratioFresco = 100 - ratioCentral;
+        } else if (item.winner === 'fresco') {
+          winnerClass = 'winner-fresco';
+          badgeHtml = `<span class="badge-winner badge-fresco"><i class="fa-solid fa-box-open"></i> Fresco.ba ${item.diff_pct}% más barato</span>`;
+          diffHtml = `<span class="diff-tag-cheaper" style="color:#60a5fa;">Fresco.ba es $${(-item.diff_val).toLocaleString('es-AR')} más barato por bulto</span>`;
+          ratioFresco = roundRatio(item.mc_bulto_price, item.fresco_bulto_price);
+          ratioCentral = 100 - ratioFresco;
+        }
+
+        return `
+          <div class="card ${winnerClass}">
+            <div class="card-header">
+              <div class="card-title">${item.name}</div>
+              ${badgeHtml}
+            </div>
+
+            <div class="bulto-info-bar">
+              <span>📦 Presentación: <strong>${item.bulto_desc}</strong></span>
+              <span>${item.cat_label}</span>
+            </div>
+
+            <div class="dual-price-row">
+              <div class="price-card-box">
+                <div class="price-card-label">📦 Fresco.ba (Bulto)</div>
+                <div class="price-card-val val-fresco">$${item.fresco_bulto_price.toLocaleString('es-AR')}</div>
+              </div>
+
+              <div class="price-card-box">
+                <div class="price-card-label">🏛️ Mercado Central (Bulto)</div>
+                <div class="price-card-val val-central">${item.mc_bulto_price ? '$' + item.mc_bulto_price.toLocaleString('es-AR') : '—'}</div>
+              </div>
+            </div>
+
+            <div class="diff-bar-section">
+              <div class="diff-text">
+                <span>Comparativa por Bulto:</span>
+                ${diffHtml}
+              </div>
+              ${item.mc_bulto_price ? `
+                <div class="ratio-bar-bg" title="Proporción del precio por bulto">
+                  <div class="ratio-bar-central" style="width:${ratioCentral}%"></div>
+                  <div class="ratio-bar-fresco" style="width:${ratioFresco}%"></div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Render Table View
+      const tBody = document.getElementById('tableBody');
+      tBody.innerHTML = filtered.map(item => {
+        let badge = '<span style="color:#94a3b8;">—</span>';
+        if (item.winner === 'central') badge = '<span style="color:#34d399; font-weight:800;">🏛️ Mercado Central</span>';
+        if (item.winner === 'fresco') badge = '<span style="color:#60a5fa; font-weight:800;">📦 FRESCO.BA</span>';
+
+        return `
+          <tr>
+            <td style="font-weight:800; color:#fff;">${item.name}</td>
+            <td>${item.cat_label}</td>
+            <td><strong>${item.bulto_desc}</strong></td>
+            <td style="color:#60a5fa; font-weight:800;">$${item.fresco_bulto_price.toLocaleString('es-AR')}</td>
+            <td style="color:#34d399; font-weight:800;">${item.mc_bulto_price ? '$' + item.mc_bulto_price.toLocaleString('es-AR') : '—'}</td>
+            <td>${item.diff_val !== null ? '$' + Math.abs(item.diff_val).toLocaleString('es-AR') : '—'}</td>
+            <td>${item.diff_pct !== null ? (item.diff_pct > 0 ? '+' + item.diff_pct + '%' : item.diff_pct + '%') : '—'}</td>
+            <td>${badge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function roundRatio(p1, p2) {
+      if (!p1 || !p2) return 50;
+      const total = p1 + p2;
+      return Math.round((p2 / total) * 100);
+    }
+
+    function filterItems() { render(); }
+
+    function setFilter(cat, btn) {
+      activeFilter = cat;
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function toggleView(v) {
+      currentView = v;
+      document.getElementById('btnGrid').classList.toggle('active', v === 'grid');
+      document.getElementById('btnTable').classList.toggle('active', v === 'table');
+      document.getElementById('cardsGrid').style.display = v === 'grid' ? 'grid' : 'none';
+      document.getElementById('tableView').style.display = v === 'table' ? 'block' : 'none';
+    }
+
+    // Init
+    initBarChart('top');
+    render();
+  </script>
+</body>
+</html>
