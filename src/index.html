@@ -1572,6 +1572,27 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-otros-grid .web-prod-card { overflow: visible !important; }
 
 </style>
+<style id="hubador-above-the-fold">
+/* Escritorio: la 1ª fila de productos (con su botón "Quiero esta oferta") tiene que verse
+   apenas se entra, sin scrollear, incluso en notebooks o con zoom 125%. */
+@media (min-width: 900px) {
+  .web-hero-inner { padding-top: 10px; padding-bottom: 8px; }
+  .web-hero-copy, .web-hero-panel, .web-hero-panel-media { height: 180px !important; max-height: 180px !important; }
+  .web-hero-offer { height: 180px !important; max-height: 180px !important; }
+  .web-hero-panel-copy { gap: 6px; padding: 12px 18px; }
+  .web-hero h1 { font-size: clamp(20px, 1.9vw, 26px); max-width: none; }
+  .web-hero-head { gap: 4px; }
+  .web-hero-head p, .web-hero-cta > div { display: none !important; }
+  .web-hero-cta a.web-btn { min-height: 46px !important; padding: 10px 20px !important; font-size: 15px !important; }
+  .web-toolbar { padding-top: 2px; }
+  html.app-mode .web-prod-card .web-prod-img, html.app-mode .web-prod-img,
+  .web-grid-products .web-prod-img, .web-prod-card .web-prod-img, .web-prod-img {
+    height: 112px !important; max-height: 112px !important; min-height: 112px !important; flex: 0 0 112px !important;
+  }
+  html.app-mode .web-prod-img img, html.app-mode .web-prod-card .web-prod-img img,
+  .web-prod-img img, .web-prod-img > img { height: 112px !important; max-height: 112px !important; }
+}
+</style>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -1663,9 +1684,15 @@ async function checkoutCartByWhatsApp({ phone, nodoId, cart, totals, login, conf
         else session = data.session;
       }
       if (session && session.user) {
-        const row = await upsertProfile(session.user.id, { tel: cleanPhone, nombre: displayName, barrio: activeBarrio, role: 'user' });
-        effectiveUser = profileFromRow(row, session.user) || { id: session.user.id, tel: cleanPhone, nombre: displayName, barrio: activeBarrio, role: 'user' };
-        effectiveUser = Object.assign({}, effectiveUser, { nombre: displayName, tel: cleanPhone, barrio: activeBarrio, nodo: nodoLabel });
+        // Si ya había una sesión real (ej. el admin logueado con su email), NO se toca su rol ni su
+        // nombre: antes esto guardaba role:'user' y le sacaba el admin al que compraba desde su sesión.
+        const isAnon = !!session.user.is_anonymous;
+        const fields = isAnon
+          ? { tel: cleanPhone, nombre: displayName, barrio: activeBarrio, role: 'user' }
+          : { tel: cleanPhone, barrio: activeBarrio };
+        const row = await upsertProfile(session.user.id, fields);
+        effectiveUser = profileFromRow(row, session.user) || Object.assign({ id: session.user.id }, fields);
+        effectiveUser = Object.assign({}, effectiveUser, { tel: cleanPhone, barrio: activeBarrio, nodo: nodoLabel }, isAnon ? { nombre: displayName } : {});
         if (typeof login === 'function') login(effectiveUser);
       }
     } catch (e) {
@@ -8078,7 +8105,7 @@ function WebGrupoDetalle() {
             <h1>{g.product}</h1>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 4px' }}>
-              <span style={{ fontSize: 13, color: '#666' }}>Coto</span>
+              <img src="img/coto-logo.png" alt="Coto" style={{ height: 16, width: 'auto', display: 'block' }} />
               <s style={{ fontSize: 15, fontWeight: 750, color: '#dc2626' }}>{g.old}{g.unit}</s>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
@@ -8259,8 +8286,8 @@ function WebMisGrupos() {
                         <div className="web-cart-item-main">
                           <h3>{g.name}</h3>
                           <p className="web-cart-item-meta">
-                            {fmtPrecioAR(t.priceN)}{g.unit || '/kg'}
-                            {t.oldN > 0 && <> · <s className="web-cart-coto">{fmtPrecioAR(t.oldN)}</s> Coto</>}
+                            <b style={{ color: 'oklch(0.55 0.15 165)', fontWeight: 800 }}>{fmtPrecioAR(t.priceN)}{g.unit || '/kg'}</b>
+                            {t.oldN > 0 && <> · <s className="web-cart-coto" style={{ color: '#dc2626', fontWeight: 700 }}>{fmtPrecioAR(t.oldN)}</s> Coto</>}
                             {' '}· 📍 {currentZoneName()}
                           </p>
                           <div className="web-cart-qty">
@@ -8271,7 +8298,6 @@ function WebMisGrupos() {
                         </div>
                         <div className="web-cart-item-side">
                           <strong>{fmtPrecioAR(t.grupo)}</strong>
-                          {t.ahorro > 0 && <em>Ahorrás {fmtPrecioAR(t.ahorro)}</em>}
                           <button type="button" className="web-btn-ghost" onClick={() => removeFromCart(g.id || g.name)}>Quitar</button>
                         </div>
                       </article>
@@ -8280,12 +8306,15 @@ function WebMisGrupos() {
                 </div>
 
                 <aside className="web-cart-summary">
+                  <NodoSelect value={waNodo} onChange={setWaNodo} style={{ marginBottom: 10 }} />
                   <div className="web-cart-row web-cart-total">
                     <span>Total en equipo</span>
                     <strong>{fmtPrecioAR(totals.grupo)}</strong>
                   </div>
-                  <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 4 }}><span>En Coto</span><s>{fmtPrecioAR(totals.coto)}</s></div>
-                  <NodoSelect value={waNodo} onChange={setWaNodo} />
+                  <div className="web-cart-row web-cart-coto-row" style={{ marginBottom: 8, justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
+                    <img src="img/coto-logo.png" alt="Coto" style={{ height: 15, width: 'auto', display: 'block' }} />
+                    <s>{fmtPrecioAR(totals.coto)}</s>
+                  </div>
                   <input
                     type="tel"
                     inputMode="tel"
@@ -8299,10 +8328,10 @@ function WebMisGrupos() {
                     onClick={handleWhatsAppCheckout}
                     disabled={waSending}
                     className="web-btn"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: waSending ? '#94a3b8' : '#25D366', textDecoration: 'none', cursor: waSending ? 'default' : 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: (waSending || String(waPhone || '').replace(/\D/g, '').length < 8) ? '#94a3b8' : '#25D366', textDecoration: 'none', cursor: waSending ? 'default' : 'pointer', transition: 'background 0.2s' }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11a16.4 16.4 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.94-4.36-.14-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.28.58-.35.78-.35.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.09.2-.14.31-.28.48-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.16 1.52 1.88 1.05.93 1.93 1.22 2.21 1.36.28.14.44.12.61-.07.16-.2.7-.81.89-1.09.19-.28.37-.23.62-.14.26.1 1.63.77 1.91.91.28.14.47.21.54.33.07.12.07.68-.17 1.36z"/></svg>
-                    {waSending ? 'Guardando...' : 'Enviar pedido por WhatsApp'}
+                    {waSending ? 'Guardando...' : 'Comprar y Enviar'}
                   </button>
                   <button type="button" className="web-linkish" onClick={() => navigate('productos')}>+ Seguir sumando productos</button>
                 </aside>

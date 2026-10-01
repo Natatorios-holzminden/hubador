@@ -1230,6 +1230,27 @@ html.app-mode .web-root { min-height: 100vh; }
 .web-otros-grid .web-prod-card { overflow: visible !important; }
 
 </style>
+<style id="hubador-above-the-fold">
+/* Escritorio: la 1ª fila de productos (con su botón "Quiero esta oferta") tiene que verse
+   apenas se entra, sin scrollear, incluso en notebooks o con zoom 125%. */
+@media (min-width: 900px) {
+  .web-hero-inner { padding-top: 10px; padding-bottom: 8px; }
+  .web-hero-copy, .web-hero-panel, .web-hero-panel-media { height: 180px !important; max-height: 180px !important; }
+  .web-hero-offer { height: 180px !important; max-height: 180px !important; }
+  .web-hero-panel-copy { gap: 6px; padding: 12px 18px; }
+  .web-hero h1 { font-size: clamp(20px, 1.9vw, 26px); max-width: none; }
+  .web-hero-head { gap: 4px; }
+  .web-hero-head p, .web-hero-cta > div { display: none !important; }
+  .web-hero-cta a.web-btn { min-height: 46px !important; padding: 10px 20px !important; font-size: 15px !important; }
+  .web-toolbar { padding-top: 2px; }
+  html.app-mode .web-prod-card .web-prod-img, html.app-mode .web-prod-img,
+  .web-grid-products .web-prod-img, .web-prod-card .web-prod-img, .web-prod-img {
+    height: 112px !important; max-height: 112px !important; min-height: 112px !important; flex: 0 0 112px !important;
+  }
+  html.app-mode .web-prod-img img, html.app-mode .web-prod-card .web-prod-img img,
+  .web-prod-img img, .web-prod-img > img { height: 112px !important; max-height: 112px !important; }
+}
+</style>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -1259,7 +1280,7 @@ src="https://www.facebook.com/tr?id=2338089210350969&ev=PageView&noscript=1"
 </template>
 <div id="root"></div>
 
-<script src="app.bundle.js?v=b3db5239"></script>
+<script src="app.bundle.js?v=fa2bf40a"></script>
 
 </body>
 </html>
