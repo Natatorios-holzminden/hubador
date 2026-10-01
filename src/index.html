@@ -2011,10 +2011,16 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
 // Comparador Web + Mobile: agregá ?both (o ?compare)
 // Compatibilidad con versión vieja subida: ?app=1 también fuerza modo app.
 const _qs = new URLSearchParams(location.search);
-const META_AD_PRODUCT_ID = String(_qs.get('producto') || _qs.get('product') || '')
-  .trim()
-  .toLowerCase()
-  .replace(/[^a-z0-9_-]/g, '');
+function normalizeMetaProductKey(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+const META_AD_PRODUCT_ID = normalizeMetaProductKey(_qs.get('producto') || _qs.get('product'));
 // Link de un solo uso para limpiar el catálogo viejo guardado en este navegador
 // sin tener que usar la consola: hubador.com/?actualizar
 if (_qs.has('actualizar')) {
@@ -9175,8 +9181,15 @@ function App() {
     let cancelled = false;
     const openAdvertisedProduct = () => {
       if (cancelled || openedAdProductRef.current === META_AD_PRODUCT_ID) return true;
-      const product = getHubadorCatalogList(true).find((item) =>
-        String(item.id || '').toLowerCase() === META_AD_PRODUCT_ID
+      const catalog = getHubadorCatalogList(true);
+      // Supabase can use generated IDs, so ad URLs use stable, human-readable
+      // product slugs and fall back to the normalized catalog name.
+      const product = catalog.find((item) =>
+        normalizeMetaProductKey(item.id) === META_AD_PRODUCT_ID
+      ) || catalog.find((item) =>
+        normalizeMetaProductKey(item.name) === META_AD_PRODUCT_ID
+      ) || catalog.find((item) =>
+        normalizeMetaProductKey(item.name).startsWith(META_AD_PRODUCT_ID + '-')
       );
       if (!product) return false;
       const card = hubadorCard(product);
