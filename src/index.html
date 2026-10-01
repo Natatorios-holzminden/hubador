@@ -1605,6 +1605,68 @@ src="https://www.facebook.com/tr?id=2338089210350969&ev=PageView&noscript=1"
 
 const { useState } = React;
 
+// Meta Pixel helpers. The pixel ID is public; never send phone numbers or other PII here.
+function metaProductPrice(product) {
+  if (!product) return 0;
+  if (product.priceN != null) return Number(product.priceN) || 0;
+  return typeof parsePrecioAR === 'function' ? parsePrecioAR(product.price) : 0;
+}
+function metaProductId(product) {
+  if (!product) return 'producto';
+  if (product.id && !String(product.id).startsWith('mo-')) return String(product.id);
+  const name = String(product.name || product.product || '');
+  try {
+    const match = getHubadorCatalogList(true).find((item) => item.name === name);
+    if (match && match.id) return String(match.id);
+  } catch (e) {}
+  return name || String(product.id || 'producto').replace(/^mo-/, '');
+}
+function metaProductParams(product, quantity) {
+  const qty = Math.max(1, Number(quantity) || 1);
+  const id = metaProductId(product);
+  const name = String((product && (product.name || product.product)) || id);
+  const price = metaProductPrice(product);
+  return {
+    content_ids: [id],
+    content_name: name,
+    content_type: 'product',
+    contents: [{ id, quantity: qty, item_price: price }],
+    currency: 'ARS',
+    value: price * qty,
+  };
+}
+function metaCartParams(cart, totals, extra) {
+  const items = Array.isArray(cart) ? cart : [];
+  const contents = items.map((item) => {
+    const qty = Math.max(1, Number(item.qty) || 1);
+    return {
+      id: String(item.id || item.name || 'producto'),
+      quantity: qty,
+      item_price: metaProductPrice(item),
+    };
+  });
+  const value = totals && totals.grupo != null
+    ? Number(totals.grupo) || 0
+    : contents.reduce((sum, item) => sum + item.item_price * item.quantity, 0);
+  return Object.assign({
+    content_ids: contents.map((item) => item.id),
+    content_type: 'product',
+    contents,
+    currency: 'ARS',
+    num_items: contents.reduce((sum, item) => sum + item.quantity, 0),
+    value,
+  }, extra || {});
+}
+function metaTrack(eventName, params) {
+  try {
+    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
+      window.fbq('track', eventName, params || {});
+    }
+  } catch (e) {
+    console.warn('[HUBADOR] Meta Pixel event failed', eventName, e);
+  }
+}
+
 
 // ─── Supabase Auth (HUBADOR) ─────────────────────────────────
 // Project URL + publishable/anon (o window.HUBADOR_* / localStorage / config.js)
@@ -1649,6 +1711,10 @@ async function checkoutCartByWhatsApp({ phone, nodoId, cart, totals, login, conf
   const cleanPhone = String(phone || '').trim();
   const displayName = cleanPhone || 'Vecino';
   const activeBarrio = currentZoneName();
+  metaTrack('InitiateCheckout', metaCartParams(cart, totals, {
+    checkout_type: 'whatsapp',
+    delivery_node: nodoId,
+  }));
   try { localStorage.setItem(HUBADOR_NODO_KEY, nodoId); } catch (e) {}
   try { saveHubadorProfileExtra({ tel: cleanPhone, nombre: displayName, barrio: activeBarrio, nodo: nodoLabel }); } catch (e) {}
   let effectiveUser = null;
@@ -1680,6 +1746,10 @@ async function checkoutCartByWhatsApp({ phone, nodoId, cart, totals, login, conf
     toast: 'Pedido guardado en Grupos activos. Confirmalo por WhatsApp para coordinar la entrega.',
     userOverride: effectiveUser,
   });
+  metaTrack('Lead', metaCartParams(cart, totals, {
+    lead_type: 'whatsapp_order',
+    delivery_node: nodoId,
+  }));
   window.open(link, '_blank', 'noopener,noreferrer');
 }
 
@@ -1941,6 +2011,10 @@ function Countdown({ deadline, big, card, inline, compact, prefix, doneLabel }) 
 // Comparador Web + Mobile: agregá ?both (o ?compare)
 // Compatibilidad con versión vieja subida: ?app=1 también fuerza modo app.
 const _qs = new URLSearchParams(location.search);
+const META_AD_PRODUCT_ID = String(_qs.get('producto') || _qs.get('product') || '')
+  .trim()
+  .toLowerCase()
+  .replace(/[^a-z0-9_-]/g, '');
 // Link de un solo uso para limpiar el catálogo viejo guardado en este navegador
 // sin tener que usar la consola: hubador.com/?actualizar
 if (_qs.has('actualizar')) {
@@ -8765,13 +8839,15 @@ const SCREEN_COMPONENTS = {
 
 function App() {
   const [active, setActive] = useState(() => {
-    let s = 'home';
+    let s = META_AD_PRODUCT_ID ? 'productos' : 'home';
     try {
-      const hash = (window.location.hash || '').replace(/^#\/?/, '').trim();
-      if (hash && (SCREEN_COMPONENTS[hash] || WEB_SCREEN_COMPONENTS[hash])) {
-        s = hash;
-      } else {
-        s = localStorage.getItem('mobileScreen') || 'home';
+      if (!META_AD_PRODUCT_ID) {
+        const hash = (window.location.hash || '').replace(/^#\/?/, '').trim();
+        if (hash && (SCREEN_COMPONENTS[hash] || WEB_SCREEN_COMPONENTS[hash])) {
+          s = hash;
+        } else {
+          s = localStorage.getItem('mobileScreen') || 'home';
+        }
       }
     } catch (e) {}
     // Precios/Comparador y Grupo en vivo (legacy) ocultos en app pública
@@ -8983,6 +9059,7 @@ function App() {
       }];
     }
     persistCart(next);
+    metaTrack('AddToCart', metaProductParams(product, q));
   };
   const updateCartQty = (id, qty) => {
     persistCart(cart.map((c) => {
@@ -9089,6 +9166,55 @@ function App() {
       }
     } catch (e) {}
   };
+
+  // Ad links can open the advertised product directly, for example:
+  // ?nodo=garin&producto=frutilla&utm_source=meta#grupo-detalle
+  const openedAdProductRef = React.useRef('');
+  React.useEffect(() => {
+    if (!META_AD_PRODUCT_ID || openedAdProductRef.current === META_AD_PRODUCT_ID) return;
+    let cancelled = false;
+    const openAdvertisedProduct = () => {
+      if (cancelled || openedAdProductRef.current === META_AD_PRODUCT_ID) return true;
+      const product = getHubadorCatalogList(true).find((item) =>
+        String(item.id || '').toLowerCase() === META_AD_PRODUCT_ID
+      );
+      if (!product) return false;
+      const card = hubadorCard(product);
+      setSelected(card);
+      setSelectedGroup(grupoFromHubadorProduct(card, currentZoneName()));
+      openedAdProductRef.current = META_AD_PRODUCT_ID;
+      setScreen('grupo-detalle', true);
+      return true;
+    };
+    if (!openAdvertisedProduct()) {
+      window.addEventListener('hubador_catalog_updated', openAdvertisedProduct);
+    }
+    return () => {
+      cancelled = true;
+      window.removeEventListener('hubador_catalog_updated', openAdvertisedProduct);
+    };
+  }, []);
+
+  // Centralized ViewContent tracking catches catalog clicks, related offers and ad deep links.
+  const lastMetaProductViewRef = React.useRef('');
+  React.useEffect(() => {
+    if (active !== 'grupo-detalle' || !selectedGroup) {
+      lastMetaProductViewRef.current = '';
+      return;
+    }
+    const product = Object.assign({}, selected || {}, {
+      id: (selected && selected.id) || selectedGroup.id || selectedGroup.product,
+      name: selectedGroup.product || (selected && selected.name),
+      price: selectedGroup.price || (selected && selected.price),
+      priceN: (selected && selected.priceN) != null
+        ? selected.priceN
+        : parsePrecioAR(selectedGroup.price),
+    });
+    const viewKey = String(product.id || product.name || 'producto');
+    if (lastMetaProductViewRef.current === viewKey) return;
+    lastMetaProductViewRef.current = viewKey;
+    metaTrack('ViewContent', metaProductParams(product, 1));
+  }, [active, selected, selectedGroup]);
 
   const ScreenComp = SCREEN_COMPONENTS[active] || MobileHome;
   const screen = SCREENS.find((s) => s.id === active);
