@@ -1595,6 +1595,7 @@ html.app-mode .web-root { min-height: 100vh; }
 </style>
 <!-- Meta Pixel Code -->
 <script>
+if (!/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -1605,6 +1606,7 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '2338089210350969');
 fbq('track', 'PageView');
+}
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=2338089210350969&ev=PageView&noscript=1"
@@ -1705,8 +1707,17 @@ const WHATSAPP = '1157314429';
 function buildWhatsAppLink(message) {
   return 'https://wa.me/549' + WHATSAPP + '?text=' + encodeURIComponent(message);
 }
-function buildOfertaWhatsAppLink(p) {
-  return buildWhatsAppLink(`Hola! Quiero sumarme a la compra de ${p.name} a ${p.price}${p.unit} que vi en HUBADOR.`);
+function buildOfertaWhatsAppLink(p, quantity) {
+  const qtyText = quantity ? ` Cantidad: ${quantity} ${p.unit === '/u' ? 'unidades' : 'kg'}.` : '';
+  return buildWhatsAppLink(`Hola! Quiero sumarme a la compra de ${p.name} a ${p.price}${p.unit}.${qtyText} Lo vi en HUBADOR.`);
+}
+function trackWhatsAppContact(product, nodo, quantity) {
+  const params = Object.assign(product ? metaProductParams(product, quantity || 1) : {}, {
+    contact_method: 'whatsapp',
+    contact_type: 'whatsapp_click',
+    delivery_node: String(nodo || currentZoneName() || 'Garín'),
+  });
+  metaTrack('Contact', params);
 }
 /** Pedido por WhatsApp sin cuenta: arma el carrito como texto y abre wa.me con todo precargado.
  *  El comprador solo tiene que tocar "Enviar" desde su propio WhatsApp — ahí le llega a HUBADOR
@@ -2048,6 +2059,7 @@ function normalizeMetaProductKey(value) {
     .replace(/^-+|-+$/g, '');
 }
 const META_AD_PRODUCT_ID = normalizeMetaProductKey(_qs.get('producto') || _qs.get('product'));
+const META_AD_LANDING = !!META_AD_PRODUCT_ID;
 // Link de un solo uso para limpiar el catálogo viejo guardado en este navegador
 // sin tener que usar la consola: hubador.com/?actualizar
 if (_qs.has('actualizar')) {
@@ -3088,24 +3100,12 @@ function MobileHome() {
               Precios mayoristas, sin intermediarios y con retiro cerca tuyo.
             </p>
             <div style={{ marginTop: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, width: '100%' }}>
-              <a
-                href={buildWhatsAppLink('Hola! Vi HUBADOR y quiero recibir la lista de precios por WhatsApp')}
-                target="_blank"
-                rel="noopener"
-                style={{
-                  background: '#25D366', color: '#fff', border: 'none', borderRadius: 999,
-                  padding: '8px 16px', minHeight: 38, width: 'fit-content', fontWeight: 800, fontSize: 13.5,
-                  fontFamily: 'inherit', cursor: 'pointer', textDecoration: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxSizing: 'border-box',
-                  boxShadow: '0 3px 10px rgba(37,211,102,0.35)',
-                  touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true" style={{ flexShrink: 0 }}>
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.572-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.99c-.002 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c-.001 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-                <span>Recibir precios por WhatsApp</span>
-              </a>
+              <HubadorWhatsAppButton
+                message="Hola! Vi HUBADOR y quiero recibir la lista de precios por WhatsApp"
+                nodo={currentZoneName()}
+                label="Recibir precios por WhatsApp"
+                layoutStyle={{ width: 'fit-content' }}
+              />
               <div style={{
                 color: 'rgba(255,255,255,0.88)', fontSize: 11, fontWeight: 500,
                 textAlign: 'center', textShadow: '0 1px 4px rgba(0,0,0,0.4)',
@@ -3200,10 +3200,7 @@ function MobileHome() {
                   <div style={{ height: 4, background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${groupProgressView(p.name).pct}%`, background: groupProgressView(p.name).pct >= 85 ? 'oklch(0.62 0.18 35)' : primary, borderRadius: 999 }} />
                   </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); openProduct(p); }}
-                    style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '9px', minHeight: 40, fontWeight: 600, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', marginTop: 2, touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxSizing: 'border-box', width: '100%' }}
-                  >Quiero esta oferta</button>
+                  <HubadorWhatsAppButton product={p} nodo={currentZoneName()} stopPropagation layoutStyle={{ marginTop: 2, position: 'relative', zIndex: 2, width: '100%' }} />
                 </div>
               </div>
             )}
@@ -3584,10 +3581,7 @@ function MobileProductos() {
                   <div style={{ height: 4, background: '#f0f1f3', borderRadius: 999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${groupProgressView(p.name).pct}%`, background: groupProgressView(p.name).pct >= 85 ? 'oklch(0.62 0.18 35)' : primary, borderRadius: 999 }} />
                   </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); openProduct(p); }}
-                    style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '9px', minHeight: 40, fontWeight: 600, fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', marginTop: 2, touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxSizing: 'border-box', width: '100%' }}
-                  >Quiero esta oferta</button>
+                  <HubadorWhatsAppButton product={p} nodo={currentZoneName()} stopPropagation layoutStyle={{ marginTop: 2, position: 'relative', zIndex: 2, width: '100%' }} />
                 </div>
               </div>
             ))}
@@ -3601,7 +3595,7 @@ function MobileProductos() {
 function MobileProducto() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { selected, showToast, addToCart, user, bumpFilled, progressTick, setMisGruposTab } = React.useContext(SelectionContext);
+  const { selected, user, progressTick } = React.useContext(SelectionContext);
   void progressTick;
   const prod = selected || hubadorCard(hubadorById('tomate'));
   const isUnit = prod.unit === '/u';
@@ -3613,23 +3607,8 @@ function MobileProducto() {
   const membersCount = live.members;
   const barrio = user?.barrio || prod.location || 'Buenos Aires';
   const priceNum = prod.priceN != null ? prod.priceN : (parseInt((prod.price || '$0').replace(/[^\d]/g, ''), 10) || 0);
-  const oldNum = prod.oldN != null ? prod.oldN : parsePrecioAR(prod.old);
   const totalPrice = priceNum * qty;
   const unitLabel = prod.unit === '/u' ? 'u' : 'kg';
-  const join = (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
-    const q = Math.max(minQty, qty);
-    addToCart({
-      name: prod.name, price: prod.price, old: prod.old, priceN: priceNum, oldN: oldNum,
-      unit: prod.unit || '/kg', img: prod.img, members: prod.members, progress: live.pct,
-      location: barrio,
-    }, q);
-    if (typeof bumpFilled === 'function') bumpFilled(prod.name, q);
-    if (typeof setMisGruposTab === 'function') setMisGruposTab('carrito');
-    showToast(`Sumaste ${q} ${unitLabel} de ${prod.name} al carrito`);
-    navigate('mis-grupos');
-  };
   const qtyBtn = (label, onClick, filled) => (
     <button type="button" aria-label={label === '+' ? 'Más' : 'Menos'} onClick={onClick} style={{ width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: 999, border: filled ? 'none' : '1.5px solid #ccc', background: filled ? primary : '#fff', color: filled ? '#fff' : '#333', fontWeight: 700, fontSize: 18, cursor: 'pointer', display: 'grid', placeItems: 'center', fontFamily: 'inherit', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{label}</button>
   );
@@ -3684,8 +3663,8 @@ function MobileProducto() {
           </div>
         </div>
         <div style={{ marginBottom: 10, position: 'relative', zIndex: 9, pointerEvents: 'auto' }}>
-          <button type="button" onClick={join} style={{ width: '100%', minHeight: 44, background: primary, color: '#fff', border: 'none', borderRadius: 12, padding: '12px', fontWeight: 700, fontSize: 15, fontFamily: 'inherit', cursor: 'pointer', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', position: 'relative', zIndex: 9, pointerEvents: 'auto' }}>Comprar</button>
-          <div style={{ textAlign: 'center', fontSize: 11, color: '#888', marginTop: 6 }}>Se suma a Mis grupos · solo se cobra al completar</div>
+          <HubadorWhatsAppButton product={prod} quantity={qty} nodo={barrio} label="Comprar por WhatsApp" layoutStyle={{ width: '100%', position: 'relative', zIndex: 9 }} />
+          <div style={{ textAlign: 'center', fontSize: 11, color: '#888', marginTop: 6 }}>Mensaje listo con el producto, precio y cantidad.</div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 10 }}>
           {[['🚚', 'Envío 24hs'], ['✅', 'Sin intermed.'], ['🌿', 'Orgánico']].map(([ic, txt]) =>
@@ -5550,7 +5529,7 @@ function MobileAdminProductos() {
 function MobileGrupoDetalle() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { selectedGroup, showToast, addToCart, user, bumpFilled, progressTick, setMisGruposTab } = React.useContext(SelectionContext);
+  const { selectedGroup, progressTick } = React.useContext(SelectionContext);
   void progressTick;
   const g = selectedGroup || (() => { const p = hubadorById('tomate'); const live = groupProgressView(p.name); return { product: p.name, location: 'Palermo', members: p.members, progress: live.pct, closes: p.time, deadlineHrs: p.deadlineHrs, price: p.price, old: p.old, unit: p.unit, disc: p.disc, img: p.img, totalKg: live.goal, precioActualizado: false }; })();
   const isUnit = g.unit === '/u';
@@ -5560,33 +5539,21 @@ function MobileGrupoDetalle() {
   const live = groupProgressView(g.product);
   const membersCount = live.members;
   const priceNum = parseInt((g.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
-  const oldNum = parseInt((g.old || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const totalPrice = priceNum * qty;
   const unitLabel = g.unit === '/u' ? 'u' : 'kg';
-  const join = (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
-    const q = Math.max(MIN_QTY, qty);
-    addToCart({
-      name: g.product, price: g.price, old: g.old, priceN: priceNum, oldN: oldNum,
-      unit: g.unit || '/kg', img: g.img, members: g.members, progress: live.pct, location: g.location,
-    }, q);
-    if (typeof bumpFilled === 'function') bumpFilled(g.product, q);
-    if (typeof setMisGruposTab === 'function') setMisGruposTab('carrito');
-    showToast(`Sumaste ${q} ${unitLabel} de ${g.product} al carrito`);
-    navigate('mis-grupos');
-  };
   const qtyBtn = (label, onClick, filled) => (
     <button type="button" aria-label={label === '+' ? 'Más' : 'Menos'} onClick={onClick} style={{ width: 40, height: 40, minWidth: 40, minHeight: 40, borderRadius: 999, border: filled ? 'none' : '1.5px solid #ccc', background: filled ? primary : '#fff', color: filled ? '#fff' : '#333', fontWeight: 700, fontSize: 18, cursor: 'pointer', display: 'grid', placeItems: 'center', fontFamily: 'inherit', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>{label}</button>
   );
   return (
     <div style={{ fontFamily: "'Inter',sans-serif", background: '#f4f5f7', height: '100%', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', WebkitFontSmoothing: 'antialiased', touchAction: 'manipulation' }}>
       <header style={{ flexShrink: 0, background: 'rgba(255,255,255,0.97)', borderBottom: '1px solid #e8eaec', padding: '0 16px', height: 48, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button type="button" onClick={() => window.history.length > 1 ? window.history.back() : navigate('home')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center', minWidth: 44, minHeight: 44, touchAction: 'manipulation' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-        </button>
-        <span style={{ fontWeight: 700, fontSize: 15, flex: 1 }}>Detalle del grupo</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+        {!META_AD_LANDING && (
+          <button type="button" onClick={() => window.history.length > 1 ? window.history.back() : navigate('home')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center', minWidth: 44, minHeight: 44, touchAction: 'manipulation' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+          </button>
+        )}
+        <span style={{ fontWeight: 800, fontSize: 15, flex: 1 }}>{META_AD_LANDING ? 'HUBADOR · Oferta en Garín' : 'Detalle del grupo'}</span>
+        {!META_AD_LANDING && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>}
       </header>
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', position: 'relative', zIndex: 1, pointerEvents: 'auto' }}>
         <div style={{ height: 138, background: 'linear-gradient(135deg,oklch(0.95 0.03 165),#e8eaec)', display: 'grid', placeItems: 'center', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
@@ -5594,7 +5561,7 @@ function MobileGrupoDetalle() {
           {g.disc && <span className="web-badge" style={{ position: 'absolute', top: 14, left: -32, width: 120, background: '#ff0000', color: '#fff', fontWeight: 900, fontSize: 12, letterSpacing: '0.02em', textAlign: 'center', transform: 'rotate(-45deg)', boxShadow: '0 2px 6px rgba(0,0,0,0.35)', padding: '3px 0', zIndex: 10, lineHeight: 1 }}>-{g.disc}%</span>}
           <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, width: 24, height: 24, borderRadius: '50%', background: checkBg(g.precioActualizado), color: '#fff', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 800, boxShadow: checkShadow(g.precioActualizado), pointerEvents: 'none' }}>✓</div>
         </div>
-        <div style={{ padding: '8px 16px 88px' }}>
+        <div style={{ padding: META_AD_LANDING ? '10px 16px 24px' : '8px 16px 88px' }}>
           <div style={{ fontSize: 11, color: '#888', marginBottom: 1 }}>Compra en conjunto · 📍 {currentZoneName()}</div>
           <h1 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{g.product}</h1>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
@@ -5608,6 +5575,22 @@ function MobileGrupoDetalle() {
             <span style={{ fontSize: 13, fontWeight: 700 }}>Equipo</span>
             <span style={{ fontSize: 20, fontWeight: 900, color: primary }}>{g.price}{g.unit}</span>
           </div>
+          {META_AD_LANDING ? (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, margin: '10px 0' }}>
+                {['📍 Retiro en Garín', '💬 Confirmación por WhatsApp', '✓ Sin crear cuenta'].map((label) => (
+                  <div key={label} style={{ minHeight: 44, display: 'grid', placeItems: 'center', textAlign: 'center', background: '#ecfdf5', border: '1px solid #bbf7d0', borderRadius: 10, padding: '6px 4px', color: '#166534', fontSize: 10.5, fontWeight: 750, lineHeight: 1.25 }}>{label}</div>
+                ))}
+              </div>
+              <HubadorLeadCapture
+                compact
+                product={{ id: g.id || g.product, name: g.product, product: g.product, price: g.price, priceN: priceNum, unit: g.unit }}
+                nodo={currentZoneName()}
+              />
+              <div style={{ marginTop: 10, textAlign: 'center', color: '#64748b', fontSize: 11, lineHeight: 1.45 }}>La entrega se confirma cuando se completa el pedido grupal. Consultar por WhatsApp no te obliga a comprar.</div>
+            </>
+          ) : (
+            <>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '10px 12px', marginBottom: 10 }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 600 }}>Cantidad ({g.unit === '/u' ? 'unidades' : 'kg'})</div>
@@ -5621,8 +5604,8 @@ function MobileGrupoDetalle() {
             </div>
           </div>
           <div style={{ marginBottom: 10, position: 'relative', zIndex: 9, pointerEvents: 'auto' }}>
-            <button type="button" onClick={join} style={{ width: '100%', minHeight: 52, background: '#f97316', color: '#fff', border: 'none', borderRadius: 12, padding: '14px', fontWeight: 800, fontSize: 17, fontFamily: 'inherit', cursor: 'pointer', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', position: 'relative', zIndex: 9, pointerEvents: 'auto', boxShadow: '0 4px 12px rgba(249,115,22,0.3)' }}>Comprar</button>
-            <div style={{ textAlign: 'center', fontSize: 11, color: '#888', marginTop: 6 }}>Se suma a Mis grupos. Otros vecinos pueden seguir uniéndose.</div>
+            <HubadorWhatsAppButton product={{ id: g.id || g.product, name: g.product, product: g.product, price: g.price, priceN: priceNum, unit: g.unit }} quantity={qty} nodo={currentZoneName()} label="Comprar por WhatsApp" layoutStyle={{ width: '100%', position: 'relative', zIndex: 9 }} />
+            <div style={{ textAlign: 'center', fontSize: 11, color: '#888', marginTop: 6 }}>Mensaje listo con el producto, precio y cantidad.</div>
           </div>
           {(() => {
             const { filled: filledKg, missing: missingKg, pct, almost, goal: totalKg } = live;
@@ -5652,6 +5635,8 @@ function MobileGrupoDetalle() {
 
           })()}
           <MasOfertas excludeName={g.product} barrio={g.location || 'Buenos Aires'} />
+            </>
+          )}
         </div>
       </div>
     </div>);
@@ -6729,6 +6714,52 @@ function BottomNav({ active }) {
 const NavContext = React.createContext(() => {});
 const SelectionContext = React.createContext({ selected: null, setSelected: () => {}, selectedOrder: null, setSelectedOrder: () => {}, selectedGroup: null, setSelectedGroup: () => {}, showToast: () => {}, webSearch: '', setWebSearch: () => {} });
 
+function HubadorWhatsAppButton({ product, quantity, nodo, message, label, className, layoutStyle, stopPropagation }) {
+  const href = message
+    ? buildWhatsAppLink(message)
+    : buildOfertaWhatsAppLink(product || { name: 'esta oferta', price: '', unit: '' }, quantity);
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className || ''}
+      onClick={(e) => {
+        if (stopPropagation) e.stopPropagation();
+        trackWhatsAppContact(product || null, nodo, quantity);
+      }}
+      style={Object.assign({
+        background: '#25D366', color: '#fff', border: 'none', borderRadius: 999,
+        minHeight: 50, padding: '12px 20px', fontFamily: 'inherit', fontWeight: 900, fontSize: 15,
+        cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', gap: 9, boxSizing: 'border-box', touchAction: 'manipulation',
+        WebkitTapHighlightColor: 'transparent', boxShadow: '0 5px 16px rgba(37,211,102,0.35)',
+      }, layoutStyle || {})}
+    >
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true" style={{ flexShrink: 0 }}>
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.572-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.99c-.002 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c-.001 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      <span>{label || 'Consultar por WhatsApp'}</span>
+    </a>
+  );
+}
+
+function HubadorLeadCapture({ product, nodo, compact }) {
+  return (
+    <div style={{ background: '#fff', border: '1.5px solid #bbf7d0', borderRadius: 16, padding: compact ? '14px' : '18px', boxShadow: '0 10px 30px rgba(15,118,110,.10)' }}>
+      <div style={{ fontWeight: 900, color: '#0f172a', fontSize: compact ? 18 : 21, letterSpacing: '-0.02em', marginBottom: 4 }}>¿Querés esta oferta?</div>
+      <div style={{ color: '#475569', fontSize: compact ? 12.5 : 13.5, lineHeight: 1.45, marginBottom: 12 }}>Abrí WhatsApp con el mensaje listo y consultá sin crear una cuenta.</div>
+      <HubadorWhatsAppButton
+        product={product}
+        nodo={nodo}
+        label="Quiero esta oferta por WhatsApp"
+        layoutStyle={{ width: '100%' }}
+      />
+      <div style={{ marginTop: 8, color: '#64748b', fontSize: 10.5, lineHeight: 1.4, textAlign: 'center' }}>Te lleva al WhatsApp de HUBADOR con el producto y precio ya escritos.</div>
+    </div>
+  );
+}
+
 function HubadorProfileGateModal({ open, initialTel, initialDireccion, initialNodo, userBarrio, onSave, onCancel }) {
   const [tel, setTel] = React.useState(initialTel || '');
   const [direccion, setDireccion] = React.useState(initialDireccion || '');
@@ -7531,23 +7562,12 @@ function WebHome() {
                   <p>Oferta grupal · precio de productor · retiro en el hub.</p>
                 </div>
                 <div className="web-hero-cta" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
-                  <a
+                  <HubadorWhatsAppButton
                     className="web-btn"
-                    href={buildWhatsAppLink('Hola! Vi HUBADOR y quiero recibir la lista de precios por WhatsApp')}
-                    target="_blank"
-                    rel="noopener"
-                    style={{
-                      background: '#25D366', color: '#fff', border: 'none', borderRadius: 999,
-                      padding: '14px 24px', minHeight: 56, fontWeight: 900, fontSize: 15.5,
-                      textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-                      boxShadow: '0 6px 20px rgba(37,211,102,0.45)',
-                    }}
-                  >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true" style={{ flexShrink: 0 }}>
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.572-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.99c-.002 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c-.001 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
-                    <span>Recibir precios por WhatsApp</span>
-                  </a>
+                    message="Hola! Vi HUBADOR y quiero recibir la lista de precios por WhatsApp"
+                    nodo={currentZoneName()}
+                    label="Recibir precios por WhatsApp"
+                  />
                   <div style={{ color: '#4b564f', fontSize: 12, fontWeight: 500 }}>
                     🔒 Sin spam. Accedé a los precios de hoy en tu barrio.
                   </div>
@@ -7641,11 +7661,7 @@ function WebHome() {
                       </span>
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
-                    <button
-                      className="web-join-card"
-                      onClick={(e) => { e.stopPropagation(); openProduct(p); }}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
-                    >Quiero esta oferta</button>
+                    <HubadorWhatsAppButton product={p} nodo={currentZoneName()} stopPropagation className="web-join-card" layoutStyle={{ width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0 }} />
                   </div>
                 </article>
               );
@@ -7798,11 +7814,7 @@ function WebProductos() {
                       </span>
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
-                    <button
-                      className="web-join-card"
-                      onClick={(e) => { e.stopPropagation(); openProduct(p); }}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
-                    >Quiero esta oferta</button>
+                    <HubadorWhatsAppButton product={p} nodo={currentZoneName()} stopPropagation className="web-join-card" layoutStyle={{ width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0 }} />
                   </div>
                 </article>
               );
@@ -7886,10 +7898,10 @@ function WebHeader({ showSearch = true, authMode = null }) {
 }
 
 
-function WebShell({ children, title, wide, auth, authMode }) {
+function WebShell({ children, title, wide, auth, authMode, minimal }) {
   return (
     <div className={'web-page' + (wide ? ' web-page-wide' : '')}>
-      <WebHeader showSearch={!auth} authMode={authMode || null} />
+      {!minimal && <WebHeader showSearch={!auth} authMode={authMode || null} />}
       <main className={wide ? 'web-main web-main-wide' : 'web-main'}>{children}</main>
     </div>
   );
@@ -8104,7 +8116,7 @@ function WebSignup() {
 function WebGrupoDetalle() {
   const primary = 'oklch(0.55 0.15 165)';
   const navigate = React.useContext(NavContext);
-  const { selected, selectedGroup, setSelected, setSelectedGroup, showToast, addToCart, user, bumpFilled, progressTick, setMisGruposTab } = React.useContext(SelectionContext);
+  const { selected, selectedGroup, setSelected, setSelectedGroup, user, progressTick } = React.useContext(SelectionContext);
   const fallbackG = (() => {
     const p = hubadorById('tomate') || getHubadorCatalogList()[0];
     const live = groupProgressView(p.name);
@@ -8133,28 +8145,10 @@ function WebGrupoDetalle() {
   }, [g.product]);
 
   const priceNum = parseInt((g.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
-  const oldNum = parseInt((g.old || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const totalPrice = priceNum * qty;
   const unitLabel = g.unit === '/u' ? 'u' : 'kg';
   const live = groupProgressView(g.product);
   const membersCount = live.members;
-  const join = (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
-    try {
-      const q = Math.max(minQty, qty);
-      addToCart({
-        name: g.product, price: g.price, old: g.old, priceN: priceNum, oldN: oldNum,
-        unit: g.unit || '/kg', img: g.img, members: g.members, progress: live.pct, location: g.location,
-      }, q);
-      if (typeof bumpFilled === 'function') bumpFilled(g.product, q);
-      if (typeof setMisGruposTab === 'function') setMisGruposTab('carrito');
-      showToast(`Sumaste ${q} ${unitLabel} de ${g.product} al carrito`);
-      navigate('mis-grupos');
-    } catch (err) {
-      console.error('[WebGrupoDetalle] error en join:', err);
-    }
-  };
   const totalKg = live.goal;
   const pct = live.pct;
   const filledKg = live.filled;
@@ -8171,9 +8165,9 @@ function WebGrupoDetalle() {
   };
 
   return (
-    <WebShell wide>
+    <WebShell wide minimal={META_AD_LANDING}>
       <div className="web-detail">
-        <button type="button" className="web-back" onClick={() => navigate('home')}>← Volver</button>
+        {!META_AD_LANDING && <button type="button" className="web-back" onClick={() => navigate('home')}>← Volver</button>}
         <div className="web-detail-grid">
           <div className="web-detail-media">
             <img src={g.img} alt={g.product} />
@@ -8193,6 +8187,21 @@ function WebGrupoDetalle() {
               <span style={{ fontSize: 24, fontWeight: 900, color: primary }}>{g.price}{g.unit}</span>
             </div>
 
+            {META_AD_LANDING ? (
+              <>
+                <p style={{ margin: '0 0 14px', color: '#475569', fontSize: 14, lineHeight: 1.5 }}>{detailBlurb}</p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+                  {['📍 Retiro en Garín', '💬 Confirmación por WhatsApp', '✓ Sin crear cuenta'].map((label) => (
+                    <span key={label} style={{ background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#166534', borderRadius: 999, padding: '7px 10px', fontSize: 12, fontWeight: 750 }}>{label}</span>
+                  ))}
+                </div>
+                <HubadorLeadCapture
+                  product={{ id: g.id || g.product, name: g.product, product: g.product, price: g.price, priceN: priceNum, unit: g.unit }}
+                  nodo={currentZoneName()}
+                />
+                <p style={{ margin: '10px 0 0', color: '#64748b', fontSize: 11.5, textAlign: 'center' }}>La entrega se confirma cuando se completa el pedido grupal. Consultar por WhatsApp no te obliga a comprar.</p>
+              </>
+            ) : (
             <div className="web-detail-cta">
               <div className="web-detail-status">
                 <div className="web-progress"><i style={{ width: pct + '%', background: primary }} /></div>
@@ -8219,13 +8228,14 @@ function WebGrupoDetalle() {
                 <div className="web-breakdown">
                   <div className="web-breakdown-total"><span>Total</span><strong>{'$' + totalPrice.toLocaleString('es-AR')}</strong></div>
                 </div>
-                <button type="button" className="web-btn web-btn-join" onClick={join}>Comprar</button>
+                <HubadorWhatsAppButton product={{ id: g.id || g.product, name: g.product, product: g.product, price: g.price, priceN: priceNum, unit: g.unit }} quantity={qty} nodo={currentZoneName()} label="Comprar por WhatsApp" className="web-btn web-btn-join" />
               </div>
             </div>
+            )}
           </div>
         </div>
 
-        <section className="web-otros">
+        {!META_AD_LANDING && <section className="web-otros">
           <div className="web-otros-head">
             <h2>Otros productos</h2>
             <p>Seguí sumando al pedido · {others.length} disponibles</p>
@@ -8263,18 +8273,13 @@ function WebGrupoDetalle() {
                       </span>
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
-                    <button
-                      type="button"
-                      className="web-join-card"
-                      onClick={(e) => { e.stopPropagation(); openOther(p); }}
-                      style={{ display: 'block', width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0, background: '#0d9488', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 8px', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', lineHeight: 1.2, minHeight: 38, boxSizing: 'border-box' }}
-                    >Comprar</button>
+                    <HubadorWhatsAppButton product={p} nodo={currentZoneName()} stopPropagation className="web-join-card" layoutStyle={{ width: '100%', marginTop: 6, marginBottom: 4, flexShrink: 0 }} />
                   </div>
                 </article>
               );
             })}
           </div>
-        </section>
+        </section>}
       </div>
     </WebShell>
   );
@@ -9267,7 +9272,7 @@ function App() {
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <ScreenComp />
         </div>
-        {!['login', 'signup', 'admin', 'admin-grupos', 'admin-pedidos', 'admin-productos'].includes(active) &&
+        {!META_AD_LANDING && !['login', 'signup', 'admin', 'admin-grupos', 'admin-pedidos', 'admin-productos'].includes(active) &&
         <BottomNav active={active} />
         }
       </SelectionContext.Provider>
