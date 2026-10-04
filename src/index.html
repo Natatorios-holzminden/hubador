@@ -2318,6 +2318,24 @@ function resolveGoalForProduct(name) {
     return (g && g > 0) ? g : GOAL_KG;
   } catch (e) { return GOAL_KG; }
 }
+/** Kilos/unidades disponibles de un producto (editable en Admin). null si no hay dato. */
+function resolveStockForProduct(name) {
+  try {
+    const p = getRawCatalogStore().find((x) => x.name === name);
+    if (!p || p.stock == null || p.stock === '') return null;
+    return { stock: Math.max(0, Number(p.stock) || 0), unit: p.unit === '/u' ? 'u' : 'kg' };
+  } catch (e) { return null; }
+}
+/** Etiqueta "📦 80 kg disp." — la misma en tienda web, mobile y detalle. */
+function StockTag({ name, style }) {
+  const s = resolveStockForProduct(name);
+  if (!s) return null;
+  return (
+    <span style={{ color: s.stock > 0 ? '#0f766e' : '#b91c1c', fontWeight: 700, whiteSpace: 'nowrap', ...(style || {}) }}>
+      📦 {s.stock > 0 ? `${s.stock} ${s.unit} disp.` : 'Sin stock'}
+    </span>
+  );
+}
 /** Kg juntados de un producto: reales desde Supabase si está configurado; si no, demo local. */
 function getGroupFilled(name) {
   const goal = resolveGoalForProduct(name);
@@ -2485,6 +2503,7 @@ function ActiveOrderExtras({ order, userKg }) {
         <span style={{ fontSize: 11.5, fontWeight: 600, color: '#444', fontVariantNumeric: 'tabular-nums', letterSpacing: '0.01em' }}>
           Faltan {live.missing} kg · Grupo: {live.filled}/{live.goal} kg
         </span>
+        <StockTag name={name} style={{ fontSize: 11.5 }} />
         {myKg > 0 && (
           <span style={{ fontSize: 11.5, fontWeight: 800, color: '#0f766e', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: 6 }}>
             👤 Tu compra: {myKg} kg
@@ -3199,6 +3218,7 @@ function MobileHome() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#888', gap: 6 }}>
                     {(() => {const live = groupProgressView(p.name);return <>
                       <span style={{ color: live.almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: live.almost ? 700 : 500 }}>{live.almost ? `⚡ Faltan ${live.missing} kg` : `Faltan ${live.missing} kg`} · {live.filled}/{live.goal} kg</span>
+                      <StockTag name={p.name} />
                     </>;})()}
                   </div>
                   <Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card />
@@ -3583,6 +3603,7 @@ function MobileProductos() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#888', gap: 6 }}>
                     {(() => {const live = groupProgressView(p.name);return <>
                       <span style={{ color: live.almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: live.almost ? 700 : 500 }}>{live.almost ? `⚡ Faltan ${live.missing} kg` : `Faltan ${live.missing} kg`} · {live.filled}/{live.goal} kg</span>
+                      <StockTag name={p.name} />
                     </>;})()}
                   </div>
                   <Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card />
@@ -3675,7 +3696,7 @@ function MobileProducto() {
         </div>
         <div style={{ background: 'oklch(0.97 0.02 165)', border: '1px solid oklch(0.88 0.06 165)', borderRadius: 12, padding: '8px 10px', marginBottom: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#555', marginBottom: 5 }}>
-            <span>Faltan {live.missing} kg · {live.filled}/{live.goal} kg</span>
+            <span>Faltan {live.missing} kg · {live.filled}/{live.goal} kg · <StockTag name={prod.name} /></span>
             <span style={{ fontWeight: 700 }}>{live.pct}%</span>
           </div>
           <div style={{ height: 5, background: '#e0e0e0', borderRadius: 999, overflow: 'hidden', marginBottom: 6 }}>
@@ -3798,6 +3819,7 @@ function MasOfertas({ excludeName, barrio = 'Buenos Aires' }) {
                       {almost ? `¡Sólo faltan ${missing} kg!` : <>Faltan <b style={{ color: '#333' }}>{missing} kg</b> · {live.filled}/{live.goal} kg</>}
                     </span>
                     {almost && <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{live.filled}/{live.goal}</span>}
+                    <StockTag name={o.name} />
                   </div>
                   <div style={{ height: 5, background: '#ececef', borderRadius: 999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 999, transition: 'width 0.3s' }} />
@@ -5825,6 +5847,7 @@ function MobileGrupoDetalle() {
                     {almost ? `⚡ ¡Sólo faltan ${missingKg} kg!` : <>Faltan <b>{missingKg} kg</b> · {filledKg}/{totalKg} kg</>}
                   </span>
                   {almost && <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{filledKg}/{totalKg} kg</span>}
+                  <StockTag name={g.product} />
                 </div>
                 <div style={{ height: 5, background: '#e0ede0', borderRadius: 999, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 999, transition: 'width 0.3s' }} />
@@ -6134,7 +6157,7 @@ function MobileSeguimiento() {
         {groupOpen && live && (
           <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: '14px 16px', marginBottom: 14 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#333', marginBottom: 6 }}>
-              Faltan {live.missing} kg · {live.filled}/{live.goal} kg
+              Faltan {live.missing} kg · {live.filled}/{live.goal} kg · <StockTag name={order.name} />
             </div>
             <div style={{ height: 5, background: '#e8ecea', borderRadius: 999, overflow: 'hidden', marginBottom: 8 }} aria-hidden="true">
               <div style={{ height: '100%', width: pct + '%', background: barColor, borderRadius: 999, transition: 'width .35s ease' }} />
@@ -7828,11 +7851,7 @@ function WebHome() {
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
                       </span>
-                      {p.stock != null && (
-                        <span style={{ marginLeft: 'auto', color: Number(p.stock) > 0 ? '#0f766e' : '#b91c1c', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                          📦 {Number(p.stock) > 0 ? `${p.stock} ${p.unit === '/u' ? 'u' : 'kg'} disp.` : 'Sin stock'}
-                        </span>
-                      )}
+                      <StockTag name={p.name} style={{ marginLeft: 'auto' }} />
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
@@ -7990,11 +8009,7 @@ function WebProductos() {
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
                       </span>
-                      {p.stock != null && (
-                        <span style={{ marginLeft: 'auto', color: Number(p.stock) > 0 ? '#0f766e' : '#b91c1c', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                          📦 {Number(p.stock) > 0 ? `${p.stock} ${p.unit === '/u' ? 'u' : 'kg'} disp.` : 'Sin stock'}
-                        </span>
-                      )}
+                      <StockTag name={p.name} style={{ marginLeft: 'auto' }} />
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
@@ -8395,7 +8410,7 @@ function WebGrupoDetalle() {
             <div className="web-detail-cta">
               <div className="web-detail-status">
                 <div className="web-progress"><i style={{ width: pct + '%', background: primary }} /></div>
-                <div className="web-muted">Faltan {missingKg} kg · {filledKg}/{totalKg} kg</div>
+                <div className="web-muted">Faltan {missingKg} kg · {filledKg}/{totalKg} kg · <StockTag name={g.product} /></div>
                 {g.deadlineHrs != null && typeof Countdown !== 'undefined' && (
                   <div style={{ marginTop: 6 }}><Countdown deadline={getDeadline(g.product, g.deadlineHrs)} compact /></div>
                 )}
@@ -8460,11 +8475,7 @@ function WebGrupoDetalle() {
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
                       </span>
-                      {p.stock != null && (
-                        <span style={{ marginLeft: 'auto', color: Number(p.stock) > 0 ? '#0f766e' : '#b91c1c', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                          📦 {Number(p.stock) > 0 ? `${p.stock} ${p.unit === '/u' ? 'u' : 'kg'} disp.` : 'Sin stock'}
-                        </span>
-                      )}
+                      <StockTag name={p.name} style={{ marginLeft: 'auto' }} />
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
