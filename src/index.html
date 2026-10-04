@@ -4582,6 +4582,77 @@ function MobileAdminGrupos() {
 
 }
 
+// Edición rápida en la tarjeta del admin: precio Coto, precio HUBADOR y kilos disponibles.
+// El % y el "Ahorrás" se recalculan en vivo mientras se escribe; se guarda con el botón o Enter.
+function AdminInlinePrices({ p, onSave }) {
+  const initial = { oldN: String(p.oldN || 0), priceN: String(p.priceN || 0), stock: String(p.stock != null ? p.stock : 100) };
+  const [draft, setDraft] = React.useState(initial);
+  const [saving, setSaving] = React.useState(false);
+  React.useEffect(() => { setDraft(initial); }, [p.oldN, p.priceN, p.stock]);
+
+  const oldN = Number(draft.oldN) || 0;
+  const priceN = Number(draft.priceN) || 0;
+  const disc = oldN > 0 && priceN > 0 ? calcDisc(priceN, oldN) : 0;
+  const ahorro = Math.max(0, oldN - priceN);
+  const dirty = draft.oldN !== initial.oldN || draft.priceN !== initial.priceN || draft.stock !== initial.stock;
+  const invalid = priceN <= 0 || (oldN > 0 && priceN > oldN);
+
+  const save = async () => {
+    if (!dirty || invalid || saving) return;
+    setSaving(true);
+    await onSave(p, { oldN, priceN, stock: Math.max(0, Number(draft.stock) || 0) });
+    setSaving(false);
+  };
+  const onKey = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); save(); }
+    if (e.key === 'Escape') { e.stopPropagation(); setDraft(initial); }
+  };
+  const box = (color, border) => ({ width: '100%', height: 32, border: `1px solid ${border}`, borderRadius: 7, padding: '0 6px 0 16px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, color, boxSizing: 'border-box', background: '#fff' });
+  const lbl = { fontSize: 10, fontWeight: 700, marginBottom: 2, display: 'block' };
+  const unitLbl = p.unit === '/u' ? 'u' : 'kg';
+
+  return (
+    <div style={{ marginTop: 'auto', paddingTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+        <label>
+          <span style={{ ...lbl, color: '#ef4444' }}>Precio Coto /{unitLbl}</span>
+          <span style={{ position: 'relative', display: 'block' }}>
+            <span style={{ position: 'absolute', left: 6, top: 7, fontSize: 12, fontWeight: 800, color: '#ef4444' }}>$</span>
+            <input type="number" min="0" inputMode="numeric" value={draft.oldN} onChange={(e) => setDraft({ ...draft, oldN: e.target.value })} onKeyDown={onKey} style={box('#ef4444', '#fca5a5')} />
+          </span>
+        </label>
+        <label>
+          <span style={{ ...lbl, color: '#0d9488' }}>Nuestro precio /{unitLbl}</span>
+          <span style={{ position: 'relative', display: 'block' }}>
+            <span style={{ position: 'absolute', left: 6, top: 7, fontSize: 12, fontWeight: 800, color: '#0d9488' }}>$</span>
+            <input type="number" min="0" inputMode="numeric" value={draft.priceN} onChange={(e) => setDraft({ ...draft, priceN: e.target.value })} onKeyDown={onKey} style={box('#0d9488', '#99f6e4')} />
+          </span>
+        </label>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 11.5, fontWeight: 800, color: '#fff', background: disc > 0 ? '#00be74' : '#94a3b8', padding: '2px 8px', borderRadius: 999 }}>↓ {disc}%</span>
+        {ahorro > 0
+          ? <span style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', background: '#ecfdf5', padding: '3px 6px', borderRadius: 4 }}>Ahorrás {fmtPrecioAR(ahorro)}{p.unit} vs Coto</span>
+          : invalid && <span style={{ fontSize: 11, fontWeight: 700, color: '#b91c1c' }}>{priceN <= 0 ? 'Poné nuestro precio' : 'Más caro que Coto'}</span>}
+      </div>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#334155', whiteSpace: 'nowrap' }}>📦 Disponibles:</span>
+        <input type="number" min="0" inputMode="numeric" value={draft.stock} onChange={(e) => setDraft({ ...draft, stock: e.target.value })} onKeyDown={onKey} style={{ width: 70, height: 28, border: '1px solid #cbd5e1', borderRadius: 7, padding: '0 6px', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, boxSizing: 'border-box' }} />
+        <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{unitLbl}</span>
+      </label>
+
+      {dirty && (
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button type="button" onClick={() => setDraft(initial)} disabled={saving} style={{ flex: 1, background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#475569', borderRadius: 7, padding: '6px', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>Deshacer</button>
+          <button type="button" onClick={save} disabled={invalid || saving} style={{ flex: 2, background: invalid ? '#94a3b8' : '#047857', border: 'none', color: '#fff', borderRadius: 7, padding: '6px', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 800, cursor: invalid ? 'default' : 'pointer' }}>{saving ? '⏳ Guardando...' : '💾 Guardar cambios'}</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MobileAdminProductos() {
   const primary = 'oklch(0.55 0.15 165)';
   const { showToast } = React.useContext(SelectionContext);
@@ -4737,6 +4808,17 @@ function MobileAdminProductos() {
     if (showToast) showToast(`📸 Portada de "${p.name}" actualizada` + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
+  const handleQuickUpdatePrices = async (p, changes) => {
+    const updated = getRawCatalogStore().map((item) => item.id === p.id ? { ...item, ...changes, precioActualizado: true } : item);
+    saveRawCatalogStore(updated);
+    reload();
+    const changed = updated.find((item) => item.id === p.id);
+    const published = changed ? await upsertProductoRemoto(changed) : false;
+    if (sb) setCatalogDirty(!published);
+    const disc = changes.oldN > 0 ? calcDisc(changes.priceN, changes.oldN) : 0;
+    if (showToast) showToast(`✓ "${p.name}": ${fmtPrecioAR(changes.priceN)} (Coto ${fmtPrecioAR(changes.oldN)}, -${disc}%) · ${changes.stock} disponibles` + (sb && !published ? ' (solo en este dispositivo)' : ''));
+  };
+
   const applyDiscountPct = (pct) => {
     const coto = Number(form.oldN) || 0;
     if (coto > 0) {
@@ -4839,6 +4921,53 @@ function MobileAdminProductos() {
     }
   };
 
+  // Cambio masivo: misma fecha de entrega y/o mismos kilos para varios productos a la vez.
+  // Un campo vacío no se toca; cada producto se sigue pudiendo editar individualmente.
+  const [bulkOpen, setBulkOpen] = React.useState(false);
+  const [bulk, setBulk] = React.useState({ scope: 'todos', deliveryDateTime: '', stock: '', goal: '' });
+  const [bulkSaving, setBulkSaving] = React.useState(false);
+
+  const handleOpenBulk = () => {
+    setBulk({ scope: 'todos', deliveryDateTime: toDatetimeLocalString(getNextSaturday12pm()), stock: '', goal: '' });
+    setBulkOpen(true);
+  };
+
+  const bulkTargets = () => {
+    if (bulk.scope === 'visibles') return items.filter((p) => !p.oculto);
+    if (bulk.scope === 'filtro') return filtered;
+    return items;
+  };
+
+  const handleApplyBulk = async () => {
+    const changes = {};
+    if (bulk.deliveryDateTime) {
+      const deadlineAt = new Date(bulk.deliveryDateTime).getTime();
+      if (isNaN(deadlineAt)) return;
+      changes.deadlineAt = deadlineAt;
+      changes.deadlineHrs = Math.max(1, Math.round((deadlineAt - Date.now()) / (3600 * 1000)));
+    }
+    if (bulk.stock !== '') changes.stock = Math.max(0, Number(bulk.stock) || 0);
+    if (bulk.goal !== '') changes.goal = Math.max(1, Number(bulk.goal) || GOAL_KG);
+    if (!Object.keys(changes).length) { if (showToast) showToast('Completá al menos la fecha o los kilos'); return; }
+
+    const ids = new Set(bulkTargets().map((p) => p.id));
+    if (!ids.size) { if (showToast) showToast('No hay productos para cambiar'); return; }
+    setBulkSaving(true);
+    const updated = getRawCatalogStore().map((p) => ids.has(p.id) ? { ...p, ...changes, precioActualizado: true } : p);
+    saveRawCatalogStore(updated);
+    reload();
+    let ok = 0, fail = 0;
+    for (const item of updated) {
+      if (!ids.has(item.id)) continue;
+      if (await upsertProductoRemoto(item)) ok++; else fail++;
+    }
+    setBulkSaving(false);
+    setBulkOpen(false);
+    if (sb) setCatalogDirty(fail > 0);
+    const what = [changes.deadlineAt && formatDeliveryDate(changes.deadlineAt), changes.stock != null && `${changes.stock} kg disponibles`, changes.goal != null && `meta ${changes.goal} kg`].filter(Boolean).join(' · ');
+    if (showToast) showToast(`🗓️ ${ids.size} producto(s) actualizados: ${what}` + (sb && fail > 0 ? ` — ${fail} quedaron solo en este dispositivo` : ''), 4200);
+  };
+
   const countActivos = items.filter(p => !p.oculto).length;
   const countOcultos = items.filter(p => p.oculto).length;
 
@@ -4881,6 +5010,12 @@ function MobileAdminProductos() {
                 style={{ background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
                 title="Copia el catálogo para pegarlo como respaldo/código"
               >📋 Exportar JSON</button>
+              <button
+                type="button"
+                onClick={handleOpenBulk}
+                style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #10b981', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                title="Poner la misma fecha de entrega y/o los mismos kilos a todos los productos"
+              >🗓️ Aplicar a todos</button>
               <button
                 onClick={handleOpenCreate}
                 style={{ background: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
@@ -5051,24 +5186,8 @@ function MobileAdminProductos() {
                     )}
                   </div>
 
-                  {/* Prices: Coto vs HUBADOR */}
-                  <div style={{ marginTop: 'auto', paddingTop: 6, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 18, fontWeight: 900, color: '#0d9488' }}>
-                      {p.price || fmtPrecioAR(p.priceN)}
-                      <small style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{p.unit}</small>
-                    </span>
-                    {(p.oldN > 0 || p.old) && (
-                      <span style={{ fontSize: 12, color: '#ef4444', textDecoration: 'line-through', fontWeight: 700 }}>
-                        {p.old || fmtPrecioAR(p.oldN)} <small style={{ textDecoration: 'none', color: '#ef4444', fontSize: 10 }}>COTO</small>
-                      </span>
-                    )}
-                  </div>
-
-                  {ahorro > 0 && (
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', background: '#ecfdf5', padding: '3px 6px', borderRadius: 4, width: 'fit-content' }}>
-                      Ahorrás {fmtPrecioAR(ahorro)}{p.unit} vs Coto
-                    </div>
-                  )}
+                  {/* Precios Coto / HUBADOR y kilos disponibles, editables directo en la tarjeta */}
+                  <AdminInlinePrices p={p} onSave={handleQuickUpdatePrices} />
 
                   {/* Admin Actions Bar */}
                   <div style={{ display: 'flex', gap: 6, marginTop: 8, paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
@@ -5124,6 +5243,66 @@ function MobileAdminProductos() {
             </div>
           </div>
         )}
+
+        {/* Cambio masivo de fecha de entrega / kilos */}
+        {bulkOpen && (() => {
+          const nTargets = bulkTargets().length;
+          const inputStyle = { width: '100%', height: 38, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 8px', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box' };
+          const labelStyle = { display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 };
+          return (
+            <div style={{ position: 'fixed', inset: 0, zIndex: 305, background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'grid', placeItems: 'center', padding: 16 }} onClick={() => !bulkSaving && setBulkOpen(false)}>
+              <div role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 420, background: '#fff', borderRadius: 18, padding: 20, boxShadow: '0 20px 48px rgba(0,0,0,0.3)', fontFamily: "'Inter', sans-serif", display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>🗓️ Aplicar a todos</h3>
+                  <button type="button" onClick={() => setBulkOpen(false)} title="Cerrar" style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '50%', width: 32, height: 32, fontSize: 16, fontWeight: 800, cursor: 'pointer', color: '#334155' }}>✕</button>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>¿A qué productos?</label>
+                  <select value={bulk.scope} onChange={(e) => setBulk({ ...bulk, scope: e.target.value })} style={inputStyle}>
+                    <option value="todos">Todos ({items.length})</option>
+                    <option value="visibles">Solo visibles ({countActivos})</option>
+                    <option value="filtro">Los que se ven ahora con el filtro/búsqueda ({filtered.length})</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>📅 Fecha y Hora de Entrega</label>
+                  <input type="datetime-local" value={bulk.deliveryDateTime} onChange={(e) => setBulk({ ...bulk, deliveryDateTime: e.target.value })} style={{ ...inputStyle, border: '1px solid #059669', background: '#f0fdf4', fontWeight: 600 }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 10.5, color: '#166534', fontWeight: 700 }}>{bulk.deliveryDateTime ? formatDeliveryDate(new Date(bulk.deliveryDateTime).getTime()) : 'No cambiar la fecha'}</span>
+                    <span style={{ display: 'flex', gap: 6 }}>
+                      <button type="button" onClick={() => setBulk({ ...bulk, deliveryDateTime: toDatetimeLocalString(getNextSaturday12pm()) })} style={{ background: '#ecfdf5', border: '1px solid #10b981', color: '#047857', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>Próximo viernes 18 hs</button>
+                      {bulk.deliveryDateTime && <button type="button" onClick={() => setBulk({ ...bulk, deliveryDateTime: '' })} style={{ background: '#fff', border: '1px solid #cbd5e1', color: '#475569', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>No cambiar</button>}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={labelStyle}>Kilos disponibles</label>
+                    <input type="number" min="0" value={bulk.stock} onChange={(e) => setBulk({ ...bulk, stock: e.target.value })} placeholder="Vacío = no cambiar" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Meta del grupo (kg)</label>
+                    <input type="number" min="1" value={bulk.goal} onChange={(e) => setBulk({ ...bulk, goal: e.target.value })} placeholder="Vacío = no cambiar" style={inputStyle} />
+                  </div>
+                </div>
+
+                <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.35 }}>
+                  Se pisa el valor de cada producto elegido. Los campos vacíos quedan como están, y después podés seguir cambiando cada uno con ✏️ Editar.
+                </div>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button type="button" disabled={bulkSaving} onClick={() => setBulkOpen(false)} style={{ flex: 1, background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#334155', borderRadius: 8, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Cancelar</button>
+                  <button type="button" disabled={bulkSaving || nTargets === 0} onClick={handleApplyBulk} style={{ flex: 2, background: bulkSaving ? '#94a3b8' : '#047857', border: 'none', color: '#fff', borderRadius: 8, padding: '10px', fontFamily: 'inherit', fontSize: 13, fontWeight: 800, cursor: bulkSaving ? 'default' : 'pointer' }}>
+                    {bulkSaving ? '⏳ Guardando...' : `Aplicar a ${nTargets} producto${nTargets === 1 ? '' : 's'}`}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Modal Dialog Form for Create / Edit */}
         {modalOpen && (
