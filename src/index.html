@@ -2625,6 +2625,11 @@ function saveRawCatalogStore(list) {
     window.dispatchEvent(new CustomEvent('hubador_catalog_updated'));
   } catch (e) {}
 }
+// El evento de arriba solo llega a la pestaña que guardó. Si el Admin está en otra pestaña,
+// el navegador avisa con "storage": lo reenviamos para que la tienda abierta se actualice sola.
+window.addEventListener('storage', (e) => {
+  if (e.key === 'hubador_catalog_raw_v3') window.dispatchEvent(new CustomEvent('hubador_catalog_updated'));
+});
 
 // ─── Catálogo remoto (Supabase) — así lo que edita Admin se ve en todos los dispositivos ──
 const PRODUCTOS_TABLE = 'productos';
@@ -4585,22 +4590,22 @@ function MobileAdminGrupos() {
 // Edición rápida en la tarjeta del admin: precio Coto, precio HUBADOR y kilos disponibles.
 // El % y el "Ahorrás" se recalculan en vivo mientras se escribe; se guarda con el botón o Enter.
 function AdminInlinePrices({ p, onSave }) {
-  const initial = { oldN: String(p.oldN || 0), priceN: String(p.priceN || 0), stock: String(p.stock != null ? p.stock : 100) };
+  const initial = { oldN: String(p.oldN || 0), priceN: String(p.priceN || 0), stock: String(p.stock != null ? p.stock : 100), goal: String(p.goal || GOAL_KG) };
   const [draft, setDraft] = React.useState(initial);
   const [saving, setSaving] = React.useState(false);
-  React.useEffect(() => { setDraft(initial); }, [p.oldN, p.priceN, p.stock]);
+  React.useEffect(() => { setDraft(initial); }, [p.oldN, p.priceN, p.stock, p.goal]);
 
   const oldN = Number(draft.oldN) || 0;
   const priceN = Number(draft.priceN) || 0;
   const disc = oldN > 0 && priceN > 0 ? calcDisc(priceN, oldN) : 0;
   const ahorro = Math.max(0, oldN - priceN);
-  const dirty = draft.oldN !== initial.oldN || draft.priceN !== initial.priceN || draft.stock !== initial.stock;
+  const dirty = draft.oldN !== initial.oldN || draft.priceN !== initial.priceN || draft.stock !== initial.stock || draft.goal !== initial.goal;
   const invalid = priceN <= 0 || (oldN > 0 && priceN > oldN);
 
   const save = async () => {
     if (!dirty || invalid || saving) return;
     setSaving(true);
-    await onSave(p, { oldN, priceN, stock: Math.max(0, Number(draft.stock) || 0) });
+    await onSave(p, { oldN, priceN, stock: Math.max(0, Number(draft.stock) || 0), goal: Math.max(1, Number(draft.goal) || GOAL_KG) });
     setSaving(false);
   };
   const onKey = (e) => {
@@ -4637,11 +4642,16 @@ function AdminInlinePrices({ p, onSave }) {
           : invalid && <span style={{ fontSize: 11, fontWeight: 700, color: '#b91c1c' }}>{priceN <= 0 ? 'Poné nuestro precio' : 'Más caro que Coto'}</span>}
       </div>
 
-      <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: '#334155', whiteSpace: 'nowrap' }}>📦 Disponibles:</span>
-        <input type="number" min="0" inputMode="numeric" value={draft.stock} onChange={(e) => setDraft({ ...draft, stock: e.target.value })} onKeyDown={onKey} style={{ width: 70, height: 28, border: '1px solid #cbd5e1', borderRadius: 7, padding: '0 6px', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, boxSizing: 'border-box' }} />
-        <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{unitLbl}</span>
-      </label>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+        <label title="Cuántos kilos hay para vender. Se muestra en la tienda como '📦 X kg disp.'">
+          <span style={{ ...lbl, color: '#334155' }}>📦 Disponibles ({unitLbl})</span>
+          <input type="number" min="0" inputMode="numeric" value={draft.stock} onChange={(e) => setDraft({ ...draft, stock: e.target.value })} onKeyDown={onKey} style={{ ...box('#334155', '#cbd5e1'), padding: '0 6px', fontSize: 12.5 }} />
+        </label>
+        <label title="Kilos que tiene que juntar el grupo. Es el número de la barra 'Faltan X kg · 0/100 kg' en la tienda">
+          <span style={{ ...lbl, color: '#334155' }}>🎯 Meta del grupo ({unitLbl})</span>
+          <input type="number" min="1" inputMode="numeric" value={draft.goal} onChange={(e) => setDraft({ ...draft, goal: e.target.value })} onKeyDown={onKey} style={{ ...box('#334155', '#cbd5e1'), padding: '0 6px', fontSize: 12.5 }} />
+        </label>
+      </div>
 
       {dirty && (
         <div style={{ display: 'flex', gap: 6 }}>
@@ -4816,7 +4826,7 @@ function MobileAdminProductos() {
     const published = changed ? await upsertProductoRemoto(changed) : false;
     if (sb) setCatalogDirty(!published);
     const disc = changes.oldN > 0 ? calcDisc(changes.priceN, changes.oldN) : 0;
-    if (showToast) showToast(`✓ "${p.name}": ${fmtPrecioAR(changes.priceN)} (Coto ${fmtPrecioAR(changes.oldN)}, -${disc}%) · ${changes.stock} disponibles` + (sb && !published ? ' (solo en este dispositivo)' : ''));
+    if (showToast) showToast(`✓ "${p.name}": ${fmtPrecioAR(changes.priceN)} (Coto ${fmtPrecioAR(changes.oldN)}, -${disc}%) · ${changes.stock} disponibles · meta ${changes.goal} kg` + (sb && !published ? ' (solo en este dispositivo)' : ''));
   };
 
   const applyDiscountPct = (pct) => {
@@ -7818,6 +7828,11 @@ function WebHome() {
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
                       </span>
+                      {p.stock != null && (
+                        <span style={{ marginLeft: 'auto', color: Number(p.stock) > 0 ? '#0f766e' : '#b91c1c', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          📦 {Number(p.stock) > 0 ? `${p.stock} ${p.unit === '/u' ? 'u' : 'kg'} disp.` : 'Sin stock'}
+                        </span>
+                      )}
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
@@ -7975,6 +7990,11 @@ function WebProductos() {
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
                       </span>
+                      {p.stock != null && (
+                        <span style={{ marginLeft: 'auto', color: Number(p.stock) > 0 ? '#0f766e' : '#b91c1c', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          📦 {Number(p.stock) > 0 ? `${p.stock} ${p.unit === '/u' ? 'u' : 'kg'} disp.` : 'Sin stock'}
+                        </span>
+                      )}
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
@@ -8440,6 +8460,11 @@ function WebGrupoDetalle() {
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
                         {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
                       </span>
+                      {p.stock != null && (
+                        <span style={{ marginLeft: 'auto', color: Number(p.stock) > 0 ? '#0f766e' : '#b91c1c', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          📦 {Number(p.stock) > 0 ? `${p.stock} ${p.unit === '/u' ? 'u' : 'kg'} disp.` : 'Sin stock'}
+                        </span>
+                      )}
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
                     <button
