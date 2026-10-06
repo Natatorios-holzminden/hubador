@@ -51,6 +51,7 @@ ITEMS_27 = [
     {'id': 'repollo_blanco', 'name': 'Repollo Blanco', 'cat': 'verduras', 'rank': 15, 'coto_term': 'repollo'},
     {'id': 'zucchini', 'name': 'Zapallito Zucchini / Largo', 'cat': 'verduras', 'rank': 16, 'coto_term': 'zucchini'},
     {'id': 'cebolla_verdeo', 'name': 'Cebolla de Verdeo', 'cat': 'verduras', 'rank': 17, 'coto_term': 'verdeo'},
+    {'id': 'tomate_cherry', 'name': 'Tomate Cherry', 'cat': 'verduras', 'rank': 18, 'coto_term': 'cherry'},
 
     # --- 12 FRUTAS ---
     {'id': 'mandarinamurcot', 'name': 'Mandarina Murcot', 'cat': 'frutas', 'rank': 1, 'coto_term': 'mandarina'},
@@ -66,7 +67,15 @@ ITEMS_27 = [
     {'id': 'kiwi', 'name': 'Kiwi Selección', 'cat': 'frutas', 'rank': 11, 'coto_term': 'kiwi'},
     {'id': 'frutilla', 'name': 'Frutilla Selección', 'cat': 'frutas', 'rank': 12, 'coto_term': 'frutilla'},
     {'id': 'mango', 'name': 'Mango Selección', 'cat': 'frutas', 'rank': 13, 'coto_term': 'mango'},
+    {'id': 'pepino', 'name': 'Pepino', 'cat': 'verduras', 'rank': 19, 'coto_term': 'pepino'},
 ]
+
+def get_fallback_img(pid):
+    for folder_name in ["coto_5oct", "coto_4oct", "coto_1oct", "coto_29sep", "coto_28sep"]:
+        fb = os.path.join(REPO_DIR, "evidencias", folder_name, f"coto_{pid}.png")
+        if os.path.exists(fb) and os.path.getsize(fb) > 5000:
+            return fb
+    return None
 
 async def run_daily_scrape():
     coto_results = []
@@ -86,7 +95,7 @@ async def run_daily_scrape():
             page = await context.new_page()
             
             try:
-                print(f"[{idx}/27] Scrapeando {item['name']} ({term})...")
+                print(f"[{idx}/{len(ITEMS_27)}] Scrapeando {item['name']} ({term})...")
                 await page.goto(url, wait_until="domcontentloaded", timeout=25000)
                 await page.wait_for_timeout(3500)
                 
@@ -115,23 +124,28 @@ async def run_daily_scrape():
                     
                     price_text = " ".join(lines[:4])
                 
+                # Scroll past the top SC Johnson promotional banner to expose product cards cleanly
+                await page.evaluate('window.scrollBy(0, 360)')
+                await page.wait_for_timeout(2500)
+
                 filename = f"coto_{pid}.png"
                 p_repo = os.path.join(COTO_OUT, filename)
                 p_desk = os.path.join(COTO_DESK, filename)
 
-                # Capture exact screenshot clip of the visible product grid
+                # Capture exact screenshot clip of the visible product cards grid
                 await page.screenshot(
                     path=p_repo,
-                    clip={'x': 250, 'y': 150, 'width': 980, 'height': 520}
+                    clip={'x': 220, 'y': 100, 'width': 980, 'height': 520}
                 )
                 
                 # Check if screenshot is valid (>10KB), if not, fallback to previous date
                 if not os.path.exists(p_repo) or os.path.getsize(p_repo) < 10000:
-                    fb_28sep = os.path.join(REPO_DIR, "evidencias", "coto_28sep", filename)
-                    if os.path.exists(fb_28sep):
-                        shutil.copy2(fb_28sep, p_repo)
+                    fb = get_fallback_img(pid)
+                    if fb:
+                        shutil.copy2(fb, p_repo)
 
-                shutil.copy2(p_repo, p_desk)
+                if os.path.exists(p_repo):
+                    shutil.copy2(p_repo, p_desk)
                 print(f"  [OK {date_label}] {item['name']:22} -> ${raw_price} (num: {num_price})")
 
                 coto_results.append({
@@ -151,9 +165,9 @@ async def run_daily_scrape():
                 # Fallback screenshot if page failed to load
                 p_repo = os.path.join(COTO_OUT, f"coto_{pid}.png")
                 p_desk = os.path.join(COTO_DESK, f"coto_{pid}.png")
-                fb_28sep = os.path.join(REPO_DIR, "evidencias", "coto_28sep", f"coto_{pid}.png")
-                if os.path.exists(fb_28sep):
-                    shutil.copy2(fb_28sep, p_repo)
+                fb = get_fallback_img(pid)
+                if fb:
+                    shutil.copy2(fb, p_repo)
                     shutil.copy2(p_repo, p_desk)
 
                 coto_results.append({

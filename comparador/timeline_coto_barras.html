@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Monitor de Evolución de Precios Coto Digital — Histórico 2 Semanas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --card-hover: #1c2744;
+      --border: rgba(255, 255, 255, 0.08);
+      --ink: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --coto-red: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --atomic: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      padding-bottom: 4rem;
+    }
+
+    .ticker {
+      background: linear-gradient(90deg, #9333ea, #38bdf8);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 0.55rem 1rem;
+      text-align: center;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    .wrap {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    header {
+      background: rgba(19, 27, 46, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.2rem;
+    }
+
+    .nav-btns { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .btn-back { background: rgba(255,255,255,0.08); color: var(--ink); }
+    .btn-back:hover { background: rgba(255,255,255,0.15); }
+    .btn-atomic { background: rgba(168, 85, 247, 0.2); color: #c084fc; border-color: rgba(168, 85, 247, 0.4); }
+    .btn-atomic:hover { background: #9333ea; color: #fff; }
+
+    /* Highlights Section (Quilmes Style) */
+    .coto-highlights-section {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(19, 27, 46, 0.9));
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #c084fc;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .ofertas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .oferta-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .oferta-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+
+    .badge-savings {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    .badge-hike {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--coto-red);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .oferta-name { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .oferta-price-main { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+    .oferta-price-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* Dual Charts Grid (Quilmes Style) */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    @media (max-width: 580px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    .chart-card-overview {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .chart-header-overview {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chart-title-overview {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chart-container-overview {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+
+    /* Single Product Deep Dive Section */
+    .single-product-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .control-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+    
+    .category-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .pill { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 0.45rem 0.9rem; border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 0.82rem; transition: all 0.2s; }
+    .pill:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .pill.active { background: var(--primary); color: #0f172a; border-color: var(--primary); }
+    .pill-atomic.active { background: #9333ea !important; color: #fff !important; border-color: #a855f7 !important; }
+
+    .select-box { display: flex; align-items: center; gap: 0.6rem; }
+    .select-box label { font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+    .product-select { background: #0b0f19; color: #fff; border: 1px solid var(--border); padding: 0.55rem 1rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; outline: none; cursor: pointer; min-width: 260px; }
+
+    .single-grid { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; }
+    @media (max-width: 992px) { .single-grid { grid-template-columns: 1fr; } }
+
+    .chart-wrapper { position: relative; height: 360px; width: 100%; }
+
+    .stats-card { background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+    .stats-title { font-size: 1.05rem; font-weight: 800; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+    
+    .kpi-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem 1rem; display: flex; flex-direction: column; gap: 3px; }
+    .kpi-lbl { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .kpi-val { font-size: 1.3rem; font-weight: 800; color: #fff; }
+    .kpi-sub { font-size: 0.8rem; font-weight: 600; }
+
+    .badge-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; font-weight: 800; text-transform: uppercase; }
+    .badge-verdura { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-fruta { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-atomic { background: rgba(168, 85, 247, 0.25); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+
+    /* Overview Mini Grid */
+    .overview-section { margin-top: 2rem; }
+    .overview-title { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .atomic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .mini-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+    .mini-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+    .mini-card-title { font-size: 0.95rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center; }
+    .mini-price-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 6px; }
+    .mini-trend { font-size: 0.8rem; font-weight: 700; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Banner Ticker -->
+  <div class="ticker">
+    <i class="fa-solid fa-chart-line"></i> MONITOR HISTÓRICO COTO DIGITAL — EVOLUCIÓN COMPLETA DE 2 SEMANAS (16-SEP AL 05-OCT)
+  </div>
+
+  <div class="wrap">
+    
+    <header>
+      <div>
+        <h1 class="brand-title"><i class="fa-solid fa-chart-column text-primary"></i> Evolución de Precios Coto Digital</h1>
+        <p class="brand-subtitle">Comparativa Histórica de Scrapers por Fecha · Análisis de 10 Relevamientos en Vivo</p>
+      </div>
+      <div class="nav-btns">
+        <a href="coto_top20_galeria.html" class="btn btn-back"><i class="fa-solid fa-camera"></i> Galería de Evidencias</a>
+        <a href="index.html" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Comparador</a>
+        <button class="btn btn-atomic" onclick="filterCategory('atomic')"><i class="fa-solid fa-atom"></i> Categoría Atomic (10)</button>
+      </div>
+    </header>
+
+    <!-- 1. DESTACADOS DE REBAJAS / OPORTUNIDADES (QUILMES STYLE) -->
+    <section class="coto-highlights-section">
+      <div class="section-title"><i class="fa-solid fa-fire text-warning"></i> Oportunidades y Rebajas Relevadas (2 Semanas)</div>
+      <div class="section-sub">Resumen de los productos con mayor reducción de precio de Coto Digital en las últimas 10 fechas.</div>
+      
+      <div class="ofertas-grid">
+        <div class="oferta-card">
+          <span class="badge-savings">📉 -68.7%</span>
+          <div class="oferta-name">Frutilla Selección</div>
+          <div class="oferta-price-main">$3.999,00 /kg</div>
+          <div class="oferta-price-sub">Estaba $12.796 el 16-Sep</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">📉 -32.0%</span>
+          <div class="oferta-name">Pepino Selección</div>
+          <div class="oferta-price-main">$1.699,00 /kg</div>
+          <div class="oferta-price-sub">OFERTA Exclusiva en Coto</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">📉 -20.0%</span>
+          <div class="oferta-name">Banana Cavendish</div>
+          <div class="oferta-price-main">$1.999,00 /kg</div>
+          <div class="oferta-price-sub">Estaba $2.499 el 16-Sep</div>
+        </div>
+
+        <div class="oferta-card">
+          <span class="badge-savings">📉 -12.5%</span>
+          <div class="oferta-name">Palta Hass (Atomic)</div>
+          <div class="oferta-price-main">$6.999,00 /kg</div>
+          <div class="oferta-price-sub">Bajó de $7.999 a $6.999</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. DUAL OVERVIEW CHARTS GRID (QUILMES STYLE ADAPTED TO COTO) -->
+    <section class="charts-grid">
+      <!-- Chart 1: Comparativa General Atomic 16-Sep vs 05-Oct -->
+      <div class="chart-card-overview">
+        <div class="chart-header-overview">
+          <div class="chart-title-overview">
+            <i class="fa-solid fa-atom text-atomic"></i> Precios Categoría ATOMIC (16-Sep vs 05-Oct)
+          </div>
+          <span class="badge-tag badge-atomic">10 Productos</span>
+        </div>
+        <div class="chart-container-overview">
+          <canvas id="overviewAtomicChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Ranking de Variación Acumulada (%) -->
+      <div class="chart-card-overview">
+        <div class="chart-header-overview">
+          <div class="chart-title-overview">
+            <i class="fa-solid fa-arrow-trend-up text-primary"></i> Ranking de Variación de Precio (%)
+          </div>
+          <span class="badge-tag badge-verdura">2 Semanas</span>
+        </div>
+        <div class="chart-container-overview">
+          <canvas id="overviewVariationChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SINGLE PRODUCT DEEP DIVE WITH 10 DATES BARS & KPIS (KEEPING EVERYTHING BELOW) -->
+    <section class="single-product-section">
+      <div class="section-title" style="color:var(--primary);"><i class="fa-solid fa-magnifying-glass-chart"></i> Inspección Detallada por Producto (10 Fechas Auditadas)</div>
+      <div class="section-sub">Selecciona cualquier producto para analizar la barra de precio fecha a fecha del scraper.</div>
+
+      <div class="control-row">
+        <div class="category-pills">
+          <button class="pill active" id="pillTodos" onclick="filterCategory('todos')">Todos (26)</button>
+          <button class="pill pill-atomic" id="pillAtomic" onclick="filterCategory('atomic')">⚛️ Atomic (10)</button>
+          <button class="pill" id="pillVerduras" onclick="filterCategory('verduras')">🥬 Verduras (15)</button>
+          <button class="pill" id="pillFrutas" onclick="filterCategory('frutas')">🍎 Frutas (11)</button>
+        </div>
+
+        <div class="select-box">
+          <label for="productSelect"><i class="fa-solid fa-box-archive"></i> Producto:</label>
+          <select id="productSelect" class="product-select" onchange="onProductSelect(this.value)">
+            <!-- Loaded dynamically -->
+          </select>
+        </div>
+      </div>
+
+      <div class="single-grid">
+        <!-- Single Bar Chart -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <div style="font-size:1.2rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:0.5rem;">
+              <span id="currentProdName">Tomate Redondo</span>
+              <span id="currentProdBadges"></span>
+            </div>
+            <span style="font-size:0.8rem; color:var(--muted);">Gráfico de Barras Individual</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-card">
+          <div class="stats-title"><i class="fa-solid fa-calculator text-primary"></i> Métricas del Producto</div>
+          
+          <div class="kpi-box">
+            <span class="kpi-lbl">Precio Inicial (16-Sep)</span>
+            <span class="kpi-val" id="kpiInitial">$3.299</span>
+            <span class="kpi-sub text-primary">Baseline de comparación</span>
+          </div>
+
+          <div class="kpi-box">
+            <span class="kpi-lbl">Precio Actual (05-Oct)</span>
+            <span class="kpi-val" id="kpiCurrent">$3.299</span>
+            <span class="kpi-sub" id="kpiTrendText">↔️ Sin variación</span>
+          </div>
+
+          <div class="kpi-box">
+            <span class="kpi-lbl">Precio Mínimo Relevado</span>
+            <span class="kpi-val text-success" id="kpiMin">$2.199</span>
+            <span class="kpi-sub text-success" id="kpiMinDate">23-Sep / 29-Sep</span>
+          </div>
+
+          <div class="kpi-box">
+            <span class="kpi-lbl">Precio Máximo Relevado</span>
+            <span class="kpi-val text-danger" id="kpiMax">$4.299</span>
+            <span class="kpi-sub text-danger" id="kpiMaxDate">28-Sep</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini Cards Overview Grid -->
+      <div class="overview-section">
+        <div class="overview-title"><i class="fa-solid fa-atom text-atomic"></i> Explorar Productos de la Categoría Seleccionada</div>
+        <div class="atomic-grid" id="overviewGrid"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    const DATA = [
+  {
+    "id": "papa_spunta",
+    "name": "Papa Spunta / Negra",
+    "cat": "verduras",
+    "atomic": false,
+    "prices": {
+      "16sep": "$2.299",
+      "17sep": "$2.299",
+      "21sep": "$2.699 (OFERTA)",
+      "22sep": "$2.699",
+      "23sep": "$2.799",
+      "28sep": "$2.799",
+      "29sep": "$2.699,00",
+      "1oct": "$2.379,15",
+      "4oct": "$2.379,15",
+      "5oct": "$2.799,00"
+    }
+  },
+  {
+    "id": "tomate_redondo",
+    "name": "Tomate Redondo",
+    "cat": "verduras",
+    "atomic": true,
+    "prices": {
+      "16sep": "$3.299",
+      "17sep": "$3.299",
+      "21sep": "$3.299 (OFERTA)",
+      "22sep": "$3.299",
+      "23sep": "$2.199 (OFERTA)",
+      "28sep": "$4.299",
+      "29sep": "$2.199 (OFERTA)",
+      "1oct": "$3.499,00",
+      "4oct": "$3.299,00",
+      "5oct": "$3.299,00"
+    }
+  },
+  {
+    "id": "tomate_cherry",
+    "name": "Tomate Cherry",
+    "cat": "verduras",
+    "atomic": true,
+    "prices": {
+      "16sep": "$9.349",
+      "17sep": "$9.349",
+      "21sep": "$9.349",
+      "22sep": "$9.349",
+      "23sep": "$9.349",
+      "28sep": "$9.349",
+      "29sep": "$9.349,15",
+      "1oct": "$9.349,15",
+      "4oct": "$8.074,15",
+      "5oct": "$9.499,00"
+    }
+  },
+  {
+    "id": "cebolla_valenciani",
+    "name": "Cebolla Valenciani",
+    "cat": "verduras",
+    "atomic": true,
+    "prices": {
+      "16sep": "$2.999",
+      "17sep": "$2.999",
+      "21sep": "$3.299",
+      "22sep": "$3.299",
+      "23sep": "$3.299",
+      "28sep": "$3.699",
+      "29sep": "$3.699,00",
+      "1oct": "$3.699,00",
+      "4oct": "$3.699,00",
+      "5oct": "$3.699,00"
+    }
+  },
+  {
+    "id": "zanahoria_chantenay",
+    "name": "Zanahoria Chantenay",
+    "cat": "verduras",
+    "atomic": false,
+    "prices": {
+      "16sep": "$1.899",
+      "17sep": "$1.899",
+      "21sep": "$1.999",
+      "22sep": "$1.999",
+      "23sep": "$2.399",
+      "28sep": "$2.399",
+      "29sep": "$2.399,00",
+      "1oct": "$1.999,00",
+      "4oct": "$1.999,00",
+      "5oct": "$1.999,00"
+    }
+  },
+  {
+    "id": "zapallo_tetsukab.",
+    "name": "Zapallo Cabutiá",
+    "cat": "verduras",
+    "atomic": false,
+    "prices": {
+      "16sep": "$2.799",
+      "17sep": "$2.799",
+      "21sep": "$1.899",
+      "22sep": "$1.899",
+      "23sep": "$2.399",
+      "28sep": "$3.499 (Anco) / $2.399 (Japonés)",
+      "29sep": "$2.399,00",
+      "1oct": "$3.499,00",
+      "4oct": "$2.399,00",
+      "5oct": "$3.499,00"
+    }
+  },
+  {
+    "id": "zapallito_redondo",
+    "name": "Zapallito Redondo",
+    "cat": "verduras",
+    "atomic": false,
+    "prices": {
+      "16sep": "$2.999",
+      "17sep": "$2.999",
+      "21sep": "$2.999 (OFERTA)",
+      "22sep": "$2.999",
+      "23sep": "$3.399",
+      "28sep": "$3.399",
+      "29sep": "$5.299,00",
+      "1oct": "$4.999,00",
+      "4oct": "$4.299,00",
+      "5oct": "$4.299,00"
+    }
+  },
+  {
+    "id": "acelga",
+    "name": "Acelga Selección",
+    "cat": "verduras",
+    "atomic": false,
+    "prices": {
+      "16sep": "$1.299",
+      "17sep": "$1.299",
+      "21sep": "$1.099 (OFERTA)",
+      "22sep": "$1.099",
+      "23sep": "$2.299",
+      "28sep": "$1.099",
+      "29sep": "$1.099,00",
+      "1oct": "$934,15",
+      "4oct": "$934,15",
+      "5oct": "$1.099,00"
+    }
+  },
+  {
+    "id": "lechuga_criolla",
+    "name": "Lechuga Criolla",
+    "cat": "verduras",
+    "atomic": true,
+    "prices": {
+      "16sep": "$2.699",
+      "17sep": "$2.699",
+      "21sep": "$2.699 (OFERTA)",
+      "22sep": "$2.699",
+      "23sep": "$4.799",
+      "28sep": "$2.599",
+      "29sep": "$2.599,00",
+      "1oct": "$2.209,15",
+      "4oct": "$1.954,15",
+      "5oct": "$2.499,00"
+    }
+  },
+  {
+    "id": "batata_arapey",
+    "name": "Batata Arapey",
+    "cat": "verduras",
+    "atomic": false,
+    "prices": {
+      "16sep": "$2.399",
+      "17sep": "$2.399",
+      "21sep": "$2.399 (OFERTA)",
+      "22sep": "$2.399",
+      "23sep": "$2.699",
+      "28sep": "$2.399",
+      "29sep": "$2.399,00",
+      "1oct": "$2.039,15",
+      "4oct": "$2.039,15",
+      "5oct": "$2.399,00"
+    }
+  },
+  {
+    "id": "pepino",
+    "name": "Pepino Selección",
+    "cat": "verduras",
+    "atomic": false,
+    "prices": {
+      "16sep": "$2.499",
+      "17sep": "$2.499",
+      "21sep": "$1.999 (OFERTA)",
+      "22sep": "$1.999",
+      "23sep": "$2.199 (OFERTA)",
+      "28sep": "$2.199 (OFERTA)",
+      "29sep": "$2.199 (OFERTA)",
+      "1oct": "$2.199 (OFERTA)",
+      "4oct": "$1.699,00 (OFERTA)"
+    }
+  },
+  {
+    "id": "berenjena_vta.med.la",
+    "name": "Berenjena Selección",
+    "cat": "verduras",
+    "atomic": true,
+    "prices": {
+      "16sep": "$2.999",
+      "17sep": "$2.999",
+      "21sep": "$2.999",
+      "22sep": "$2.999",
+      "23sep": "$2.999",
+      "28sep": "$2.999",
+      "29sep": "$2.999,00",
+      "1oct": "$2.999,00",
+      "4oct": "$3.499,00",
+      "5oct": "$3.499,00"
+    }
+  },
+  {
+    "id": "repollo_blanco",
+    "name": "Repollo Blanco",
+    "cat": "verduras",
+    "atomic": true,
+    "prices": {
+      "16sep": "$1.699",
+      "17sep": "$1.699",
+      "21sep": "$1.699",
+      "22sep": "$1.699",
+      "23sep": "$1.699",
+      "28sep": "$1.699",
+      "29sep": "$1.699,15",
+      "1oct": "$1.699,15",
+      "4oct": "$1.699,15",
+      "5oct": "$1.999,00"
+    }
+  },
+  {
+    "id": "zucchini",
+    "name": "Zucchini / Zapallito Largo",
+    "cat": "verduras",
+    "atomic": true,
+    "prices": {
+      "16sep": "$4.999",
+      "17sep": "$4.999",
+      "21sep": "$4.999",
+      "22sep": "$4.999",
+      "23sep": "$4.999",
+      "28sep": "$4.999",
+      "29sep": "$4.999,00",
+      "1oct": "$4.999,00",
+      "4oct": "$4.999,00",
+      "5oct": "$4.999,00"
+    }
+  },
+  {
+    "id": "cebolla_verdeo",
+    "name": "Cebolla de Verdeo",
+    "cat": "verduras",
+    "atomic": true,
+    "prices": {
+      "16sep": "$1.444",
+      "17sep": "$1.444",
+      "21sep": "$1.444",
+      "22sep": "$1.444",
+      "23sep": "$1.444",
+      "28sep": "$1.444",
+      "29sep": "$1.444,15",
+      "1oct": "$1.444,15",
+      "4oct": "$1.444,15",
+      "5oct": "$1.699,00"
+    }
+  },
+  {
+    "id": "banana_cavendish",
+    "name": "Banana Cavendish",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$2.499",
+      "17sep": "$2.499",
+      "21sep": "$2.299 (OFERTA)",
+      "22sep": "$2.299",
+      "23sep": "$2.199 (OFERTA)",
+      "28sep": "$1.999",
+      "29sep": "$1.999,00",
+      "1oct": "$1.699,15",
+      "4oct": "$1.699,15",
+      "5oct": "$1.999,00"
+    }
+  },
+  {
+    "id": "manzana_red_delicious",
+    "name": "Manzana Red Delicious",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$2.890",
+      "17sep": "$2.890",
+      "21sep": "$2.899 (OFERTA)",
+      "22sep": "$2.899",
+      "23sep": "$2.199 (OFERTA)",
+      "28sep": "$2.890",
+      "29sep": "$2.899,00",
+      "1oct": "$2.899,00",
+      "4oct": "$2.899,00",
+      "5oct": "$2.899,00"
+    }
+  },
+  {
+    "id": "naranja_salustiana",
+    "name": "Naranja Salustiana Jugo",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$899",
+      "17sep": "$899",
+      "21sep": "$899 (OFERTA)",
+      "22sep": "$899",
+      "23sep": "$699",
+      "28sep": "$899",
+      "29sep": "$899,00",
+      "1oct": "$899,00",
+      "4oct": "$899,00",
+      "5oct": "$899,00"
+    }
+  },
+  {
+    "id": "mandarinamurcot",
+    "name": "Mandarina Murcot",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$999",
+      "17sep": "$999",
+      "21sep": "$1.299 (OFERTA)",
+      "22sep": "$1.299",
+      "23sep": "$1.299",
+      "28sep": "$1.299",
+      "29sep": "$1.299,00",
+      "1oct": "$1.199,00",
+      "4oct": "$1.199,00",
+      "5oct": "$1.199,00"
+    }
+  },
+  {
+    "id": "pera_packhams",
+    "name": "Pera Packhams",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$2.299",
+      "17sep": "$2.299",
+      "21sep": "$2.999",
+      "22sep": "$2.999",
+      "23sep": "$2.299",
+      "28sep": "$2.299",
+      "29sep": "$2.999,00",
+      "1oct": "$2.549,15",
+      "4oct": "$2.549,15",
+      "5oct": "$2.999,00"
+    }
+  },
+  {
+    "id": "limon_eureka",
+    "name": "Limón Eureka",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$1.499",
+      "17sep": "$1.499",
+      "21sep": "$1.299 (OFERTA)",
+      "22sep": "$1.299",
+      "23sep": "$1.499",
+      "28sep": "$1.499",
+      "29sep": "$1.299,00",
+      "1oct": "$1.299,00",
+      "4oct": "$1.299,00",
+      "5oct": "$1.299,00"
+    }
+  },
+  {
+    "id": "frutilla",
+    "name": "Frutilla Selección",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$12.796",
+      "17sep": "$12.796",
+      "21sep": "$3.199 (OFERTA)",
+      "22sep": "$3.199",
+      "23sep": "$8.999",
+      "28sep": "$3.999 (OFERTA 500g)",
+      "29sep": "$3.999 (OFERTA 500g)",
+      "1oct": "$3.999,00",
+      "4oct": "$3.999,00",
+      "5oct": "$3.999,00"
+    }
+  },
+  {
+    "id": "pomelo_starruby",
+    "name": "Pomelo Star Ruby",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$999",
+      "17sep": "$999",
+      "21sep": "$999 (OFERTA)",
+      "22sep": "$999",
+      "23sep": "$999",
+      "28sep": "$2.999",
+      "29sep": "$2.999,00",
+      "1oct": "$1.299,00",
+      "4oct": "$1.299,00",
+      "5oct": "$1.399,00"
+    }
+  },
+  {
+    "id": "palta_hass",
+    "name": "Palta Hass",
+    "cat": "frutas",
+    "atomic": true,
+    "prices": {
+      "16sep": "$7.999",
+      "17sep": "$7.999",
+      "21sep": "$7.999 (OFERTA)",
+      "22sep": "$7.999",
+      "23sep": "$7.499",
+      "28sep": "$7.999",
+      "29sep": "$7.999,00",
+      "1oct": "$7.999,00",
+      "4oct": "$6.999,00",
+      "5oct": "$6.999,00"
+    }
+  },
+  {
+    "id": "mango",
+    "name": "Mango Selección",
+    "cat": "frutas",
+    "atomic": true,
+    "prices": {
+      "16sep": "$5.999",
+      "17sep": "$5.999",
+      "21sep": "$5.999",
+      "22sep": "$5.999",
+      "23sep": "$5.999",
+      "28sep": "$5.999",
+      "29sep": "$5.999,00",
+      "1oct": "$5.999,00",
+      "4oct": "$4.999,00",
+      "5oct": "$4.999,00"
+    }
+  },
+  {
+    "id": "kiwi",
+    "name": "Kiwi Selección",
+    "cat": "frutas",
+    "atomic": false,
+    "prices": {
+      "16sep": "$7.999",
+      "17sep": "$7.999",
+      "21sep": "$7.999",
+      "22sep": "$7.999",
+      "23sep": "$7.999",
+      "28sep": "$7.999",
+      "29sep": "$7.999",
+      "1oct": "$8.999,00",
+      "4oct": "$8.999,00",
+      "5oct": "$8.999,00"
+    }
+  }
+];
+    const DATES = ['16sep', '17sep', '21sep', '22sep', '23sep', '28sep', '29sep', '1oct', '4oct', '5oct'];
+    const DATE_LABELS = ['16-Sep', '17-Sep', '21-Sep', '22-Sep', '23-Sep', '28-Sep', '29-Sep', '01-Oct', '04-Oct', '05-Oct'];
+
+    let currentCategory = 'todos';
+    let currentProdId = 'tomate_redondo';
+    let myChart = null;
+
+    function parsePriceNum(valStr) {
+      if (!valStr || valStr === '-') return 0;
+      let clean = valStr.replace('$', '').replace(' (OFERTA)', '').replace(' (Foto 4)', '').replace(' (Foto 5)', '').replace(' (Hoy Live)', '').replace(' (Anco) / $2.399 (Japonés)', '').replace(' (OFERTA 500g)', '').trim();
+      if (clean.includes('.')) clean = clean.replace('.', '');
+      if (clean.includes(',')) clean = clean.replace(',', '.');
+      return parseFloat(clean) || 0;
+    }
+
+    // --- 1. OVERVIEW CHARTS (QUILMES STYLE) ---
+    function renderOverviewCharts() {
+      const atomicItems = DATA.filter(x => x.atomic);
+      const labelsAtomic = atomicItems.map(x => x.name.replace(' Selección', '').replace(' / Zapallito Largo', ''));
+      const prices16 = atomicItems.map(x => parsePriceNum(x.prices['16sep']));
+      const prices05 = atomicItems.map(x => parsePriceNum(x.prices['5oct']));
+
+      // Chart 1: Atomic 16-Sep vs 05-Oct Grouped Bar Chart
+      new Chart(document.getElementById('overviewAtomicChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: labelsAtomic,
+          datasets: [
+            {
+              label: '16-Sep (Baseline)',
+              data: prices16,
+              backgroundColor: 'rgba(56, 189, 248, 0.7)',
+              borderRadius: 4
+            },
+            {
+              label: '05-Oct (Hoy Live)',
+              data: prices05,
+              backgroundColor: 'rgba(168, 85, 247, 0.85)',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#94a3b8', font: { weight: 'bold' } } }
+          },
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#94a3b8', callback: v => '$' + v.toLocaleString('es-AR') }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+
+      // Chart 2: Top Variaciones (%) Horizontal Bar Chart
+      const variations = DATA.map(x => {
+        const p1 = parsePriceNum(x.prices['16sep']);
+        const p2 = parsePriceNum(x.prices['5oct']);
+        const pct = p1 > 0 ? ((p2 - p1) / p1) * 100 : 0;
+        return { name: x.name.replace(' Selección', ''), pct: parseFloat(pct.toFixed(1)) };
+      }).sort((a, b) => a.pct - b.pct);
+
+      const top7Var = variations.filter(x => x.pct !== 0).slice(0, 10);
+
+      new Chart(document.getElementById('overviewVariationChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: top7Var.map(x => x.name),
+          datasets: [{
+            label: 'Variación Acumulada (%)',
+            data: top7Var.map(x => x.pct),
+            backgroundColor: top7Var.map(x => x.pct < 0 ? '#10b981' : '#ef4444'),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#94a3b8', font: { weight: 'bold' } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // --- 2. SINGLE PRODUCT DEEP DIVE ---
+    function initSelect() {
+      const select = document.getElementById('productSelect');
+      select.innerHTML = '';
+      
+      const filtered = DATA.filter(item => {
+        if (currentCategory === 'todos') return true;
+        if (currentCategory === 'atomic') return !!item.atomic;
+        return item.cat === currentCategory;
+      });
+
+      filtered.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = (item.atomic ? '⚛️ ' : '') + item.name + ' (' + (item.cat === 'verduras' ? '🥬' : '🍎') + ')';
+        select.appendChild(opt);
+      });
+
+      if (filtered.length > 0) {
+        if (!filtered.some(x => x.id === currentProdId)) {
+          currentProdId = filtered[0].id;
+        }
+        select.value = currentProdId;
+      }
+    }
+
+    function renderChart(prodId) {
+      const item = DATA.find(x => x.id === prodId);
+      if (!item) return;
+
+      document.getElementById('currentProdName').textContent = item.name;
+      
+      let badgesHtml = '';
+      if (item.atomic) badgesHtml += '<span class="badge-tag badge-atomic"><i class="fa-solid fa-atom"></i> Atomic</span> ';
+      badgesHtml += `<span class="badge-tag ${item.cat === 'verduras' ? 'badge-verdura' : 'badge-fruta'}">${item.cat === 'verduras' ? '🥬 Verdura' : '🍎 Fruta'}</span>`;
+      document.getElementById('currentProdBadges').innerHTML = badgesHtml;
+
+      const priceNums = DATES.map(d => parsePriceNum(item.prices[d]));
+      const priceStrs = DATES.map(d => item.prices[d] || '-');
+
+      const barColors = priceNums.map((val, i) => {
+        if (i === 0) return '#38bdf8';
+        const prev = priceNums[i - 1];
+        if (val < prev) return '#10b981';
+        if (val > prev) return '#ef4444';
+        return '#38bdf8';
+      });
+
+      const ctx = document.getElementById('barChart').getContext('2d');
+      if (myChart) myChart.destroy();
+
+      myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: DATE_LABELS,
+          datasets: [{
+            label: 'Precio Coto Digital ($)',
+            data: priceNums,
+            backgroundColor: barColors,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return 'Precio: ' + priceStrs[ctx.dataIndex] + ' ($' + ctx.raw.toLocaleString('es-AR') + ')';
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { weight: 'bold' } } },
+            y: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#94a3b8', callback: v => '$' + v.toLocaleString('es-AR') } }
+          }
+        }
+      });
+
+      // Update KPI Stats
+      const pInitial = priceNums[0];
+      const pCurrent = priceNums[priceNums.length - 1];
+      
+      document.getElementById('kpiInitial').textContent = item.prices['16sep'] || '$' + pInitial;
+      document.getElementById('kpiCurrent').textContent = item.prices['5oct'] || '$' + pCurrent;
+
+      const diff = pCurrent - pInitial;
+      const pct = pInitial > 0 ? ((diff / pInitial) * 100).toFixed(1) : 0;
+      
+      const kpiTrend = document.getElementById('kpiTrendText');
+      if (diff < 0) {
+        kpiTrend.className = 'kpi-sub text-success';
+        kpiTrend.textContent = `📉 Bajó ${pct}% (-$${Math.abs(diff).toLocaleString('es-AR')})`;
+      } else if (diff > 0) {
+        kpiTrend.className = 'kpi-sub text-danger';
+        kpiTrend.textContent = `📈 Subió +${pct}% (+$${diff.toLocaleString('es-AR')})`;
+      } else {
+        kpiTrend.className = 'kpi-sub text-primary';
+        kpiTrend.textContent = '↔️ Sin variación respecto a 16-Sep';
+      }
+
+      // Min & Max
+      let minVal = Infinity, minDateIdx = [];
+      let maxVal = -Infinity, maxDateIdx = [];
+
+      priceNums.forEach((v, i) => {
+        if (v > 0) {
+          if (v < minVal) { minVal = v; minDateIdx = [DATE_LABELS[i]]; }
+          else if (v === minVal) { minDateIdx.push(DATE_LABELS[i]); }
+          
+          if (v > maxVal) { maxVal = v; maxDateIdx = [DATE_LABELS[i]]; }
+          else if (v === maxVal) { maxDateIdx.push(DATE_LABELS[i]); }
+        }
+      });
+
+      document.getElementById('kpiMin').textContent = '$' + minVal.toLocaleString('es-AR');
+      document.getElementById('kpiMinDate').textContent = minDateIdx.join(' / ');
+
+      document.getElementById('kpiMax').textContent = '$' + maxVal.toLocaleString('es-AR');
+      document.getElementById('kpiMaxDate').textContent = maxDateIdx.join(' / ');
+    }
+
+    function renderOverviewGrid() {
+      const grid = document.getElementById('overviewGrid');
+      grid.innerHTML = '';
+
+      const filtered = DATA.filter(item => {
+        if (currentCategory === 'todos') return true;
+        if (currentCategory === 'atomic') return !!item.atomic;
+        return item.cat === currentCategory;
+      });
+
+      filtered.forEach(item => {
+        const pInitial = parsePriceNum(item.prices['16sep']);
+        const pCurrent = parsePriceNum(item.prices['5oct']);
+        const diff = pCurrent - pInitial;
+        const pct = pInitial > 0 ? ((diff / pInitial) * 100).toFixed(1) : 0;
+
+        let trendClass = 'text-primary';
+        let trendIcon = '↔️';
+        if (diff < 0) { trendClass = 'text-success'; trendIcon = '📉 -' + Math.abs(pct) + '%'; }
+        else if (diff > 0) { trendClass = 'text-danger'; trendIcon = '📈 +' + pct + '%'; }
+
+        const card = document.createElement('div');
+        card.className = 'mini-card';
+        card.onclick = () => {
+          currentProdId = item.id;
+          document.getElementById('productSelect').value = item.id;
+          renderChart(item.id);
+        };
+
+        card.innerHTML = `
+          <div class="mini-card-title">
+            <span>${item.atomic ? '⚛️ ' : ''}${item.name}</span>
+            <span class="badge-tag ${item.cat === 'verduras' ? 'badge-verdura' : 'badge-fruta'}">${item.cat === 'verduras' ? '🥬' : '🍎'}</span>
+          </div>
+          <div class="mini-price-row">
+            <span style="color:var(--muted);">16-Sep: <strong>${item.prices['16sep']}</strong></span>
+            <span>05-Oct: <strong style="color:var(--primary);">${item.prices['5oct']}</strong></span>
+          </div>
+          <div class="mini-trend ${trendClass}">${trendIcon} en 2 semanas</div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      
+      if (cat === 'todos') document.getElementById('pillTodos').classList.add('active');
+      if (cat === 'atomic') document.getElementById('pillAtomic').classList.add('active');
+      if (cat === 'verduras') document.getElementById('pillVerduras').classList.add('active');
+      if (cat === 'frutas') document.getElementById('pillFrutas').classList.add('active');
+
+      initSelect();
+      renderChart(currentProdId);
+      renderOverviewGrid();
+    }
+
+    function onProductSelect(pid) {
+      currentProdId = pid;
+      renderChart(pid);
+    }
+
+    // Initialize
+    renderOverviewCharts();
+    initSelect();
+    renderChart(currentProdId);
+    renderOverviewGrid();
+  </script>
+</body>
+</html>
