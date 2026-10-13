@@ -71,7 +71,7 @@ ITEMS_27 = [
 ]
 
 def get_fallback_img(pid):
-    for folder_name in ["coto_5oct", "coto_4oct", "coto_1oct", "coto_29sep", "coto_28sep"]:
+    for folder_name in ["coto_6oct", "coto_5oct", "coto_4oct", "coto_1oct", "coto_29sep", "coto_28sep"]:
         fb = os.path.join(REPO_DIR, "evidencias", folder_name, f"coto_{pid}.png")
         if os.path.exists(fb) and os.path.getsize(fb) > 5000:
             return fb

@@ -1,24 +1,31 @@
-import json, os, re
+import json, os, re, sys, shutil
+if sys.stdout:
+    sys.stdout.reconfigure(encoding='utf-8')
 
 json_path = r'C:\Users\WORK\Documents\GitHub\hubador\comparador\timeline_summary.json'
 evid_dir = r'C:\Users\WORK\Documents\GitHub\hubador\comparador\evidencias'
+desktop_dir = r'C:\Users\WORK\Desktop\hubador antes del formulario\hubador\comparador'
 
 with open(json_path, encoding='utf-8') as f:
     items = json.load(f)
 
-date_keys = [
-    ('16sep', '16-Sep', ''),
-    ('17sep', '17-Sep', ''),
-    ('21sep', '21-Sep', 'coto_21sep'),
-    ('22sep', '22-Sep', 'coto_22sep'),
-    ('23sep', '23-Sep', 'coto_23sep'),
-    ('28sep', '28-Sep', 'coto_28sep'),
-    ('29sep', '29-Sep', 'coto_29sep'),
-    ('1oct', '01-Oct', 'coto_1oct'),
-    ('4oct', '04-Oct', 'coto_4oct'),
-    ('5oct', '05-Oct', 'coto_5oct'),
-    ('6oct', '06-Oct', 'coto_6oct')
-]
+# Dynamically discover all date keys from the first item
+all_date_keys = list(items[0]['prices'].keys())
+
+def format_date_label(dkey):
+    m = re.match(r'(\d+)([a-zA-Z]+)', dkey)
+    if m:
+        day_num = int(m.group(1))
+        mon_str = m.group(2).capitalize()
+        return f"{day_num:02d}-{mon_str}"
+    return dkey.upper()
+
+def get_sdir(dkey):
+    if dkey in ['16sep', '17sep']:
+        return ''
+    return f'coto_{dkey}'
+
+date_keys = [(dk, format_date_label(dk), get_sdir(dk)) for dk in all_date_keys]
 
 def find_img(pid, sdir):
     folder = os.path.join(evid_dir, sdir) if sdir else evid_dir
@@ -74,6 +81,7 @@ for item in items:
 
 json_data_str = json.dumps(processed, ensure_ascii=False, indent=2)
 num_dates = len(date_keys)
+latest_label = date_keys[-1][1]
 
 html_content = f'''<!DOCTYPE html>
 <html lang="es">
@@ -157,7 +165,7 @@ html_content = f'''<!DOCTYPE html>
   <div class="header">
     <div class="title-box">
       <h1><i class="fa-solid fa-chart-line text-danger"></i> Línea de Tiempo Coto Digital — {num_dates} Fechas Auditadas</h1>
-      <p>Evolución visual de precios y capturas directas para los 26 productos principales (16-Sep al 06-Oct Hoy Live).</p>
+      <p>Evolución visual de precios y capturas directas para los 26 productos principales (16-Sep al {latest_label} Hoy Live).</p>
     </div>
     <div class="nav-btns">
       <a href="index.html" class="btn btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Comparador</a>
@@ -325,4 +333,7 @@ with open(path1, 'w', encoding='utf-8') as f:
 with open(path2, 'w', encoding='utf-8') as f:
     f.write(html_content)
 
-print('Generated dynamic timeline card HTML files successfully!')
+for p in [path1, path2]:
+    shutil.copy2(p, os.path.join(desktop_dir, os.path.basename(p)))
+
+print(f"[+] Generated dynamic timeline card HTML files successfully for {num_dates} dates!")

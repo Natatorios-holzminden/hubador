@@ -1,4 +1,6 @@
-import json, os, re
+import json, os, re, sys
+if sys.stdout:
+    sys.stdout.reconfigure(encoding='utf-8')
 
 repo_dir = r'C:\Users\WORK\Documents\GitHub\hubador\comparador'
 desktop_dir = r'C:\Users\WORK\Desktop\hubador antes del formulario\hubador\comparador'
@@ -8,36 +10,35 @@ brain_dir = r'C:\Users\WORK\.gemini\antigravity\brain\1b9a1801-5beb-4cae-9286-ca
 with open(os.path.join(repo_dir, 'timeline_summary.json'), encoding='utf-8') as f:
     summary_items = json.load(f)
 
-# Load 5oct and 6oct results if available
-res_5oct_path = os.path.join(brain_dir, 'scratch', 'results_5oct_audited.json')
-if not os.path.exists(res_5oct_path):
-    res_5oct_path = os.path.join(brain_dir, 'scratch', 'results_5oct.json')
-map_5oct = {}
-if os.path.exists(res_5oct_path):
-    with open(res_5oct_path, encoding='utf-8') as f:
-        map_5oct = {x['id']: x for x in json.load(f)}
+# Dynamically discover all date keys from the first item
+all_date_keys = list(summary_items[0]['prices'].keys())
 
-res_6oct_path = os.path.join(brain_dir, 'scratch', 'results_6oct_audited.json')
-if not os.path.exists(res_6oct_path):
-    res_6oct_path = os.path.join(brain_dir, 'scratch', 'results_6oct.json')
-map_6oct = {}
-if os.path.exists(res_6oct_path):
-    with open(res_6oct_path, encoding='utf-8') as f:
-        map_6oct = {x['id']: x for x in json.load(f)}
+def format_date_label(dkey, is_latest=False):
+    m = re.match(r'(\d+)([a-zA-Z]+)', dkey)
+    if m:
+        day_num = int(m.group(1))
+        mon_str = m.group(2).capitalize()
+        label = f"{day_num:02d}-{mon_str}"
+    else:
+        label = dkey.upper()
+    if dkey == '17sep':
+        label += " (PDF)"
+    elif is_latest:
+        label += " (Hoy Live)"
+    return label
 
-date_configs = [
-    ('16sep', '16-Sep', lambda pid: f'evidencias/recorte_coto_{pid}.png'),
-    ('17sep', '17-Sep (PDF)', lambda pid: f'evidencias/recorte_coto_{pid}.png'),
-    ('21sep', '21-Sep', lambda pid: f'evidencias/coto_21sep/coto_{pid}.png'),
-    ('22sep', '22-Sep', lambda pid: f'evidencias/coto_22sep/coto_{pid}.png'),
-    ('23sep', '23-Sep', lambda pid: f'evidencias/coto_23sep/coto_{pid}.png'),
-    ('28sep', '28-Sep', lambda pid: f'evidencias/coto_28sep/coto_{pid}.png'),
-    ('29sep', '29-Sep', lambda pid: f'evidencias/coto_29sep/coto_{pid}.png'),
-    ('1oct', '01-Oct', lambda pid: f'evidencias/coto_1oct/coto_{pid}.png'),
-    ('4oct', '04-Oct', lambda pid: f'evidencias/coto_4oct/coto_{pid}.png'),
-    ('5oct', '05-Oct', lambda pid: f'evidencias/coto_5oct/coto_{pid}.png'),
-    ('6oct', '06-Oct (Hoy Live)', lambda pid: f'evidencias/coto_6oct/coto_{pid}.png')
-]
+def get_img_path(dkey, pid):
+    if dkey in ['16sep', '17sep']:
+        return f'evidencias/recorte_coto_{pid}.png'
+    return f'evidencias/coto_{dkey}/coto_{pid}.png'
+
+latest_date_key = all_date_keys[-1]
+
+date_configs = []
+for i, dkey in enumerate(all_date_keys):
+    is_last = (i == len(all_date_keys) - 1)
+    label = format_date_label(dkey, is_latest=is_last)
+    date_configs.append((dkey, label, lambda pid, dk=dkey: get_img_path(dk, pid)))
 
 js_items = []
 v_rank = 1
@@ -58,20 +59,7 @@ for item in summary_items:
         
     dates_obj = {}
     for dkey, dlabel, img_fn in date_configs:
-        price_str = item['prices'].get(dkey)
-        if not price_str:
-            if dkey == '5oct' and pid in map_5oct:
-                res = map_5oct[pid]
-                p_raw = res.get('coto_precio_str') or res.get('coto_precio_num')
-                price_str = f"${p_raw}" if p_raw else "$---"
-            elif dkey == '6oct' and pid in map_6oct:
-                res = map_6oct[pid]
-                p_raw = res.get('coto_precio_str') or res.get('coto_precio_num')
-                price_str = f"${p_raw}" if p_raw else "$---"
-            else:
-                price_str = "$---"
-                
-        # Format offer indicator if present
+        price_str = item['prices'].get(dkey, "$---")
         if "OFERTA" in price_str and "(OFERTA)" not in price_str:
             price_str = price_str.replace("OFERTA", "(OFERTA)")
             
@@ -94,6 +82,13 @@ for item in summary_items:
     })
 
 js_items_str = json.dumps(js_items, ensure_ascii=False, indent=2)
+
+date_buttons_html = ""
+for i, (dkey, dlabel, _) in enumerate(reversed(date_configs)):
+    is_active = (i == 0)
+    act_cls = "active" if is_active else ""
+    cam_icon = '<i class="fa-solid fa-camera" style="color:#38bdf8;"></i> ' if is_active else ''
+    date_buttons_html += f'      <button class="date-btn {act_cls}" onclick="selectDate(\'{dkey}\', this)">{cam_icon}{dlabel}</button>\n'
 
 html_content = f'''<!DOCTYPE html>
 <html lang="es">
@@ -186,18 +181,7 @@ html_content = f'''<!DOCTYPE html>
   <div class="toolbar-section">
     <div class="filter-group">
       <span class="filter-lbl"><i class="fa-solid fa-calendar-days"></i> Seleccionar Fecha:</span>
-      <button class="date-btn active" onclick="selectDate('6oct', this)"><i class="fa-solid fa-camera" style="color:#38bdf8;"></i> 06-Oct (Hoy Live)</button>
-      <button class="date-btn" onclick="selectDate('5oct', this)">05-Oct</button>
-      <button class="date-btn" onclick="selectDate('4oct', this)">04-Oct</button>
-      <button class="date-btn" onclick="selectDate('1oct', this)">01-Oct</button>
-      <button class="date-btn" onclick="selectDate('29sep', this)">29-Sep</button>
-      <button class="date-btn" onclick="selectDate('28sep', this)">28-Sep</button>
-      <button class="date-btn" onclick="selectDate('23sep', this)">23-Sep</button>
-      <button class="date-btn" onclick="selectDate('22sep', this)">22-Sep</button>
-      <button class="date-btn" onclick="selectDate('21sep', this)">21-Sep</button>
-      <button class="date-btn" onclick="selectDate('17sep', this)">17-Sep</button>
-      <button class="date-btn" onclick="selectDate('16sep', this)">16-Sep</button>
-    </div>
+{date_buttons_html}    </div>
 
     <div class="filter-group">
       <span class="filter-lbl"><i class="fa-solid fa-filter"></i> Categoría:</span>
@@ -212,7 +196,7 @@ html_content = f'''<!DOCTYPE html>
 
   <script>
     const ITEMS = {js_items_str};
-    let currentDate = '6oct';
+    let currentDate = '{latest_date_key}';
     let currentCat = 'todos';
 
     function openLB(title, img) {{
@@ -240,7 +224,7 @@ html_content = f'''<!DOCTYPE html>
       }});
 
       grid.innerHTML = filtered.map(item => {{
-        const dData = item.dates[currentDate] || item.dates['6oct'] || Object.values(item.dates)[0];
+        const dData = item.dates[currentDate] || item.dates['{latest_date_key}'] || Object.values(item.dates)[0];
         
         return `
           <div class="card">
@@ -302,4 +286,4 @@ with open(os.path.join(repo_dir, 'coto_top20_galeria.html'), 'w', encoding='utf-
 with open(os.path.join(desktop_dir, 'coto_top20_galeria.html'), 'w', encoding='utf-8') as f:
     f.write(html_content)
 
-print("Rebuilt coto_top20_galeria.html completely for all products & 11 dates!")
+print(f"[+] Rebuilt coto_top20_galeria.html dynamically for all {len(all_date_keys)} dates!")
