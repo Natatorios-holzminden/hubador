@@ -1714,8 +1714,7 @@ function buildOfertaWhatsAppLink(p) {
 function buildCartWhatsAppLink(cart, totals, nodoLabel) {
   const lines = (cart || []).map((item) => {
     const t = cartLineTotals(item);
-    const unit = item.unit === '/u' ? 'u' : 'kg';
-    return `• ${t.qty} ${unit} ${item.name} — ${fmtPrecioAR(t.grupo)}`;
+    return `• ${fmtQty(t.qty, item.unit)} ${item.name} — ${fmtPrecioAR(t.grupo)}`;
   });
   const entrega = nodoLabel ? `\nEntrega en: ${nodoLabel}\n` : '\n';
   const msg = `Hola! Quiero confirmar este pedido en HUBADOR:\n\n${lines.join('\n')}\n\nTotal: ${fmtPrecioAR(totals.grupo)}${entrega}\n¿Cómo hago la transferencia?`;
@@ -2230,8 +2229,27 @@ function cartTotals(cart) {
   }, { grupo: 0, coto: 0, ahorro: 0, items: 0 });
 }
 const GOAL_KG = 100;
-const MIN_KG = 2;   // mínimo para pedir cualquier producto por kg
+const MIN_KG = 1;   // mínimo para pedir cualquier producto (1 kg, 1 paquete, 1 atado…)
 const STEP_KG = 1;  // de a cuánto suben/bajan los botones − / +
+
+// Unidades de venta que se eligen en Admin (se guardan en la columna "unit" de productos).
+const HUBADOR_UNITS = [
+  { value: '/kg', label: 'Kilo', one: 'kg', many: 'kg' },
+  { value: '/paquete', label: 'Paquete', one: 'paquete', many: 'paquetes' },
+  { value: '/atado', label: 'Atado', one: 'atado', many: 'atados' },
+  { value: '/planta', label: 'Planta', one: 'planta', many: 'plantas' },
+  { value: '/cabeza', label: 'Cabeza', one: 'cabeza', many: 'cabezas' },
+  { value: '/u', label: 'Unidad', one: 'unidad', many: 'unidades' },
+];
+function unitInfo(u) { return HUBADOR_UNITS.find((x) => x.value === u) || HUBADOR_UNITS[0]; }
+function unitWord(u, n) { const i = unitInfo(u); return Number(n) === 1 ? i.one : i.many; }
+function fmtQty(n, u) { return `${n} ${unitWord(u, n)}`; }
+function lotsText(n) { return `${n} ${n === 1 ? 'cajón listo' : 'cajones listos'}`; }
+/** "Faltan 4 kg · 1/5 kg", con "1 cajón listo · " adelante si ya se completó alguno. */
+function faltanText(live) {
+  const base = `Faltan ${fmtQty(live.missing, live.unit)} · ${live.filled}/${fmtQty(live.goal, live.unit)}`;
+  return live.lots > 0 ? `${lotsText(live.lots)} · ${base}` : base;
+}
 const HUBADOR_PROGRESS_KEY = 'hubadorProgress'; // fallback: solo si Supabase no está configurado
 
 /** Progreso REAL: kg confirmados por producto, sumados en Supabase (vista product_progress)
@@ -2323,16 +2341,22 @@ function resolveStockForProduct(name) {
   try {
     const p = getRawCatalogStore().find((x) => x.name === name);
     if (!p || p.stock == null || p.stock === '') return null;
-    return { stock: Math.max(0, Number(p.stock) || 0), unit: p.unit === '/u' ? 'u' : 'kg' };
+    return { stock: Math.max(0, Number(p.stock) || 0), unit: unitWord(p.unit, 2) };
   } catch (e) { return null; }
 }
-/** Kg juntados de un producto: reales desde Supabase si está configurado; si no, demo local.
- *  "Disponibles" del Admin = kilos que todavía faltan: si cargás 75 con meta 100, la barra
- *  muestra 25/100. Si los pedidos reales ya juntaron más que eso, gana el número real. */
+function resolveUnitForProduct(name) {
+  try {
+    const p = getRawCatalogStore().find((x) => x.name === name);
+    return (p && p.unit) || '/kg';
+  } catch (e) { return '/kg'; }
+}
+/** Total juntado de un producto (puede pasar la meta: ver groupProgressView), real desde Supabase
+ *  si está configurado; si no, demo local. "Disponibles" del Admin = lo que todavía falta: si cargás
+ *  75 con meta 100, la barra muestra 25/100. Si los pedidos reales juntaron más, gana el número real. */
 function getGroupFilled(name) {
   const goal = resolveGoalForProduct(name);
   const manual = manualFilledFromStock(name, goal);
-  return Math.min(goal, Math.max(manual, getGroupFilledReal(name, goal)));
+  return Math.max(manual, getGroupFilledReal(name, goal));
 }
 function manualFilledFromStock(name, goal) {
   const s = resolveStockForProduct(name);
@@ -2342,11 +2366,11 @@ function getGroupFilledReal(name, goal) {
   if (sb) {
     const zone = getSavedNodoId();
     const real = zone ? ((HUBADOR_ZONE_PROGRESS[zone] || {})[name] || 0) : (HUBADOR_REAL_PROGRESS[name] || 0);
-    return Math.min(goal, Math.max(0, Math.round(real)));
+    return Math.max(0, Math.round(real));
   }
   const map = loadHubadorProgress();
   const v = map[name];
-  if (v != null && !Number.isNaN(Number(v))) return Math.min(goal, Math.max(0, Math.round(Number(v))));
+  if (v != null && !Number.isNaN(Number(v))) return Math.max(0, Math.round(Number(v)));
   const seed = HUBADOR_SEED_FILLED[name];
   return Math.min(goal, seed != null ? seed : 40);
 }
@@ -2354,7 +2378,7 @@ function setGroupFilled(name, kg) {
   // Solo aplica al modo demo local; con Supabase el valor real llega por sync/realtime.
   const goal = resolveGoalForProduct(name);
   const map = loadHubadorProgress();
-  map[name] = Math.min(goal, Math.max(0, Math.round(kg)));
+  map[name] = Math.max(0, Math.round(kg));
   try { localStorage.setItem(HUBADOR_PROGRESS_KEY, JSON.stringify(map)); } catch (e) {}
   return map[name];
 }
@@ -2368,15 +2392,20 @@ function bumpGroupFilled(name, qty) {
     if (zone) {
       HUBADOR_ZONE_PROGRESS[zone] = HUBADOR_ZONE_PROGRESS[zone] || {};
       HUBADOR_ZONE_PROGRESS[zone][name] = (HUBADOR_ZONE_PROGRESS[zone][name] || 0) + add;
-      return Math.min(goal, Math.round(HUBADOR_ZONE_PROGRESS[zone][name]));
+      return Math.round(HUBADOR_ZONE_PROGRESS[zone][name]);
     }
-    return Math.min(goal, Math.round(HUBADOR_REAL_PROGRESS[name]));
+    return Math.round(HUBADOR_REAL_PROGRESS[name]);
   }
   return setGroupFilled(name, getGroupFilled(name) + Math.max(0, Number(qty) || 0));
 }
 function groupProgressView(name) {
   const goal = resolveGoalForProduct(name);
-  const filled = getGroupFilled(name);
+  // Sin tope: cuando el total supera la meta se cuenta un cajón completo y la barra
+  // vuelve a arrancar con lo que sobra (meta 5, total 6 → 1 cajón listo · 1/5).
+  const total = getGroupFilled(name);
+  const lots = Math.floor(total / goal);
+  const filled = total - lots * goal;
+  const unit = resolveUnitForProduct(name);
   const missing = Math.max(0, goal - filled);
   const pct = Math.min(100, Math.round(filled / goal * 100));
   const almost = missing > 0 && missing <= Math.max(1, Math.round(goal * 0.15));
@@ -2384,8 +2413,8 @@ function groupProgressView(name) {
   const zoneNow = getSavedNodoId();
   const members = sb
     ? (zoneNow ? ((HUBADOR_ZONE_MEMBERS[zoneNow] || {})[name] || 0) : (HUBADOR_REAL_MEMBERS[name] || 0))
-    : Math.max(1, Math.round(filled / 10));
-  return { filled, missing, pct, almost, goal, members };
+    : Math.max(1, Math.round(total / 10));
+  return { filled, missing, pct, almost, goal, members, total, lots, unit };
 }
 
 function demoHubProgressSeed(order) {
@@ -2396,7 +2425,7 @@ function demoHubProgressSeed(order) {
 }
 function resolveHubProgressPct(order) {
   const name = order && order.name;
-  if (name) return groupProgressView(name).pct;
+  if (name) { const v = groupProgressView(name); return v.lots > 0 ? 100 : v.pct; }
   if (order && order.hubProgress != null && !Number.isNaN(Number(order.hubProgress))) {
     return Math.min(100, Math.max(0, Math.round(Number(order.hubProgress))));
   }
@@ -2501,7 +2530,7 @@ function ActiveOrderExtras({ order, userKg }) {
     <div style={{ marginTop: 10 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
       <div style={{ marginBottom: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
         <span style={{ fontSize: 11.5, fontWeight: 600, color: '#444', fontVariantNumeric: 'tabular-nums', letterSpacing: '0.01em' }}>
-          Faltan {live.missing} kg · Grupo: {live.filled}/{live.goal} kg
+          {faltanText(live)}
         </span>
         {myKg > 0 && (
           <span style={{ fontSize: 11.5, fontWeight: 800, color: '#0f766e', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: 6 }}>
@@ -3216,7 +3245,7 @@ function MobileHome() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#888', gap: 6 }}>
                     {(() => {const live = groupProgressView(p.name);return <>
-                      <span style={{ color: live.almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: live.almost ? 700 : 500 }}>{live.almost ? `⚡ Faltan ${live.missing} kg` : `Faltan ${live.missing} kg`} · {live.filled}/{live.goal} kg</span>
+                      <span style={{ color: live.almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: live.almost ? 700 : 500 }}>{live.almost ? '⚡ ' : ''}{faltanText(live)}</span>
                     </>;})()}
                   </div>
                   <Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card />
@@ -3600,7 +3629,7 @@ function MobileProductos() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: '#888', gap: 6 }}>
                     {(() => {const live = groupProgressView(p.name);return <>
-                      <span style={{ color: live.almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: live.almost ? 700 : 500 }}>{live.almost ? `⚡ Faltan ${live.missing} kg` : `Faltan ${live.missing} kg`} · {live.filled}/{live.goal} kg</span>
+                      <span style={{ color: live.almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: live.almost ? 700 : 500 }}>{live.almost ? '⚡ ' : ''}{faltanText(live)}</span>
                     </>;})()}
                   </div>
                   <Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card />
@@ -3638,7 +3667,7 @@ function MobileProducto() {
   const priceNum = prod.priceN != null ? prod.priceN : (parseInt((prod.price || '$0').replace(/[^\d]/g, ''), 10) || 0);
   const oldNum = prod.oldN != null ? prod.oldN : parsePrecioAR(prod.old);
   const totalPrice = priceNum * qty;
-  const unitLabel = prod.unit === '/u' ? 'u' : 'kg';
+  const unitLabel = unitWord(prod.unit, 2);
   const join = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
@@ -3650,7 +3679,7 @@ function MobileProducto() {
     }, q);
     if (typeof bumpFilled === 'function') bumpFilled(prod.name, q);
     if (typeof setMisGruposTab === 'function') setMisGruposTab('carrito');
-    showToast(`Sumaste ${q} ${unitLabel} de ${prod.name} al carrito`);
+    showToast(`Sumaste ${fmtQty(q, prod.unit)} de ${prod.name} al carrito`);
     navigate('mis-grupos');
   };
   const qtyBtn = (label, onClick, filled) => (
@@ -3683,17 +3712,17 @@ function MobileProducto() {
         <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '8px 12px', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>Cantidad ({unitLabel})</div>
-            <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>Total: <b style={{ color: primary }}>${totalPrice.toLocaleString('es-AR')}</b> <span style={{ color: '#888', fontSize: 11 }}>· mín. {minQty} {unitLabel}</span></div>
+            <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>Total: <b style={{ color: primary }}>${totalPrice.toLocaleString('es-AR')}</b> <span style={{ color: '#888', fontSize: 11 }}>· mín. {fmtQty(minQty, prod.unit)}</span></div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {qtyBtn('−', () => setQty((q) => Math.max(minQty, q - step)), false)}
-            <span style={{ fontWeight: 800, fontSize: 17, minWidth: 44, textAlign: 'center' }}>{qty} {unitLabel}</span>
+            <span style={{ fontWeight: 800, fontSize: 17, minWidth: 44, textAlign: 'center' }}>{fmtQty(qty, prod.unit)}</span>
             {qtyBtn('+', () => setQty((q) => q + step), true)}
           </div>
         </div>
         <div style={{ background: 'oklch(0.97 0.02 165)', border: '1px solid oklch(0.88 0.06 165)', borderRadius: 12, padding: '8px 10px', marginBottom: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#555', marginBottom: 5 }}>
-            <span>Faltan {live.missing} kg · {live.filled}/{live.goal} kg</span>
+            <span>{faltanText(live)}</span>
             <span style={{ fontWeight: 700 }}>{live.pct}%</span>
           </div>
           <div style={{ height: 5, background: '#e0e0e0', borderRadius: 999, overflow: 'hidden', marginBottom: 6 }}>
@@ -3813,7 +3842,7 @@ function MasOfertas({ excludeName, barrio = 'Buenos Aires' }) {
                 <div style={{ marginTop: 8 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10.5, marginBottom: 3 }}>
                     <span style={{ color: almost ? accent : '#666', fontWeight: almost ? 700 : 500 }}>
-                      {almost ? `¡Sólo faltan ${missing} kg!` : <>Faltan <b style={{ color: '#333' }}>{missing} kg</b> · {live.filled}/{live.goal} kg</>}
+                      {live.lots > 0 && <b style={{ color: '#047857' }}>{lotsText(live.lots)} · </b>}{almost ? `¡Sólo faltan ${fmtQty(missing, live.unit)}!` : <>Faltan <b style={{ color: '#333' }}>{fmtQty(missing, live.unit)}</b> · {live.filled}/{fmtQty(live.goal, live.unit)}</>}
                     </span>
                     {almost && <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{live.filled}/{live.goal}</span>}
                   </div>
@@ -3912,7 +3941,6 @@ function formatPedidoDate(ts) {
 function orderOwnerEmail(o) { return (o && (o.email || o.userEmail)) || null; }
 function orderFromCartLine(item, user, stamp, status) {
   const t = cartLineTotals(item);
-  const unitLabel = item.unit === '/u' ? 'u' : 'kg';
   const createdAt = stamp || Date.now();
   const email = user && user.email ? user.email : null;
   const livePct = item.name ? groupProgressView(item.name).pct : demoHubProgressSeed({ name: item.name, id: String(createdAt) });
@@ -3921,7 +3949,7 @@ function orderFromCartLine(item, user, stamp, status) {
   return {
     id: 'ord-' + createdAt + '-' + Math.random().toString(36).slice(2, 7),
     name: item.name,
-    qty: t.qty + ' ' + unitLabel,
+    qty: fmtQty(t.qty, item.unit),
     qtyN: t.qty,
     price: fmtPrecioAR(t.priceN),
     priceN: t.priceN,
@@ -3960,12 +3988,11 @@ function mergeCartIntoOrders(existing, cart, user, opts) {
       const prevQty = Number(next[idx].qtyN != null ? next[idx].qtyN : parseFloat(String(next[idx].qty || '').replace(/[^\d.]/g, ''))) || 0;
       const addQty = Number(draft.qtyN != null ? draft.qtyN : parseFloat(String(draft.qty || '').replace(/[^\d.]/g, ''))) || 0;
       const totalQty = prevQty + addQty;
-      const unitLabel = (draft.qty && draft.qty.includes('u')) ? 'u' : 'kg';
       const totalN = (next[idx].totalN || 0) + (draft.totalN || 0);
       next[idx] = Object.assign({}, next[idx], draft, {
         id: next[idx].id,
         qtyN: totalQty,
-        qty: totalQty + ' ' + unitLabel,
+        qty: fmtQty(totalQty, item.unit),
         totalN: totalN,
         total: fmtPrecioAR(totalN),
         confirmedAt: Date.now(),
@@ -4632,7 +4659,8 @@ function AdminInlinePrices({ p, onSave }) {
   };
   const box = (color, border) => ({ width: '100%', height: 32, border: `1px solid ${border}`, borderRadius: 7, padding: '0 6px 0 16px', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 800, color, boxSizing: 'border-box', background: '#fff' });
   const lbl = { fontSize: 10, fontWeight: 700, marginBottom: 2, display: 'block' };
-  const unitLbl = p.unit === '/u' ? 'u' : 'kg';
+  const unitLbl = unitInfo(p.unit).one;
+  const unitPl = unitInfo(p.unit).many;
 
   return (
     <div style={{ marginTop: 'auto', paddingTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -4661,12 +4689,12 @@ function AdminInlinePrices({ p, onSave }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-        <label title="Kilos que todavía faltan para la meta. Mueve la barra de la tienda: 75 disponibles con meta 100 = 'Faltan 75 kg · 25/100 kg'">
-          <span style={{ ...lbl, color: '#334155' }}>📦 Disponibles ({unitLbl})</span>
+        <label title="Lo que todavía falta para la meta. Mueve la barra de la tienda: 75 disponibles con meta 100 = 'Faltan 75 · 25/100'">
+          <span style={{ ...lbl, color: '#334155' }}>📦 Disponibles ({unitPl})</span>
           <input type="number" min="0" inputMode="numeric" value={draft.stock} onChange={(e) => setDraft({ ...draft, stock: e.target.value })} onKeyDown={onKey} style={{ ...box('#334155', '#cbd5e1'), padding: '0 6px', fontSize: 12.5 }} />
         </label>
-        <label title="Kilos que tiene que juntar el grupo. Es el número de la barra 'Faltan X kg · 0/100 kg' en la tienda">
-          <span style={{ ...lbl, color: '#334155' }}>🎯 Meta del grupo ({unitLbl})</span>
+        <label title="Lo que tiene que juntar el grupo para completar un cajón. Si se pasa, arranca el siguiente cajón.">
+          <span style={{ ...lbl, color: '#334155' }}>🎯 Meta del grupo ({unitPl})</span>
           <input type="number" min="1" inputMode="numeric" value={draft.goal} onChange={(e) => setDraft({ ...draft, goal: e.target.value })} onKeyDown={onKey} style={{ ...box('#334155', '#cbd5e1'), padding: '0 6px', fontSize: 12.5 }} />
         </label>
       </div>
@@ -5308,11 +5336,11 @@ function MobileAdminProductos() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <div>
-                    <label style={labelStyle}>Kilos disponibles</label>
+                    <label style={labelStyle}>Disponibles</label>
                     <input type="number" min="0" value={bulk.stock} onChange={(e) => setBulk({ ...bulk, stock: e.target.value })} placeholder="Vacío = no cambiar" style={inputStyle} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Meta del grupo (kg)</label>
+                    <label style={labelStyle}>Meta del grupo</label>
                     <input type="number" min="1" value={bulk.goal} onChange={(e) => setBulk({ ...bulk, goal: e.target.value })} placeholder="Vacío = no cambiar" style={inputStyle} />
                   </div>
                 </div>
@@ -5401,8 +5429,7 @@ function MobileAdminProductos() {
                       onChange={(e) => setForm({ ...form, unit: e.target.value })}
                       style={{ width: '100%', height: 40, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 8px', fontFamily: 'inherit', fontSize: 13, boxSizing: 'border-box' }}
                     >
-                      <option value="/kg">/kg (Por kilo)</option>
-                      <option value="/u">/u (Por unidad)</option>
+                      {HUBADOR_UNITS.map((u) => <option key={u.value} value={u.value}>{u.label}</option>)}
                     </select>
                   </div>
                 </div>
@@ -5421,7 +5448,7 @@ function MobileAdminProductos() {
 
                 {/* Precios: Coto vs HUBADOR */}
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>Comparativa de Precios ($ / {form.unit === '/u' ? 'unidad' : 'kilo'})</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>Comparativa de Precios ($ / {unitInfo(form.unit).one})</div>
 
                   <div>
                     <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#ef4444', marginBottom: 3 }}>Precio Coto (el más caro, de referencia)</label>
@@ -5527,7 +5554,7 @@ function MobileAdminProductos() {
                 {/* Kilos, meta del grupo y tiempo límite */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Kilos disponibles</label>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Disponibles ({unitInfo(form.unit).many})</label>
                     <input
                       type="number"
                       min="0"
@@ -5538,7 +5565,7 @@ function MobileAdminProductos() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Meta del grupo (kg)</label>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Meta del grupo ({unitInfo(form.unit).many})</label>
                     <input
                       type="number"
                       min="1"
@@ -5769,7 +5796,7 @@ function MobileGrupoDetalle() {
   const priceNum = parseInt((g.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const oldNum = parseInt((g.old || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const totalPrice = priceNum * qty;
-  const unitLabel = g.unit === '/u' ? 'u' : 'kg';
+  const unitLabel = unitWord(g.unit, 2);
   const join = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (e && e.stopPropagation) e.stopPropagation();
@@ -5780,7 +5807,7 @@ function MobileGrupoDetalle() {
     }, q);
     if (typeof bumpFilled === 'function') bumpFilled(g.product, q);
     if (typeof setMisGruposTab === 'function') setMisGruposTab('carrito');
-    showToast(`Sumaste ${q} ${unitLabel} de ${g.product} al carrito`);
+    showToast(`Sumaste ${fmtQty(q, g.unit)} de ${g.product} al carrito`);
     navigate('mis-grupos');
   };
   const qtyBtn = (label, onClick, filled) => (
@@ -5817,13 +5844,13 @@ function MobileGrupoDetalle() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', border: '1px solid #e8eaec', borderRadius: 12, padding: '10px 12px', marginBottom: 10 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>Cantidad ({g.unit === '/u' ? 'unidades' : 'kg'})</div>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>Cantidad ({unitLabel})</div>
               <div style={{ fontSize: 13, color: '#444', marginTop: 2 }}>Total: <b style={{ color: primary, fontSize: 21, fontWeight: 900 }}>${totalPrice.toLocaleString('es-AR')}</b></div>
-              <div style={{ color: '#888', fontSize: 11, fontWeight: 500 }}>mín. {MIN_QTY} {unitLabel}</div>
+              <div style={{ color: '#888', fontSize: 11, fontWeight: 500 }}>mín. {fmtQty(MIN_QTY, g.unit)}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {qtyBtn('−', () => setQty((q) => Math.max(MIN_QTY, q - STEP)), false)}
-              <span style={{ fontWeight: 800, fontSize: 17, minWidth: 48, textAlign: 'center', display: 'inline-flex', alignItems: 'baseline', justifyContent: 'center', gap: 3 }}>{qty}<span style={{ fontSize: 11, fontWeight: 600, color: '#888' }}>{g.unit === '/u' ? 'u' : 'kg'}</span></span>
+              <span style={{ fontWeight: 800, fontSize: 17, minWidth: 48, textAlign: 'center', display: 'inline-flex', alignItems: 'baseline', justifyContent: 'center', gap: 3 }}>{qty}<span style={{ fontSize: 11, fontWeight: 600, color: '#888' }}>{unitWord(g.unit, qty)}</span></span>
               {qtyBtn('+', () => setQty((q) => q + STEP), true)}
             </div>
           </div>
@@ -5840,9 +5867,9 @@ function MobileGrupoDetalle() {
               <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 12, padding: '8px 10px', marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 12, marginBottom: 5 }}>
                   <span style={{ fontWeight: 700, color: accent }}>
-                    {almost ? `⚡ ¡Sólo faltan ${missingKg} kg!` : <>Faltan <b>{missingKg} kg</b> · {filledKg}/{totalKg} kg</>}
+                    {live.lots > 0 && <b>{lotsText(live.lots)} · </b>}{almost ? `⚡ ¡Sólo faltan ${fmtQty(missingKg, live.unit)}!` : <>Faltan <b>{fmtQty(missingKg, live.unit)}</b> · {filledKg}/{fmtQty(totalKg, live.unit)}</>}
                   </span>
-                  {almost && <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{filledKg}/{totalKg} kg</span>}
+                  {almost && <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>{filledKg}/{fmtQty(totalKg, live.unit)}</span>}
                 </div>
                 <div style={{ height: 5, background: '#e0ede0', borderRadius: 999, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 999, transition: 'width 0.3s' }} />
@@ -5912,7 +5939,7 @@ function MobileGrupoParticipantes() {
   if (neighborCount > 0) {
     activity.push({ letter: 'V', color: '#2dd4bf', msg: `${neighborCount} vecino${neighborCount === 1 ? '' : 's'} ya sumaron kg`, time: '' });
   }
-  activity.push({ letter: '·', color: '#94a3b8', msg: liveP.almost ? `¡Casi lleno! Faltan ${missingKg} kg` : `Meta ${totalKg} kg · van ${filledKg} kg`, time: '' });
+  activity.push({ letter: '·', color: '#94a3b8', msg: liveP.almost ? `¡Casi lleno! Faltan ${fmtQty(missingKg, liveP.unit)}` : `Meta ${fmtQty(totalKg, liveP.unit)} · van ${fmtQty(filledKg, liveP.unit)}`, time: '' });
 
   return (
     <div style={{ fontFamily: "'Inter',sans-serif", background: '#f4f5f7', height: '100%', display: 'flex', flexDirection: 'column', WebkitFontSmoothing: 'antialiased' }}>
@@ -5944,7 +5971,7 @@ function MobileGrupoParticipantes() {
                 <div style={{ fontWeight: 900, fontSize: 36, letterSpacing: '-0.02em', lineHeight: 1 }}>{filledKg}</div>
                 <div style={{ fontWeight: 700, fontSize: 14, color: '#555' }}>kg</div>
               </div>
-              <div style={{ fontSize: 11, color: '#888', marginTop: 3 }}>de {totalKg} kg</div>
+              <div style={{ fontSize: 11, color: '#888', marginTop: 3 }}>de {fmtQty(totalKg, liveP.unit)}</div>
             </div>
           </div>
         </div>
@@ -5972,8 +5999,8 @@ function MobileGrupoParticipantes() {
           {youJoined ? `Vos + ${neighborCount} vecino${neighborCount === 1 ? '' : 's'}` : `${totalPeople} vecino${totalPeople === 1 ? '' : 's'} sumando`}
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, fontSize: 12, color: '#888', marginBottom: 16 }}>
-          <span>Faltan: <b style={{ color: '#333' }}>{missingKg} kg</b></span>
-          <span style={{ color: primary }}>Sumados: <b>{filledKg} kg</b></span>
+          <span>Faltan: <b style={{ color: '#333' }}>{fmtQty(missingKg, liveP.unit)}</b></span>
+          <span style={{ color: primary }}>Sumados: <b>{fmtQty(filledKg, liveP.unit)}</b></span>
         </div>
         <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: '14px', textAlign: 'center', marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: '#888', marginBottom: 6 }}>Cierra en</div>
@@ -6016,8 +6043,8 @@ function buildSeguimientoTimeline(order) {
   const status = (order && order.status) || 'pagado';
   const name = order && order.name;
   const live = name ? groupProgressView(name) : null;
-  const pct = live ? live.pct : resolveHubProgressPct(order || {});
-  const missing = live ? live.missing : Math.max(0, GOAL_KG - Math.round((pct / 100) * GOAL_KG));
+  const pct = live ? (live.lots > 0 ? 100 : live.pct) : resolveHubProgressPct(order || {});
+  const missing = live ? (live.lots > 0 ? 0 : live.missing) : Math.max(0, GOAL_KG - Math.round((pct / 100) * GOAL_KG));
   const almost = missing > 0 && missing <= 15;
   const confirmedAt = Number((order && (order.confirmedAt || order.createdAt)) || Date.now());
   const ageH = Math.max(0, (Date.now() - confirmedAt) / 3600000);
@@ -6042,8 +6069,8 @@ function buildSeguimientoTimeline(order) {
   const groupDesc = pct >= 100
     ? 'Productos agrupados y listos para el hub.'
     : almost || pct >= 85
-      ? ('¡Casi cerrado! Faltan ' + missing + ' kg — compartí para acelerar.')
-      : ('El grupo se está armando · faltan ' + missing + ' kg.');
+      ? ('¡Casi cerrado! Faltan ' + fmtQty(missing, live ? live.unit : '/kg') + ' — compartí para acelerar.')
+      : ('El grupo se está armando · faltan ' + fmtQty(missing, live ? live.unit : '/kg') + '.');
 
   const defs = [
     { label: 'Pedido confirmado', time: t0, desc: 'Pago recibido · pedido verificado.' },
@@ -6152,7 +6179,7 @@ function MobileSeguimiento() {
         {groupOpen && live && (
           <div style={{ background: '#fff', border: '1px solid #e8eaec', borderRadius: 14, padding: '14px 16px', marginBottom: 14 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#333', marginBottom: 6 }}>
-              Faltan {live.missing} kg · {live.filled}/{live.goal} kg
+              {faltanText(live)}
             </div>
             <div style={{ height: 5, background: '#e8ecea', borderRadius: 999, overflow: 'hidden', marginBottom: 8 }} aria-hidden="true">
               <div style={{ height: '100%', width: pct + '%', background: barColor, borderRadius: 999, transition: 'width .35s ease' }} />
@@ -7159,7 +7186,6 @@ function MobileMisGrupos() {
   const tab = misGruposTab === 'activos' ? 'activos' : 'carrito';
   const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
-  const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
   const userContact = resolveUserContact(user);
   const initialPhone = (userContact && userContact.tel) || (user && (user.tel || user.phone || user.nombre)) || '';
   const [waPhone, setWaPhone] = React.useState(initialPhone);
@@ -7256,7 +7282,7 @@ function MobileMisGrupos() {
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 8, gap: 8 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f5f7', borderRadius: 999, padding: '4px 6px' }}>
                               <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(minQ, t.qty - step))} style={{ width: 28, height: 28, borderRadius: 999, border: '1px solid #ddd', background: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
-                              <span style={{ fontWeight: 800, fontSize: 13, minWidth: 36, textAlign: 'center' }}>{t.qty} {unitOf(g.unit)}</span>
+                              <span style={{ fontWeight: 800, fontSize: 13, minWidth: 36, textAlign: 'center' }}>{fmtQty(t.qty, g.unit)}</span>
                               <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + step)} style={{ width: 28, height: 28, borderRadius: 999, border: 'none', background: primary, color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
                             </div>
                           </div>
@@ -7844,7 +7870,7 @@ function WebHome() {
                     <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', flexShrink: 0 }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
                     <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible', flexShrink: 0 }}>
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
-                        {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
+                        {almost ? '⚡ ' : ''}{faltanText(live)}
                       </span>
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
@@ -8001,7 +8027,7 @@ function WebProductos() {
                     <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', flexShrink: 0 }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
                     <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible', flexShrink: 0 }}>
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
-                        {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
+                        {almost ? '⚡ ' : ''}{faltanText(live)}
                       </span>
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
@@ -8325,7 +8351,7 @@ function WebGrupoDetalle() {
   const catalog = HUBADOR_CATALOG.map(hubadorCard);
   const catFromCatalog = (catalog.find((p) => p.name === g.product) || {}).cat || g.cat || 'frescos';
   const catLabel = catFromCatalog === 'frutas' ? 'Fruta' : catFromCatalog === 'verduras' ? 'Verdura' : 'Fresco';
-  const unitLong = g.unit === '/u' ? 'por unidad' : 'por kg';
+  const unitLong = 'por ' + unitInfo(g.unit).one;
   const detailBlurb = g.desc || g.descripcion || (selected && (selected.desc || selected.descripcion)) || `${catLabel} fresca · se vende ${unitLong}. Cosecha de la semana, sin intermediarios. Retirás en el hub de ${g.location || 'tu barrio'}.`;
 
   React.useEffect(() => {
@@ -8342,7 +8368,7 @@ function WebGrupoDetalle() {
   const priceNum = parseInt((g.price || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const oldNum = parseInt((g.old || '$0').replace(/[^\d]/g, ''), 10) || 0;
   const totalPrice = priceNum * qty;
-  const unitLabel = g.unit === '/u' ? 'u' : 'kg';
+  const unitLabel = unitWord(g.unit, 2);
   const live = groupProgressView(g.product);
   const membersCount = live.members;
   const join = (e) => {
@@ -8356,7 +8382,7 @@ function WebGrupoDetalle() {
       }, q);
       if (typeof bumpFilled === 'function') bumpFilled(g.product, q);
       if (typeof setMisGruposTab === 'function') setMisGruposTab('carrito');
-      showToast(`Sumaste ${q} ${unitLabel} de ${g.product} al carrito`);
+      showToast(`Sumaste ${fmtQty(q, g.unit)} de ${g.product} al carrito`);
       navigate('mis-grupos');
     } catch (err) {
       console.error('[WebGrupoDetalle] error en join:', err);
@@ -8403,7 +8429,7 @@ function WebGrupoDetalle() {
             <div className="web-detail-cta">
               <div className="web-detail-status">
                 <div className="web-progress"><i style={{ width: pct + '%', background: primary }} /></div>
-                <div className="web-muted">Faltan {missingKg} kg · {filledKg}/{totalKg} kg</div>
+                <div className="web-muted">{faltanText(live)}</div>
                 {g.deadlineHrs != null && typeof Countdown !== 'undefined' && (
                   <div style={{ marginTop: 6 }}><Countdown deadline={getDeadline(g.product, g.deadlineHrs)} compact /></div>
                 )}
@@ -8416,10 +8442,10 @@ function WebGrupoDetalle() {
 
               <div className="web-detail-buy">
                 <div className="web-qty">
-                  <span>Cantidad ({unitLabel}) · mín. {minQty} {unitLabel}</span>
+                  <span>Cantidad ({unitLabel}) · mín. {fmtQty(minQty, g.unit)}</span>
                   <div>
                     <button type="button" onClick={() => setQty((q) => Math.max(minQty, q - step))}>−</button>
-                    <b>{qty} {unitLabel}</b>
+                    <b>{fmtQty(qty, g.unit)}</b>
                     <button type="button" onClick={() => setQty((q) => q + step)}>+</button>
                   </div>
                 </div>
@@ -8466,7 +8492,7 @@ function WebGrupoDetalle() {
                     <div className="web-progress" style={{ display: 'block', height: 8, margin: '6px 0 3px', background: '#f0f1f3', borderRadius: 999, overflow: 'hidden', flexShrink: 0 }}><i style={{ display: 'block', height: '100%', width: live.pct + '%', background: live.pct >= 85 ? 'oklch(0.62 0.18 35)' : primary }} /></div>
                     <div className="web-prod-meta" style={{ display: 'flex', visibility: 'visible', flexShrink: 0 }}>
                       <span style={{ color: almost ? 'oklch(0.62 0.18 35)' : '#666', fontWeight: almost ? 700 : 500 }}>
-                        {almost ? `⚡ Faltan ${miss}kg` : `Faltan ${miss}kg`} · {live.filled}/{live.goal} kg
+                        {almost ? '⚡ ' : ''}{faltanText(live)}
                       </span>
                     </div>
                     <div className="web-countdown-wrap" style={{ display: 'block', flexShrink: 0 }}><Countdown deadline={getDeadline(p.name, p.deadlineHrs)} card /></div>
@@ -8493,7 +8519,6 @@ function WebMisGrupos() {
   const tab = misGruposTab === 'activos' ? 'activos' : 'carrito';
   const setTab = (t) => setMisGruposTab && setMisGruposTab(t);
   const totals = cartTotals(cart);
-  const unitOf = (u) => (u === '/u' ? 'u' : 'kg');
   const activos = ordersForProfile(orders, user && user.email).filter((o) => isActivoPedidoStatus(o.status));
   const userContact = resolveUserContact(user);
   const initialPhone = (userContact && userContact.tel) || (user && (user.tel || user.phone || user.nombre)) || '';
@@ -8579,7 +8604,7 @@ function WebMisGrupos() {
                           </p>
                           <div className="web-cart-qty">
                             <button type="button" aria-label="Menos" onClick={() => updateCartQty(g.id || g.name, Math.max(minQ, t.qty - step))}>−</button>
-                            <span>{t.qty} {unitOf(g.unit)}</span>
+                            <span>{fmtQty(t.qty, g.unit)}</span>
                             <button type="button" aria-label="Más" onClick={() => updateCartQty(g.id || g.name, t.qty + step)}>+</button>
                           </div>
                         </div>
@@ -8899,9 +8924,11 @@ function MobileAdminPedidos() {
   ]));
   const cellOf = (name, zid) => {
     const r = board.find((x) => x.product_name === name && (x.zona || '') === zid);
-    const kg = r ? Number(r.filled_kg) || 0 : 0;
+    const total = r ? Number(r.filled_kg) || 0 : 0;
     const goal = resolveGoalForProduct(name);
-    return { kg, goal, pct: Math.min(100, Math.round((kg / goal) * 100)), members: r ? Number(r.members) || 0 : 0 };
+    const lots = Math.floor(total / goal);
+    const kg = total - lots * goal;
+    return { kg, total, lots, goal, unit: resolveUnitForProduct(name), pct: Math.round((kg / goal) * 100), members: r ? Number(r.members) || 0 : 0 };
   };
 
   const handleDeleteOrder = async (orderId) => {
@@ -8956,9 +8983,10 @@ function MobileAdminPedidos() {
                     const c = cellOf(name, z.id);
                     return (
                       <div key={name + z.id} style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 12, fontWeight: 800, color: c.pct >= 100 ? '#dc2626' : '#0f172a' }}>{c.kg}/{c.goal} kg <span style={{ color: '#64748b', fontWeight: 600 }}>· {c.pct}%</span></div>
+                        {c.lots > 0 && <div style={{ fontSize: 11, fontWeight: 800, color: '#047857' }}>📦 {lotsText(c.lots)}</div>}
+                        <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>{c.kg}/{fmtQty(c.goal, c.unit)} <span style={{ color: '#64748b', fontWeight: 600 }}>· {c.pct}%</span></div>
                         <div style={{ height: 5, background: '#e8ecea', borderRadius: 999, overflow: 'hidden', margin: '3px 0' }}>
-                          <div style={{ height: '100%', width: c.pct + '%', background: c.pct >= 100 ? '#dc2626' : primary, borderRadius: 999 }} />
+                          <div style={{ height: '100%', width: c.pct + '%', background: primary, borderRadius: 999 }} />
                         </div>
                         <div style={{ fontSize: 10.5, color: '#64748b' }}>{c.members} {c.members === 1 ? 'vecino' : 'vecinos'}</div>
                       </div>
